@@ -138,5 +138,64 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+        public ModelResponse AutenticarUsuario(string nombreUsuario, string contrasena)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var usuario = GetObject("AutenticarUsuario", CommandType.StoredProcedure,
+                    new[] {
+                new SqlParameter("@NombreUsuario", nombreUsuario),
+                new SqlParameter("@Contrasena", contrasena)
+                    },
+                    new Func<IDataReader, Usuario>((reader) =>
+                    {
+                        var u = LlenarEntidad<Usuario>(reader);
+
+                        u.Sucursal = new Sucursal()
+                        {
+                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
+                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["SucursalDescripcion"]),
+                            Calle = MapearPorpiedades<string>(reader["Calle"]),
+                            Ciudad = MapearPorpiedades<string>(reader["Ciudad"]),
+                            Colonia = MapearPorpiedades<string>(reader["Colonia"]),
+                            CodigoPostal = MapearPorpiedades<string>(reader["CodigoPostal"])
+                        };
+
+                        u.Area = new Area()
+                        {
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["AreaDescripcion"]),
+                            Correo = MapearPorpiedades<string>(reader["AreaCorreo"])
+                        };
+
+                        return u;
+                    }));
+
+                if (usuario != null)
+                {
+                    modelResponse.IsSuccess = true;
+                    modelResponse.Response = usuario;
+                    modelResponse.Message = "Autenticación exitosa";
+                }
+                else
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Response = null;
+                    modelResponse.Message = "Usuario o contraseña incorrectos";
+                }
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+                modelResponse.Response = null;
+            }
+
+            return modelResponse;
+        }
     }
 }
