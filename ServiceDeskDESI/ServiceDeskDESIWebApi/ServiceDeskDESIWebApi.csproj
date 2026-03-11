@@ -129,6 +129,11 @@
   <ItemGroup>
     <Compile Include="App_Start\Startup.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\AutenticationController.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="DAL\BaseDbWrapper.cs" />
+    <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
+    <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -145,8 +150,13 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Controllers\" />
     <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ServiceDeskDESIEntities\ServiceDeskDESIEntities.csproj">
+      <Project>{e6c9d446-02e1-45ac-858d-dd6cdd95a7e5}</Project>
+      <Name>ServiceDeskDESIEntities</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
