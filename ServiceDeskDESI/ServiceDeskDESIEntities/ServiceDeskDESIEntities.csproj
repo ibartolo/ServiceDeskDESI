@@ -47,6 +47,8 @@
     <Compile Include="Catalogos\Sucursal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Seguridad\ModelResponse.cs" />
+    <Compile Include="Seguridad\Token.cs" />
+    <Compile Include="Seguridad\TokenCookie.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

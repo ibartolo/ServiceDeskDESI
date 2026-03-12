@@ -38,7 +38,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = usuarios;
-                modelResponse.Message = "Usuarios obtenidos correctamente";
             }
             catch (Exception ex)
             {
@@ -78,7 +77,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = usuario;
-                modelResponse.Message = "Usuario obtenido correctamente";
             }
             catch (Exception ex)
             {
@@ -101,7 +99,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = u;
-                modelResponse.Message = "Usuario guardado correctamente";
             }
             catch (Exception ex)
             {
@@ -126,8 +123,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 });
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Message = "Usuario eliminado correctamente";
-                modelResponse.Response = null;
             }
             catch (Exception ex)
             {
@@ -179,7 +174,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 {
                     modelResponse.IsSuccess = true;
                     modelResponse.Response = usuario;
-                    modelResponse.Message = "Autenticación exitosa";
                 }
                 else
                 {
