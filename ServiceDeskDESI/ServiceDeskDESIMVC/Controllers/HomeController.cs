@@ -12,7 +12,7 @@ namespace ServiceDeskDESIMVC.Controllers
         { 
             return View();
         }
-        public ActionResult Index()
+        public ActionResult Inicio()
         {
             return View();
         }

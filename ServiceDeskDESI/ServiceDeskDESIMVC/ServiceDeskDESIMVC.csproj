@@ -123,7 +123,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CSS\Comun\TempAutentication.css" />
+    <Content Include="CSS\Comun\TemplateCalendario.css" />
+    <Content Include="CSS\Comun\TemplateGraficas.css" />
+    <Content Include="CSS\Comun\TemplatePage.css" />
+    <Content Include="CSS\Comun\TemplateTarjetas.css" />
+    <Content Include="CSS\Comun\TemplateVideo.css" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\Comun\Calendario.js" />
     <Content Include="Scripts\Comun\TempAutentication.js" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -133,12 +139,17 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\FiltersHelper.cs" />
+    <Compile Include="Helpers\SessionHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
     <None Include="packages.config" />
     <Content Include="Views\Home\Autenticacion.cshtml" />
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Home\Inicio.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -149,6 +160,12 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ServiceDeskDESIEntities\ServiceDeskDESIEntities.csproj">
+      <Project>{e6c9d446-02e1-45ac-858d-dd6cdd95a7e5}</Project>
+      <Name>ServiceDeskDESIEntities</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
