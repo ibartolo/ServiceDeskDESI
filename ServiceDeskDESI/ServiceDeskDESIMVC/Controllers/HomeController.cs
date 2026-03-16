@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Autenticacion()
+        //[NoAutenticated]
+        public ActionResult Autentication()
         { 
             return View();
         }
-        public ActionResult Inicio()
+        //[Autenticated]
+        public ActionResult Index()
         {
             return View();
         }

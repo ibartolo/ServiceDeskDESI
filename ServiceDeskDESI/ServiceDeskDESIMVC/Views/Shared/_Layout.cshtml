@@ -9,9 +9,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- FullCalendar CSS -->
+    <!-- FullCalendar CSS (comentado pero disponible) -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
-    <!-- Chart.js CSS -->
+    <!-- Chart.js CSS (comentado pero disponible) -->
     <link href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css" rel="stylesheet">
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
@@ -25,10 +25,111 @@
     <!-- ESTILOS ESPECÍFICOS PARA VIDEOS Y GRÁFICAS -->
     <!-- ========================================= -->
     <link href="~/CSS/Comun/TemplateVideo.css" rel="stylesheet" />
-    <link href="~/CSS/Comun/TemplateGraficas.css" rel="stylesheet" />
-    <link href="~/CSS/Comun/TemplateCalendario.css" rel="stylesheet" />
+    <!--<link href="~/CSS/Comun/TemplateGraficas.css" rel="stylesheet" />
+    <link href="~/CSS/Comun/TemplateCalendario.css" rel="stylesheet" />-->
     <link href="~/CSS/Comun/TemplateTarjetas.css" rel="stylesheet" />
 
+    <!-- ========================================= -->
+    <!-- SCRIPTS - jQuery primero, luego Bootstrap -->
+    <!-- ========================================= -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Scripts comentados (disponibles para cuando se necesiten) -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- ========================================= -->
+    <!-- SCRIPT PARA FUNCIONALIDAD DEL SIDEBAR Y MENÚS -->
+    <!-- ========================================= -->
+    <script>
+        $(document).ready(function () {
+            console.log("jQuery cargado correctamente - versión: " + $.fn.jquery);
+
+            // =========================================
+            // FUNCIONALIDAD DEL SIDEBAR (COLLAPSE)
+            // =========================================
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+                console.log('Sidebar toggled');
+            });
+
+            // =========================================
+            // MANEJO DE SUBMENÚS DESPLEGABLES
+            // =========================================
+            $('.has-arrow').on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const $parent = $(this).parent();
+
+                // Cerrar otros submenús abiertos (opcional - comentar si no se desea)
+                $('.components li').not($parent).removeClass('active');
+
+                // Toggle del submenú actual
+                $parent.toggleClass('active');
+
+                console.log('Submenú toggled:', $parent.find('.menu-text').text());
+            });
+
+            // =========================================
+            // CERRAR SUBMENÚS AL HACER CLIC FUERA
+            // =========================================
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.components li').length) {
+                    $('.components li').removeClass('active');
+                }
+            });
+
+            // =========================================
+            // MANEJO DE RESPONSIVE - CERRAR SIDEBAR EN MÓVIL AL SELECCIONAR OPCIÓN
+            // =========================================
+            $('.components a').on('click', function () {
+                if ($(window).width() <= 992) {
+                    if (!$(this).hasClass('has-arrow')) {
+                        $('#sidebar').removeClass('active');
+                        $('#content').removeClass('active');
+                    }
+                }
+            });
+
+            // =========================================
+            // AJUSTE EN CAMBIO DE TAMAÑO DE VENTANA
+            // =========================================
+            $(window).on('resize', function () {
+                if ($(window).width() > 992) {
+                    $('#sidebar, #content').removeClass('active');
+                }
+            });
+
+            // =========================================
+            // INICIALIZAR HERRAMIENTAS ADICIONALES (comentadas)
+            // =========================================
+            /*
+            // Inicializar calendario (cuando se descomente)
+            if (typeof FullCalendar !== 'undefined' && document.getElementById('calendar')) {
+                console.log('FullCalendar disponible');
+            }
+
+            // Inicializar gráficas (cuando se descomente)
+            if (typeof Chart !== 'undefined') {
+                console.log('Chart.js disponible');
+            }
+            */
+
+            // Verificar SweetAlert2 disponible
+            if (typeof Swal !== 'undefined') {
+                console.log('SweetAlert2 disponible');
+            }
+        });
+    </script>
+
+    <!-- ========================================= -->
+    <!-- SCRIPT PARA EL CALENDARIO Y GRÁFICAS (COMENTADO) -->
+    <!-- ========================================= -->
+    <!--<script src="~/Scripts/Comun/Calendario.js"></script>-->
 </head>
 <body>
     <div class="wrapper">
@@ -158,18 +259,5 @@
             </div>
         </div>
     </div>
-
-    <!-- ========================================= -->
-    <!-- SCRIPTS -->
-    <!-- ========================================= -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- ========================================= -->
-    <!-- SCRIPT PARA EL CALENDARIO Y GRÁFICAS -->
-    <!-- ========================================= -->
-    <script src="~/Scripts/Comun/Calendario.js"></script>
 </body>
 </html>
