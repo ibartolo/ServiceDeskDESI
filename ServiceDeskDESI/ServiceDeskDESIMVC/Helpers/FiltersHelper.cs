@@ -23,7 +23,7 @@ namespace ServiceDeskDESIMVC.Helpers
                     filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new
                     {
                         controller = "Home",
-                        action = "Autenticacion"
+                        action = "Autentication"
                     }));
                 }
             }
@@ -39,7 +39,7 @@ namespace ServiceDeskDESIMVC.Helpers
                     filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new
                     {
                         controller = "Home",
-                        action = "Inicio"
+                        action = "Index"
                     }));
                 }
             }

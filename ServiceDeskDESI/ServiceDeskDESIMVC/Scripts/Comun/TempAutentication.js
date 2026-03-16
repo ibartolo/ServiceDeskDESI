@@ -42,7 +42,7 @@
                 iconColor: '#4e73df'
             }).then(() => {
                 // Redirigir al dashboard
-                window.location.href = '/Home/Inicio'; // Cambia por la URL de tu dashboard
+                window.location.href = '/Home/Index'; // Cambia por la URL de tu dashboard
             });
         } else {
             // Mostrar mensaje de error
