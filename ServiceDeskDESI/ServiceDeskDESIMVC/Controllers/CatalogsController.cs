@@ -3,15 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using ServiceDeskDESIEntities.Catalogos;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
     public class CatalogsController : Controller
     {
-        // GET: Catalogs
-        public ActionResult Area()
+        #region Views
+        public ActionResult WorkArea(long id = 0)
         {
-            return View();
+            var area = new ServiceDeskDESIEntities.Catalogos.Area();
+            return View(area);
         }
+        #endregion
+
+        #region Data Access
+        public string ConsutlarTodasAreas()
+        {
+            var areas = new List<Area>();
+            areas.Add(new Area() { Id = 1, Nombre = "Sistemas", Descripcion = "Area de sistemas", Correo = "" });
+            areas.Add(new Area() { Id = 2, Nombre = "Recursos Humanos", Descripcion = "Area de recursos humanos", Correo = "" });
+            return Newtonsoft.Json.JsonConvert.SerializeObject(areas);
+        }
+        #endregion
     }
 }

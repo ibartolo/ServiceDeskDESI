@@ -130,6 +130,7 @@
     <Content Include="CSS\Comun\TemplateVideo.css" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\Comun\Calendario.js" />
+    <Content Include="Scripts\Comun\Comun.js" />
     <Content Include="Scripts\Comun\TempAutentication.js" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -154,7 +155,7 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Catalogs\Area.cshtml" />
+    <Content Include="Views\Catalogs\WorkArea.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
