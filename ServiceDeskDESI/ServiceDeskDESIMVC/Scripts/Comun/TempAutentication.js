@@ -29,27 +29,64 @@
         const password = document.getElementById('password').value;
         const remember = document.getElementById('remember').checked;
 
-        // Validación simple (en un caso real, esto sería una llamada AJAX)
         if (username && password) {
-            // Simular inicio de sesión exitoso
+            // Mostrar loading
             Swal.fire({
-                title: '¡Bienvenido!',
-                text: 'Iniciando sesión...',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                background: 'white',
-                iconColor: '#4e73df'
-            }).then(() => {
-                // Redirigir al dashboard
-                window.location.href = '/Home/Index'; // Cambia por la URL de tu dashboard
+                title: 'Iniciando sesión...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Llamada AJAX al Login
+            $.ajax({
+                url: '/Home/LogIn',
+                type: 'POST',
+                data: {
+                    user: username,
+                    pass: password
+                },
+                success: function (response) {
+                    var result = JSON.parse(response);
+
+                    if (result.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Bienvenido!',
+                            text: result.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            window.location.href = '/Home/Index';
+                        });
+                    } else {
+                        Swal.close();
+                        alertMessage.style.display = 'flex';
+                        alertText.textContent = result.Message;
+
+                        setTimeout(() => {
+                            alertMessage.style.display = 'none';
+                        }, 3000);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    Swal.close();
+                    alertMessage.style.display = 'flex';
+                    alertText.textContent = 'Error de conexión con el servidor';
+
+                    setTimeout(() => {
+                        alertMessage.style.display = 'none';
+                    }, 3000);
+                }
             });
         } else {
-            // Mostrar mensaje de error
             alertMessage.style.display = 'flex';
             alertText.textContent = 'Por favor, ingrese usuario y contraseña';
 
-            // Ocultar después de 3 segundos
             setTimeout(() => {
                 alertMessage.style.display = 'none';
             }, 3000);

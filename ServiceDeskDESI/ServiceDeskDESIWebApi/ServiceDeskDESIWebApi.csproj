@@ -142,9 +142,11 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AutenticationController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\CompaniaController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
+    <Compile Include="DAL\DbWrapper.Calogos.cs" />
     <Compile Include="DAL\DbWrapper.Compania.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="Global.asax.cs">

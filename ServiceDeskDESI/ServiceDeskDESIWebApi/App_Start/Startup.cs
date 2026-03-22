@@ -120,7 +120,7 @@ namespace ServiceDeskDESIWebApi.App_Start
 
             var user = new DAL.DbWrapper().AutenticarUsuario(context.UserName, context.Password);
 
-            if (user == null)
+            if (!(user != null && (user.IsSuccess && user.Response != null)))
             {
                 context.SetError("invalid_grant", "The user name or password is incorrect.");
                 return;

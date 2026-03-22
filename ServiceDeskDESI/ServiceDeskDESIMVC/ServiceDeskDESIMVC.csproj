@@ -140,10 +140,13 @@
     <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
+    <Compile Include="DAL\HttpClientConnection.Autentication.cs" />
+    <Compile Include="DAL\HttpClientConnection.Catalogs.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\Cryptography.cs" />
     <Compile Include="Helpers\FiltersHelper.cs" />
     <Compile Include="Helpers\SessionHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
