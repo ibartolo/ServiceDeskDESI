@@ -15,6 +15,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var area = new ServiceDeskDESIEntities.Catalogos.Area();
             return View(area);
         }
+
+        public ActionResult Company(long id = 0)
+        {
+            var compania = new ServiceDeskDESIEntities.Catalogos.Compania();
+            return View(compania);
+        }
+
         #endregion
 
         #region Data Access
@@ -26,5 +33,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(areas);
         }
         #endregion
+
+      
     }
 }
