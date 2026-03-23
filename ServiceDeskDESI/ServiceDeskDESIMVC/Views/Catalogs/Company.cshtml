@@ -1,0 +1,144 @@
+﻿@model ServiceDeskDESIEntities.Catalogos.Compania
+@{
+    ViewBag.Title = "Company";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Compania</h3>
+    <form enctype="multipart/form-data" id="frmCompania" name="frmCompania" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Compania" })
+
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Acronimo</label>
+                    @Html.TextBoxFor(x => x.Acronimo, new { @class = "form-control", placeholder = "Nombre Acronimo" })
+
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>RFC</label>
+                    @Html.TextBoxFor(x => x.RFC, new { @class = "form-control", placeholder = "RFC" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label>Direccion</label>
+                @Html.TextBoxFor(x => x.Direccion, new { @class = "form-control", placeholder = "Direccion" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarCompania()" />
+                    <a href="/Catalogs/Company" class="btn btn-warning">Cancelar</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                    <table id="tblCompania">
+
+                    </table>
+                </div>
+            </div>
+        </div>                     
+    </form>
+</div>
+
+<script>
+    $(function () {
+        $("#frmCompania").validate({
+            rules: {
+                "Nombre": {
+                    required: true,
+                    maxlength: 250
+                },
+                "Acronimo": {
+                    required: true,
+                    maxlength: 250
+                },
+                "RFC": {
+                    required: true,
+                    maxlength: 250
+                },
+                "Direccion": {
+                    required: true,
+                    maxlength: 250
+                }
+            },
+                messages: {
+                    "Nombre": {
+                        required: "El Nombre es requerido",
+                        maxlength: "El Nombre no puede superar los 250 caracteristicas "
+                    },
+                    "Acronimo": {
+                        required: "El Acronimo es requerido",
+                        maxlength: "El Acronimo no puede superar los 250 caracteristicas "
+                    },
+                    "RFC": {
+                        required: "El RFC es requerido",
+                        maxlength: "El RFC no puede superar los 250 caracteristicas "
+                    },
+                    "Direccion": {
+                        required: "El Direccion es requerido",
+                        maxlength: "El Direccion no puede superar los 250 caracteristicas "
+                    }
+                },
+
+                errorElement: "span",
+                errorClass: "text-danger",
+                highligth: function (element) {
+                    $(element).addClass("is-invalid").removeClass("is-valid");
+                },
+                unhighlight: function (element) {
+                $(element).removeClass("is-invalid").addClass("is-valid");
+                },
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element);
+                }            
+        });
+    });
+
+
+    $(document).ready(function () {
+        var tabla = new DataTable('#tblCompany', {
+            columns: [
+                { data: 'Id', title: 'ID' },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Acronimo', title: 'Acronimo' },
+                { data: 'Direccion', title: 'Direccion' }
+            ]
+        });
+        ObtenerCompanias();
+    });
+    function GuardarActualizarCompania() {
+        if ($("#frmCompania").valid()) {}
+    }
+
+    //function ConsultarTodasCompanias() {
+    //    GetMVC("/Catalogs/")
+    //}
+
+</script>

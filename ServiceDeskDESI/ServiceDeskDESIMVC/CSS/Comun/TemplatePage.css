@@ -1,0 +1,434 @@
+﻿:root {
+    --primary: #4e73df;
+    --primary-dark: #2e59d9;
+    --primary-light: #7a93e8;
+    --secondary: #2c3e50;
+    --success: #1cc88a;
+    --warning: #f6c23e;
+    --danger: #e74a3b;
+    --info: #36b9cc;
+    --light: #f8f9fc;
+    --dark: #5a5c69;
+    --sidebar-width: 260px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* Layout principal */
+.wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* ========================================= */
+/* ESTILOS DEL SIDEBAR */
+/* ========================================= */
+#sidebar {
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    transition: all 0.3s;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+}
+
+    #sidebar.active {
+        margin-left: calc(-1 * var(--sidebar-width));
+    }
+
+.sidebar-header {
+    padding: 25px 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+    .sidebar-header h3 {
+        color: #fff;
+        font-weight: 700;
+        margin: 10px 0 0 0;
+        font-size: 1.5rem;
+    }
+
+    .sidebar-header p {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.85rem;
+        margin: 5px 0 0 0;
+    }
+
+.components {
+    padding: 20px 0;
+}
+
+    .components li {
+        list-style: none;
+    }
+
+        .components li a {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+            .components li a:hover {
+                background-color: rgba(255,255,255,0.1);
+                color: white;
+                border-left-color: white;
+            }
+
+            .components li a.active {
+                background-color: rgba(255,255,255,0.1);
+                color: white;
+                border-left-color: var(--warning);
+            }
+
+            .components li a i {
+                margin-right: 10px;
+                width: 20px;
+                text-align: center;
+                font-size: 1.1rem;
+            }
+
+            .components li a .menu-text {
+                flex: 1;
+            }
+
+        /* Submenú */
+        .components li ul {
+            background-color: rgba(0,0,0,0.2);
+            padding: 0;
+            margin: 0;
+            display: none;
+        }
+
+        .components li.active ul {
+            display: block;
+        }
+
+        .components li ul li a {
+            padding: 10px 20px 10px 50px;
+            font-size: 0.9rem;
+        }
+
+            .components li ul li a i {
+                font-size: 0.9rem;
+            }
+
+.has-arrow {
+    position: relative;
+}
+
+    .has-arrow::after {
+        content: '\f107';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 20px;
+        transition: all 0.3s;
+    }
+
+.active.has-arrow::after {
+    transform: rotate(180deg);
+}
+
+/* ========================================= */
+/* ESTILOS DEL CONTENIDO PRINCIPAL */
+/* ========================================= */
+#content {
+    width: calc(100% - var(--sidebar-width));
+    margin-left: var(--sidebar-width);
+    transition: all 0.3s;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+}
+
+    #content.active {
+        width: 100%;
+        margin-left: 0;
+    }
+
+/* Navbar superior */
+.navbar-top {
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--primary);
+    cursor: pointer;
+    display: none;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.user-details {
+    text-align: right;
+}
+
+.user-name {
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.user-role {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* Contenido principal */
+.main-content {
+    padding: 25px;
+}
+
+.page-title {
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 25px;
+    border-bottom: 2px solid rgba(78, 115, 223, 0.1);
+    padding-bottom: 10px;
+}
+
+/* Tarjetas estadísticas */
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary);
+    transition: transform 0.3s;
+}
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-card.primary {
+        border-left-color: var(--primary);
+    }
+
+    .stat-card.success {
+        border-left-color: var(--success);
+    }
+
+    .stat-card.warning {
+        border-left-color: var(--warning);
+    }
+
+    .stat-card.danger {
+        border-left-color: var(--danger);
+    }
+
+    .stat-card.info {
+        border-left-color: var(--info);
+    }
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.stat-title {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* ========================================= */
+/* ESTILOS DE FORMULARIOS */
+/* ========================================= */
+.form-section {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    margin-bottom: 25px;
+}
+
+.section-title {
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 5px;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #e3e6f0;
+    padding: 10px 15px;
+    transition: all 0.3s;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+/* Checkbox personalizado */
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* ========================================= */
+/* ESTILOS DE BOTONES - EJEMPLOS COMPLETOS */
+/* ========================================= */
+.btn {
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 0.875rem;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+
+.btn-success {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+.btn-warning {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: #fff;
+}
+
+.btn-danger {
+    background: var(--danger);
+    border-color: var(--danger);
+}
+
+.btn-info {
+    background: var(--info);
+    border-color: var(--info);
+    color: #fff;
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+    .btn-outline-primary:hover {
+        background: var(--primary);
+        color: #fff;
+    }
+
+/* ========================================= */
+/* ESTILOS RESPONSIVE */
+/* ========================================= */
+@media (max-width: 992px) {
+    #sidebar {
+        margin-left: calc(-1 * var(--sidebar-width));
+    }
+
+        #sidebar.active {
+            margin-left: 0;
+        }
+
+    #content {
+        width: 100%;
+        margin-left: 0;
+    }
+
+        #content.active {
+            width: calc(100% - var(--sidebar-width));
+            margin-left: var(--sidebar-width);
+        }
+
+    .menu-toggle {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-top {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .user-details {
+        display: none;
+    }
+
+    .main-content {
+        padding: 15px;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+}

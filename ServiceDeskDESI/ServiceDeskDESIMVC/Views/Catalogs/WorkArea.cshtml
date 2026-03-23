@@ -1,0 +1,128 @@
+﻿@model ServiceDeskDESIEntities.Catalogos.Area
+@{
+    ViewBag.Title = "Area";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Areas de trabajo</h3>
+    <form enctype="multipart/form-data" id="frmArea" name="frmArea" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Nombre:</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre del área" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Descripción:</label>
+                    @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripción del área" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Correo:</label>
+                    @Html.TextBoxFor(x => x.Correo, new { @class = "form-control", placeholder = "Correo del área" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarArea()" />
+                    <a href="/Catalogs/WorkArea" class="btn btn-warning">Cancelar</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                    <table id="tblArea">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(function () {
+        $("#frmArea").validate({
+            rules: {
+                "Nombre": {
+                    required: true,
+                    maxlength: 250
+                },
+                "Descripcion": {
+                    required: true,
+                    maxlength: 500
+                },
+                "Correo": {
+                    required: true,
+                    email: true,
+                    maxlength: 100
+                }
+            },
+            messages: {
+                "Nombre": {
+                    required: "El campo 'Nombre' es requerido.",
+                    maxlength: "El nombre no puede superar los 250 caracteres."
+                },
+                "Descripcion": {
+                    required: "El campo 'Descripción' es requerido.",
+                    maxlength: "La descripción no puede superar los 500 caracteres."
+                },
+                "Correo": {
+                    required: "El campo 'Correo' es requerido.",
+                    email: "Ingrese un correo electrónico válido.",
+                    maxlength: "El correo no puede superar los 100 caracteres."
+                }
+            },
+            errorElement: "span",
+            errorClass: "text-danger",
+            highlight: function (element) {
+                $(element).addClass("is-invalid").removeClass("is-valid");
+            },
+            unhighlight: function (element) {
+                $(element).removeClass("is-invalid").addClass("is-valid");
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element);
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        var tabla = new DataTable('#tblArea', {
+            columns: [
+                { data: 'Id', title: 'ID' },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Descripcion', title: 'Descripción' },
+                { data: 'Correo', title: 'Correo' },
+                { data: 'Estatus', title: 'Estatus' } // Opcional, si quieres mostrarlo
+            ]
+        });
+        ConsultarTodasAreas();
+    });
+
+    function GuardarActualizarArea() {
+        if ($("#frmArea").valid()) { }
+    }
+
+    function ConsultarTodasAreas() {
+        GetMVC("/Catalogs/ConsutlarTodasAreas", function (r) {
+            MapingPropertiesDataTable("tblArea", r);
+        });
+    }
+</script>

@@ -1,0 +1,256 @@
+﻿
+@{
+    ViewBag.Title = "Inicio";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="page-title">Dashboard Service Desk DESI</h2>
+
+<!-- Tarjetas estadísticas -->
+<div class="row">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card primary">
+            <div class="stat-number">145</div>
+            <div class="stat-title">Tickets Activos</div>
+            <small class="text-success">+12% vs ayer</small>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card success">
+            <div class="stat-number">89</div>
+            <div class="stat-title">Resueltos Hoy</div>
+            <small class="text-success">+5% vs ayer</small>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card warning">
+            <div class="stat-number">23</div>
+            <div class="stat-title">Pendientes</div>
+            <small class="text-danger">-3% vs ayer</small>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card info">
+            <div class="stat-number">12</div>
+            <div class="stat-title">Agentes</div>
+            <small>Disponibles: 8</small>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- SECCIÓN DE FORMULARIOS DE CAPTURA -->
+<!-- ========================================= -->
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Registro de Nuevo Ticket</h3>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Título del Ticket</label>
+                <input type="text" class="form-control" placeholder="Ingrese el título del ticket">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Categoría</label>
+                <select class="form-select">
+                    <option selected>Seleccione una categoría</option>
+                    <option value="1">Hardware</option>
+                    <option value="2">Software</option>
+                    <option value="3">Redes</option>
+                    <option value="4">Base de Datos</option>
+                    <option value="5">Seguridad</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Prioridad</label>
+                <select class="form-select">
+                    <option selected>Seleccione prioridad</option>
+                    <option value="alta" class="text-danger">Alta</option>
+                    <option value="media" class="text-warning">Media</option>
+                    <option value="baja" class="text-success">Baja</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Fecha Límite</label>
+                <input type="date" class="form-control" value="2026-03-11">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea class="form-control" rows="3" placeholder="Describa el problema..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="notificarEmail">
+                    <label class="form-check-label" for="notificarEmail">Notificar por email</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="notificarSMS">
+                    <label class="form-check-label" for="notificarSMS">Notificar por SMS</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="esUrgente">
+                    <label class="form-check-label" for="esUrgente">Marcar como urgente</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Guardar Ticket</button>
+            <button type="reset" class="btn btn-secondary"><i class="fas fa-times me-2"></i>Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- EJEMPLOS DE BOTONES -->
+<!-- ========================================= -->
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-palette me-2"></i>Ejemplos de Botones</h3>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h5>Tamaños:</h5>
+            <button class="btn btn-primary btn-sm">Pequeño</button>
+            <button class="btn btn-primary">Normal</button>
+            <button class="btn btn-primary btn-lg">Grande</button>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h5>Colores:</h5>
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-secondary">Secondary</button>
+            <button class="btn btn-success">Success</button>
+            <button class="btn btn-danger">Danger</button>
+            <button class="btn btn-warning">Warning</button>
+            <button class="btn btn-info">Info</button>
+            <button class="btn btn-light">Light</button>
+            <button class="btn btn-dark">Dark</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h5>Outline:</h5>
+            <button class="btn btn-outline-primary">Outline Primary</button>
+            <button class="btn btn-outline-success">Outline Success</button>
+            <button class="btn btn-outline-danger">Outline Danger</button>
+            <button class="btn btn-outline-warning">Outline Warning</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- SECCIÓN DE VIDEOS -->
+<!-- ========================================= -->
+<div class="video-section">
+    <h3 class="section-title"><i class="fas fa-video me-2"></i>Videos Tutoriales</h3>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div>
+                        <i class="fas fa-play-circle"></i>
+                        <h5>Cómo crear un ticket</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="video-container">
+                <div class="video-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div>
+                        <i class="fas fa-play-circle"></i>
+                        <h5>Gestión de usuarios</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="video-container">
+                <div class="video-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div>
+                        <i class="fas fa-play-circle"></i>
+                        <h5>Reportes avanzados</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- SECCIÓN DE GRÁFICAS -->
+<!-- ========================================= -->
+<!--<div class="chart-section">
+    <h3 class="section-title"><i class="fas fa-chart-pie me-2"></i>Estadísticas de Tickets</h3>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <canvas id="ticketsChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <canvas id="priorityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>-->
+
+<!-- ========================================= -->
+<!-- SECCIÓN DE CALENDARIO CON EVENTOS ARRASTRABLES -->
+<!-- ========================================= -->
+<!--<div class="calendar-section">
+    <h3 class="section-title"><i class="fas fa-calendar-alt me-2"></i>Calendario de Actividades</h3>
+    <div id="calendar"></div>
+</div>-->
+
+<!-- Tickets recientes -->
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-clock me-2"></i>Tickets Recientes</h3>
+
+    <div class="ticket-card high">
+        <div class="ticket-title">#1234 - Servidor caído</div>
+        <div class="ticket-meta">Creado: 10/03/2026 | Prioridad: Alta | Asignado: Juan Pérez</div>
+    </div>
+
+    <div class="ticket-card medium">
+        <div class="ticket-title">#1235 - Problema con Office 365</div>
+        <div class="ticket-meta">Creado: 10/03/2026 | Prioridad: Media | Asignado: María García</div>
+    </div>
+
+    <div class="ticket-card low">
+        <div class="ticket-title">#1236 - Solicitud de nuevo software</div>
+        <div class="ticket-meta">Creado: 09/03/2026 | Prioridad: Baja | Asignado: Carlos López</div>
+    </div>
+
+    <div class="ticket-card high">
+        <div class="ticket-title">#1237 - Falla en red principal</div>
+        <div class="ticket-meta">Creado: 09/03/2026 | Prioridad: Alta | Asignado: Ana Martínez</div>
+    </div>
+</div>
