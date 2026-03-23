@@ -19,7 +19,7 @@ namespace ServiceDeskDESIWebApi.Controllers
             dbWrapper = new DbWrapper();
         }
 
-        [HttpGet, Route("")]
+        [HttpGet, Route("List")]
         public ModelResponse ObtenerCompania()
         {
             var result = dbWrapper.ObtenerCompania();
@@ -32,7 +32,7 @@ namespace ServiceDeskDESIWebApi.Controllers
             return result;
         }
 
-        [HttpPost, Route("")]
+        [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarCompania(Compania c)
         {
             var result = dbWrapper.GuardarOActualizarCompania(c);
