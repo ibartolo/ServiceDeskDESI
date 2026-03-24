@@ -9,6 +9,15 @@
 <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
 
 <div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
     <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Areas de trabajo</h3>
     <form enctype="multipart/form-data" id="frmArea" name="frmArea" method="post">
         @Html.HiddenFor(x => x.Id)
@@ -106,23 +115,161 @@
     $(document).ready(function () {
         var tabla = new DataTable('#tblArea', {
             columns: [
-                { data: 'Id', title: 'ID' },
+                { data: 'Id', title: 'ID', visible: false },
                 { data: 'Nombre', title: 'Nombre' },
                 { data: 'Descripcion', title: 'Descripción' },
                 { data: 'Correo', title: 'Correo' },
-                { data: 'Estatus', title: 'Estatus' } // Opcional, si quieres mostrarlo
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        return '<div class="d-flex gap-3">' +
+                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarArea(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarArea(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '</div>';
+                    }
+                },
+                { data: 'Estatus', title: 'Estatus', visible: false }
             ]
         });
         ConsultarTodasAreas();
     });
 
     function GuardarActualizarArea() {
-        if ($("#frmArea").valid()) { }
+        if ($("#frmArea").valid()) {
+            Swal.fire({
+                title: 'Guardando...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            var area = {
+                Id: $("#Id").val() || 0,
+                Nombre: $("#Nombre").val(),
+                Descripcion: $("#Descripcion").val(),
+                Correo: $("#Correo").val(),
+                CreadoPor: $("#CreadoPor").val(),
+                FechaCreacion: new Date().toISOString(),
+                ModificadoPor: $("#ModificadoPor").val() || null,
+                FechaModificacion: null,
+                Estatus: true
+            };
+
+            PostMVC('/Catalogs/GuardarOActualizarArea', area, function (response) {
+                Swal.close();
+
+                if (response.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    }).then(() => {
+                        window.location.href = '/Catalogs/WorkArea';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
+        }
     }
 
     function ConsultarTodasAreas() {
         GetMVC("/Catalogs/ConsutlarTodasAreas", function (r) {
-            MapingPropertiesDataTable("tblArea", r);
+            var result = typeof r === 'string' ? JSON.parse(r) : r;
+
+            if (result.IsSuccess) {
+                MapingPropertiesDataTable("tblArea", result.Response);
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: result.Message,
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
         });
+    }
+
+    function EditarArea(id) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        window.location.href = '/Catalogs/WorkArea/' + id;
+    }
+
+    function EliminarArea(event, id) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Esta acción eliminará lógicamente el registro',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                var area = {
+                    Id: id,
+                    ModificadoPor: $("#ModificadoPor").val() || "system",
+                    FechaModificacion: new Date().toISOString()
+                };
+
+                PostMVC('/Catalogs/EliminarArea', area, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: response.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            ConsultarTodasAreas();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+
+        return false;
     }
 </script>

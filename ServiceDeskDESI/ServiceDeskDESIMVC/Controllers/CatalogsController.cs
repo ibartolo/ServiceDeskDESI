@@ -1,39 +1,70 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using ServiceDeskDESIEntities.Catalogos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using ServiceDeskDESIEntities.Catalogos;
+using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
-    public class CatalogsController : Controller
+    [Autenticated]
+    public class CatalogsController : BaseController
     {
         #region Views
-        public ActionResult WorkArea(long id = 0)
+        public async Task<ActionResult> WorkArea(long id = 0)
         {
-            var area = new ServiceDeskDESIEntities.Catalogos.Area();
+            var area = new Area();
+
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerAreaPorId(id);
+
+                if (response.IsSuccess && response.Response != null)
+                {
+                    area = JsonConvert.DeserializeObject<Area>(response.Response.ToString());
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+
             return View(area);
         }
 
         public ActionResult Company(long id = 0)
         {
-            var compania = new ServiceDeskDESIEntities.Catalogos.Compania();
+            var compania = new Compania();
             return View(compania);
         }
 
         #endregion
 
         #region Data Access
-        public string ConsutlarTodasAreas()
+        public async Task<string> ConsutlarTodasAreas()
         {
-            var areas = new List<Area>();
-            areas.Add(new Area() { Id = 1, Nombre = "Sistemas", Descripcion = "Area de sistemas", Correo = "" });
-            areas.Add(new Area() { Id = 2, Nombre = "Recursos Humanos", Descripcion = "Area de recursos humanos", Correo = "" });
-            return Newtonsoft.Json.JsonConvert.SerializeObject(areas);
+            var response = await httpClientConnection.ObtenerAreas();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarAreaPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerAreaPorId(id);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> GuardarOActualizarArea(Area a)
+        {
+            var response = await httpClientConnection.GuardarOActualizarArea(a);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> EliminarArea(Area a)
+        {
+            var response = await httpClientConnection.EliminarArea(a);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         #endregion
 
-      
     }
 }

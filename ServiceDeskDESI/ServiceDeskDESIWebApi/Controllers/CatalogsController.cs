@@ -17,7 +17,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// Obtiene todas las áreas activas
         /// </summary>
         /// <returns>Lista de áreas</returns>
-        [HttpGet, Route("Lista")]
+        [HttpGet, Route("Area/Lista")]
         public ModelResponse ObtenerAreas()
         {
             var result = dbWrapper.ObtenerAreas();
@@ -29,7 +29,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="id">ID del área</param>
         /// <returns>Área encontrada</returns>
-        [HttpGet, Route("{id:long}")]
+        [HttpGet, Route("Area/{id:long}")]
         public ModelResponse ObtenerAreaPorId(long id)
         {
             var result = dbWrapper.ObtenerAreaPorId(id);
@@ -41,7 +41,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="a">Objeto área con los datos</param>
         /// <returns>Área guardada con su ID actualizado</returns>
-        [HttpPost, Route("")]
+        [HttpPost, Route("Area")]
         public ModelResponse GuardarOActualizarArea(Area a)
         {
             var result = dbWrapper.GuardarOActualizarArea(a);
@@ -53,7 +53,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="a">Área a eliminar (debe incluir Id, ModificadoPor y FechaModificacion)</param>
         /// <returns>Resultado de la operación</returns>
-        [HttpDelete, Route("")]
+        [HttpDelete, Route("Area")]
         public ModelResponse EliminarArea(Area a)
         {
             a.FechaModificacion = DateTime.Now;

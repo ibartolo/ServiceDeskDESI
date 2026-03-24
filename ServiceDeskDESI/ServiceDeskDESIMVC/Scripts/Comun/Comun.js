@@ -17,7 +17,6 @@ function GetMVC(url, callBackResult) {
 }
 
 function GetParamMVC(url, parameters, callBackResult) {
-    AddLoader();
     $.ajax({
         url: url,
         cache: false,
@@ -25,18 +24,15 @@ function GetParamMVC(url, parameters, callBackResult) {
         dataType: 'json',
         data: parameters,
         success: function (r) {
-            RemoveLoader();
             callBackResult(r);
         },
         error: function (e) {
-            RemoveLoader();
             callBackResult(e);
         }
     });
 }
 
 function PostMVC(url, parameters, callBackResult) {
-    AddLoader();
     $.ajax({
         url: url,
         cache: false,
@@ -44,19 +40,15 @@ function PostMVC(url, parameters, callBackResult) {
         dataType: 'json',
         data: parameters,
         success: function (r) {
-            RemoveLoader();
             callBackResult(r);
         },
         error: function (e) {
-            RemoveLoader();
             callBackResult(e);
         }
     });
 }
 
 function PostFileMVC(url, parameters, callBackResult) {
-    AddLoader();
-
     var formData = new FormData();
     $.each(parameters, function (i, v) {
         formData.append(v.Name, v.Value);
@@ -70,18 +62,15 @@ function PostFileMVC(url, parameters, callBackResult) {
         contentType: false,
         processData: false,
         success: function (r) {
-            RemoveLoader();
             callBackResult(r);
         },
         error: function (e) {
-            RemoveLoader();
             callBackResult(e);
         }
     });
 }
 
 function PostViewMVC(url, parameters, callBackResult) {
-    AddLoader();
     $.ajax({
         url: url,
         cache: false,
@@ -89,11 +78,9 @@ function PostViewMVC(url, parameters, callBackResult) {
         data: parameters,
         dataType: 'text',
         success: function (r) {
-            RemoveLoader();
             callBackResult(r);
         },
         error: function (e) {
-            RemoveLoader();
             callBackResult(e);
         }
     });

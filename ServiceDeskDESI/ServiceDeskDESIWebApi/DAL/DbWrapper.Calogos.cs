@@ -74,6 +74,18 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
+                if (string.IsNullOrWhiteSpace(a.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
+                if (a.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
+
+                if (string.IsNullOrWhiteSpace(a.Descripcion)) { throw new ArgumentException("La descripción del área es requerida."); }
+                if (a.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
+
+                if (string.IsNullOrWhiteSpace(a.Correo)) { throw new ArgumentException("El correo del área es requerido."); }
+                if (a.Correo.Length > 100) { throw new ArgumentException("El correo no puede exceder los 100 caracteres."); }
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(a.Correo, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                { throw new ArgumentException("El formato del correo no es válido."); }
+
                 var parametros = ObtenerParametrosSQL(a).ToArray();
                 var areaId = ExecuteScalar("GuardarOActualizarArea", CommandType.StoredProcedure, parametros);
                 a.Id = Convert.ToInt64(areaId);
@@ -82,11 +94,15 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = a;
                 modelResponse.Message = "Área guardada correctamente";
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error inesperado, por favor contacte al administrador.";
             }
 
             return modelResponse;
