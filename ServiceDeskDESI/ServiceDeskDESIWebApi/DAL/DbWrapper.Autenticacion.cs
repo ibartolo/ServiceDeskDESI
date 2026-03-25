@@ -48,15 +48,18 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
         public ModelResponse ObtenerUsuarioPorId(long id)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
+                if (id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
+
                 var usuario = GetObject("ObtenerUsuarioPorId", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@Id", id)
+                        new SqlParameter("@Id", id)
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
@@ -75,24 +78,52 @@ namespace ServiceDeskDESIWebApi.DAL
                         return u;
                     }));
 
+                if (usuario == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró el usuario especificado.";
+                    return modelResponse;
+                }
+
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = usuario;
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
+                modelResponse.Message = "Ocurrió un error al obtener el usuario.";
                 modelResponse.Response = null;
             }
 
             return modelResponse;
         }
+
         public ModelResponse GuardarOActualizarUsuario(Usuario u)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
+                // Validaciones
+                if (string.IsNullOrWhiteSpace(u.NombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (u.NombreUsuario.Length > 25) { throw new ArgumentException("El nombre de usuario no puede exceder los 25 caracteres."); }
+                if (string.IsNullOrWhiteSpace(u.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
+                if (u.Contrasena.Length > 250) { throw new ArgumentException("La contraseña no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(u.Correo)) { throw new ArgumentException("El correo es requerido."); }
+                if (u.Correo.Length > 250) { throw new ArgumentException("El correo no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(u.Nombre)) { throw new ArgumentException("El nombre es requerido."); }
+                if (u.Nombre.Length > 150) { throw new ArgumentException("El nombre no puede exceder los 150 caracteres."); }
+                if (string.IsNullOrWhiteSpace(u.Apellido)) { throw new ArgumentException("El apellido es requerido."); }
+                if (u.Apellido.Length > 250) { throw new ArgumentException("El apellido no puede exceder los 250 caracteres."); }
+                if (u.Sucursal == null || u.Sucursal.Id <= 0) { throw new ArgumentException("La sucursal es requerida."); }
+                if (u.Area == null || u.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
+                if (string.IsNullOrWhiteSpace(u.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+
                 var parametros = ObtenerParametrosSQL(u).ToArray();
                 var usuarioId = ExecuteScalar("GuardarOActualizarUsuario", CommandType.StoredProcedure, parametros);
                 u.Id = Convert.ToInt64(usuarioId);
@@ -100,21 +131,30 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = u;
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al guardar el usuario.";
                 modelResponse.Response = null;
             }
 
             return modelResponse;
         }
+
         public ModelResponse EliminarUsuario(long id, string modificadoPor, DateTime fechaModificacion)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
+                if (id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
+
                 ExecuteNonQuery("EliminarUsuario", CommandType.StoredProcedure, new SqlParameter[]
                 {
                     new SqlParameter("@Id", id),
@@ -123,26 +163,35 @@ namespace ServiceDeskDESIWebApi.DAL
                 });
 
                 modelResponse.IsSuccess = true;
+                modelResponse.Message = "Usuario eliminado correctamente.";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al eliminar el usuario.";
             }
 
             return modelResponse;
         }
+
         public ModelResponse AutenticarUsuario(string nombreUsuario, string contrasena)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
+                if (string.IsNullOrWhiteSpace(nombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
+
                 var usuario = GetObject("AutenticarUsuario", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@NombreUsuario", nombreUsuario),
-                new SqlParameter("@Contrasena", contrasena)
+                        new SqlParameter("@NombreUsuario", nombreUsuario),
+                        new SqlParameter("@Contrasena", contrasena)
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
@@ -178,28 +227,34 @@ namespace ServiceDeskDESIWebApi.DAL
                 else
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Response = null;
-                    modelResponse.Message = "Usuario o contraseña incorrectos";
+                    modelResponse.Message = "Usuario o contraseña incorrectos.";
                 }
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al autenticar el usuario.";
             }
 
             return modelResponse;
         }
+
         public ModelResponse ObtenerUsuarioPorNombreUsuario(string nombreUsuario)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
+                if (string.IsNullOrWhiteSpace(nombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
                 var usuario = GetObject("ObtenerUsuarioPorNombreUsuario", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@NombreUsuario", nombreUsuario)
+                        new SqlParameter("@NombreUsuario", nombreUsuario)
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
@@ -229,57 +284,70 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = usuario;
-                modelResponse.Message = "Usuario obtenido correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al obtener el usuario.";
             }
 
             return modelResponse;
         }
-        // Insertar token de recuperación
+
         public ModelResponse InsertarTokenRecuperacion(long usuarioId, string token, DateTime fechaExpiracion, string creadoPor)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
+                if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(token)) { throw new ArgumentException("El token es requerido."); }
+                if (fechaExpiracion <= DateTime.Now) { throw new ArgumentException("La fecha de expiración debe ser mayor a la fecha actual."); }
+                if (string.IsNullOrWhiteSpace(creadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+
                 var tokenId = ExecuteScalar("InsertarTokenRecuperacion", CommandType.StoredProcedure, new SqlParameter[]
                 {
-            new SqlParameter("@UsuarioId", usuarioId),
-            new SqlParameter("@Token", token),
-            new SqlParameter("@FechaExpiracion", fechaExpiracion),
-            new SqlParameter("@CreadoPor", creadoPor),
-            new SqlParameter("@FechaCreacion", DateTime.Now)
+                    new SqlParameter("@UsuarioId", usuarioId),
+                    new SqlParameter("@Token", token),
+                    new SqlParameter("@FechaExpiracion", fechaExpiracion),
+                    new SqlParameter("@CreadoPor", creadoPor),
+                    new SqlParameter("@FechaCreacion", DateTime.Now)
                 });
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = Convert.ToInt64(tokenId);
-                modelResponse.Message = "Token guardado correctamente";
+                modelResponse.Message = "Token guardado correctamente.";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al guardar el token.";
             }
 
             return modelResponse;
         }
 
-        // Obtener token de recuperación para validación
         public ModelResponse ObtenerTokenRecuperacion(string token)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
+                if (string.IsNullOrWhiteSpace(token)) { throw new ArgumentException("El token es requerido."); }
+
                 var result = GetObject("ObtenerTokenRecuperacion", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@Token", token)
+                        new SqlParameter("@Token", token)
                     },
                     new Func<IDataReader, dynamic>((reader) =>
                     {
@@ -297,45 +365,63 @@ namespace ServiceDeskDESIWebApi.DAL
                         };
                     }));
 
+                if (result == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El token no es válido o ha expirado.";
+                    return modelResponse;
+                }
+
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = result;
-                modelResponse.Message = "Token obtenido correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al obtener el token.";
             }
 
             return modelResponse;
         }
 
-        // Actualizar token como usado
         public ModelResponse ActualizarTokenUsado(long id, string modificadoPor)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
+                if (id <= 0) { throw new ArgumentException("El ID del token es requerido."); }
+                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
+
                 ExecuteNonQuery("ActualizarTokenUsado", CommandType.StoredProcedure, new SqlParameter[]
                 {
-            new SqlParameter("@Id", id),
-            new SqlParameter("@ModificadoPor", modificadoPor),
-            new SqlParameter("@FechaModificacion", DateTime.Now)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", DateTime.Now)
                 });
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Message = "Token actualizado correctamente";
+                modelResponse.Message = "Token actualizado correctamente.";
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
             }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al actualizar el token.";
+            }
 
             return modelResponse;
         }
+
         public ModelResponse ActualizarContrasena(Usuario usuario)
         {
             var modelResponse = new ModelResponse();
@@ -346,14 +432,15 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (usuario.Id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
                 if (usuario.Contrasena.Length < 6) { throw new ArgumentException("La contraseña debe tener al menos 6 caracteres."); }
+                if (usuario.Contrasena.Length > 250) { throw new ArgumentException("La contraseña no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(usuario.ModificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
 
                 var result = ExecuteScalar("ActualizarContrasena", CommandType.StoredProcedure, new SqlParameter[]
                 {
-            new SqlParameter("@Id", usuario.Id),
-            new SqlParameter("@Contrasena", usuario.Contrasena),
-            new SqlParameter("@ModificadoPor", usuario.ModificadoPor),
-            new SqlParameter("@FechaModificacion", usuario.FechaModificacion ?? DateTime.Now)
+                    new SqlParameter("@Id", usuario.Id),
+                    new SqlParameter("@Contrasena", usuario.Contrasena),
+                    new SqlParameter("@ModificadoPor", usuario.ModificadoPor),
+                    new SqlParameter("@FechaModificacion", usuario.FechaModificacion ?? DateTime.Now)
                 });
 
                 long idActualizado = Convert.ToInt64(result);
@@ -361,7 +448,7 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (idActualizado > 0)
                 {
                     modelResponse.IsSuccess = true;
-                    modelResponse.Message = "Contraseña actualizada correctamente";
+                    modelResponse.Message = "Contraseña actualizada correctamente.";
                     modelResponse.Response = idActualizado;
                 }
                 else
@@ -378,7 +465,7 @@ namespace ServiceDeskDESIWebApi.DAL
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al actualizar la contraseña";
+                modelResponse.Message = "Ocurrió un error al actualizar la contraseña.";
             }
 
             return modelResponse;
