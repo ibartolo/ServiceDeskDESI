@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperación de Contraseña - Service Desk DESI</title>
+</head>
+<body style="margin: 0; padding: 20px; background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+        
+        <!-- Encabezado -->
+        <div style="background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%); padding: 40px 30px; text-align: center;">
+            <div style="margin-bottom: 15px;">
+                <i class="fas fa-headset" style="font-size: 3.5rem; color: white;"></i>
+            </div>
+            <h1 style="color: white; font-size: 1.8rem; margin: 10px 0 0 0; font-weight: 700;">Service Desk DESI</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 0.95rem;">Sistema de Gestión de Tickets</p>
+        </div>
+
+        <!-- Cuerpo del correo -->
+        <div style="padding: 40px 30px;">
+            <div style="font-size: 1.2rem; font-weight: 600; color: #5a5c69; margin-bottom: 20px;">
+                Hola, <strong>{{Nombre}} {{Apellido}}</strong>
+            </div>
+
+            <div style="color: #6c757d; margin-bottom: 25px; line-height: 1.6;">
+                Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en <strong>Service Desk DESI</strong>.
+                Si no realizaste esta solicitud, por favor ignora este mensaje.
+            </div>
+
+            <!-- Botón principal -->
+            <div style="text-align: center; margin: 35px 0;">
+                <a href="{{UrlRecuperacion}}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%); color: white; text-decoration: none; padding: 14px 35px; border-radius: 8px; font-weight: 600; font-size: 1rem; box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);">
+                    Restablecer Contraseña
+                </a>
+            </div>
+
+            <!-- Información del enlace -->
+            <div style="background: #f8f9fc; border-left: 4px solid #4e73df; padding: 15px 20px; margin: 25px 0; border-radius: 8px;">
+                <p style="color: #5a5c69; font-size: 0.9rem; margin: 0 0 8px 0;">
+                    <strong>Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</strong>
+                </p>
+                <p style="word-break: break-all; color: #4e73df; font-family: monospace; font-size: 0.85rem; margin: 0;">
+                    {{UrlRecuperacion}}
+                </p>
+            </div>
+
+            <!-- Vigencia del enlace -->
+            <div style="background: #fff8e6; border-left: 4px solid #f6c23e; padding: 15px 20px; margin: 25px 0; border-radius: 8px;">
+                <p style="color: #856404; font-size: 0.9rem; margin: 0; display: flex; align-items: flex-start; gap: 10px;">
+                    <i class="fas fa-clock" style="font-size: 1.1rem; margin-top: 2px;"></i>
+                    <span><strong>Vigencia:</strong> Este enlace de recuperación expirará en <strong>10 minutos</strong>. Si no completas el proceso antes, deberás solicitar un nuevo enlace.</span>
+                </p>
+            </div>
+
+            <!-- Advertencia de seguridad -->
+            <div style="background: #fff5f5; border-left: 4px solid #e74a3b; padding: 15px 20px; margin: 25px 0; border-radius: 8px;">
+                <p style="color: #e74a3b; font-size: 0.9rem; margin: 0; display: flex; align-items: flex-start; gap: 10px;">
+                    <i class="fas fa-shield-alt" style="font-size: 1.1rem; margin-top: 2px;"></i>
+                    <span><strong>¿No solicitaste esto?</strong> Si no solicitaste restablecer tu contraseña, por favor ignora este correo. Tu cuenta permanece segura. Si crees que alguien está intentando acceder a tu cuenta, contacta al administrador del sistema.</span>
+                </p>
+            </div>
+
+            <!-- Instrucciones adicionales -->
+            <div style="margin: 25px 0; padding: 0;">
+                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 10px;">
+                    <strong>¿Necesitas ayuda?</strong>
+                </p>
+                <p style="color: #6c757d; font-size: 0.85rem; margin: 0;">
+                    Si tienes problemas para restablecer tu contraseña, comunícate con el equipo de soporte o visita nuestro sitio web.
+                </p>
+            </div>
+        </div>
+
+        <!-- Pie de página -->
+        <div style="background: #f8f9fc; padding: 25px 30px; text-align: center; border-top: 1px solid #e3e6f0;">
+            <div style="margin-bottom: 15px;">
+                <span style="display: inline-block; margin: 0 12px; color: #6c757d; font-size: 0.85rem;">
+                    <i class="fas fa-globe" style="margin-right: 5px; color: #4e73df;"></i> <a href="https://desipr.com.mx/" style="color: #4e73df; text-decoration: none;">desipr.com.mx</a>
+                </span>
+            </div>
+            <div style="color: #858796; font-size: 0.75rem; margin-top: 15px;">
+                &copy; 2026 Service Desk DESI. Todos los derechos reservados.<br>
+                <a href="https://desipr.com.mx/" style="color: #4e73df; text-decoration: none;">Aviso de Privacidad</a> | 
+                <a href="https://desipr.com.mx/" style="color: #4e73df; text-decoration: none;">Términos y Condiciones</a>
+            </div>
+            <div style="color: #858796; font-size: 0.7rem; margin-top: 15px;">
+                Este es un mensaje automático, por favor no responder a este correo.
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</body>
+</html>

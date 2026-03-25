@@ -191,5 +191,197 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+        public ModelResponse ObtenerUsuarioPorNombreUsuario(string nombreUsuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var usuario = GetObject("ObtenerUsuarioPorNombreUsuario", CommandType.StoredProcedure,
+                    new[] {
+                new SqlParameter("@NombreUsuario", nombreUsuario)
+                    },
+                    new Func<IDataReader, Usuario>((reader) =>
+                    {
+                        var u = LlenarEntidad<Usuario>(reader);
+
+                        u.Sucursal = new Sucursal()
+                        {
+                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
+                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["SucursalDescripcion"]),
+                            Calle = MapearPorpiedades<string>(reader["Calle"]),
+                            Ciudad = MapearPorpiedades<string>(reader["Ciudad"]),
+                            Colonia = MapearPorpiedades<string>(reader["Colonia"]),
+                            CodigoPostal = MapearPorpiedades<string>(reader["CodigoPostal"])
+                        };
+
+                        u.Area = new Area()
+                        {
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["AreaDescripcion"]),
+                            Correo = MapearPorpiedades<string>(reader["AreaCorreo"])
+                        };
+
+                        return u;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = usuario;
+                modelResponse.Message = "Usuario obtenido correctamente";
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+                modelResponse.Response = null;
+            }
+
+            return modelResponse;
+        }
+        // Insertar token de recuperación
+        public ModelResponse InsertarTokenRecuperacion(long usuarioId, string token, DateTime fechaExpiracion, string creadoPor)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var tokenId = ExecuteScalar("InsertarTokenRecuperacion", CommandType.StoredProcedure, new SqlParameter[]
+                {
+            new SqlParameter("@UsuarioId", usuarioId),
+            new SqlParameter("@Token", token),
+            new SqlParameter("@FechaExpiracion", fechaExpiracion),
+            new SqlParameter("@CreadoPor", creadoPor),
+            new SqlParameter("@FechaCreacion", DateTime.Now)
+                });
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = Convert.ToInt64(tokenId);
+                modelResponse.Message = "Token guardado correctamente";
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+                modelResponse.Response = null;
+            }
+
+            return modelResponse;
+        }
+
+        // Obtener token de recuperación para validación
+        public ModelResponse ObtenerTokenRecuperacion(string token)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var result = GetObject("ObtenerTokenRecuperacion", CommandType.StoredProcedure,
+                    new[] {
+                new SqlParameter("@Token", token)
+                    },
+                    new Func<IDataReader, dynamic>((reader) =>
+                    {
+                        return new
+                        {
+                            Id = MapearPorpiedades<long>(reader["Id"]),
+                            UsuarioId = MapearPorpiedades<long>(reader["UsuarioId"]),
+                            Token = MapearPorpiedades<string>(reader["Token"]),
+                            FechaExpiracion = MapearPorpiedades<DateTime>(reader["FechaExpiracion"]),
+                            Usado = MapearPorpiedades<bool>(reader["Usado"]),
+                            Nombre = MapearPorpiedades<string>(reader["Nombre"]),
+                            Apellido = MapearPorpiedades<string>(reader["Apellido"]),
+                            Correo = MapearPorpiedades<string>(reader["Correo"]),
+                            NombreUsuario = MapearPorpiedades<string>(reader["NombreUsuario"])
+                        };
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = result;
+                modelResponse.Message = "Token obtenido correctamente";
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+                modelResponse.Response = null;
+            }
+
+            return modelResponse;
+        }
+
+        // Actualizar token como usado
+        public ModelResponse ActualizarTokenUsado(long id, string modificadoPor)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                ExecuteNonQuery("ActualizarTokenUsado", CommandType.StoredProcedure, new SqlParameter[]
+                {
+            new SqlParameter("@Id", id),
+            new SqlParameter("@ModificadoPor", modificadoPor),
+            new SqlParameter("@FechaModificacion", DateTime.Now)
+                });
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Message = "Token actualizado correctamente";
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+
+            return modelResponse;
+        }
+        public ModelResponse ActualizarContrasena(Usuario usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                // Validaciones
+                if (usuario.Id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
+                if (usuario.Contrasena.Length < 6) { throw new ArgumentException("La contraseña debe tener al menos 6 caracteres."); }
+                if (string.IsNullOrWhiteSpace(usuario.ModificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
+
+                var result = ExecuteScalar("ActualizarContrasena", CommandType.StoredProcedure, new SqlParameter[]
+                {
+            new SqlParameter("@Id", usuario.Id),
+            new SqlParameter("@Contrasena", usuario.Contrasena),
+            new SqlParameter("@ModificadoPor", usuario.ModificadoPor),
+            new SqlParameter("@FechaModificacion", usuario.FechaModificacion ?? DateTime.Now)
+                });
+
+                long idActualizado = Convert.ToInt64(result);
+
+                if (idActualizado > 0)
+                {
+                    modelResponse.IsSuccess = true;
+                    modelResponse.Message = "Contraseña actualizada correctamente";
+                    modelResponse.Response = idActualizado;
+                }
+                else
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo actualizar la contraseña. El usuario no existe o está inactivo.";
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al actualizar la contraseña";
+            }
+
+            return modelResponse;
+        }
     }
 }
