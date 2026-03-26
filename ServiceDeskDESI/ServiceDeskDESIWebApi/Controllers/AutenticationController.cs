@@ -154,7 +154,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="token">Token GUID</param>
         /// <returns>Información del token y usuario</returns>
-        [HttpGet, Route("validar-token/{token}")]
+        [HttpGet, Route("validarToken/{token}")]
         public ModelResponse ValidarTokenRecuperacion(string token)
         {
             var result = dbWrapper.ObtenerTokenRecuperacion(token);
@@ -166,7 +166,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="request">Objeto con token y nueva contraseña</param>
         /// <returns>Resultado de la operación</returns>
-        [HttpPost, Route("restablecer-contrasenia")]
+        [HttpPost, Route("restablecerContrasenia")]
         public ModelResponse RestablecerContrasenia(RestablecerContraseniaRequest request)
         {
             var modelResponse = new ModelResponse();

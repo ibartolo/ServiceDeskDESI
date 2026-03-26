@@ -6,6 +6,7 @@ using ServiceDeskDESIMVC.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -23,6 +24,12 @@ namespace ServiceDeskDESIMVC.Controllers
         [Autenticated]
         public ActionResult Index()
         {
+            return View();
+        }
+        [NoAutenticated]
+        public ActionResult RecoverPassword(string id)
+        {
+            ViewBag.Token = id;
             return View();
         }
 
@@ -82,6 +89,25 @@ namespace ServiceDeskDESIMVC.Controllers
 
             return JsonConvert.SerializeObject(mr);
         }
+
+        public async Task<string> ValidarToken(string id)
+        { 
+            var response = await httpClientConnection.ValidarTokenRecuperacion(id);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> RestablecerContrasenia(string token, string nuevaContrasena)
+        {
+            var response = await httpClientConnection.RestablecerContrasenia(token, Cryptography.Encrypt(nuevaContrasena));
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ValidarRecetearContrasenia(Usuario usuario)
+        {
+            var response = await httpClientConnection.ValidarRecetearContrasenia(usuario);
+            return JsonConvert.SerializeObject(response);
+        }
+
         #endregion
     }
 }

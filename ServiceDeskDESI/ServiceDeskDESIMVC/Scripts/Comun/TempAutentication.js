@@ -104,9 +104,9 @@
         Swal.fire({
             title: 'Recuperar Contraseña',
             html: `
-                        <p>Ingrese su correo electrónico para recibir instrucciones:</p>
-                        <input type="email" id="resetEmail" class="form-control mt-3" placeholder="correo@ejemplo.com">
-                    `,
+            <p>Ingresa tu nombre de usuario para recibir instrucciones:</p>
+            <input type="text" id="resetEmail" class="form-control mt-3" placeholder="juan.perez">
+        `,
             icon: 'info',
             confirmButtonText: 'Enviar',
             cancelButtonText: 'Cancelar',
@@ -114,19 +114,47 @@
             confirmButtonColor: '#4e73df',
             cancelButtonColor: '#e74a3b',
             preConfirm: () => {
-                const email = document.getElementById('resetEmail').value;
-                if (!email) {
-                    Swal.showValidationMessage('Por favor, ingrese un correo electrónico');
+                const nombreUsuario = document.getElementById('resetEmail').value;
+                if (!nombreUsuario) {
+                    Swal.showValidationMessage('Por favor, ingrese su nombre de usuario');
                 }
-                return email;
+                return nombreUsuario;
             }
         }).then((result) => {
             if (result.isConfirmed) {
+                const nombreUsuario = result.value;
+
                 Swal.fire({
-                    title: 'Correo Enviado',
-                    text: `Se han enviado instrucciones a ${result.value}`,
-                    icon: 'success',
-                    confirmButtonColor: '#4e73df'
+                    title: 'Enviando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                var usuario = {
+                    NombreUsuario: nombreUsuario
+                };
+
+                PostMVC('/Home/ValidarRecetearContrasenia', usuario, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        Swal.fire({
+                            title: 'Correo Enviado',
+                            text: response.Message,
+                            icon: 'success',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
                 });
             }
         });
