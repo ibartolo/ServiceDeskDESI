@@ -12,5 +12,6 @@ namespace ServiceDeskDESIEntities.Seguridad
         public long UserID { get; set; }
         public string UserName { get; set; }
         public string ProfileImage { get; set; }
+        public string UserAvatar { get; set; }
     }
 }

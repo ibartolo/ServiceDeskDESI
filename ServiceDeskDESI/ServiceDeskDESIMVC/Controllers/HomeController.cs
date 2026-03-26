@@ -64,7 +64,8 @@ namespace ServiceDeskDESIMVC.Controllers
                             Token = token,
                             UserID = usuarioAutenticado.Id,
                             UserName = user,
-                            ProfileImage = usuarioAutenticado.ImagenPerfil
+                            ProfileImage = usuarioAutenticado.ImagenPerfil,
+                            UserAvatar = GenerarAvatarIniciales(usuarioAutenticado.NombreUsuario)
                         };
 
                         SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
@@ -90,6 +91,22 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(mr);
         }
 
+        [Autenticated]
+        public ActionResult LogOut()
+        {
+            SessionHelper.CloseSession();
+            if (Request.Cookies["ConfigMenu"] != null)
+            {
+                var c = new HttpCookie("ConfigMenu")
+                {
+                    Expires = DateTime.Now.AddDays(-1)
+                };
+                Response.Cookies.Add(c);
+            }
+
+            return RedirectToAction("Autentication");
+        }
+
         public async Task<string> ValidarToken(string id)
         { 
             var response = await httpClientConnection.ValidarTokenRecuperacion(id);
@@ -109,5 +126,30 @@ namespace ServiceDeskDESIMVC.Controllers
         }
 
         #endregion
+
+        public string GenerarAvatarIniciales(string nombreUsuario)
+        {
+            if (string.IsNullOrWhiteSpace(nombreUsuario))
+                return "??";
+
+            // Expresión regular para obtener las iniciales
+            var regex = new System.Text.RegularExpressions.Regex(@"^([a-zA-Z])[a-zA-Z]*\.?([a-zA-Z])");
+            var match = regex.Match(nombreUsuario);
+
+            if (match.Success && match.Groups.Count > 2)
+            {
+                string primera = match.Groups[1].Value.ToUpper();
+                string segunda = match.Groups[2].Value.ToUpper();
+                return $"{primera}{segunda}";
+            }
+
+            // Si no encuentra el patrón con punto, toma primera y última letra
+            if (nombreUsuario.Length >= 2)
+            {
+                return $"{nombreUsuario[0].ToString().ToUpper()}{nombreUsuario[1].ToString().ToUpper()}";
+            }
+
+            return nombreUsuario.Length == 1 ? nombreUsuario.ToUpper() : "??";
+        }
     }
 }
