@@ -27,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// Obtiene todos los usuarios activos
         /// </summary>
         /// <returns>Lista de usuarios con sus sucursales y áreas</returns>
-        [HttpGet, Route("Lista")]
+        [HttpGet, Route("User/Lista")]
         public ModelResponse ObtenerUsuarios()
         {
             var result = dbWrapper.ObtenerUsuarios();
@@ -39,7 +39,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="id">ID del usuario</param>
         /// <returns>Usuario encontrado</returns>
-        [HttpGet, Route("{id:long}")]
+        [HttpGet, Route("User/{id:long}")]
         public ModelResponse ObtenerUsuarioPorId(long id)
         {
             var result = dbWrapper.ObtenerUsuarioPorId(id);
@@ -51,7 +51,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="u">Objeto usuario con los datos</param>
         /// <returns>Usuario guardado con su ID actualizado</returns>
-        [HttpPost, Route("")]
+        [HttpPost, Route("User")]
         public ModelResponse GuardarOActualizarUsuario(Usuario u)
         {
             var result = dbWrapper.GuardarOActualizarUsuario(u);
@@ -63,7 +63,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="u">Usuario a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
-        [HttpDelete, Route("")]
+        [HttpDelete, Route("User")]
         public ModelResponse EliminarUsuario(Usuario u)
         {
             u.FechaModificacion = DateTime.Now;

@@ -12,55 +12,52 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> AutenticarUsuario(Usuario usuario)
+        public async Task<ModelResponse> ObtenerUsuarioPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Autentication/autenticar", HttpMethod.Post, usuario,
+            var result = await RequestAsync<object>($"api/Autentication/User/{id}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
-                })); // No necesita token porque es el login
+                }), token.Token.access_token);
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
 
             return modelResponse;
         }
-        public async Task<ModelResponse> ValidarTokenRecuperacion(string token)
+
+        public async Task<ModelResponse> GuardarOActualizarUsuario(Usuario usuario)
         {
-            var result = await RequestAsync<object>($"api/Autentication/validarToken/"+ token, HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Autentication/User", HttpMethod.Post, usuario,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
-                })); // No necesita token porque es el login
+                }), token.Token.access_token);
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
 
             return modelResponse;
         }
-        public async Task<ModelResponse> RestablecerContrasenia(string token, string nuevaContrasena)
-        {
-            var request = new
-            {
-                Token = token,
-                NuevaContrasena = nuevaContrasena
-            };
 
-            var result = await RequestAsync<object>($"api/Autentication/restablecerContrasenia", HttpMethod.Post, request,
+        public async Task<ModelResponse> ActualizarContrasena(Usuario usuario)
+        {
+            var result = await RequestAsync<object>($"api/Autentication/actualizar-contrasena", HttpMethod.Post, usuario,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
-                }));
+                }), token.Token.access_token);
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
 
             return modelResponse;
         }
-        public async Task<ModelResponse> ValidarRecetearContrasenia(Usuario usuario)
+
+        public async Task<ModelResponse> ObtenerSucursales()
         {
-            var result = await RequestAsync<object>($"api/Autentication/ValidarRecetearContrasenia", HttpMethod.Post, usuario,
+            var result = await RequestAsync<object>($"api/Catalogs/obtener-sucursales", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
-                }));
+                }), token.Token.access_token);
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
 
