@@ -126,5 +126,16 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.EliminarCategoria(categoria.Id, categoria.ModificadoPor, categoria.FechaModificacion.Value);
             return result;
         }
+
+        /// <summary>
+        /// Obtiene todas las categorías con jerarquía (ordenadas: padres primero, luego hijas)
+        /// </summary>
+        /// <returns>Lista de categorías ordenadas jerárquicamente</returns>
+        [HttpGet, Route("Categoria/List")]
+        public ModelResponse ObtenerCategorias()
+        {
+            var result = dbWrapper.ObtenerCategorias();
+            return result;
+        }
     }
 }

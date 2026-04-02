@@ -252,5 +252,47 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+        public ModelResponse ObtenerCategorias()
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var categorias = GetObjects("ObtenerCategorias", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                    new Func<IDataReader, Categoria>((reader) =>
+                    {
+                        var categoria = LlenarEntidad<Categoria>(reader);
+
+                        categoria.Area = new Area()
+                        {
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
+                        };
+
+                        if (reader["CategoriaPadreId"] != DBNull.Value)
+                        {
+                            categoria.CategoriaPadre = new Categoria()
+                            {
+                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"]),
+                                Nombre = MapearPorpiedades<string>(reader["CategoriaPadreNombre"])
+                            };
+                        }
+
+                        return categoria;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = categorias;
+                modelResponse.Message = "Categorías obtenidas correctamente";
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener las categorías";
+            }
+
+            return modelResponse;
+        }
     }
 }

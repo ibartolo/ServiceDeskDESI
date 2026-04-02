@@ -288,6 +288,11 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await httpClientConnection.ObtenerCategoriasPorArea(id);
             return JsonConvert.SerializeObject(response);
         }
+        public async Task<string> ConsultarTodasCategorias()
+        {
+            var response = await httpClientConnection.ObtenerCategorias();
+            return JsonConvert.SerializeObject(response);
+        }
         #endregion
 
     }
