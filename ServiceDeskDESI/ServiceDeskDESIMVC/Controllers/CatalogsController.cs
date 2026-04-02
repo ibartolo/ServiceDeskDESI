@@ -89,6 +89,49 @@ namespace ServiceDeskDESIMVC.Controllers
             public string NuevaContrasena { get; set; }
         }
 
+        public async Task<ActionResult> Category(long id = 0)
+        {
+            var categoria = new Categoria();
+
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerCategoriaPorId(id);
+
+                if (response.IsSuccess && response.Response != null)
+                {
+                    categoria = JsonConvert.DeserializeObject<Categoria>(response.Response.ToString());
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+
+            // Cargar áreas para el dropdown
+            var areasResponse = await httpClientConnection.ObtenerAreas();
+            if (areasResponse.IsSuccess && areasResponse.Response != null)
+            {
+                ViewBag.Areas = areasResponse.Response;
+            }
+
+            // Cargar categorías padres para el dropdown (solo categorías principales)
+            if (ViewBag.Areas != null)
+            {
+                var areaId = categoria.Area?.Id ?? 0;
+                if (areaId > 0)
+                {
+                    var categoriasResponse = await httpClientConnection.ObtenerCategoriasPorArea(areaId);
+                    if (categoriasResponse.IsSuccess && categoriasResponse.Response != null)
+                    {
+                        var categorias = JsonConvert.DeserializeObject<List<Categoria>>(categoriasResponse.Response.ToString());
+                        ViewBag.CategoriasPadre = categorias.Where(x => x.CategoriaPadre == null).ToList();
+                    }
+                }
+            }
+
+            return View(categoria);
+        }
+
         #endregion
 
         #region Data Access
@@ -163,8 +206,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 return JsonConvert.SerializeObject(modelResponse);
             }
         }
-
-        public async Task<string> CambiarContrasena([FromBody] CambioContrasenaRequest request)
+        public async Task<string> CambiarContrasena(CambioContrasenaRequest request)
         {
             var modelResponse = new ModelResponse();
 
@@ -211,6 +253,40 @@ namespace ServiceDeskDESIMVC.Controllers
                 modelResponse.Message = "Ocurrió un error al cambiar la contraseña";
                 return JsonConvert.SerializeObject(modelResponse);
             }
+        }
+        public async Task<string> GuardarOActualizarCategoria(Categoria categoria)
+        {
+            var tokenCookie = SessionHelper.GetSessionUser();
+
+            if (categoria.Id == 0)
+            {
+                categoria.CreadoPor = tokenCookie?.UserName ?? "system";
+                categoria.FechaCreacion = DateTime.Now;
+            }
+            else
+            {
+                categoria.ModificadoPor = tokenCookie?.UserName ?? "system";
+                categoria.FechaModificacion = DateTime.Now;
+            }
+            categoria.Estatus = true;
+
+            var response = await httpClientConnection.GuardarOActualizarCategoria(categoria);
+            return JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> EliminarCategoria(Categoria categoria)
+        {
+            var tokenCookie = SessionHelper.GetSessionUser();
+
+            categoria.ModificadoPor = tokenCookie?.UserName ?? "system";
+            categoria.FechaModificacion = DateTime.Now;
+
+            var response = await httpClientConnection.EliminarCategoria(categoria);
+            return JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarTodasCategoriasPorArea(long id)
+        {
+            var response = await httpClientConnection.ObtenerCategoriasPorArea(id);
+            return JsonConvert.SerializeObject(response);
         }
         #endregion
 

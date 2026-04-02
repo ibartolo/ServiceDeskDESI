@@ -24,7 +24,6 @@ namespace ServiceDeskDESIMVC.DAL
 
             return modelResponse;
         }
-
         public async Task<ModelResponse> ObtenerAreaPorId(long id)
         {
             var result = await RequestAsync($"api/Catalogs/Area/{id}", HttpMethod.Get, null,
@@ -35,7 +34,6 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result);
             return modelResponse;
         }
-
         public async Task<ModelResponse> GuardarOActualizarArea(Area a)
         {
             MappingColumSecurity(a);

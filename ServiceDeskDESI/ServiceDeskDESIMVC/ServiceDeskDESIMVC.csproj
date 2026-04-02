@@ -145,7 +145,8 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
     <Compile Include="DAL\HttpClientConnection.Autentication.cs" />
-    <Compile Include="DAL\HttpClientConnection.Catalogs.cs" />
+    <Compile Include="DAL\HttpClientConnection.Area.cs" />
+    <Compile Include="DAL\HttpClientConnection.Categoria.cs" />
     <Compile Include="DAL\HttpClientConnection.Compania.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
     <Compile Include="DAL\HttpClientConnection.User.cs" />
@@ -170,6 +171,7 @@
     <Content Include="Views\Home\RecoverPassword.cshtml" />
     <Content Include="Views\User\MyProfile.cshtml" />
     <Content Include="Views\User\PartialChangePass.cshtml" />
+    <Content Include="Views\Catalogs\Category.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
