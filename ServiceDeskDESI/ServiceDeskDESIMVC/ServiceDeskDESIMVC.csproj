@@ -160,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
+    <Content Include="Content\datatables\i18n\es-ES.json" />
     <None Include="packages.config" />
     <Content Include="Views\Home\Autentication.cshtml" />
     <Content Include="Views\_ViewStart.cshtml" />

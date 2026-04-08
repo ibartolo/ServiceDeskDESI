@@ -28,6 +28,7 @@
         @Html.HiddenFor(x => x.ModificadoPor)
         @Html.HiddenFor(x => x.FechaModificacion)
         @Html.HiddenFor(x => x.Estatus)
+        @Html.HiddenFor(x => x.CategoriaPadre.Id)
 
         <div class="row">
             <div class="col-md-4">
@@ -123,7 +124,7 @@
                 }
             ],
             language: {
-                url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                url: "/Content/datatables/i18n/es-ES.json"
             }
         });
 
@@ -200,18 +201,22 @@
                     ddl.append('<option value="">Sin categoría padre</option>');
 
                     // Filtrar por área y solo categorías principales (sin padre)
-                    var categoriasFiltradas = todasCategorias.filter(function (c) {
-                        return c.Area.Id === parseInt(areaId) && c.CategoriaPadre === null;
-                    });
+                    //var categoriasFiltradas = todasCategorias.filter(function (c) {
+                    //    return c.Area.Id === parseInt(areaId) && c.CategoriaPadre === null;
+                    //});
 
                     // Ordenar por Orden
-                    categoriasFiltradas.sort(function (a, b) {
+                    todasCategorias.sort(function (a, b) {
                         return a.Orden - b.Orden;
                     });
 
-                    categoriasFiltradas.forEach(function (c) {
+                    todasCategorias.forEach(function (c) {
                         ddl.append('<option value="' + c.Id + '">' + c.Nombre + '</option>');
                     });
+
+                    if ($("#CategoriaPadre_Id").val() != '') {
+                        ddl.val($("#CategoriaPadre_Id").val());
+                    }
                 }
             });
         } else {
