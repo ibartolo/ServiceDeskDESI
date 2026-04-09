@@ -8,6 +8,15 @@
 <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
 
 <div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
     <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Compania</h3>
     <form enctype="multipart/form-data" id="frmCompania" name="frmCompania" method="post">
         @Html.HiddenFor(x => x.Id)
@@ -58,12 +67,10 @@
         <div class="row">
             <div class="col-md-12 table-responsive">
                 <div class="mb-3">
-                    <table id="tblCompania">
-
-                    </table>
+                    <table id="tblCompania"></table>
                 </div>
             </div>
-        </div>                     
+        </div>
     </form>
 </div>
 
@@ -123,22 +130,165 @@
 
 
     $(document).ready(function () {
-        var tabla = new DataTable('#tblCompany', {
+        var tabla = new DataTable('#tblCompania', {
             columns: [
-                { data: 'Id', title: 'ID' },
+                { data: 'Id', title: 'ID', visible: false },
                 { data: 'Nombre', title: 'Nombre' },
                 { data: 'Acronimo', title: 'Acronimo' },
-                { data: 'Direccion', title: 'Direccion' }
+                { data: 'Direccion', title: 'Direccion' },
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        return '<div class="d-flex gap-3">' +
+                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarCompania(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarCompania(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '</div>';
+                    }
+                    
+                },
+                { data: 'Estatus', title: 'Estatus', visible: false }
             ]
         });
-        ObtenerCompanias();
+        ConsultarTodasCompanias();
     });
     function GuardarActualizarCompania() {
-        if ($("#frmCompania").valid()) {}
+        if ($("#frmCompania").valid()) {
+            Swal.fire({
+                title: 'Guardando...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            var compania = {
+                Id: $("#Id").val() || 0,
+                Nombre: $("#Nombre").val(),
+                Acronimo: $("#Acronimo").val(),
+                RFC: $("#RFC").val(),
+                Direccion: $("#Direccion").val(),
+                CreadoPor: $("#CreadoPor").val(),
+                FechaCreacion: new Date().toISOString(),
+                ModificadoPor: $("#ModificadoPor").val() || null,
+                FechaModificacion: null,
+                Estatus: true
+            };
+
+            PostMVC('/Catalogs/GuardarOActualizarCompanias', compania, function (response) {
+
+                Swal.close();
+
+                if (response.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    }).then(() => {
+                        window.location.href = '/Catalogs/Company';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
+
+        }
+        
     }
 
-    //function ConsultarTodasCompanias() {
-    //    GetMVC("/Catalogs/")
-    //}
+    function ConsultarTodasCompanias() {
+        GetMVC("/Catalogs/ConsultarTodasLasCompanias", function (r) {
+            var result = typeof r == 'string' ? JSON.parse(r) : r;
+
+            if (result.IsSuccess) {
+                MapingPropertiesDataTable("tblCompania", result.Response);
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: result.Message,
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+
+    function EditarCompania(id) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.location.href = '/Catalogs/Company' + id;
+    }
+
+    function EliminarCompania(event, id) {
+        event.preventDefault();
+        event.stopPropagation();
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Esta acción eliminará lógicamente el registro',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                var compania = {
+                    Id: id,
+                    ModificadoPor: $("#ModificadoPor").val() || "system",
+                    FechaModificacion: new Date().toISOString()
+                };
+                PostMVC('/Catalogs/EliminarCompanias', compania, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: response.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            ConsultarTodasCompanias();
+                                });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: response.Message,
+                                icon: 'error',
+                                confirmButtonText: 'Aceptar',
+                                background: 'white',
+                                confirmButtonColor: '#4e73df'
+                            });
+                        }
+                    });
+                }
+            });
+
+        return false;
+    }
+    
 
 </script>

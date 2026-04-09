@@ -12,25 +12,25 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodasCompanias(string token)
+        public async Task<ModelResponse> ObtenerTodasCompanias()
         {
-            var result = await RequestAsync<object>("api/compania/List", HttpMethod.Get, null,
+            var result = await RequestAsync($"api/compania/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
-                }), token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+                }), token.Token.access_token);
+            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result);
             return modelresponse;
         }
 
         public async Task<ModelResponse> GuardarActualizarCompania(Compania c)
         {
-           var result = await RequestAsync<object>("api/compania/Guardar", HttpMethod.Get, null,
+            MappingColumSecurity(c);
+           var result = await RequestAsync<object>($"api/compania/Guardar", HttpMethod.Post, c,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
-                }));
-
+                }), token.Token.access_token);
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
@@ -46,6 +46,18 @@ namespace ServiceDeskDESIMVC.DAL
 
             return modelResponse;
 
+        }
+
+        public async Task<ModelResponse> EliminarCompania(Compania c )
+        {
+            MappingColumSecurity(c);
+            var result = await RequestAsync<object>($"api/compania/Compania", HttpMethod.Delete, c,
+                new Func<string, string>((responseString) =>
+               {
+                   return responseString;
+               }), token.Token.access_token);
+            var modelreponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelreponse;
         }
 
     }

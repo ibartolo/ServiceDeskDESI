@@ -11,13 +11,13 @@ using System.Web.Http;
 namespace ServiceDeskDESIWebApi.Controllers
 {
     [RoutePrefix("api/compania")]
-    public class CompaniaController : ApiController
+    public class CompaniaController : BaseController
     {
-        private DbWrapper dbWrapper;
-        public CompaniaController()
-        {
-            dbWrapper = new DbWrapper();
-        }
+        //private DbWrapper dbWrapper;
+        //public CompaniaController()
+        //{
+        //    dbWrapper = new DbWrapper();
+        //}
 
         [HttpGet, Route("List")]
         public ModelResponse ObtenerCompania()
@@ -39,11 +39,11 @@ namespace ServiceDeskDESIWebApi.Controllers
             return result;
         }
 
-        [HttpDelete, Route("")]
+        [HttpDelete, Route("Compania")]
         public ModelResponse EliminarCompania(Compania c)
         {
             c.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarCompania(c.Id, c.ModificadoPor, c.FechaModificacion.Value);
+            var result = dbWrapper.EliminarCompania(c);
             return result;
         }
 
