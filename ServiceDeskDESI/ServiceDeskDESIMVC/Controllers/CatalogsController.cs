@@ -35,10 +35,22 @@ namespace ServiceDeskDESIMVC.Controllers
             return View(area);
         }
 
-        public ActionResult Company(long id = 0)
+        public async Task<ActionResult> Company(long id = 0)
         {
             var compania = new Compania();
-            return View(compania);
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerCompaniaPorId(id);
+                if (response.IsSuccess && response.Response !=null)
+                {
+                    compania = JsonConvert.DeserializeObject<Compania>(response.Response.ToString());
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+                return View(compania);
         }
 
         #endregion
@@ -62,6 +74,27 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> EliminarArea(Area a)
         {
             var response = await httpClientConnection.EliminarArea(a);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ConsultarTodasLasCompanias()
+        {
+            var response = await httpClientConnection.ObtenerTodasCompanias();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarCompaniasPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerCompaniaPorId(id);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string>GuardarOActualizarCompanias(Compania c)
+        {
+            var response = await httpClientConnection.GuardarActualizarCompania(c);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string>EliminarCompanias(Compania c)
+        {
+            var response = await httpClientConnection.EliminarCompania(c);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         #endregion
