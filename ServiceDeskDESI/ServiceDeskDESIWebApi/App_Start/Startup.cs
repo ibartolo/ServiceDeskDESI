@@ -63,7 +63,7 @@ namespace ServiceDeskDESIWebApi.App_Start
             {
                 AllowInsecureHttp = true,
                 TokenEndpointPath = new PathString("/token"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromDays(1),
+                AccessTokenExpireTimeSpan = TimeSpan.FromHours(6),
                 Provider = new SimpleAuthorizationServerProvider()
             };
 

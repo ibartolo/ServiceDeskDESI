@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using ServiceDeskDESIEntities.Catalogos;
+using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
@@ -12,50 +12,55 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerAreas()
+        public async Task<ModelResponse> ObtenerUsuarioPorId(long id)
         {
-            var result = await RequestAsync($"api/Catalogs/Area/Lista", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Autentication/User/{id}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
 
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result);
-
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse> ObtenerAreaPorId(long id)
-        {
-            var result = await RequestAsync($"api/Catalogs/Area/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result);
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse> GuardarOActualizarArea(Area a)
-        {
-            MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/Catalogs/Area", HttpMethod.Post, a,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+
             return modelResponse;
         }
-        public async Task<ModelResponse> EliminarArea(Area a)
+
+        public async Task<ModelResponse> GuardarOActualizarUsuario(Usuario usuario)
         {
-            MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/Catalogs/Area", HttpMethod.Delete, a,
+            var result = await RequestAsync<object>($"api/Autentication/User", HttpMethod.Post, usuario,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> ActualizarContrasena(Usuario usuario)
+        {
+            var result = await RequestAsync<object>($"api/Autentication/actualizar-contrasena", HttpMethod.Post, usuario,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> ObtenerSucursales()
+        {
+            var result = await RequestAsync<object>($"api/Catalogs/obtener-sucursales", HttpMethod.Get, null,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+
             return modelResponse;
         }
     }

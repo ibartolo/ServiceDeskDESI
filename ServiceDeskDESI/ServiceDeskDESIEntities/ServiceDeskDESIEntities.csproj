@@ -44,6 +44,7 @@
     <Compile Include="Autenticacion\Usuario.cs" />
     <Compile Include="BaseObject.cs" />
     <Compile Include="Catalogos\Area.cs" />
+    <Compile Include="Catalogos\Categoria.cs" />
     <Compile Include="Catalogos\Compania.cs" />
     <Compile Include="Catalogos\Sucursal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

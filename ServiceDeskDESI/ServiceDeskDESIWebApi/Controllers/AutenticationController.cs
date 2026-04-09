@@ -27,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// Obtiene todos los usuarios activos
         /// </summary>
         /// <returns>Lista de usuarios con sus sucursales y áreas</returns>
-        [HttpGet, Route("Lista")]
+        [HttpGet, Route("User/Lista")]
         public ModelResponse ObtenerUsuarios()
         {
             var result = dbWrapper.ObtenerUsuarios();
@@ -39,7 +39,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="id">ID del usuario</param>
         /// <returns>Usuario encontrado</returns>
-        [HttpGet, Route("{id:long}")]
+        [HttpGet, Route("User/{id:long}")]
         public ModelResponse ObtenerUsuarioPorId(long id)
         {
             var result = dbWrapper.ObtenerUsuarioPorId(id);
@@ -51,7 +51,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="u">Objeto usuario con los datos</param>
         /// <returns>Usuario guardado con su ID actualizado</returns>
-        [HttpPost, Route("")]
+        [HttpPost, Route("User")]
         public ModelResponse GuardarOActualizarUsuario(Usuario u)
         {
             var result = dbWrapper.GuardarOActualizarUsuario(u);
@@ -63,7 +63,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="u">Usuario a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
-        [HttpDelete, Route("")]
+        [HttpDelete, Route("User")]
         public ModelResponse EliminarUsuario(Usuario u)
         {
             u.FechaModificacion = DateTime.Now;
@@ -154,7 +154,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="token">Token GUID</param>
         /// <returns>Información del token y usuario</returns>
-        [HttpGet, Route("validar-token/{token}")]
+        [HttpGet, Route("validarToken/{token}")]
         public ModelResponse ValidarTokenRecuperacion(string token)
         {
             var result = dbWrapper.ObtenerTokenRecuperacion(token);
@@ -166,7 +166,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="request">Objeto con token y nueva contraseña</param>
         /// <returns>Resultado de la operación</returns>
-        [HttpPost, Route("restablecer-contrasenia")]
+        [HttpPost, Route("restablecerContrasenia")]
         public ModelResponse RestablecerContrasenia(RestablecerContraseniaRequest request)
         {
             var modelResponse = new ModelResponse();
