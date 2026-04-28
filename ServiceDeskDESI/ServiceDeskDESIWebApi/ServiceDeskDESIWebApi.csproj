@@ -152,6 +152,8 @@
     <Compile Include="DAL\DbWrapper.Categoria.cs" />
     <Compile Include="DAL\DbWrapper.Compania.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
+    <Compile Include="DAL\DbWrapper.Marca.cs" />
+    <Compile Include="DAL\DbWrapper.Modelo.cs" />
     <Compile Include="DAL\DbWrapper.TipoActivo.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
