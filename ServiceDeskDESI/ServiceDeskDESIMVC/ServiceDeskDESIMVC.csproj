@@ -142,6 +142,7 @@
     <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\CompaniaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
     <Compile Include="DAL\HttpClientConnection.Autentication.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="DAL\HttpClientConnection.Categoria.cs" />
     <Compile Include="DAL\HttpClientConnection.Compania.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
+    <Compile Include="DAL\HttpClientConnection.Ticket.cs" />
     <Compile Include="DAL\HttpClientConnection.User.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -173,6 +175,7 @@
     <Content Include="Views\User\MyProfile.cshtml" />
     <Content Include="Views\User\PartialChangePass.cshtml" />
     <Content Include="Views\Catalogs\Category.cshtml" />
+    <Content Include="Views\Ticket\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

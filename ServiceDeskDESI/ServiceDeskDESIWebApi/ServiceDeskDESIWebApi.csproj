@@ -145,6 +145,7 @@
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\CompaniaController.cs" />
+    <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Activo.cs" />
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
@@ -155,6 +156,7 @@
     <Compile Include="DAL\DbWrapper.Marca.cs" />
     <Compile Include="DAL\DbWrapper.Modelo.cs" />
     <Compile Include="DAL\DbWrapper.TipoActivo.cs" />
+    <Compile Include="DAL\DbWrapper.Ticket.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

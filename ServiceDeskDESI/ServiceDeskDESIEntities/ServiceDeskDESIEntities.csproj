@@ -56,6 +56,7 @@
     <Compile Include="Seguridad\RestablecerContraseniaRequest.cs" />
     <Compile Include="Seguridad\Token.cs" />
     <Compile Include="Seguridad\TokenCookie.cs" />
+    <Compile Include="Tickets\Ticket.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
