@@ -1,10 +1,12 @@
-﻿﻿@model ServiceDeskDESIEntities.Autenticacion.Usuario
+﻿@model ServiceDeskDESIEntities.Catalogos.Area
 @{
-    ViewBag.Title = "Mi Perfil";
+    ViewBag.Title = "Area";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
 
 <div class="form-section">
     @if (ViewBag.ErrorMessage != null)
@@ -16,186 +18,84 @@
             </button>
         </div>
     }
-
-    <h3 class="section-title"><i class="fas fa-user-circle me-2"></i>Mi Perfil</h3>
-
-    <form enctype="multipart/form-data" id="frmPerfil" name="frmPerfil" method="post">
+    <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Areas de trabajo</h3>
+    <form enctype="multipart/form-data" id="frmArea" name="frmArea" method="post">
         @Html.HiddenFor(x => x.Id)
         @Html.HiddenFor(x => x.CreadoPor)
         @Html.HiddenFor(x => x.FechaCreacion)
         @Html.HiddenFor(x => x.ModificadoPor)
         @Html.HiddenFor(x => x.FechaModificacion)
         @Html.HiddenFor(x => x.Estatus)
-        @Html.HiddenFor(x => x.Contrasena)
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="mb-3">
-                    <label>Nombre de usuario:</label>
-                    @Html.TextBoxFor(x => x.NombreUsuario, new { @class = "form-control", placeholder = "Nombre de usuario", @readonly = "readonly", @disabled = "disabled" })
+                    <label>Nombre:</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre del área" })
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="mb-3">
-                    <label>Correo electrónico:</label>
-                    @Html.TextBoxFor(x => x.Correo, new { @class = "form-control", placeholder = "Correo electrónico", @disabled = "disabled" })
+                    <label>Descripción:</label>
+                    @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripción del área" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Correo:</label>
+                    @Html.TextBoxFor(x => x.Correo, new { @class = "form-control", placeholder = "Correo del área" })
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label>Nombre(s):</label>
-                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre(s)" })
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label>Apellidos:</label>
-                    @Html.TextBoxFor(x => x.Apellido, new { @class = "form-control", placeholder = "Apellidos" })
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label>Teléfono celular:</label>
-                    @Html.TextBoxFor(x => x.Celular, new { @class = "form-control", placeholder = "Teléfono celular" })
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label>RFC:</label>
-                    @Html.TextBoxFor(x => x.RFC, new { @class = "form-control", placeholder = "RFC" })
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label>Sucursal:</label>
-                    @Html.DropDownListFor(x => x.Sucursal.Id, new SelectList(ViewBag.Sucursales, "Id", "Nombre"), "Seleccione una sucursal", new { @class = "form-control" })
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label>Área:</label>
-                    @Html.DropDownListFor(x => x.Area.Id, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control" })
-                </div>
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <label>Imagen de perfil:</label>
-                    <div class="d-flex align-items-center gap-3">
-                        @if (!string.IsNullOrEmpty(Model.ImagenPerfil))
-                        {
-                            <img src="@Model.ImagenPerfil" alt="Foto de perfil" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;" id="imgPerfil" />
-                        }
-                        else
-                        {
-                            <div id="avatarIniciales" class="rounded-circle d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2rem; font-weight: bold;">
-                                @{
-                                    var iniciales = GenerarAvatarIniciales(Model.NombreUsuario);
-                                }
-                                @iniciales
-                            </div>
-                        }
-                        <input type="file" class="form-control" id="ImagenPerfil" name="ImagenPerfil" accept="image/*" />
-                    </div>
-                    <small class="text-muted">Formatos permitidos: JPG, PNG. Tamaño máximo: 2MB</small>
+                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarArea()" />
+                    <a href="/Catalogs/WorkArea" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
         </div>
-
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 table-responsive">
                 <div class="mb-3">
-                    <a href="#" class="btn btn-outline-info" onclick="CambiarContrasena()">
-                        <i class="fas fa-key"></i> Cambiar contraseña
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="mb-3">
-                    <input type="button" value="Guardar cambios" class="btn btn-success" onclick="GuardarPerfil()" />
-                    <a href="/Home/Index" class="btn btn-warning">Cancelar</a>
+                    <table id="tblArea">
+                    </table>
                 </div>
             </div>
         </div>
     </form>
 </div>
-
-<!-- Div oculto para el modal de cambio de contraseña -->
-<div id="modalCambioContrasena" style="display: none;">
-    <div class="text-start">
-        <div class="mb-3">
-            <label class="form-label">Contraseña actual</label>
-            <input type="password" id="contrasenaActual" class="form-control" placeholder="Ingrese su contraseña actual">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Nueva contraseña</label>
-            <input type="password" id="nuevaContrasena" class="form-control" placeholder="Ingrese nueva contraseña">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Confirmar contraseña</label>
-            <input type="password" id="confirmarContrasena" class="form-control" placeholder="Confirme su nueva contraseña">
-        </div>
-        <ul class="requisitos mt-2" style="font-size: 0.85rem;">
-            <li id="reqLongitud"><i class="fas fa-circle"></i> Mínimo 6 caracteres</li>
-            <li id="reqMayuscula"><i class="fas fa-circle"></i> Al menos una mayúscula</li>
-            <li id="reqMinuscula"><i class="fas fa-circle"></i> Al menos una minúscula</li>
-            <li id="reqNumero"><i class="fas fa-circle"></i> Al menos un número</li>
-            <li id="reqEspecial"><i class="fas fa-circle"></i> Al menos un carácter especial (!@#$%^&*)</li>
-        </ul>
-    </div>
-</div>
-
 <script>
     $(function () {
-        $("#frmPerfil").validate({
+        $("#frmArea").validate({
             rules: {
                 "Nombre": {
                     required: true,
-                    maxlength: 150
-                },
-                "Apellido": {
-                    required: true,
                     maxlength: 250
                 },
-                "Celular": {
+                "Descripcion": {
                     required: true,
-                    maxlength: 50
+                    maxlength: 500
                 },
-                "RFC": {
+                "Correo": {
                     required: true,
-                    maxlength: 50
+                    email: true,
+                    maxlength: 100
                 }
             },
             messages: {
                 "Nombre": {
-                    required: "El campo 'Nombre(s)' es requerido.",
-                    maxlength: "El nombre no puede superar los 150 caracteres."
+                    required: "El campo 'Nombre' es requerido.",
+                    maxlength: "El nombre no puede superar los 250 caracteres."
                 },
-                "Apellido": {
-                    required: "El campo 'Apellidos' es requerido.",
-                    maxlength: "Los apellidos no pueden superar los 250 caracteres."
+                "Descripcion": {
+                    required: "El campo 'Descripción' es requerido.",
+                    maxlength: "La descripción no puede superar los 500 caracteres."
                 },
-                "Celular": {
-                    required: "El campo 'Teléfono celular' es requerido.",
-                    maxlength: "El teléfono no puede superar los 50 caracteres."
-                },
-                "RFC": {
-                    required: "El campo 'RFC' es requerido.",
-                    maxlength: "El RFC no puede superar los 50 caracteres."
+                "Correo": {
+                    required: "El campo 'Correo' es requerido.",
+                    email: "Ingrese un correo electrónico válido.",
+                    maxlength: "El correo no puede superar los 100 caracteres."
                 }
             },
             errorElement: "span",
@@ -212,8 +112,29 @@
         });
     });
 
-    function GuardarPerfil() {
-        if ($("#frmPerfil").valid()) {
+    $(document).ready(function () {
+        var tabla = new DataTable('#tblArea', {
+            columns: [
+                { data: 'Id', title: 'ID', visible: false },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Descripcion', title: 'Descripción' },
+                { data: 'Correo', title: 'Correo' },
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        return '<div class="d-flex gap-3">' +
+                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarArea(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarArea(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '</div>';
+                    }
+                },
+                { data: 'Estatus', title: 'Estatus', visible: false }
+            ]
+        });
+        ConsultarTodasAreas();
+    });
+
+    function GuardarActualizarArea() {
+        if ($("#frmArea").valid()) {
             Swal.fire({
                 title: 'Guardando...',
                 text: 'Por favor espere',
@@ -223,29 +144,19 @@
                 }
             });
 
-            var usuario = {
+            var area = {
                 Id: $("#Id").val() || 0,
-                NombreUsuario: $("#NombreUsuario").val(),
-                Correo: $("#Correo").val(),
                 Nombre: $("#Nombre").val(),
-                Apellido: $("#Apellido").val(),
-                Celular: $("#Celular").val(),
-                RFC: $("#RFC").val(),
-                Sucursal: {
-                    Id: $("#Sucursal_Id").val()
-                },
-                Area: {
-                    Id: $("#Area_Id").val()
-                },
+                Descripcion: $("#Descripcion").val(),
+                Correo: $("#Correo").val(),
                 CreadoPor: $("#CreadoPor").val(),
-                FechaCreacion: $("#FechaCreacion").val(),
+                FechaCreacion: new Date().toISOString(),
                 ModificadoPor: $("#ModificadoPor").val() || null,
-                FechaModificacion: new Date().toISOString(),
-                Estatus: true,
-                Contrasena: $("#Contrasena").val()
+                FechaModificacion: null,
+                Estatus: true
             };
 
-            PostMVC('/Perfil/GuardarPerfil', usuario, function (response) {
+            PostMVC('/Catalogs/GuardarOActualizarArea', area, function (response) {
                 Swal.close();
 
                 if (response.IsSuccess) {
@@ -258,7 +169,7 @@
                         background: 'white',
                         iconColor: '#4e73df'
                     }).then(() => {
-                        window.location.href = '/Perfil/MiPerfil';
+                        window.location.href = '/Catalogs/WorkArea';
                     });
                 } else {
                     Swal.fire({
@@ -274,69 +185,49 @@
         }
     }
 
-    function CambiarContrasena() {
-        var modalHtml = $('#modalCambioContrasena').html();
+    function ConsultarTodasAreas() {
+        GetMVC("/Catalogs/ConsutlarTodasAreas", function (r) {
+            var result = typeof r === 'string' ? JSON.parse(r) : r;
+
+            if (result.IsSuccess) {
+                MapingPropertiesDataTable("tblArea", result.Response);
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: result.Message,
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+
+    function EditarArea(id) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        window.location.href = '/Catalogs/WorkArea/' + id;
+    }
+
+    function EliminarArea(event, id) {
+        event.preventDefault();
+        event.stopPropagation();
 
         Swal.fire({
-            title: 'Cambiar contraseña',
-            html: modalHtml,
-            icon: 'info',
-            confirmButtonText: 'Actualizar',
-            cancelButtonText: 'Cancelar',
+            title: '¿Está seguro?',
+            text: 'Esta acción eliminará lógicamente el registro',
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#4e73df',
-            cancelButtonColor: '#858796',
-            didOpen: () => {
-                $(document).on('keyup', '#nuevaContrasena', function() {
-                    const contrasena = $(this).val();
-                    const tieneLongitud = contrasena.length >= 6;
-                    const tieneMayuscula = /[A-Z]/.test(contrasena);
-                    const tieneMinuscula = /[a-z]/.test(contrasena);
-                    const tieneNumero = /[0-9]/.test(contrasena);
-                    const tieneEspecial = /[!@@#$%^&*]/.test(contrasena);
-
-                    actualizarRequisito('#reqLongitud', tieneLongitud);
-                    actualizarRequisito('#reqMayuscula', tieneMayuscula);
-                    actualizarRequisito('#reqMinuscula', tieneMinuscula);
-                    actualizarRequisito('#reqNumero', tieneNumero);
-                    actualizarRequisito('#reqEspecial', tieneEspecial);
-                });
-            },
-            preConfirm: () => {
-                const contrasenaActual = document.getElementById('contrasenaActual').value;
-                const nuevaContrasena = document.getElementById('nuevaContrasena').value;
-                const confirmarContrasena = document.getElementById('confirmarContrasena').value;
-
-                if (!contrasenaActual) {
-                    Swal.showValidationMessage('La contraseña actual es requerida');
-                    return false;
-                }
-                if (!nuevaContrasena) {
-                    Swal.showValidationMessage('La nueva contraseña es requerida');
-                    return false;
-                }
-                if (nuevaContrasena !== confirmarContrasena) {
-                    Swal.showValidationMessage('Las contraseñas no coinciden');
-                    return false;
-                }
-
-                const tieneLongitud = nuevaContrasena.length >= 6;
-                const tieneMayuscula = /[A-Z]/.test(nuevaContrasena);
-                const tieneMinuscula = /[a-z]/.test(nuevaContrasena);
-                const tieneNumero = /[0-9]/.test(nuevaContrasena);
-                //const tieneEspecial = /[!@@#$%^&*]/.test(nuevaContrasena);
-
-                if (!tieneLongitud || !tieneMayuscula || !tieneMinuscula || !tieneNumero || !tieneEspecial) {
-                    Swal.showValidationMessage('La nueva contraseña no cumple con los requisitos de seguridad');
-                    return false;
-                }
-
-                return { contrasenaActual, nuevaContrasena };
-            }
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796'
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({
-                    title: 'Actualizando...',
+                    title: 'Eliminando...',
                     text: 'Por favor espere',
                     allowOutsideClick: false,
                     didOpen: () => {
@@ -344,23 +235,26 @@
                     }
                 });
 
-                var data = {
-                    Id: $("#Id").val(),
-                    ContrasenaActual: result.value.contrasenaActual,
-                    NuevaContrasena: result.value.nuevaContrasena
+                var area = {
+                    Id: id,
+                    ModificadoPor: $("#ModificadoPor").val() || "system",
+                    FechaModificacion: new Date().toISOString()
                 };
 
-                PostMVC('/Perfil/CambiarContrasena', data, function (response) {
+                PostMVC('/Catalogs/EliminarArea', area, function (response) {
                     Swal.close();
 
                     if (response.IsSuccess) {
                         Swal.fire({
-                            title: '¡Contraseña actualizada!',
+                            title: '¡Eliminado!',
                             text: response.Message,
                             icon: 'success',
-                            confirmButtonText: 'Aceptar',
+                            timer: 1500,
+                            showConfirmButton: false,
                             background: 'white',
-                            confirmButtonColor: '#4e73df'
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            ConsultarTodasAreas();
                         });
                     } else {
                         Swal.fire({
@@ -375,31 +269,7 @@
                 });
             }
         });
-    }
 
-    function actualizarRequisito(elemento, isValid) {
-        const $el = $(elemento);
-        if (isValid) {
-            $el.removeClass('invalid').addClass('valid');
-            $el.html('<i class="fas fa-check-circle"></i> ' + $el.text().substring(1));
-        } else {
-            $el.removeClass('valid').addClass('invalid');
-            $el.html('<i class="fas fa-circle"></i> ' + $el.text().substring(1));
-        }
+        return false;
     }
-
-    $('#ImagenPerfil').on('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                if ($('#imgPerfil').length) {
-                    $('#imgPerfil').attr('src', e.target.result);
-                } else {
-                    $('#avatarIniciales').replaceWith('<img src="' + e.target.result + '" alt="Foto de perfil" class="rounded-circle" id="imgPerfil" style="width: 80px; height: 80px; object-fit: cover;" />');
-                }
-            }
-            reader.readAsDataURL(file);
-        }
-    });
 </script>
