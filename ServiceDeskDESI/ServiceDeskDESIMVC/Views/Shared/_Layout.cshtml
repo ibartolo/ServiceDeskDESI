@@ -29,6 +29,9 @@
     <link href="~/CSS/Comun/TemplateCalendario.css" rel="stylesheet" />-->
     <link href="~/CSS/Comun/TemplateTarjetas.css" rel="stylesheet" />
 
+    <!-- Nuevo CSS: estilos para módulos deshabilitados -->
+    <link href="~/CSS/Comun/TemplateDisabled.css" rel="stylesheet" />
+
     <!-- ========================================= -->
     <!-- SCRIPTS - jQuery primero, luego Bootstrap -->
     <!-- ========================================= -->
@@ -73,6 +76,27 @@
                 $parent.toggleClass('active');
 
                 console.log('Submenú toggled:', $parent.find('.menu-text').text());
+            });
+
+            // =========================================
+            // MARCAR ENLACES SIN REDIRECCIÓN COMO DESHABILITADOS
+            // =========================================
+            // Añade la clase `disabled-module` a todos los enlaces en .components con href="#".
+            // Para enlaces que NO son padres (.has-arrow) se evita el click y se añade aria-disabled.
+            $('.components a[href="#"]').each(function () {
+                var $a = $(this);
+                $a.addClass('disabled-module');
+
+                if (!$a.hasClass('has-arrow')) {
+                    // Marcar como realmente no accionable (legend/tooltip accesible)
+                    $a.attr('aria-disabled', 'true');
+                    $a.on('click.disabled', function (ev) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        // opcional: mostrar un tooltip o Swal indicando "Módulo en desarrollo"
+                        // Swal.fire('Módulo en desarrollo', '', 'info');
+                    });
+                }
             });
 
             // =========================================
@@ -157,10 +181,10 @@
                         <span class="menu-text">Tickets</span>
                     </a>
                     <ul>
-                        <li><a href="#"><i class="fas fa-list"></i> Ver Tickets</a></li>
-                        <li><a href="#"><i class="fas fa-plus"></i> Nuevo Ticket</a></li>
-                        <li><a href="#"><i class="fas fa-clock"></i> Pendientes</a></li>
-                        <li><a href="#"><i class="fas fa-check-circle"></i> Resueltos</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-list"></i> Ver Tickets</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-plus"></i> Nuevo Ticket</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-clock"></i> Pendientes</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-check-circle"></i> Resueltos</a></li>
                     </ul>
                 </li>
                 <li>
@@ -175,23 +199,23 @@
                         <span class="menu-text">Usuarios</span>
                     </a>
                     <ul>
-                        <li><a href="#"><i class="fas fa-user"></i> Agentes</a></li>
-                        <li><a href="#"><i class="fas fa-user-tie"></i> Administradores</a></li>
-                        <li><a href="#"><i class="fas fa-user-plus"></i> Nuevo Usuario</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-user"></i> Agentes</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-user-tie"></i> Administradores</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-user-plus"></i> Nuevo Usuario</a></li>
                     </ul>
                 </li>
                 <!--<li>
-        <a href="#" class="has-arrow">
-            <i class="fas fa-folder"></i>
-            <span class="menu-text">Categorías</span>
-        </a>
-        <ul>
-            <li><a href="#"><i class="fas fa-laptop"></i> Hardware</a></li>
-            <li><a href="#"><i class="fas fa-code"></i> Software</a></li>
-            <li><a href="#"><i class="fas fa-network-wired"></i> Redes</a></li>
-            <li><a href="#"><i class="fas fa-database"></i> Base de Datos</a></li>
-        </ul>
-    </li>-->
+                    <a href="#" class="has-arrow">
+                        <i class="fas fa-folder"></i>
+                        <span class="menu-text">Categorías</span>
+                    </a>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-laptop"></i> Hardware</a></li>
+                        <li><a href="#"><i class="fas fa-code"></i> Software</a></li>
+                        <li><a href="#"><i class="fas fa-network-wired"></i> Redes</a></li>
+                        <li><a href="#"><i class="fas fa-database"></i> Base de Datos</a></li>
+                    </ul>
+                </li>-->
                 <li>
                     <a href="#" class="has-arrow">
                         <i class="fas fa-book"></i>
@@ -200,24 +224,24 @@
                     <ul>
                         <li><a href="/Catalogs/Company"><i class="fas fa-building"></i> Compañías</a></li>
                         <li><a href="/Catalogs/WorkArea"><i class="fas fa-chart-simple"></i> Áreas</a></li>
-                        <li><a href="#"><i class="fas fa-store"></i> Sucursales</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-store"></i> Sucursales</a></li>
                         <li><a href="/Catalogs/Category"><i class="fas fa-folder-tree"></i> Categorías</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="#" class="disabled-module">
                         <i class="fas fa-calendar-alt"></i>
                         <span class="menu-text">Calendario</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="#" class="disabled-module">
                         <i class="fas fa-video"></i>
                         <span class="menu-text">Videos Tutoriales</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="#" class="disabled-module">
                         <i class="fas fa-chart-bar"></i>
                         <span class="menu-text">Reportes</span>
                     </a>
@@ -228,9 +252,9 @@
                         <span class="menu-text">Configuración</span>
                     </a>
                     <ul>
-                        <li><a href="#"><i class="fas fa-sliders-h"></i> General</a></li>
-                        <li><a href="#"><i class="fas fa-bell"></i> Notificaciones</a></li>
-                        <li><a href="#"><i class="fas fa-shield-alt"></i> Seguridad</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-sliders-h"></i> General</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-bell"></i> Notificaciones</a></li>
+                        <li><a href="#" class="disabled-module"><i class="fas fa-shield-alt"></i> Seguridad</a></li>
                     </ul>
                 </li>
             </ul>

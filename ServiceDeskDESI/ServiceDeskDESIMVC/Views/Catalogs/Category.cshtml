@@ -43,21 +43,21 @@
                     @Html.HiddenFor(x => x.CategoriaPadre.Id)
                 </div>
             </div>
-            <div class="col-md-4">
+            <!--<div class="col-md-4">
                 <div class="mb-3">
                     <label>Orden:</label>
                     @Html.TextBoxFor(x => x.Orden, new { @class = "form-control", placeholder = "Orden", type = "number" })
                 </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
+            </div>-->
+            <div class="col-md-4">
                 <div class="mb-3">
                     <label>Nombre:</label>
                     @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre de la categoría" })
                 </div>
             </div>
+        </div>
+
+        <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Descripción:</label>
@@ -110,7 +110,7 @@
                 { data: 'Descripcion', title: 'Descripción' },
                 { data: 'CategoriaPadre.Nombre', title: 'Categoría Padre', defaultContent: '---' },
                 { data: 'Area.Nombre', title: 'Área' },
-                { data: 'Orden', title: 'Orden' },
+                { data: 'Orden', title: 'Orden', visible: false },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
                         return '<div class="d-flex gap-3">' +

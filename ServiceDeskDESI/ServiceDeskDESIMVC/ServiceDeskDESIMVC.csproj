@@ -124,6 +124,7 @@
   <ItemGroup>
     <Content Include="CSS\Comun\TempAutentication.css" />
     <Content Include="CSS\Comun\TemplateCalendario.css" />
+    <Content Include="CSS\Comun\TemplateDisabled.css" />
     <Content Include="CSS\Comun\TemplateGraficas.css" />
     <Content Include="CSS\Comun\TemplatePage.css" />
     <Content Include="CSS\Comun\TemplateReciverPass.css" />
