@@ -134,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
+    <Content Include="Template\Template_RecuperarEmail.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -142,15 +143,28 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AutenticationController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\CompaniaController.cs" />
+    <Compile Include="Controllers\MarcaController.cs" />
+    <Compile Include="Controllers\ModeloController.cs" />
+    <Compile Include="Controllers\TicketController.cs" />
+    <Compile Include="Controllers\TipoActivoController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
+    <Compile Include="DAL\DbWrapper.Activo.cs" />
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
+    <Compile Include="DAL\DbWrapper.Area.cs" />
+    <Compile Include="DAL\DbWrapper.Categoria.cs" />
     <Compile Include="DAL\DbWrapper.Compania.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
+    <Compile Include="DAL\DbWrapper.Marca.cs" />
+    <Compile Include="DAL\DbWrapper.Modelo.cs" />
+    <Compile Include="DAL\DbWrapper.TipoActivo.cs" />
+    <Compile Include="DAL\DbWrapper.Ticket.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\Cryptography.cs" />
+    <Compile Include="Helpers\EmailHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,386 @@
+﻿﻿@model ServiceDeskDESIEntities.Catalogos.Categoria
+@{
+    ViewBag.Title = "Categorías";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    <h3 class="section-title"><i class="fas fa-folder-tree me-2"></i>Categorías</h3>
+    <form id="frmCategoria" name="frmCategoria" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
+        @Html.HiddenFor(x => x.CategoriaPadre.Id)
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Área:</label>
+                    @Html.DropDownListFor(x => x.Area.Id, new SelectList(ViewBag.Areas, "Id", "Nombre"), new { @class = "form-control", id = "ddlArea" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Categoría Padre:</label>
+                    <select id="ddlCategoriaPadre" class="form-control">
+                        <option value="">Sin categoria padre</option>
+                    </select>
+                    @Html.HiddenFor(x => x.CategoriaPadre.Id)
+                </div>
+            </div>
+            <!--<div class="col-md-4">
+                <div class="mb-3">
+                    <label>Orden:</label>
+                    @Html.TextBoxFor(x => x.Orden, new { @class = "form-control", placeholder = "Orden", type = "number" })
+                </div>
+            </div>-->
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Nombre:</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre de la categoría" })
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label>Descripción:</label>
+                    @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripción de la categoría" })
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarCategoria()" />
+                    <a href="/Catalogs/Category" class="btn btn-warning">Cancelar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <label>Filtrar por Área:</label>
+                    @Html.DropDownList("ddlFiltroArea", new SelectList(ViewBag.Areas, "Id", "Nombre"), "Todas las áreas", new { @class = "form-control w-25", id = "ddlFiltroArea" })
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                    <table id="tblCategoria" class="table table-striped">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    var tablaCategoria;
+
+    $(document).ready(function () {
+        // Cargar todas las categorías para el dropdown de categorías padres
+        CargarCategoriasPadre();
+
+        // Inicializar DataTable
+        tablaCategoria = $('#tblCategoria').DataTable({
+            columns: [
+                { data: 'Id', title: 'ID', visible: false },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Descripcion', title: 'Descripción' },
+                { data: 'CategoriaPadre.Nombre', title: 'Categoría Padre', defaultContent: '---' },
+                { data: 'Area.Nombre', title: 'Área' },
+                { data: 'Orden', title: 'Orden', visible: false },
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        return '<div class="d-flex gap-3">' +
+                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarCategoria(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarCategoria(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '</div>';
+                    }
+                }
+            ],
+            language: {
+                url: "/Content/datatables/i18n/es-ES.json"
+            }
+        });
+
+        // Filtrar por área
+        $("#ddlFiltroArea").change(function () {
+            var areaId = $(this).val();
+            ConsultarCategorias(areaId);
+        });
+
+        // Cargar todas las categorías al iniciar
+        ConsultarCategorias($("#ddlFiltroArea").val());
+
+        // Cargar categorías padres al cambiar el área
+        $("#ddlArea").change(function () {
+            CargarCategoriasPadre();
+        });
+    });
+
+    $(function () {
+        $("#frmCategoria").validate({
+            rules: {
+                "Area.Id": {
+                    required: true,
+                    min: 1
+                },
+                "Nombre": {
+                    required: true,
+                    maxlength: 250
+                },
+                "Orden": {
+                    required: true,
+                    number: true,
+                    min: 0
+                }
+            },
+            messages: {
+                "Area.Id": {
+                    required: "El campo 'Área' es requerido.",
+                    min: "Seleccione un área válida."
+                },
+                "Nombre": {
+                    required: "El campo 'Nombre' es requerido.",
+                    maxlength: "El nombre no puede superar los 250 caracteres."
+                },
+                "Orden": {
+                    required: "El campo 'Orden' es requerido.",
+                    number: "Ingrese un número válido.",
+                    min: "El orden no puede ser negativo."
+                }
+            },
+            errorElement: "span",
+            errorClass: "text-danger",
+            highlight: function (element) {
+                $(element).addClass("is-invalid").removeClass("is-valid");
+            },
+            unhighlight: function (element) {
+                $(element).removeClass("is-invalid").addClass("is-valid");
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element);
+            }
+        });
+    });
+
+    function CargarCategoriasPadre() {
+        var areaId = $("#ddlArea").val();
+        if (areaId) {
+            GetMVC('/Catalogs/ConsultarTodasCategorias', function (response) {
+                var result = typeof response === 'string' ? JSON.parse(response) : response;
+                if (result.IsSuccess && result.Response) {
+                    var todasCategorias = result.Response;
+                    var ddl = $("#ddlCategoriaPadre");
+                    ddl.empty();
+                    ddl.append('<option value="">Sin categoría padre</option>');
+
+                    // Filtrar por área y solo categorías principales (sin padre)
+                    //var categoriasFiltradas = todasCategorias.filter(function (c) {
+                    //    return c.Area.Id === parseInt(areaId) && c.CategoriaPadre === null;
+                    //});
+
+                    // Ordenar por Orden
+                    todasCategorias.sort(function (a, b) {
+                        return a.Orden - b.Orden;
+                    });
+
+                    todasCategorias.forEach(function (c) {
+                        ddl.append('<option value="' + c.Id + '">' + c.Nombre + '</option>');
+                    });
+
+                    if ($("#CategoriaPadre_Id").val() != '') {
+                        ddl.val($("#CategoriaPadre_Id").val());
+                    }
+                }
+            });
+        } else {
+            $("#ddlCategoriaPadre").empty().append('<option value="">Sin categoría padre</option>');
+        }
+    }
+
+    function ConsultarCategorias(areaId) {
+        if (!areaId || areaId === "") {
+            // Si no hay área seleccionada, traer todas las categorías
+            GetMVC("/Catalogs/ConsultarTodasCategorias", function (response) {
+                var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+                if (result.IsSuccess && result.Response) {
+                    MapingPropertiesDataTable("tblCategoria", result.Response);
+                } else {
+                    MapingPropertiesDataTable("tblCategoria", []);
+                    if (!result.IsSuccess) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: result.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                }
+            });
+        } else {
+            // Si hay área seleccionada, filtrar por área
+            GetMVC("/Catalogs/ConsultarTodasCategoriasPorArea/" + areaId, function (response) {
+                var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+                if (result.IsSuccess && result.Response) {
+                    MapingPropertiesDataTable("tblCategoria", result.Response);
+                } else {
+                    MapingPropertiesDataTable("tblCategoria", []);
+                    if (!result.IsSuccess) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: result.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    function GuardarActualizarCategoria() {
+        if ($("#frmCategoria").valid()) {
+            Swal.fire({
+                title: 'Guardando...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            var categoria = {
+                Id: $("#Id").val() || 0,
+                Nombre: $("#Nombre").val(),
+                Descripcion: $("#Descripcion").val(),
+                CategoriaPadre: $("#ddlCategoriaPadre").val() ? { Id: parseInt($("#ddlCategoriaPadre").val()) } : null,
+                Area: { Id: parseInt($("#ddlArea").val()) },
+                Orden: parseInt($("#Orden").val()) || 0,
+                CreadoPor: $("#CreadoPor").val(),
+                FechaCreacion: $("#FechaCreacion").val(),
+                ModificadoPor: $("#ModificadoPor").val() || null,
+                FechaModificacion: null,
+                Estatus: true
+            };
+
+            PostMVC('/Catalogs/GuardarOActualizarCategoria', categoria, function (response) {
+                Swal.close();
+
+                if (response.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    }).then(() => {
+                        window.location.href = '/Catalogs/Category';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
+        }
+    }
+
+    function EditarCategoria(id) {
+        window.location.href = '/Catalogs/Category/' + id;
+    }
+
+    function EliminarCategoria(id) {
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Esta acción eliminará lógicamente el registro',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                var categoria = {
+                    Id: id,
+                    ModificadoPor: $("#ModificadoPor").val() || "system",
+                    FechaModificacion: new Date().toISOString()
+                };
+
+                PostMVC('/Catalogs/EliminarCategoria', categoria, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: response.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            ConsultarCategorias($("#ddlFiltroArea").val());
+                            $("#frmCategoria")[0].reset();
+                            $("#Id").val(0);
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>

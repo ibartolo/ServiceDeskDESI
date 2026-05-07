@@ -124,13 +124,16 @@
   <ItemGroup>
     <Content Include="CSS\Comun\TempAutentication.css" />
     <Content Include="CSS\Comun\TemplateCalendario.css" />
+    <Content Include="CSS\Comun\TemplateDisabled.css" />
     <Content Include="CSS\Comun\TemplateGraficas.css" />
     <Content Include="CSS\Comun\TemplatePage.css" />
+    <Content Include="CSS\Comun\TemplateReciverPass.css" />
     <Content Include="CSS\Comun\TemplateTarjetas.css" />
     <Content Include="CSS\Comun\TemplateVideo.css" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\Comun\Calendario.js" />
     <Content Include="Scripts\Comun\Comun.js" />
+    <Content Include="Scripts\Comun\RecoverPass.js" />
     <Content Include="Scripts\Comun\TempAutentication.js" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -138,20 +141,31 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CatalogsController.cs" />
-    <Compile Include="Controllers\CompaniaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\TicketController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
+    <Compile Include="DAL\HttpClientConnection.Autentication.cs" />
+    <Compile Include="DAL\HttpClientConnection.Area.cs" />
+    <Compile Include="DAL\HttpClientConnection.Categoria.cs" />
     <Compile Include="DAL\HttpClientConnection.Compania.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
+    <Compile Include="DAL\HttpClientConnection.Marca.cs" />
+    <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
+    <Compile Include="DAL\HttpClientConnection.Ticket.cs" />
+    <Compile Include="DAL\HttpClientConnection.TipoActivo.cs" />
+    <Compile Include="DAL\HttpClientConnection.User.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\Cryptography.cs" />
     <Compile Include="Helpers\FiltersHelper.cs" />
     <Compile Include="Helpers\SessionHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
+    <Content Include="Content\datatables\i18n\es-ES.json" />
     <None Include="packages.config" />
     <Content Include="Views\Home\Autentication.cshtml" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -160,6 +174,14 @@
     <Content Include="Views\Catalogs\WorkArea.cshtml" />
     <Content Include="Views\Compania\AltaEdicion.cshtml" />
     <Content Include="Views\Catalogs\Company.cshtml" />
+    <Content Include="Views\Home\RecoverPassword.cshtml" />
+    <Content Include="Views\User\MyProfile.cshtml" />
+    <Content Include="Views\User\PartialChangePass.cshtml" />
+    <Content Include="Views\Catalogs\Category.cshtml" />
+    <Content Include="Views\Ticket\Index.cshtml" />
+    <Content Include="Views\Catalogs\TypeActive.cshtml" />
+    <Content Include="Views\Catalogs\Model.cshtml" />
+    <Content Include="Views\Catalogs\Mark.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -170,7 +192,6 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
-    <Folder Include="Views\Base\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceDeskDESIEntities\ServiceDeskDESIEntities.csproj">

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Desk DESI - Cambiar Contraseña</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #4e73df;
+            --primary-dark: #2e59d9;
+            --success: #1cc88a;
+            --warning: #f6c23e;
+            --danger: #e74a3b;
+            --dark: #5a5c69;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .reset-container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reset-header {
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 35px 30px;
+            text-align: center;
+        }
+
+        .reset-header i {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+
+        .reset-header h2 {
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .reset-header p {
+            margin: 8px 0 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .reset-body {
+            padding: 35px 30px;
+        }
+
+        .user-info-card {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .user-info-title {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .user-info-title i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-icon {
+            width: 32px;
+            color: var(--primary);
+        }
+
+        .info-label {
+            width: 110px;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+
+        .info-value {
+            flex: 1;
+            color: var(--dark);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group-text {
+            background: #f8f9fc;
+            border: 1px solid #e3e6f0;
+            border-right: none;
+            color: var(--primary);
+        }
+
+        .form-control {
+            border: 1px solid #e3e6f0;
+            border-left: none;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: none;
+            outline: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+            z-index: 10;
+            background: white;
+            padding: 0 5px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .btn-reset {
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 115, 223, 0.4);
+        }
+
+        .btn-reset:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert-message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fff5f5;
+            border-left: 4px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .alert-warning {
+            background: #fff8e6;
+            border-left: 4px solid var(--warning);
+            color: #856404;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            border-left: 4px solid var(--success);
+            color: #2e7d32;
+        }
+
+        .password-requirements {
+            background: #f8f9fc;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            font-size: 0.75rem;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 0;
+            color: #6c757d;
+        }
+
+        .requirement.valid {
+            color: var(--success);
+        }
+
+        .requirement i {
+            width: 14px;
+            font-size: 0.7rem;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e3e6f0;
+        }
+
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 576px) {
+            .reset-header {
+                padding: 25px 20px;
+            }
+            .reset-body {
+                padding: 25px 20px;
+            }
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .info-label {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="reset-container" id="resetContainer">
+        <!-- Contenido dinámico se carga con jQuery -->
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Obtener token de la URL
+            var urlParams = new URLSearchParams(window.location.search);
+            //var token = urlParams.get('token');
+			var token = '65487c4f-029c-4a0e-886c-8b06f125a460';
+            
+            if (!token) {
+                mostrarError('No se proporcionó un token de recuperación.', 'Token no encontrado');
+                return;
+            }
+            
+            // Simulación de datos del servicio
+            var respuestaServicio = {
+                "IsSuccess": true,
+                "Message": null,
+                "Response": {
+                    "Id": 5,
+                    "UsuarioId": 3,
+                    "Token": token,
+                    "FechaExpiracion": "2026-03-25T19:01:44.12",
+                    "Usado": false,
+                    "Nombre": "Administrador",
+                    "Apellido": "Sistema",
+                    "Correo": "bartolocastro@gmail.com",
+                    "NombreUsuario": "SystemAdmin"
+                }
+            };
+            
+            procesarRespuesta(respuestaServicio);
+            
+            function procesarRespuesta(response) {
+                if (response.IsSuccess && response.Response && !response.Response.Usado) {
+                    mostrarFormularioCambio(response.Response);
+                } else {
+                    mostrarError(response.Message || 'El token no es válido o ha expirado.', 'Token inválido');
+                }
+            }
+            
+            function mostrarFormularioCambio(userData) {
+                var nombreCompleto = userData.Nombre + ' ' + userData.Apellido;
+                var fechaExpiracion = new Date(userData.FechaExpiracion);
+                var fechaFormateada = fechaExpiracion.toLocaleString('es-MX');
+                
+                var html = `
+                    <div class="reset-header">
+                        <i class="fas fa-lock-open"></i>
+                        <h2>Cambiar Contraseña</h2>
+                        <p>Ingresa tu nueva contraseña</p>
+                    </div>
+                    
+                    <div class="reset-body">
+                        <div class="user-info-card">
+                            <div class="user-info-title">
+                                <i class="fas fa-user-circle"></i> Información de la cuenta
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon"><i class="fas fa-user"></i></div>
+                                <div class="info-label">Nombre de usuario:</div>
+                                <div class="info-value">${escapeHtml(userData.NombreUsuario)}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon"><i class="fas fa-id-card"></i></div>
+                                <div class="info-label">Nombre completo:</div>
+                                <div class="info-value">${escapeHtml(nombreCompleto)}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                                <div class="info-label">Correo electrónico:</div>
+                                <div class="info-value">${escapeHtml(userData.Correo)}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon"><i class="fas fa-clock"></i></div>
+                                <div class="info-label">Válido hasta:</div>
+                                <div class="info-value">${fechaFormateada}</div>
+                            </div>
+                        </div>
+                        
+                        <div id="alertMessage" class="alert-message"></div>
+                        
+                        <form id="resetPasswordForm">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-key me-1"></i> Nueva Contraseña</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="newPassword" placeholder="Ingrese su nueva contraseña">
+                                    <span class="password-toggle" id="toggleNewPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                                <div class="password-requirements">
+                                    <div class="requirement" id="reqLength"><i class="fas fa-circle"></i> Mínimo 8 caracteres</div>
+                                    <div class="requirement" id="reqUpper"><i class="fas fa-circle"></i> Al menos una mayúscula</div>
+                                    <div class="requirement" id="reqLower"><i class="fas fa-circle"></i> Al menos una minúscula</div>
+                                    <div class="requirement" id="reqNumber"><i class="fas fa-circle"></i> Al menos un número</div>
+                                    <div class="requirement" id="reqSpecial"><i class="fas fa-circle"></i> Al menos un carácter especial (!@#$%^&*)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-check-circle me-1"></i> Confirmar Contraseña</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirme su nueva contraseña">
+                                    <span class="password-toggle" id="toggleConfirmPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn-reset" id="submitBtn">
+                                <i class="fas fa-save"></i> Cambiar Contraseña
+                            </button>
+                        </form>
+                        
+                        <div class="footer-links">
+                            <a href="/Login"><i class="fas fa-arrow-left"></i> Volver al inicio de sesión</a>
+                        </div>
+                    </div>
+                `;
+                
+                $('#resetContainer').html(html);
+                
+                // Almacenar los textos originales en data attributes
+                $('#reqLength').data('original-text', 'Mínimo 8 caracteres');
+                $('#reqUpper').data('original-text', 'Al menos una mayúscula');
+                $('#reqLower').data('original-text', 'Al menos una minúscula');
+                $('#reqNumber').data('original-text', 'Al menos un número');
+                $('#reqSpecial').data('original-text', 'Al menos un carácter especial (!@#$%^&*)');
+                
+                // Inicializar toggles de contraseña
+                $('#toggleNewPassword').on('click', function() {
+                    togglePassword('newPassword', $(this));
+                });
+                
+                $('#toggleConfirmPassword').on('click', function() {
+                    togglePassword('confirmPassword', $(this));
+                });
+                
+                // Validación de requisitos
+                $('#newPassword').on('input', function() {
+                    validatePasswordRequirements($(this).val());
+                    checkFormValidity();
+                });
+                
+                $('#confirmPassword').on('input', function() {
+                    checkFormValidity();
+                });
+                
+                // Manejo del formulario
+                $('#resetPasswordForm').on('submit', function(e) {
+                    e.preventDefault();
+                    cambiarContraseña(userData.Token);
+                });
+            }
+            
+            function togglePassword(inputId, toggleElement) {
+                var input = $('#' + inputId);
+                var type = input.attr('type') === 'password' ? 'text' : 'password';
+                input.attr('type', type);
+                toggleElement.find('i').toggleClass('fa-eye fa-eye-slash');
+            }
+            
+            function validatePasswordRequirements(password) {
+                var hasLength = password.length >= 8;
+                var hasUpper = /[A-Z]/.test(password);
+                var hasLower = /[a-z]/.test(password);
+                var hasNumber = /[0-9]/.test(password);
+                var hasSpecial = /[!@#$%^&*()_\-+={}[\]\\|;:'",.<>/?]/.test(password);
+                
+                updateRequirement('#reqLength', hasLength);
+                updateRequirement('#reqUpper', hasUpper);
+                updateRequirement('#reqLower', hasLower);
+                updateRequirement('#reqNumber', hasNumber);
+                updateRequirement('#reqSpecial', hasSpecial);
+                
+                return hasLength && hasUpper && hasLower && hasNumber && hasSpecial;
+            }
+            
+            function updateRequirement(selector, isValid) {
+                var $element = $(selector);
+                var originalText = $element.data('original-text');
+                
+                if (isValid) {
+                    $element.addClass('valid').html('<i class="fas fa-check-circle"></i> ' + originalText);
+                } else {
+                    $element.removeClass('valid').html('<i class="fas fa-circle"></i> ' + originalText);
+                }
+            }
+            
+            function checkFormValidity() {
+                var newPass = $('#newPassword').val();
+                var confirmPass = $('#confirmPassword').val();
+                var $alertDiv = $('#alertMessage');
+                var $submitBtn = $('#submitBtn');
+                
+                var isValidPassword = validatePasswordRequirements(newPass);
+                var doMatch = newPass === confirmPass && newPass !== '';
+                
+                if (!isValidPassword && newPass !== '') {
+                    $alertDiv.removeClass().addClass('alert-message alert-warning').html('<i class="fas fa-exclamation-triangle"></i> La contraseña no cumple con los requisitos de seguridad.').show();
+                    $submitBtn.prop('disabled', true);
+                } else if (!doMatch && confirmPass !== '') {
+                    $alertDiv.removeClass().addClass('alert-message alert-warning').html('<i class="fas fa-exclamation-triangle"></i> Las contraseñas no coinciden.').show();
+                    $submitBtn.prop('disabled', true);
+                } else {
+                    $alertDiv.hide();
+                    $submitBtn.prop('disabled', !(isValidPassword && doMatch && newPass !== ''));
+                }
+            }
+            
+            function cambiarContraseña(token) {
+                var newPassword = $('#newPassword').val();
+                var $submitBtn = $('#submitBtn');
+                var originalHtml = $submitBtn.html();
+                
+                $submitBtn.prop('disabled', true).html('<span class="loading-spinner"></span> Procesando...');
+                
+                // Simulación de cambio de contraseña
+                setTimeout(function() {
+                    Swal.fire({
+                        title: '¡Contraseña Actualizada!',
+                        text: 'Tu contraseña ha sido cambiada exitosamente. Ahora puedes iniciar sesión.',
+                        icon: 'success',
+                        confirmButtonColor: '#4e73df',
+                        confirmButtonText: 'Ir al inicio de sesión'
+                    }).then(function() {
+                        window.location.href = '/Login';
+                    });
+                }, 1500);
+            }
+            
+            function mostrarError(mensaje, titulo) {
+                var html = `
+                    <div class="reset-header" style="background: linear-gradient(180deg, #e74a3b 0%, #c0392b 100%);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h2>${escapeHtml(titulo)}</h2>
+                        <p>No se puede completar la recuperación</p>
+                    </div>
+                    <div class="reset-body">
+                        <div class="alert-message alert-error" style="display: flex;">
+                            <i class="fas fa-times-circle"></i>
+                            <span>${escapeHtml(mensaje)}</span>
+                        </div>
+                        <div class="footer-links">
+                            <a href="/Login"><i class="fas fa-arrow-left"></i> Volver al inicio de sesión</a><br>
+                            <a href="/Recuperar" style="margin-top: 10px; display: inline-block;"><i class="fas fa-envelope"></i> Solicitar nuevo enlace</a>
+                        </div>
+                    </div>
+                `;
+                $('#resetContainer').html(html);
+            }
+            
+            function mostrarErrorEnFormulario(mensaje) {
+                var $alertDiv = $('#alertMessage');
+                $alertDiv.removeClass().addClass('alert-message alert-error').html('<i class="fas fa-times-circle"></i> ' + escapeHtml(mensaje)).show();
+                setTimeout(function() {
+                    $alertDiv.fadeOut();
+                }, 5000);
+            }
+            
+            function escapeHtml(text) {
+                if (!text) return '';
+                return $('<div>').text(text).html();
+            }
+        });
+    </script>
+</body>
+</html>

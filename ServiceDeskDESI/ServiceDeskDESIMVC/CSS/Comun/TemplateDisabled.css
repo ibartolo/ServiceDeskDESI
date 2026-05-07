@@ -1,0 +1,27 @@
+﻿/* TemplateDisabled.css
+   Estilos para marcar enlaces/módulos aún no implementados.
+   La clase `disabled-module` se añade automáticamente por JS a los enlaces con href="#" dentro de .components.
+*/
+
+.components a.disabled-module {
+    color: #6c757d !important; /* color muted similar a bootstrap */
+    opacity: 0.65;
+    transition: opacity 0.15s ease-in-out;
+    text-decoration: none;
+}
+
+    .components a.disabled-module i {
+        color: #6c757d !important;
+    }
+
+    /* Indicar cursor y accesibilidad sólo para los elementos realmente no accionables */
+    .components a.disabled-module[aria-disabled="true"] {
+        cursor: not-allowed;
+        pointer-events: none; /* bloquea interacción en leaf links; para padres (has-arrow) no se añade aria-disabled */
+    }
+
+    /* Mantener aspecto al pasar el ratón (sin poner comportamiento clickable) */
+    .components a.disabled-module:hover {
+        opacity: 0.75;
+        text-decoration: none;
+    }
