@@ -16,7 +16,7 @@ namespace ServiceDeskDESIWebApi.DAL
             var modelResponse = new ModelResponse();
             try
             {
-                var TipoActivos = GetObjects("ObtenerActivos", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                var TipoActivos = GetObjects("ObtenerTipoActivo", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
                     new Func<IDataReader, TipoActivo>((reader) =>
                     {
                         var activo = LlenarEntidad<TipoActivo>(reader);
@@ -93,7 +93,7 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse EliminarTipoActivO (TipoActivo t)
+        public ModelResponse EliminarTipoActivo (TipoActivo t)
         {
             var modelResponse = new ModelResponse();
             try

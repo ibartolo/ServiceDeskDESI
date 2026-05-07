@@ -57,6 +57,59 @@ namespace ServiceDeskDESIMVC.Controllers
                 return View(compania);
         }
 
+        public  async Task<ActionResult> TypeActive(long id = 0)
+        {
+            var tipoactivo = new TipoActivo();
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerTipoActivoPorId(id);
+                if (response.IsSuccess && response.Response !=null)
+                {
+                    tipoactivo = JsonConvert.DeserializeObject<TipoActivo>(response.Response.ToString());
+
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+            return View(tipoactivo);
+
+        }
+        public async Task<ActionResult> Model (long id = 0)
+        {
+            var modelo = new Modelo();
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerModelosPorId(id);
+                if (response.IsSuccess && response.Response != null)
+                {
+                    modelo = JsonConvert.DeserializeObject<Modelo>(response.Response.ToString());
+                }
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+            return View(modelo);
+
+        }
+        public async Task<ActionResult> Mark(long id = 0)
+        {
+            var marca = new Marca();
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerMarcaPorId(id);
+                if (response.IsSuccess && response.Response != null)
+                {
+                    marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
+                }
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+            return View(marca);
+        }
+
         public async Task<ActionResult> MyProfile()
         {
             // Obtener el ID del usuario desde la sesión
@@ -328,5 +381,70 @@ namespace ServiceDeskDESIMVC.Controllers
         }
         #endregion
 
+        #region 4catalogos
+        public async Task<string> ConsultarTodosLosTipoActivos()
+        {
+            var response = await httpClientConnection.ObtenerTodosLosTipoActivos();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarTodosLosTipoActivoPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerTipoActivoPorId(id);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string>GuardarOActualizarTipoActivo(TipoActivo t)
+        {
+            var response = await httpClientConnection.GuardarOActualizarTipoActivo(t);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string>EliminarTipoActivo(TipoActivo t)
+        {
+            var response = await httpClientConnection.EliminarTipoActivo(t);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ConsultarTodosLosModelos()
+        {
+            var response = await httpClientConnection.ObtenerTodosLosModelos();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarTodosModelosPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerModelosPorId(id);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> GuardarOActualizarModelos(Modelo m)
+        {
+            var response = await httpClientConnection.GuardarActualizarModelos(m);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> EliminarModelos (Modelo m)
+        {
+            var response = await httpClientConnection.EliminarModelos(m);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ConsultarTodosLasMarcas()
+        {
+            var response = await httpClientConnection.ObtenerTodosLasMarcas();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarTodasMarcasPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerMarcaPorId(id);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> GuardarOActualizarMarca(Marca m)
+        {
+            var response = await httpClientConnection.GuardarOActualizarMarca(m);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> EliminarMarcas(Marca m)
+        {
+            var response = await httpClientConnection.EliminarMarcas(m);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        #endregion
     }
 }

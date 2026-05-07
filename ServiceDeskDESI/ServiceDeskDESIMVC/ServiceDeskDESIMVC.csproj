@@ -140,7 +140,6 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CatalogsController.cs" />
-    <Compile Include="Controllers\CompaniaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\UserController.cs" />
@@ -150,7 +149,10 @@
     <Compile Include="DAL\HttpClientConnection.Categoria.cs" />
     <Compile Include="DAL\HttpClientConnection.Compania.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
+    <Compile Include="DAL\HttpClientConnection.Marca.cs" />
+    <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
     <Compile Include="DAL\HttpClientConnection.Ticket.cs" />
+    <Compile Include="DAL\HttpClientConnection.TipoActivo.cs" />
     <Compile Include="DAL\HttpClientConnection.User.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -176,6 +178,9 @@
     <Content Include="Views\User\PartialChangePass.cshtml" />
     <Content Include="Views\Catalogs\Category.cshtml" />
     <Content Include="Views\Ticket\Index.cshtml" />
+    <Content Include="Views\Catalogs\TypeActive.cshtml" />
+    <Content Include="Views\Catalogs\Model.cshtml" />
+    <Content Include="Views\Catalogs\Mark.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

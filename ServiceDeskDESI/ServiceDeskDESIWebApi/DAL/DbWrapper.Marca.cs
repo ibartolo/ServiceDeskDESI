@@ -19,8 +19,8 @@ namespace ServiceDeskDESIWebApi.DAL
                 var marcas = GetObjects("ObtenerMarca", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
                     new Func<IDataReader, Marca>((reader) =>
                     {
-                        var activo = LlenarEntidad<Marca>(reader);
-                        return activo;
+                        var marca = LlenarEntidad<Marca>(reader);
+                        return marca;
                     }));
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = marcas;
