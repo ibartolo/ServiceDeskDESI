@@ -20,6 +20,13 @@ namespace ServiceDeskDESIWebApi.DAL
                    new Func<IDataReader, Modelo>((reader) =>
                    {
                        var activo = LlenarEntidad<Modelo>(reader);
+
+                       activo.Marca = new Marca()
+                       {
+                           Id = MapearPorpiedades<long> (reader["MarcaId"]),
+                           Nombre = MapearPorpiedades<string>(reader["MarcaNombre"])
+                       };
+
                        return activo;
                    }));
                 modelResponse.IsSuccess = true;
@@ -40,6 +47,9 @@ namespace ServiceDeskDESIWebApi.DAL
             var modelResponse = new ModelResponse();
             try
             {
+                //validaciones
+                if (m.Marca ==null || m.Marca.Id <=0) { throw new ArgumentException("La Marca es requerida."); }
+
                 var parametros = ObtenerParametrosSQL(m).ToArray();
                 var modeloId = ExecuteScalar("GuardarOActualizarModelo", CommandType.StoredProcedure, parametros);
                 m.Id = Convert.ToInt64(modeloId);
@@ -63,58 +73,72 @@ namespace ServiceDeskDESIWebApi.DAL
             var modelResponse = new ModelResponse();
             try
             {
-                modelResponse.IsSuccess = true;
-                var parameters = new List<SqlParameter>();
-                parameters.Add(new SqlParameter()
-                {
-                    Value = id,
-                    IsNullable = true,
-                    ParameterName = "@Id",
-                    SqlDbType = System.Data.SqlDbType.Int
-                });
+                if (id <= 0) { throw new ArgumentException("El ID del Modelo Es requerido."); }
 
-                var result = GetObject("ObtenerModeloPorId", System.Data.CommandType.StoredProcedure,
-                    parameters, new Func<System.Data.IDataReader, Modelo>((reader) =>
-                    {
-                        var r = LlenarEntidad<Modelo>(reader);
-                        return r;
-                    }));
-                modelResponse.Response = result;
+                var modelo = GetObject("ObtenerModeloPorId",CommandType.StoredProcedure,
+                   new[] { new SqlParameter("@Id", id) },
+                   new Func<IDataReader, Modelo>((reader) =>
+                   {
+                       var m = LlenarEntidad<Modelo>(reader);
+                       m.Marca = new Marca()
+                       {
+                           Id = MapearPorpiedades<long>(reader[("MarcaId")]),
+                           Nombre = MapearPorpiedades<string>(reader["MarcaNombre"])
+                       };
+                       return m;
+                   }));
+                if (modelo == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró el Nombre Especificado.";
+                    return modelResponse;
+                }
+
+
                 modelResponse.IsSuccess = true;
-                modelResponse.Message = "Modelo Obtenido Correctamente";
+                modelResponse.Response = modelo;
+                modelResponse.Message = "Marca obtenido correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al obtener la Marca";
             }
 
             return modelResponse;
 
         }
-        public ModelResponse EliminarModelo (Modelo m)
+        public ModelResponse EliminarModelo (long id, string modificadoPor, DateTime fechaModificacion)
         {
             var modelResponse = new ModelResponse();
             try
             {
+                if (id <= 0) { throw new ArgumentException("El ID del Modelo es requerido."); }
+                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 ExecuteNonQuery("EliminarModelo", CommandType.StoredProcedure, new SqlParameter[]
                 {
-                    new SqlParameter("@Id", m.Id),
-                    new SqlParameter("@ModificadoPor", m.ModificadoPor),
-                    new SqlParameter("@FechaModificacion",m.FechaModificacion)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion)
                 });
                 modelResponse.IsSuccess = true;
-                modelResponse.Message = "Modelo Eliminado Correctamente";
-                modelResponse.Response = null;
+                modelResponse.Message = "Marca eliminado correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al eliminar la Marca";
             }
-
             return modelResponse;
         }
     }
