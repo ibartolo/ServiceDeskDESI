@@ -17,14 +17,14 @@
             </div>
          }
         <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Modelo</h3>
-        <form enctype="multipart/form-data" id="frmModelo" name="frmModelo" method="post">
+        <form id="frmModelo" name="frmModelo" method="post">
             @Html.HiddenFor(x => x.Id)
             @Html.HiddenFor(x => x.CreadoPor)
             @Html.HiddenFor(x => x.FechaCreacion)
             @Html.HiddenFor(x => x.ModificadoPor)
             @Html.HiddenFor(x => x.FechaModificacion)
             @Html.HiddenFor(x => x.Estatus)
-            
+
 
             <div class="row">
                 <div class="cold-md-4">
@@ -39,6 +39,313 @@
                         @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion De Modelo" })
                     </div>
                 </div>
+                @*<div class="cold-md-4">
+            <div class="mb-3">
+                <label>Marca</label>
+                @Html.DropDownListFor(x => x.Marca.Id, new SelectList(ViewBag.Marcas, "Id", "Nombre"), "Seleccione Un Modelo", new { @class = "form'control", id = "ddlMarca" })
             </div>
-        </form>
+        </div>*@
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label>Marca</label>
+                        <select id="ddlMarca" class="form-control">
+                            <option value="">Seleccione una Marca</option>
+                        </select>
+                        @Html.HiddenFor(x => x.Marca.Id)
+                    </div>
+                </div>
+            </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActulizarModelo()" />
+                                <a href="/Catalogs/Model" class="btn btn-warning">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*<div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label>Filtrar por Modelos:</label>
+                        @Html.DropDownList("ddlFiltroModelo", new SelectList(ViewBag.Marcas, "Id", "Nombre"), "Todas los Modelos", new { @class = "form-control w-25", id = "ddlFiltroModelo" })
+                    </div>
+                </div>
+            </div>*@
+
+                    <div class="row">
+                        <div class="col-md-12 table-responsive">
+                            <div class="mb-3">
+                            </div>
+                            <table id="tblModelo" class="table table-striped"></table>
+                        </div>
+                    </div>
+
+</form>
     </div>
+
+<script>
+    var tablaModelo;
+    $(function () {
+        $("#frmModelo").validate({
+            rules: {
+                "Nombre": {
+                    required: true,
+                    maxlength: 250
+                },
+                "Descripcion": {
+                    required: true
+                }
+            },
+            messages: {
+                "Nombre": {
+                    required: "El campo 'Título' es requerido.",
+                    maxlength: "El título no puede superar los 250 caracteres."
+                },
+                "Descripcion": {
+                    required: "El campo 'Descripción' es requerido."
+                }
+            },
+            errorElement: "span",
+            errorClass: "text-danger",
+            highlight: function (element) {
+                $(element).addClass("is-invalid").removeClass("is-valid");
+            },
+            unhighlight: function (element) {
+                $(element).removeClass("is-invalid").addClass("is-valid");
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element);
+            }
+        });
+
+    });
+
+    $(document).ready(function () {
+        //ObtenerMarcas();
+        //Iniciar Tabla
+        //if (marcaId != 0) {
+
+        InicializarDataTable();
+        ConsultarTodoslosModelos();
+
+        $("#ddlMarca").change(function () {
+            var marcaId = $(this).val();
+
+            if (marcaId) {
+                GetMVC('/Catalogs/ConsultarTodasMarcasPorId?marcaId=' + marcaId, function (response) {
+                    var result = typeof response === 'string' ? JSON.parse(response) : response;
+                    if (result.IsSuccess && result.Response) {
+
+                    }
+
+
+                });
+
+            }
+        });
+    });
+
+        function InicializarDataTable() {
+            tablaModelo = $('#tblModelo').DataTable({
+                columns: [
+                    { data: 'Id', title: 'ID', visible: false },
+                    { data: 'Titulo', title: 'Título' },
+                    { data: 'Marca.Nombre', title: 'Marca' },
+                    {
+                        data: 'FechaCreacion',
+                        title: 'Fecha Creación',
+                        render: function (data) {
+                            if (data) {
+                                var fecha = new Date(data);
+                                return fecha.toLocaleDateString();
+                            }
+                            return '---';
+                        }
+                    },
+                    {
+                        data: 'Id', title: 'Acciones', render: function (data) {
+                            return '<div class="d-flex gap-3">' +
+                                '<button class="btn btn-sm btn-outline-primary" onclick="EditarModelo(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                                '<button class="btn btn-sm btn-outline-danger" onclick="EliminarModelo(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                                '</div>';
+                        }
+                    }
+                ],
+                language: {
+                    url: "/Content/datatables/i18n/es-ES.json"
+                }
+            });
+            ConsultarTodoslosModelos();
+        }
+        function ConsultarTodoslosModelos() {
+            GetMVC("/Catalogs/ConsultarTodosLosModelos", function (response) {
+                var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+                if (result.IsSuccess && result.Response) {
+                    MapingPropertiesDataTable("tblModelo", result.Response);
+                } else {
+                    MapingPropertiesDataTable("tblModelo", []);
+                    if (!result.IsSuccess) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: result.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                }
+            });
+        }
+        function ConsultarTicketsPorArea(areaId) {
+            GetMVC("/Ticket/ConsultarTicketsPorArea/" + areaId, function (response) {
+                var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+                if (result.IsSuccess && result.Response) {
+                    MapingPropertiesDataTable("tblTicket", result.Response);
+                } else {
+                    MapingPropertiesDataTable("tblTicket", []);
+                    if (!result.IsSuccess) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: result.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                }
+            });
+        }
+        function GuardarActualizarModelo() {
+            if ($("#frmModelo").valid()) {
+                // Validar Marca
+                if (!$("#ddlMarca").val()) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Debe seleccionar un área',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                    return;
+                }
+                Swal.fire({
+                    title: 'Guardando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                var modelo = {
+                    Id: $("#Id").val() || 0,
+                    Nombre: $("#Nombre").val(),
+                    Marca: { Id: parseInt($("#ddlMarca").val()) },
+                    Descripcion: $("#Descripcion").val(),
+                    CreadoPor: $("#CreadoPor").val(),
+                    FechaCreacion: $("#FechaCreacion").val(),
+                    ModificadoPor: $("#ModificadoPor").val() || null,
+                    FechaModificacion: null,
+                    Estatus: true
+
+                };
+
+                PostMVC('/Catalogs/GuardarOActualizarModelos', modelo, function (respose) {
+                    Swal.close();
+                    if (respose.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: response.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            window.location.href = '/Catalogs/Model';
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+
+            }
+        }
+    
+        function EditarModelo(id) {
+            event.preventDefault();
+            event.stopPropagation();
+            window.location.href = '/Catalogs/Model/' + id;
+        }
+
+    function EliminarModelo(id) {
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Esta acción eliminará lógicamente el registro',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                var ticket = {
+                    Id: id,
+                    ModificadoPor: $("#ModificadoPor").val() || "system",
+                    FechaModificacion: new Date().toISOString()
+                };
+
+                PostMVC('/Catalogs/EliminarModelos', ticket, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: response.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            ConsultarTodoslosModelos();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+
+</script>

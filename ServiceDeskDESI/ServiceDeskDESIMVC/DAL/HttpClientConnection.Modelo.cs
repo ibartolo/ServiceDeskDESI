@@ -14,12 +14,12 @@ namespace ServiceDeskDESIMVC.DAL
     {
         public async Task <ModelResponse> ObtenerTodosLosModelos()
         {
-            var result = await RequestAsync($"api/modelo/List", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/modelo/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result);
+            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelresponse;
         }
         public async Task<ModelResponse> GuardarActualizarModelos (Modelo m)
@@ -39,15 +39,14 @@ namespace ServiceDeskDESIMVC.DAL
             new Func<string, string>((responseString) =>
             {
                 return responseString;
-            }));
+            }), token.Token.access_token);
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
 
             return modelResponse;
         }
         public async Task<ModelResponse> EliminarModelos(Modelo m)
         {
-            MappingColumSecurity(m);
-            var result = await RequestAsync<object>($"api/modelo/Eliminar", HttpMethod.Delete, m,
+                var result = await RequestAsync<object>($"api/modelo/Eliminar", HttpMethod.Delete, m,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
