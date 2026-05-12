@@ -79,6 +79,13 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<ActionResult> Model (long id = 0)
         {
             var modelo = new Modelo();
+            // Cargar marcas 
+            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
+            if (marcaResponse.IsSuccess && marcaResponse.Response != null)
+            {
+                ViewBag.Marcas = marcaResponse.Response;
+            }
+
             if (id > 0)
             {
                 var response = await httpClientConnection.ObtenerModelosPorId(id);
@@ -101,7 +108,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 var response = await httpClientConnection.ObtenerMarcaPorId(id);
                 if (response.IsSuccess && response.Response != null)
                 {
-                    marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
+                       marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
                 }
                 {
                     ViewBag.ErrorMessage = response.Message;
@@ -406,22 +413,26 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> ConsultarTodosLosModelos()
         {
             var response = await httpClientConnection.ObtenerTodosLosModelos();
-            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+            return JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodosModelosPorId(long id)
         {
             var response = await httpClientConnection.ObtenerModelosPorId(id);
-            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+            return JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarModelos(Modelo m)
         {
+            m.Estatus = true;
             var response = await httpClientConnection.GuardarActualizarModelos(m);
-            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+            return JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarModelos (Modelo m)
         {
+            var tokenCookie = SessionHelper.GetSessionUser();
+            m.ModificadoPor = tokenCookie?.UserName ?? "System";
+            m.FechaModificacion = DateTime.Now;
             var response = await httpClientConnection.EliminarModelos(m);
-            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+            return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ConsultarTodosLasMarcas()

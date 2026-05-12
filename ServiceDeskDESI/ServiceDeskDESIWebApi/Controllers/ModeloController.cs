@@ -34,7 +34,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse EliminarModelos(Modelo m)
         {
             m.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarModelo(m);
+            var result = dbWrapper.EliminarModelo(m.Id,m.ModificadoPor,m.FechaModificacion.Value);
             return result;
         }
     }
