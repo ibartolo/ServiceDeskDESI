@@ -83,7 +83,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
-                ViewBag.Marcas = marcaResponse.Response;
+                ViewBag.Marcas = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString()), "Id", "Nombre");
             }
 
             if (id > 0)

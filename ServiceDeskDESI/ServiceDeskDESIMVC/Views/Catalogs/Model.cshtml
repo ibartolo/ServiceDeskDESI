@@ -39,12 +39,12 @@
                         @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion De Modelo" })
                     </div>
                 </div>
-                @*<div class="cold-md-4">
-            <div class="mb-3">
-                <label>Marca</label>
-                @Html.DropDownListFor(x => x.Marca.Id, new SelectList(ViewBag.Marcas, "Id", "Nombre"), "Seleccione Un Modelo", new { @class = "form'control", id = "ddlMarca" })
-            </div>
-        </div>*@
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Marca</label>
+                        @Html.DropDownListFor(x => x.Marca.Id, (IEnumerable<SelectListItem>)ViewBag.Marcas, "Seleccione Un Modelo", new { @class = "form-control", id = "ddlMarca" })
+                    </div>
+        </div>
                 <div class="col-md-4">
                     <div class="mb-3">
                         <label>Marca</label>
@@ -64,14 +64,14 @@
                         </div>
                     </div>
 
-                    @*<div class="row">
+                    <div class="row">
                 <div class="col-md-12">
                     <div class="mb-3">
                         <label>Filtrar por Modelos:</label>
-                        @Html.DropDownList("ddlFiltroModelo", new SelectList(ViewBag.Marcas, "Id", "Nombre"), "Todas los Modelos", new { @class = "form-control w-25", id = "ddlFiltroModelo" })
+                        @Html.DropDownList("ddlFiltroModelo", (IEnumerable<SelectListItem>)ViewBag.Marcas, "Todas los Modelos", new { @class = "form-control w-25", id = "ddlFiltroModelo" })
                     </div>
                 </div>
-            </div>*@
+            </div>
 
                     <div class="row">
                         <div class="col-md-12 table-responsive">
