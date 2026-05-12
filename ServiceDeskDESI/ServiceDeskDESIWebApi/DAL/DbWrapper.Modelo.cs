@@ -11,34 +11,37 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodosLosModelos()
+        public ModelResponse ObtenerModelos()
         {
             var modelResponse = new ModelResponse();
+
             try
             {
-                var modelos = GetObjects("ObtenerModelo", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
-                   new Func<IDataReader, Modelo>((reader) =>
-                   {
-                       var activo = LlenarEntidad<Modelo>(reader);
+                var modelos = GetObjects("ObtenerModelos", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                    new Func<IDataReader, Modelo>((reader) =>
+                    {
+                        var modelo = LlenarEntidad<Modelo>(reader);
 
-                       activo.Marca = new Marca()
-                       {
-                           Id = MapearPorpiedades<long> (reader["MarcaId"]),
-                           Nombre = MapearPorpiedades<string>(reader["MarcaNombre"])
-                       };
+                        modelo.Marca = new Marca()
+                        {
+                            Id = MapearPorpiedades<long>(reader["MarcaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
+                        };
 
-                       return activo;
-                   }));
+                        return modelo;
+                    }));
+
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = modelos;
-                modelResponse.Message = "Modelos Obtenidos Correctamente";
+                modelResponse.Message = "Modelos obtenidos correctamente";
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al obtener los modelos";
             }
+
             return modelResponse;
         }
 

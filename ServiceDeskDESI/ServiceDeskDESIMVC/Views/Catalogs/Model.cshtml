@@ -1,70 +1,70 @@
 ﻿@model ServiceDeskDESIEntities.Catalogos.Modelo
-    @{
-        ViewBag.Title = "Model";
-        Layout = "~/Views/Shared/_Layout.cshtml";
+@{
+    ViewBag.Title = "Model";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+<div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
     }
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
-    <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
-    <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
-    <div class="form-section">
-        @if (ViewBag.ErrorMessage != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-         }
-        <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Modelo</h3>
-        <form id="frmModelo" name="frmModelo" method="post">
-            @Html.HiddenFor(x => x.Id)
-            @Html.HiddenFor(x => x.CreadoPor)
-            @Html.HiddenFor(x => x.FechaCreacion)
-            @Html.HiddenFor(x => x.ModificadoPor)
-            @Html.HiddenFor(x => x.FechaModificacion)
-            @Html.HiddenFor(x => x.Estatus)
+    <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Modelo</h3>
+    <form id="frmModelo" name="frmModelo" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
 
 
-            <div class="row">
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Nombre</label>
-                        @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre de Modelo" })
-                    </div>
+        <div class="row">
+            <div class="cold-md-4">
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre de Modelo" })
                 </div>
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Descripcion</label>
-                        @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion De Modelo" })
-                    </div>
-                </div>
-                @*<div class="cold-md-4">
-            <div class="mb-3">
-                <label>Marca</label>
-                @Html.DropDownListFor(x => x.Marca.Id, new SelectList(ViewBag.Marcas, "Id", "Nombre"), "Seleccione Un Modelo", new { @class = "form'control", id = "ddlMarca" })
             </div>
-        </div>*@
-                <div class="col-md-4">
+            <div class="cold-md-4">
+                <div class="mb-3">
+                    <label>Descripcion</label>
+                    @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion De Modelo" })
+                </div>
+            </div>
+            @*<div class="cold-md-4">
                     <div class="mb-3">
                         <label>Marca</label>
-                        <select id="ddlMarca" class="form-control">
-                            <option value="">Seleccione una Marca</option>
-                        </select>
-                        @Html.HiddenFor(x => x.Marca.Id)
+                        @Html.DropDownListFor(x => x.Marca.Id, new SelectList(ViewBag.Marcas, "Id", "Nombre"), "Seleccione Un Modelo", new { @class = "form'control", id = "ddlMarca" })
                     </div>
+                </div>*@
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Marca</label>
+                    <select id="ddlMarca" class="form-control">
+                        <option value="">Seleccione una Marca</option>
+                    </select>
+                    @Html.HiddenFor(x => x.Marca.Id)
                 </div>
             </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActulizarModelo()" />
-                                <a href="/Catalogs/Model" class="btn btn-warning">Cancelar</a>
-                            </div>
-                        </div>
-                    </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActulizarModelo()" />
+                    <a href="/Catalogs/Model" class="btn btn-warning">Cancelar</a>
+                </div>
+            </div>
+        </div>
 
-                    @*<div class="row">
+        @*<div class="row">
                 <div class="col-md-12">
                     <div class="mb-3">
                         <label>Filtrar por Modelos:</label>
@@ -73,16 +73,16 @@
                 </div>
             </div>*@
 
-                    <div class="row">
-                        <div class="col-md-12 table-responsive">
-                            <div class="mb-3">
-                            </div>
-                            <table id="tblModelo" class="table table-striped"></table>
-                        </div>
-                    </div>
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                </div>
+                <table id="tblModelo" class="table table-striped"></table>
+            </div>
+        </div>
 
-</form>
-    </div>
+    </form>
+</div>
 
 <script>
     var tablaModelo;
@@ -146,149 +146,152 @@
         });
     });
 
-        function InicializarDataTable() {
-            tablaModelo = $('#tblModelo').DataTable({
-                columns: [
-                    { data: 'Id', title: 'ID', visible: false },
-                    { data: 'Titulo', title: 'Título' },
-                    { data: 'Marca.Nombre', title: 'Marca' },
-                    {
-                        data: 'FechaCreacion',
-                        title: 'Fecha Creación',
-                        render: function (data) {
-                            if (data) {
-                                var fecha = new Date(data);
-                                return fecha.toLocaleDateString();
-                            }
-                            return '---';
+    function InicializarDataTable() {
+        tablaModelo = $('#tblModelo').DataTable({
+            columns: [
+                { data: 'Id', title: 'ID', visible: false },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Marca.Nombre', title: 'Marca' },
+                {
+                    data: 'FechaCreacion',
+                    title: 'Fecha Creación',
+                    render: function (data) {
+                        if (data) {
+                            var fecha = new Date(data);
+                            return fecha.toLocaleDateString();
                         }
-                    },
-                    {
-                        data: 'Id', title: 'Acciones', render: function (data) {
-                            return '<div class="d-flex gap-3">' +
-                                '<button class="btn btn-sm btn-outline-primary" onclick="EditarModelo(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                                '<button class="btn btn-sm btn-outline-danger" onclick="EliminarModelo(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                                '</div>';
-                        }
+                        return '---';
                     }
-                ],
-                language: {
-                    url: "/Content/datatables/i18n/es-ES.json"
+                },
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        return '<div class="d-flex gap-3">' +
+                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarModelo(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarModelo(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '</div>';
+                    }
                 }
-            });
-            ConsultarTodoslosModelos();
-        }
-        function ConsultarTodoslosModelos() {
-            GetMVC("/Catalogs/ConsultarTodosLosModelos", function (response) {
-                var result = typeof response === 'string' ? JSON.parse(response) : response;
+            ],
+            language: {
+                url: "/Content/datatables/i18n/es-ES.json"
+            }
+        });
+        ConsultarTodoslosModelos();
+    }
 
-                if (result.IsSuccess && result.Response) {
-                    MapingPropertiesDataTable("tblModelo", result.Response);
-                } else {
-                    MapingPropertiesDataTable("tblModelo", []);
-                    if (!result.IsSuccess) {
-                        Swal.fire({
-                            title: 'Error',
-                            text: result.Message,
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                            background: 'white',
-                            confirmButtonColor: '#4e73df'
-                        });
-                    }
-                }
-            });
-        }
-        function ConsultarTicketsPorArea(areaId) {
-            GetMVC("/Ticket/ConsultarTicketsPorArea/" + areaId, function (response) {
-                var result = typeof response === 'string' ? JSON.parse(response) : response;
+    function ConsultarTodoslosModelos() {
+        GetMVC("/Catalogs/ConsultarTodosLosModelos", function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
 
-                if (result.IsSuccess && result.Response) {
-                    MapingPropertiesDataTable("tblTicket", result.Response);
-                } else {
-                    MapingPropertiesDataTable("tblTicket", []);
-                    if (!result.IsSuccess) {
-                        Swal.fire({
-                            title: 'Error',
-                            text: result.Message,
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                            background: 'white',
-                            confirmButtonColor: '#4e73df'
-                        });
-                    }
-                }
-            });
-        }
-        function GuardarActualizarModelo() {
-            if ($("#frmModelo").valid()) {
-                // Validar Marca
-                if (!$("#ddlMarca").val()) {
+            if (result.IsSuccess && result.Response) {
+                MapingPropertiesDataTable("tblModelo", result.Response);
+            } else {
+                MapingPropertiesDataTable("tblModelo", []);
+                if (!result.IsSuccess) {
                     Swal.fire({
                         title: 'Error',
-                        text: 'Debe seleccionar un área',
+                        text: result.Message,
                         icon: 'error',
                         confirmButtonText: 'Aceptar',
                         background: 'white',
                         confirmButtonColor: '#4e73df'
                     });
-                    return;
                 }
-                Swal.fire({
-                    title: 'Guardando...',
-                    text: 'Por favor espere',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                var modelo = {
-                    Id: $("#Id").val() || 0,
-                    Nombre: $("#Nombre").val(),
-                    Marca: { Id: parseInt($("#ddlMarca").val()) },
-                    Descripcion: $("#Descripcion").val(),
-                    CreadoPor: $("#CreadoPor").val(),
-                    FechaCreacion: $("#FechaCreacion").val(),
-                    ModificadoPor: $("#ModificadoPor").val() || null,
-                    FechaModificacion: null,
-                    Estatus: true
-
-                };
-
-                PostMVC('/Catalogs/GuardarOActualizarModelos', modelo, function (respose) {
-                    Swal.close();
-                    if (respose.IsSuccess) {
-                        Swal.fire({
-                            title: '¡Éxito!',
-                            text: response.Message,
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false,
-                            background: 'white',
-                            iconColor: '#4e73df'
-                        }).then(() => {
-                            window.location.href = '/Catalogs/Model';
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error',
-                            text: response.Message,
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                            background: 'white',
-                            confirmButtonColor: '#4e73df'
-                        });
-                    }
-                });
-
             }
+        });
+    }
+
+    function ConsultarTicketsPorArea(areaId) {
+        GetMVC("/Ticket/ConsultarTicketsPorArea/" + areaId, function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+            if (result.IsSuccess && result.Response) {
+                MapingPropertiesDataTable("tblTicket", result.Response);
+            } else {
+                MapingPropertiesDataTable("tblTicket", []);
+                if (!result.IsSuccess) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: result.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            }
+        });
+    }
+
+    function GuardarActualizarModelo() {
+        if ($("#frmModelo").valid()) {
+            // Validar Marca
+            if (!$("#ddlMarca").val()) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Debe seleccionar un área',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+                return;
+            }
+            Swal.fire({
+                title: 'Guardando...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            var modelo = {
+                Id: $("#Id").val() || 0,
+                Nombre: $("#Nombre").val(),
+                Marca: { Id: parseInt($("#ddlMarca").val()) },
+                Descripcion: $("#Descripcion").val(),
+                CreadoPor: $("#CreadoPor").val(),
+                FechaCreacion: $("#FechaCreacion").val(),
+                ModificadoPor: $("#ModificadoPor").val() || null,
+                FechaModificacion: null,
+                Estatus: true
+
+            };
+
+            PostMVC('/Catalogs/GuardarOActualizarModelos', modelo, function (respose) {
+                Swal.close();
+                if (respose.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    }).then(() => {
+                        window.location.href = '/Catalogs/Model';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
+
         }
-    
-        function EditarModelo(id) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.location.href = '/Catalogs/Model/' + id;
-        }
+    }
+
+    function EditarModelo(id) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.location.href = '/Catalogs/Model/' + id;
+    }
 
     function EliminarModelo(id) {
         Swal.fire({
