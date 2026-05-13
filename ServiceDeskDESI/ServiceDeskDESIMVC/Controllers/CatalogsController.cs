@@ -76,15 +76,17 @@ namespace ServiceDeskDESIMVC.Controllers
             return View(tipoactivo);
 
         }
-        public async Task<ActionResult> Model (long id = 0)
+        public async Task<ActionResult> Model(long id = 0)
         {
             var modelo = new Modelo();
 
             // Cargar marcas 
             var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
+            var marcasList = new List<Marca>();
+
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
-                ViewBag.Marcas = marcaResponse.Response;
+                marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
             }
 
             if (id > 0)
@@ -99,8 +101,25 @@ namespace ServiceDeskDESIMVC.Controllers
                     ViewBag.ErrorMessage = response.Message;
                 }
             }
-            return View(modelo);
 
+            // Asignar el DropDownList con el valor seleccionado si existe
+            var selectList = MappingPropertiToDropDownList(marcasList, "Id", "Nombre");
+            if (modelo.Marca != null && modelo.Marca.Id > 0)
+            {
+                // Seleccionar el item correspondiente
+                foreach (var item in selectList)
+                {
+                    if (item.Value == modelo.Marca.Id.ToString())
+                    {
+                        item.Selected = true;
+                        break;
+                    }
+                }
+            }
+
+            ViewBag.Marcas = selectList;
+
+            return View(modelo);
         }
         public async Task<ActionResult> Mark(long id = 0)
         {
@@ -430,9 +449,6 @@ namespace ServiceDeskDESIMVC.Controllers
         }
         public async Task<string> EliminarModelos (Modelo m)
         {
-            var tokenCookie = SessionHelper.GetSessionUser();
-            m.ModificadoPor = tokenCookie?.UserName ?? "System";
-            m.FechaModificacion = DateTime.Now;
             var response = await httpClientConnection.EliminarModelos(m);
             return JsonConvert.SerializeObject(response);
         }

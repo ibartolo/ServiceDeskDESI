@@ -24,13 +24,13 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.ObtenerModeloPorId(id);
             return result;
         }
-        [HttpPost, Route("Guardar")]
+        [HttpPost, Route("")]
         public ModelResponse GuardarOActualizarModelos(Modelo m)
         {
             var result = dbWrapper.GuardarOActualizarModelo(m);
             return result;
         }
-        [HttpDelete, Route("Eliminar")]
+        [HttpDelete, Route("")]
         public ModelResponse EliminarModelos(Modelo m)
         {
             m.FechaModificacion = DateTime.Now;
