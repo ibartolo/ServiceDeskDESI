@@ -79,6 +79,7 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<ActionResult> Model (long id = 0)
         {
             var modelo = new Modelo();
+
             // Cargar marcas 
             var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
