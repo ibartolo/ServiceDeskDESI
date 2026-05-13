@@ -93,6 +93,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 {
                     modelo = JsonConvert.DeserializeObject<Modelo>(response.Response.ToString());
                 }
+                else
                 {
                     ViewBag.ErrorMessage = response.Message;
                 }

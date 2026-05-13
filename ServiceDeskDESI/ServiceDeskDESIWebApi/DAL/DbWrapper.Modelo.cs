@@ -71,36 +71,40 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtnerModeloPorId(long id)
+        public ModelResponse ObtenerModeloPorId(long id)
         {
             var modelResponse = new ModelResponse();
+
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del Modelo Es requerido."); }
+                if (id <= 0) { throw new ArgumentException("El ID del modelo es requerido."); }
 
-                var modelo = GetObject("ObtenerModeloPorId",CommandType.StoredProcedure,
-                   new[] { new SqlParameter("@Id", id) },
-                   new Func<IDataReader, Modelo>((reader) =>
-                   {
-                       var m = LlenarEntidad<Modelo>(reader);
-                       m.Marca = new Marca()
-                       {
-                           Id = MapearPorpiedades<long>(reader[("MarcaId")]),
-                           Nombre = MapearPorpiedades<string>(reader["MarcaNombre"])
-                       };
-                       return m;
-                   }));
+                var modelo = GetObject("ObtenerModeloPorId", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Id", id) },
+                    new Func<IDataReader, Modelo>((reader) =>
+                    {
+                        var m = LlenarEntidad<Modelo>(reader);
+
+                        m.Marca = new Marca()
+                        {
+                            Id = MapearPorpiedades<long>(reader["MarcaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
+                        };
+
+                        return m;
+                    }));
+
                 if (modelo == null)
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se encontró el Nombre Especificado.";
+                    modelResponse.Message = "No se encontró el modelo especificado.";
                     return modelResponse;
                 }
 
-
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = modelo;
-                modelResponse.Message = "Marca obtenido correctamente";
+                modelResponse.Message = "Modelo obtenido correctamente";
             }
             catch (ArgumentException ex)
             {
@@ -110,11 +114,10 @@ namespace ServiceDeskDESIWebApi.DAL
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener la Marca";
+                modelResponse.Message = "Ocurrió un error al obtener el modelo";
             }
 
             return modelResponse;
-
         }
         public ModelResponse EliminarModelo (long id, string modificadoPor, DateTime fechaModificacion)
         {

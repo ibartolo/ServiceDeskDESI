@@ -21,7 +21,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpGet, Route("{id:long}")]
         public ModelResponse ObtenerModelosPorId(long id)
         {
-            var result = dbWrapper.ObtnerModeloPorId(id);
+            var result = dbWrapper.ObtenerModeloPorId(id);
             return result;
         }
         [HttpPost, Route("Guardar")]
