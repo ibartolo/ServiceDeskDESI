@@ -42,10 +42,10 @@
                 <div class="cold-md-4">
                     <div class="mb-3">
                         <label>Marca</label>
-                        @Html.DropDownListFor(x => x.Marca.Id, (IEnumerable<SelectListItem>)ViewBag.Marcas, "Seleccione Un Modelo", new { @class = "form-control", id = "ddlMarca" })
+                        @Html.DropDownListFor(x => x.Marca.Id, (IEnumerable<SelectListItem>)ViewBag.Marcas, "Seleccione Una Marca", new { @class = "form-control", id = "ddlMarca" })
                     </div>
-        </div>
-                <div class="col-md-4">
+                 </div>
+                @*<div class="col-md-4">
                     <div class="mb-3">
                         <label>Marca</label>
                         <select id="ddlMarca" class="form-control">
@@ -53,7 +53,7 @@
                         </select>
                         @Html.HiddenFor(x => x.Marca.Id)
                     </div>
-                </div>
+                </div>*@
             </div>
                     <div class="row">
                         <div class="col-md-12">
@@ -67,7 +67,7 @@
                     <div class="row">
                 <div class="col-md-12">
                     <div class="mb-3">
-                        <label>Filtrar por Modelos:</label>
+                        <label>Filtrar por Marca:</label>
                         @Html.DropDownList("ddlFiltroModelo", (IEnumerable<SelectListItem>)ViewBag.Marcas, "Todas los Modelos", new { @class = "form-control w-25", id = "ddlFiltroModelo" })
                     </div>
                 </div>
@@ -99,8 +99,8 @@
             },
             messages: {
                 "Nombre": {
-                    required: "El campo 'Título' es requerido.",
-                    maxlength: "El título no puede superar los 250 caracteres."
+                    required: "El campo 'Nombre' es requerido.",
+                    maxlength: "El Nombre no puede superar los 250 caracteres."
                 },
                 "Descripcion": {
                     required: "El campo 'Descripción' es requerido."
@@ -150,7 +150,8 @@
             tablaModelo = $('#tblModelo').DataTable({
                 columns: [
                     { data: 'Id', title: 'ID', visible: false },
-                    { data: 'Titulo', title: 'Título' },
+                    { data: 'Nombre', title: 'Nombre' },
+                    { data: 'Descripcion', title: 'Descripcion' },
                     { data: 'Marca.Nombre', title: 'Marca' },
                     {
                         data: 'FechaCreacion',
@@ -199,28 +200,28 @@
                 }
             });
         }
-        function ConsultarTicketsPorArea(areaId) {
-            GetMVC("/Ticket/ConsultarTicketsPorArea/" + areaId, function (response) {
-                var result = typeof response === 'string' ? JSON.parse(response) : response;
+        //function ConsultarTicketsPorArea(areaId) {
+        //    GetMVC("/Ticket/ConsultarTicketsPorArea/" + areaId, function (response) {
+        //        var result = typeof response === 'string' ? JSON.parse(response) : response;
 
-                if (result.IsSuccess && result.Response) {
-                    MapingPropertiesDataTable("tblTicket", result.Response);
-                } else {
-                    MapingPropertiesDataTable("tblTicket", []);
-                    if (!result.IsSuccess) {
-                        Swal.fire({
-                            title: 'Error',
-                            text: result.Message,
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                            background: 'white',
-                            confirmButtonColor: '#4e73df'
-                        });
-                    }
-                }
-            });
-        }
-        function GuardarActualizarModelo() {
+        //        if (result.IsSuccess && result.Response) {
+        //            MapingPropertiesDataTable("tblTicket", result.Response);
+        //        } else {
+        //            MapingPropertiesDataTable("tblTicket", []);
+        //            if (!result.IsSuccess) {
+        //                Swal.fire({
+        //                    title: 'Error',
+        //                    text: result.Message,
+        //                    icon: 'error',
+        //                    confirmButtonText: 'Aceptar',
+        //                    background: 'white',
+        //                    confirmButtonColor: '#4e73df'
+        //                });
+        //            }
+        //        }
+        //    });
+        //}
+    function GuardarActulizarModelo() {
             if ($("#frmModelo").valid()) {
                 // Validar Marca
                 if (!$("#ddlMarca").val()) {
@@ -245,8 +246,8 @@
                 var modelo = {
                     Id: $("#Id").val() || 0,
                     Nombre: $("#Nombre").val(),
-                    Marca: { Id: parseInt($("#ddlMarca").val()) },
                     Descripcion: $("#Descripcion").val(),
+                    Marca: { Id: parseInt($("#ddlMarca").val()) },
                     CreadoPor: $("#CreadoPor").val(),
                     FechaCreacion: $("#FechaCreacion").val(),
                     ModificadoPor: $("#ModificadoPor").val() || null,

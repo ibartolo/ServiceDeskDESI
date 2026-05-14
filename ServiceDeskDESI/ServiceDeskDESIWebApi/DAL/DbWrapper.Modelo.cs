@@ -19,15 +19,15 @@ namespace ServiceDeskDESIWebApi.DAL
                 var modelos = GetObjects("ObtenerModelo", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
                    new Func<IDataReader, Modelo>((reader) =>
                    {
-                       var activo = LlenarEntidad<Modelo>(reader);
+                       var modelo = LlenarEntidad<Modelo>(reader);
 
-                       activo.Marca = new Marca()
+                       modelo.Marca = new Marca()
                        {
                            Id = MapearPorpiedades<long> (reader["MarcaId"]),
                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"])
                        };
 
-                       return activo;
+                       return modelo;
                    }));
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = modelos;
