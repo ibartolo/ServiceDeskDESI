@@ -147,6 +147,7 @@
     <Compile Include="Controllers\CompaniaController.cs" />
     <Compile Include="Controllers\MarcaController.cs" />
     <Compile Include="Controllers\ModeloController.cs" />
+    <Compile Include="Controllers\RolController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\TipoActivoController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
@@ -168,6 +169,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DAL\DbWrapper.Rol.cs" />
     <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
