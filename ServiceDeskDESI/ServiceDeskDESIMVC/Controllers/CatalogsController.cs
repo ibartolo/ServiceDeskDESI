@@ -79,21 +79,15 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<ActionResult> Model(long id = 0)
         {
             var modelo = new Modelo();
-<<<<<<< HEAD
-=======
 
             // Cargar marcas 
->>>>>>> develop
             var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
             var marcasList = new List<Marca>();
 
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
-<<<<<<< HEAD
                 ViewBag.Marcas = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString()), "Id", "Nombre");
-=======
                 marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
->>>>>>> develop
             }
 
             if (id > 0)
