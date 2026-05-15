@@ -142,7 +142,6 @@
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\josepruebaController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
@@ -193,7 +192,6 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
-    <Folder Include="Views\joseprueba\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceDeskDESIEntities\ServiceDeskDESIEntities.csproj">
