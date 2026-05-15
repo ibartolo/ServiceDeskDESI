@@ -25,7 +25,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> GuardarActualizarModelos (Modelo m)
         {
             MappingColumSecurity(m);
-            var result = await RequestAsync<object>($"api/modelo/Guardar", HttpMethod.Post, m,
+            var result = await RequestAsync<object>($"api/modelo", HttpMethod.Post, m,
                new Func<string, string>((responseString) =>
                {
                    return responseString;
@@ -46,7 +46,8 @@ namespace ServiceDeskDESIMVC.DAL
         }
         public async Task<ModelResponse> EliminarModelos(Modelo m)
         {
-                var result = await RequestAsync<object>($"api/modelo/Eliminar", HttpMethod.Delete, m,
+            MappingColumSecurity(m);
+                var result = await RequestAsync<object>($"api/modelo", HttpMethod.Delete, m,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

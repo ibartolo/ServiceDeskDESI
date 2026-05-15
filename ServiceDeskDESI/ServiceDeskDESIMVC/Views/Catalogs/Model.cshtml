@@ -1,31 +1,32 @@
 ﻿@model ServiceDeskDESIEntities.Catalogos.Modelo
-    @{
-        ViewBag.Title = "Model";
-        Layout = "~/Views/Shared/_Layout.cshtml";
+@{
+    ViewBag.Title = "Model";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+<div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
     }
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
-    <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
-    <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
-    <div class="form-section">
-        @if (ViewBag.ErrorMessage != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-         }
-        <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Modelo</h3>
-        <form id="frmModelo" name="frmModelo" method="post">
-            @Html.HiddenFor(x => x.Id)
-            @Html.HiddenFor(x => x.CreadoPor)
-            @Html.HiddenFor(x => x.FechaCreacion)
-            @Html.HiddenFor(x => x.ModificadoPor)
-            @Html.HiddenFor(x => x.FechaModificacion)
-            @Html.HiddenFor(x => x.Estatus)
+    <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Modelo</h3>
+    <form id="frmModelo" name="frmModelo" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
 
 
+<<<<<<< HEAD
             <div class="row">
                 <div class="cold-md-4">
                     <div class="mb-3">
@@ -72,20 +73,56 @@
                     </div>
                 </div>
             </div>
+=======
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre de Modelo" })
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label>Descripcion</label>
+                    @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion De Modelo" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Marca</label>
+                    @Html.DropDownListFor(x => x.Marca.Id, (IEnumerable<SelectListItem>)ViewBag.Marcas, "Seleccione Un Modelo", new { @class = "form-control", id = "ddlMarca" })
+                </div>
+            </div>
+>>>>>>> develop
 
-                    <div class="row">
-                        <div class="col-md-12 table-responsive">
-                            <div class="mb-3">
-                            </div>
-                            <table id="tblModelo" class="table table-striped"></table>
-                        </div>
-                    </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarModelo()" />
+                    <a href="/Catalogs/Model" class="btn btn-warning">Cancelar</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                </div>
+                <table id="tblModelo" class="table table-striped"></table>
+            </div>
+        </div>
 
-</form>
-    </div>
+    </form>
+</div>
 
 <script>
     var tablaModelo;
+
+    $(document).ready(function () {
+        InicializarDataTable();
+        ConsultarTodosLosModelos();
+    });
+
     $(function () {
         $("#frmModelo").validate({
             rules: {
@@ -94,16 +131,22 @@
                     maxlength: 250
                 },
                 "Descripcion": {
-                    required: true
+                    required: true,
+                    maxlength: 250
                 }
             },
             messages: {
                 "Nombre": {
                     required: "El campo 'Nombre' es requerido.",
+<<<<<<< HEAD
                     maxlength: "El Nombre no puede superar los 250 caracteres."
+=======
+                    maxlength: "El nombre no puede superar los 250 caracteres."
+>>>>>>> develop
                 },
                 "Descripcion": {
-                    required: "El campo 'Descripción' es requerido."
+                    required: "El campo 'Descripción' es requerido.",
+                    maxlength: "La descripción no puede superar los 250 caracteres."
                 }
             },
             errorElement: "span",
@@ -118,34 +161,42 @@
                 error.insertAfter(element);
             }
         });
-
     });
 
-    $(document).ready(function () {
-        //ObtenerMarcas();
-        //Iniciar Tabla
-        //if (marcaId != 0) {
-
-        InicializarDataTable();
-        ConsultarTodoslosModelos();
-
-        $("#ddlMarca").change(function () {
-            var marcaId = $(this).val();
-
-            if (marcaId) {
-                GetMVC('/Catalogs/ConsultarTodasMarcasPorId?marcaId=' + marcaId, function (response) {
-                    var result = typeof response === 'string' ? JSON.parse(response) : response;
-                    if (result.IsSuccess && result.Response) {
-
+    function InicializarDataTable() {
+        tablaModelo = $('#tblModelo').DataTable({
+            columns: [
+                { data: 'Id', title: 'ID', visible: false },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Descripcion', title: 'Descripción' },
+                { data: 'Marca.Nombre', title: 'Marca' },
+                {
+                    data: 'FechaCreacion',
+                    title: 'Fecha Creación',
+                    render: function (data) {
+                        if (data) {
+                            var fecha = new Date(data);
+                            return fecha.toLocaleDateString();
+                        }
+                        return '---';
                     }
-
-
-                });
-
+                },
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        return '<div class="d-flex gap-3">' +
+                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarModelo(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarModelo(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '</div>';
+                    }
+                }
+            ],
+            language: {
+                url: "/Content/datatables/i18n/es-ES.json"
             }
         });
-    });
+    }
 
+<<<<<<< HEAD
         function InicializarDataTable() {
             tablaModelo = $('#tblModelo').DataTable({
                 columns: [
@@ -225,16 +276,27 @@
             if ($("#frmModelo").valid()) {
                 // Validar Marca
                 if (!$("#ddlMarca").val()) {
+=======
+    function ConsultarTodosLosModelos() {
+        GetMVC("/Catalogs/ConsultarTodosLosModelos", function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+            if (result.IsSuccess && result.Response) {
+                MapingPropertiesDataTable("tblModelo", result.Response);
+            } else {
+                MapingPropertiesDataTable("tblModelo", []);
+                if (!result.IsSuccess) {
+>>>>>>> develop
                     Swal.fire({
                         title: 'Error',
-                        text: 'Debe seleccionar un área',
+                        text: result.Message,
                         icon: 'error',
                         confirmButtonText: 'Aceptar',
                         background: 'white',
                         confirmButtonColor: '#4e73df'
                     });
-                    return;
                 }
+<<<<<<< HEAD
                 Swal.fire({
                     title: 'Guardando...',
                     text: 'Por favor espere',
@@ -282,16 +344,84 @@
                     }
                 });
 
+=======
+>>>>>>> develop
             }
+        });
+    }
+
+    function GuardarActualizarModelo() {
+        if ($("#frmModelo").valid()) {
+            if (!$("#ddlMarca").val()) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Debe seleccionar una marca',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Guardando...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            var modelo = {
+                Id: $("#Id").val() || 0,
+                Nombre: $("#Nombre").val(),
+                Descripcion: $("#Descripcion").val(),
+                Marca: { Id: parseInt($("#ddlMarca").val()) },
+                CreadoPor: $("#CreadoPor").val(),
+                FechaCreacion: $("#FechaCreacion").val(),
+                ModificadoPor: $("#ModificadoPor").val() || null,
+                FechaModificacion: null,
+                Estatus: true
+            };
+
+            PostMVC('/Catalogs/GuardarOActualizarModelos', modelo, function (response) {
+                Swal.close();
+
+                if (response.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    }).then(() => {
+                        window.location.href = '/Catalogs/Model';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
         }
-    
-        function EditarModelo(id) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.location.href = '/Catalogs/Model/' + id;
-        }
+    }
+
+    function EditarModelo(id) {
+        window.location.href = '/Catalogs/Model/' + id;
+    }
 
     function EliminarModelo(id) {
+        event.preventDefault();
+        event.stopPropagation();
+
         Swal.fire({
             title: '¿Está seguro?',
             text: 'Esta acción eliminará lógicamente el registro',
@@ -312,13 +442,13 @@
                     }
                 });
 
-                var ticket = {
+                var modelo = {
                     Id: id,
                     ModificadoPor: $("#ModificadoPor").val() || "system",
                     FechaModificacion: new Date().toISOString()
                 };
 
-                PostMVC('/Catalogs/EliminarModelos', ticket, function (response) {
+                PostMVC('/Catalogs/EliminarModelos', modelo, function (response) {
                     Swal.close();
 
                     if (response.IsSuccess) {
@@ -331,7 +461,9 @@
                             background: 'white',
                             iconColor: '#4e73df'
                         }).then(() => {
-                            ConsultarTodoslosModelos();
+                            ConsultarTodosLosModelos();
+                            $("#frmModelo")[0].reset();
+                            $("#Id").val(0);
                         });
                     } else {
                         Swal.fire({
@@ -347,6 +479,4 @@
             }
         });
     }
-
-
 </script>
