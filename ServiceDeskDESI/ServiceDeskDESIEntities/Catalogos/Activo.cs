@@ -10,10 +10,10 @@ namespace ServiceDeskDESIEntities.Catalogos
     {
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
-        public long TipoActivoID { get; set; }
+        public TipoActivo TipoActivo{ get; set; }
         public string Serial { get; set; }
-        public long  MarcaID { get; set; }
-        public long ModeloID { get; set; }
+        public Marca Marca { get; set; }
+        public Modelo Modelo{ get; set; }
         public string Notas { get; set; }
         public DateTime FechaCompra { get; set; }
   }

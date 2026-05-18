@@ -1,0 +1,101 @@
+﻿@model ServiceDeskDESIEntities.Catalogos.Activo
+    @{
+        ViewBag.Title = "Active";
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+    <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+    <div class="form-section">
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+        <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Activo</h3>
+        <form enctype="multipart/form-data" id="frmActivo" name="frmActivo" method="post">
+            @Html.HiddenFor(x => x.Id)
+            @Html.HiddenFor(x => x.CreadoPor)
+            @Html.HiddenFor(x => x.FechaCreacion)
+            @Html.HiddenFor(x => x.ModificadoPor)
+            @Html.HiddenFor(x => x.FechaModificacion)
+            @Html.HiddenFor(x => x.Estatus)
+
+            <div class="row">
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Nombre</label>
+                        @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Activo" })
+                    </div>
+                </div>
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Descripcion</label>
+                        @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion Activo" })
+                    </div>
+                </div>
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Serial</label>
+                        @Html.TextBoxFor(x => x.Serial, new { @class = "form-control", placeholder = "Serial del Activo" })
+                    </div>
+                </div>
+               
+            </div>
+            <div class="row">
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Notas</label>
+                        @Html.TextBoxFor(x => x.Notas, new { @class = "form-control", placeholder = "Notas de Activo" })
+                    </div>
+                </div>
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Tipo de Activo</label>
+                        @Html.DropDownListFor(x => x.TipoActivo.Id, (IEnumerable<SelectListItem>)ViewBag.TipoActivoss, "Seleccione Un Tipo", new { @class = "form-control", id = "ddlTipoActivo" })
+                    </div>
+                </div>
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Marca</label>
+                        @Html.DropDownListFor(x => x.Marca.Id, (IEnumerable<SelectListItem>)ViewBag.Marcass, "Seleccione Una Marca", new { @class = "form-control", id = "ddlMarca" })
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Modelo</label>
+                        @Html.DropDownListFor(x => x.Modelo.Id, (IEnumerable<SelectListItem>)ViewBag.Modelos, "Seleccione Un Modelo", new { @class = "form-control", id = "ddlMarca" })
+                    </div>
+                </div>
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Fecha De Compra</label>
+                        @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", placeholder = "Fecha De Compra" })
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="mb-3">
+                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarActivo" />
+                    <a href="/Catalogs/Active" class="btn btn-warning">Cancelar</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 table-responsive">
+                    <div class="mb-3">
+                    </div>
+                    <table id="tblActivo" class="table table-striped"></table>
+                </div>
+            </div>
+
+        </form>
+    </div>
+   
+

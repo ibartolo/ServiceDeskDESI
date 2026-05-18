@@ -145,6 +145,7 @@
     <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
+    <Compile Include="DAL\HttpClientConnection.Activo.cs" />
     <Compile Include="DAL\HttpClientConnection.Autentication.cs" />
     <Compile Include="DAL\HttpClientConnection.Area.cs" />
     <Compile Include="DAL\HttpClientConnection.Categoria.cs" />
@@ -182,6 +183,7 @@
     <Content Include="Views\Catalogs\TypeActive.cshtml" />
     <Content Include="Views\Catalogs\Model.cshtml" />
     <Content Include="Views\Catalogs\Mark.cshtml" />
+    <Content Include="Views\Catalogs\Active.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
