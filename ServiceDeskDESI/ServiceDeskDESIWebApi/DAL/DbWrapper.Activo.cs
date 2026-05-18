@@ -95,29 +95,33 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse EliminarActivo(Activo a)
+        public ModelResponse EliminarActivo(long id, string modificadoPor, DateTime fechaModificacion)
         {
             var modelResponse = new ModelResponse();
             try
             {
+                if (id <= 0) { throw new ArgumentException("El ID del Modelo es requerido."); }
+                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El activo modificador es requerido."); }
                 ExecuteNonQuery("EliminarActivo", CommandType.StoredProcedure, new SqlParameter[]
                 {
-                    new SqlParameter("@Id", a.Id),
-                    new SqlParameter("@ModificadoPor", a.ModificadoPor),
-                    new SqlParameter("@FechaModificacion",a.FechaModificacion)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion)
                 });
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Message = "Activo Eliminado Correctamente";
-                modelResponse.Response = null;
+                modelResponse.Message = "Activo eliminado correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al eliminar la Activo";
             }
-
             return modelResponse;
         }
     }

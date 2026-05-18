@@ -76,6 +76,97 @@ namespace ServiceDeskDESIMVC.Controllers
             return View(tipoactivo);
 
         }
+        public async Task<ActionResult>Active(long id = 0)
+        {
+            var activo = new Activo();
+            // cargar tipo activo, modelo, marca
+            var tipoactivoResponse = await httpClientConnection.ObtenerTodosLosTipoActivos();
+            var tipoactivoList = new List<TipoActivo>();
+            if (tipoactivoResponse.IsSuccess && tipoactivoResponse.Response != null)
+            {
+                ViewBag.TipoActivoss = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<TipoActivo>>(tipoactivoResponse.Response.ToString()), "Id", "Nombre");
+                tipoactivoList = JsonConvert.DeserializeObject<List<TipoActivo>>(tipoactivoResponse.Response.ToString());
+            }
+            
+
+
+            var modeloResponse = await httpClientConnection.ObtenerTodosLosModelos();
+            var modeloList = new List<Modelo>();
+            if (modeloResponse.IsSuccess && modeloResponse.Response != null)
+            {
+                ViewBag.Modelos = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Modelo>>(modeloResponse.Response.ToString()), "Id", "Nombre");
+                modeloList = JsonConvert.DeserializeObject<List<Modelo>>(modeloResponse.Response.ToString());
+            }
+
+            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
+            var marcasList = new List<Marca>();
+            if (marcaResponse.IsSuccess && marcaResponse.Response != null)
+            {
+                ViewBag.Marcass = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString()), "Id", "Nombre");
+                marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
+            }
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerActivoPorId(id);
+
+                if (response.IsSuccess && response.Response != null)
+                {
+                    activo = JsonConvert.DeserializeObject<Activo>(response.Response.ToString());
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+
+            // asignar el DropDownList con el valor seleccionado si existe 
+
+            var selectList = MappingPropertiToDropDownList(tipoactivoList, "Id", "Nombre");
+            if (activo.TipoActivo != null && activo.TipoActivo.Id > 0)
+            {
+                // seleccionar el item corespondiete 
+                foreach (var item in selectList)
+                {
+                    if (item.Value == activo.TipoActivo.Id.ToString())
+                    {
+                        item.Selected = true;
+                        break;
+                    }
+                }
+            }
+            ViewBag.TipoActivoss = selectList;
+
+            var selectLista = MappingPropertiToDropDownList(modeloList, "Id", "Nombre");
+            if (activo.Modelo != null && activo.Modelo.Id > 0)
+            {
+                //seleccionar item correspondiente
+                foreach (var item in selectLista)
+                {
+                    if (item.Value == activo.Modelo.Id.ToString())
+                    {
+                        item.Selected = true;
+                        break;
+                    }
+                }
+            }
+            ViewBag.Modelos = selectLista;
+
+            var selectListas = MappingPropertiToDropDownList(marcasList, "Id", "Nombre");
+            if (activo.Marca != null && activo.Marca.Id > 0)
+            {
+                foreach (var item in selectListas)
+                {
+                    if (item.Value == activo.Marca.Id.ToString())
+                    {
+                        item.Selected = true;
+                        break;
+                    }
+                }
+            }
+            ViewBag.Marcass = selectList;
+
+            return View(activo);        
+        }
         public async Task<ActionResult> Model(long id = 0)
         {
             var modelo = new Modelo();
@@ -475,6 +566,28 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        public async Task<string> ConsultarTodosLosActivo()
+        {
+            var response = await httpClientConnection.ObtenerTodosLosActivos();
+            return JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarTodosLosActivosPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerActivoPorId(id);
+            return JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> GuardarOActualizarActivos(Activo a)
+        {
+            a.Estatus = true;
+            var response = await httpClientConnection.GuardarActualizarActivos(a);
+            return JsonConvert.SerializeObject(response);
+
+        }
+        public async Task<string> EliminarActivos(Activo a)
+        {
+            var response = await httpClientConnection.EliminarActivos(a);
+            return JsonConvert.SerializeObject(response);
+        }
         #endregion
     }
 }
