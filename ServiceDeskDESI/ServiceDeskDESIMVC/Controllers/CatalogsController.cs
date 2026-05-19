@@ -74,8 +74,25 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
             }
             return View(tipoactivo);
-
         }
+        public async Task<ActionResult> Branch(long id = 0)
+        {
+            var sucursal = new Sucursal();
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerSucursalesPorId(id);
+                if (response.IsSuccess && response.Response !=null)
+                {
+                    sucursal = JsonConvert.DeserializeObject<Sucursal>(response.Response.ToString());
+                }
+                else 
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }                
+            }
+            return View(sucursal);
+        }
+
         public async Task<ActionResult>Active(long id = 0)
         {
             var activo = new Activo();
@@ -498,28 +515,51 @@ namespace ServiceDeskDESIMVC.Controllers
         }
         #endregion
 
-        #region 4catalogos
+        #region 5catalogos
+        public async Task<string> ConsultarTodasLasSucursales()
+        {
+            var response = await httpClientConnection.ObtenerTodasLasSucursales();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarTodasLasSucursalesPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerSucursalesPorId(id);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> GuardarActualizarSucursales(Sucursal s)
+        {
+            var response = await httpClientConnection.GuardarActualizarSucursales(s);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> EliminarSucurales(Sucursal s)
+        {
+            var response = await httpClientConnection.EliminarSucursal(s);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
         public async Task<string> ConsultarTodosLosTipoActivos()
         {
             var response = await httpClientConnection.ObtenerTodosLosTipoActivos();
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        
         public async Task<string> ConsultarTodosLosTipoActivoPorId(long id)
         {
             var response = await httpClientConnection.ObtenerTipoActivoPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+     
         public async Task<string>GuardarOActualizarTipoActivo(TipoActivo t)
         {
             var response = await httpClientConnection.GuardarOActualizarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+       
         public async Task<string>EliminarTipoActivo(TipoActivo t)
         {
             var response = await httpClientConnection.EliminarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
-
+        
         public async Task<string> ConsultarTodosLosModelos()
         {
             var response = await httpClientConnection.ObtenerTodosLosModelos();
