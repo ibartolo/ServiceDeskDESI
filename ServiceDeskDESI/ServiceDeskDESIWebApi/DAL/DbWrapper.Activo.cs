@@ -82,36 +82,64 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerActivosPorId (long id)
+        public ModelResponse ObtenerActivoPorId(long id)
         {
             var modelResponse = new ModelResponse();
+
             try
             {
-                modelResponse.IsSuccess = true;
-                var parameters = new List<SqlParameter>();
-                parameters.Add(new SqlParameter()
-                {
-                    Value = id,
-                    IsNullable = true,
-                    ParameterName = "@Id",
-                    SqlDbType = System.Data.SqlDbType.Int
-                });
+                if (id <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
 
-                var result = GetObject("ObtenerActivoPorId", System.Data.CommandType.StoredProcedure,
-                    parameters, new Func<System.Data.IDataReader, Activo>((reader) =>
+                var activo = GetObject("ObtenerActivoPorId", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Id", id) },
+                    new Func<IDataReader, Activo>((reader) =>
                     {
-                        var r = LlenarEntidad<Activo>(reader);
-                        return r;
+                        var a = LlenarEntidad<Activo>(reader);
+
+                        a.TipoActivo = new TipoActivo()
+                        {
+                            Id = MapearPorpiedades<long>(reader["TipoActivoId"]),
+                            Nombre = MapearPorpiedades<string>(reader["TipoActivoNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["TipoActivoDescripcion"])
+                        };
+
+                        a.Marca = new Marca()
+                        {
+                            Id = MapearPorpiedades<long>(reader["MarcaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
+                        };
+
+                        a.Modelo = new Modelo()
+                        {
+                            Id = MapearPorpiedades<long>(reader["ModeloId"]),
+                            Nombre = MapearPorpiedades<string>(reader["ModeloNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["ModeloDescripcion"])
+                        };
+
+                        return a;
                     }));
-                modelResponse.Response = result;
+
+                if (activo == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró el activo especificado.";
+                    return modelResponse;
+                }
+
                 modelResponse.IsSuccess = true;
-                modelResponse.Message = "Compania obtenido correctamente";
+                modelResponse.Response = activo;
+                modelResponse.Message = "Activo obtenido correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al obtener el activo";
             }
 
             return modelResponse;

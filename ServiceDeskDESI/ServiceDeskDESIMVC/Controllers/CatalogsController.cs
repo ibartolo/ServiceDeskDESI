@@ -135,14 +135,11 @@ namespace ServiceDeskDESIMVC.Controllers
                     ViewBag.ErrorMessage = response.Message;
                 }
             }
-
-            // asignar el DropDownList con el valor seleccionado si existe 
-
-            var selectList = MappingPropertiToDropDownList(tipoactivoList, "Id", "Nombre");
+            // Después de obtener el objeto activo, setea el valor seleccionado
+            var selectListTipo = MappingPropertiToDropDownList(tipoactivoList, "Id", "Nombre");
             if (activo.TipoActivo != null && activo.TipoActivo.Id > 0)
             {
-                // seleccionar el item corespondiete 
-                foreach (var item in selectList)
+                foreach (var item in selectListTipo)
                 {
                     if (item.Value == activo.TipoActivo.Id.ToString())
                     {
@@ -151,7 +148,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     }
                 }
             }
-            ViewBag.TipoActivoss = selectList;
+            ViewBag.TipoActivoss = selectListTipo;
 
             var selectLista = MappingPropertiToDropDownList(modeloList, "Id", "Nombre");
             if (activo.Modelo != null && activo.Modelo.Id > 0)
@@ -615,7 +612,6 @@ namespace ServiceDeskDESIMVC.Controllers
         }
         public async Task<string> GuardarOActualizarActivos(Activo a)
         {
-            a.Estatus = true;
             var response = await httpClientConnection.GuardarActualizarActivos(a);
             return JsonConvert.SerializeObject(response);
 

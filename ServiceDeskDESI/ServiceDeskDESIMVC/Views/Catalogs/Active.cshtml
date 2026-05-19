@@ -1,4 +1,4 @@
-﻿@model ServiceDeskDESIEntities.Catalogos.Activo
+﻿﻿@model ServiceDeskDESIEntities.Catalogos.Activo
 @{
     ViewBag.Title = "Active";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -6,6 +6,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
 <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<style>
+    .is-invalid-dropdown {
+        border-color: #dc3545 !important;
+        padding-right: calc(1.5em + 0.75rem) !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right calc(0.375em + 0.1875rem) center !important;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
+    }
+</style>
 
 <div class="form-section">
     @if (ViewBag.ErrorMessage != null)
@@ -90,12 +101,10 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label>Fecha de Compra</label>
-                    @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", placeholder = "Fecha de Compra", type = "date" })
-                </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label>Fecha de Compra</label>
+                @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", type = "date", @Value = Model.Id == 0 ? "" : Model.FechaCompra.ToString("yyyy-MM-dd") })
             </div>
         </div>
 
@@ -135,6 +144,10 @@
 
 <script>
     var tablaActivo;
+    var tipoActivoSelect = @(Model.TipoActivo?.Id ?? 0);
+    var marcaSelect = @(Model.Marca?.Id ?? 0);
+    var modeloSelect = @(Model.Modelo?.Id ?? 0);
+    var activoId = @Model.Id;
 
     $(document).ready(function () {
         InicializarDataTable();
@@ -147,6 +160,9 @@
             // Limpiar el DDL de modelos
             $("#ddlModelo").empty().append('<option value="">Seleccione un modelo</option>');
             $("#Modelo_Id").val('');
+
+            // Remover estilo de error del DDL de modelo
+            $("#ddlModelo").removeClass("is-invalid-dropdown");
 
             if (marcaId) {
                 // Mostrar spinner de carga en el DDL de modelos
@@ -164,6 +180,12 @@
                             modelos.forEach(function (m) {
                                 $("#ddlModelo").append('<option value="' + m.Id + '">' + m.Nombre + '</option>');
                             });
+
+                            // Seleccionar el modelo si estamos en modo edición
+                            if (modeloSelect > 0) {
+                                $("#ddlModelo").val(modeloSelect);
+                                $("#Modelo_Id").val(modeloSelect);
+                            }
                         } else {
                             $("#ddlModelo").append('<option value="">No hay modelos disponibles</option>');
                         }
@@ -181,6 +203,25 @@
                 });
             }
         });
+
+        // Remover estilos de error cuando cambian los dropdowns
+        $("#ddlTipoActivo, #ddlMarca, #ddlModelo").change(function () {
+            $(this).removeClass("is-invalid-dropdown");
+        });
+
+        // Modo edición: preseleccionar valores
+        if (activoId != 0) {
+            // Seleccionar tipo de activo
+            if (tipoActivoSelect > 0) {
+                $("#ddlTipoActivo").val(tipoActivoSelect);
+            }
+
+            // Seleccionar marca y disparar evento para cargar modelos
+            if (marcaSelect > 0) {
+                $("#ddlMarca").val(marcaSelect);
+                $("#ddlMarca").trigger('change');
+            }
+        }
     });
 
     $(function () {
@@ -192,6 +233,9 @@
                 },
                 "Descripcion": {
                     required: true
+                },
+                "FechaCompra": {
+                    required: true
                 }
             },
             messages: {
@@ -201,6 +245,9 @@
                 },
                 "Descripcion": {
                     required: "El campo 'Descripción' es requerido."
+                },
+                "FechaCompra": {
+                    required: "El campo 'Fecha de Compra' es requerido."
                 }
             },
             errorElement: "span",
@@ -264,66 +311,44 @@
         });
     }
 
-    function ConsultarTodosLosActivos() {
-        GetMVC("/Catalogs/ConsultarTodosLosActivo", function (response) {
-            var result = typeof response === 'string' ? JSON.parse(response) : response;
-
-            if (result.IsSuccess && result.Response) {
-                MapingPropertiesDataTable("tblActivo", result.Response);
-            } else {
-                MapingPropertiesDataTable("tblActivo", []);
-                if (!result.IsSuccess) {
-                    Swal.fire({
-                        title: 'Error',
-                        text: result.Message,
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar',
-                        background: 'white',
-                        confirmButtonColor: '#4e73df'
-                    });
-                }
-            }
-        });
-    }
-
     function GuardarActualizarActivo() {
+        // Limpiar estilos de error previos
+        $("#ddlTipoActivo, #ddlMarca, #ddlModelo").removeClass("is-invalid-dropdown");
+
+        var isValidDropdown = true;
+        var errorMessage = "";
+
+        if (!$("#ddlTipoActivo").val()) {
+            $("#ddlTipoActivo").addClass("is-invalid-dropdown");
+            isValidDropdown = false;
+            errorMessage = "Debe seleccionar un tipo de activo";
+        }
+
+        if (!$("#ddlMarca").val()) {
+            $("#ddlMarca").addClass("is-invalid-dropdown");
+            isValidDropdown = false;
+            if (errorMessage === "") errorMessage = "Debe seleccionar una marca";
+        }
+
+        if (!$("#ddlModelo").val()) {
+            $("#ddlModelo").addClass("is-invalid-dropdown");
+            isValidDropdown = false;
+            if (errorMessage === "") errorMessage = "Debe seleccionar un modelo";
+        }
+
+        if (!isValidDropdown) {
+            Swal.fire({
+                title: 'Error',
+                text: errorMessage,
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+
         if ($("#frmActivo").valid()) {
-            if (!$("#ddlTipoActivo").val()) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Debe seleccionar un tipo de activo',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-                return;
-            }
-
-            if (!$("#ddlMarca").val()) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Debe seleccionar una marca',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-                return;
-            }
-
-            if (!$("#ddlModelo").val()) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Debe seleccionar un modelo',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-                return;
-            }
-
             Swal.fire({
                 title: 'Guardando...',
                 text: 'Por favor espere',
@@ -427,6 +452,8 @@
                             $("#frmActivo")[0].reset();
                             $("#Id").val(0);
                             $("#ddlModelo").empty().append('<option value="">Seleccione un modelo</option>');
+                            // Limpiar estilos de error
+                            $("#ddlTipoActivo, #ddlMarca, #ddlModelo").removeClass("is-invalid-dropdown");
                         });
                     } else {
                         Swal.fire({

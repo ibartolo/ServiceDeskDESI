@@ -385,4 +385,3 @@ function NumeroALetras(num) {
         return Millones(data.enteros) + " " + data.letrasMonedaPlural + " " + data.letrasCentavos;
 }
 
-
