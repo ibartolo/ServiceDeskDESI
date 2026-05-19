@@ -149,6 +149,7 @@
     <Compile Include="Controllers\MarcaController.cs" />
     <Compile Include="Controllers\ModeloController.cs" />
     <Compile Include="Controllers\RolController.cs" />
+    <Compile Include="Controllers\SucursalController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\TipoActivoController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
@@ -160,6 +161,7 @@
     <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Marca.cs" />
     <Compile Include="DAL\DbWrapper.Modelo.cs" />
+    <Compile Include="DAL\DbWrapper.Sucursal.cs" />
     <Compile Include="DAL\DbWrapper.TipoActivo.cs" />
     <Compile Include="DAL\DbWrapper.Ticket.cs" />
     <Compile Include="Global.asax.cs">

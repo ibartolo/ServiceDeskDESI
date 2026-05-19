@@ -153,6 +153,7 @@
     <Compile Include="DAL\HttpClientConnection.cs" />
     <Compile Include="DAL\HttpClientConnection.Marca.cs" />
     <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
+    <Compile Include="DAL\HttpClientConnection.Sucursal.cs" />
     <Compile Include="DAL\HttpClientConnection.Ticket.cs" />
     <Compile Include="DAL\HttpClientConnection.TipoActivo.cs" />
     <Compile Include="DAL\HttpClientConnection.User.cs" />
@@ -184,6 +185,7 @@
     <Content Include="Views\Catalogs\Model.cshtml" />
     <Content Include="Views\Catalogs\Mark.cshtml" />
     <Content Include="Views\Catalogs\Active.cshtml" />
+    <Content Include="Views\Catalogs\Branch.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
