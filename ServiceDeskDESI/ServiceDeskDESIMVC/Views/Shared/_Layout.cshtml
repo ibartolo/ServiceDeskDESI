@@ -277,17 +277,26 @@
                 <div class="user-menu">
                     <div class="user-details">
                         <div class="user-name">@ServiceDeskDESIMVC.Helpers.SessionHelper.GetSessionUser().UserName</div>
-                        <!--<div class="user-role">Agente de Soporte Nivel 2</div>-->
                     </div>
                     <div class="user-avatar">
-                        @ServiceDeskDESIMVC.Helpers.SessionHelper.GetSessionUser().UserAvatar
+                        @{
+                            var usuario = ServiceDeskDESIMVC.Helpers.SessionHelper.GetSessionUser();
+                            if (!string.IsNullOrEmpty(usuario.ProfileImage) && System.IO.File.Exists(Server.MapPath(usuario.ProfileImage)))
+                            {
+                                <img src="@usuario.ProfileImage" alt="Foto de perfil" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                @Html.Raw(usuario.UserAvatar)
+                            }
+                        }
                     </div>
                     <div class="dropdown">
                         <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="fas fa-chevron-down"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/User/MyProfile"><i class="fas fa-user me-2"></i> Perfil</a></li>
+                            <li><a class="dropdown-item" href="User/MyProfile"><i class="fas fa-user me-2"></i> Perfil</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Configuración</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/Home/LogOut"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a></li>
