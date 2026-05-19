@@ -1,101 +1,445 @@
 ﻿@model ServiceDeskDESIEntities.Catalogos.Activo
-    @{
-        ViewBag.Title = "Active";
-        Layout = "~/Views/Shared/_Layout.cshtml";
+@{
+    ViewBag.Title = "Active";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
     }
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
-    <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
-    <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
-    <div class="form-section">
-        @if (ViewBag.ErrorMessage != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        }
-        <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Activo</h3>
-        <form enctype="multipart/form-data" id="frmActivo" name="frmActivo" method="post">
-            @Html.HiddenFor(x => x.Id)
-            @Html.HiddenFor(x => x.CreadoPor)
-            @Html.HiddenFor(x => x.FechaCreacion)
-            @Html.HiddenFor(x => x.ModificadoPor)
-            @Html.HiddenFor(x => x.FechaModificacion)
-            @Html.HiddenFor(x => x.Estatus)
+    <h3 class="section-title"><i class="fas fa-laptop me-2"></i>Catálogo de Activos</h3>
+    <form enctype="multipart/form-data" id="frmActivo" name="frmActivo" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
 
-            <div class="row">
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Nombre</label>
-                        @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Activo" })
-                    </div>
-                </div>
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Descripcion</label>
-                        @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion Activo" })
-                    </div>
-                </div>
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Serial</label>
-                        @Html.TextBoxFor(x => x.Serial, new { @class = "form-control", placeholder = "Serial del Activo" })
-                    </div>
-                </div>
-               
-            </div>
-            <div class="row">
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Notas</label>
-                        @Html.TextBoxFor(x => x.Notas, new { @class = "form-control", placeholder = "Notas de Activo" })
-                    </div>
-                </div>
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Tipo de Activo</label>
-                        @Html.DropDownListFor(x => x.TipoActivo.Id, (IEnumerable<SelectListItem>)ViewBag.TipoActivoss, "Seleccione Un Tipo", new { @class = "form-control", id = "ddlTipoActivo" })
-                    </div>
-                </div>
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Marca</label>
-                        @Html.DropDownListFor(x => x.Marca.Id, (IEnumerable<SelectListItem>)ViewBag.Marcass, "Seleccione Una Marca", new { @class = "form-control", id = "ddlMarca" })
-                    </div>
-                </div>
-
-            </div>
-            <div class="row">
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Modelo</label>
-                        @Html.DropDownListFor(x => x.Modelo.Id, (IEnumerable<SelectListItem>)ViewBag.Modelos, "Seleccione Un Modelo", new { @class = "form-control", id = "ddlMarca" })
-                    </div>
-                </div>
-                <div class="cold-md-4">
-                    <div class="mb-3">
-                        <label>Fecha De Compra</label>
-                        @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", placeholder = "Fecha De Compra" })
-                    </div>
-                </div>
-            </div>
-            <div class="row">
+        <div class="row">
+            <div class="col-md-4">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarActivo" />
+                    <label>Nombre</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Activo" })
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label>Descripción</label>
+                    @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripción Activo" })
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Serial</label>
+                    @Html.TextBoxFor(x => x.Serial, new { @class = "form-control", placeholder = "Serial del Activo" })
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label>Notas</label>
+                    @Html.TextBoxFor(x => x.Notas, new { @class = "form-control", placeholder = "Notas de Activo" })
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Tipo de Activo</label>
+                    @Html.DropDownListFor(x => x.TipoActivo.Id, (IEnumerable<SelectListItem>)ViewBag.TipoActivoss, "Seleccione un tipo", new { @class = "form-control", id = "ddlTipoActivo" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Marca</label>
+                    <select id="ddlMarca" class="form-control">
+                        <option value="">Seleccione una marca</option>
+                        @if (ViewBag.Marcass != null)
+                        {
+                            foreach (var item in (List<SelectListItem>)ViewBag.Marcass)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                    @Html.HiddenFor(x => x.Marca.Id)
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Modelo</label>
+                    <select id="ddlModelo" class="form-control">
+                        <option value="">Seleccione un modelo</option>
+                    </select>
+                    @Html.HiddenFor(x => x.Modelo.Id)
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Fecha de Compra</label>
+                    @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", placeholder = "Fecha de Compra", type = "date" })
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarActivo()" />
                     <a href="/Catalogs/Active" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12 table-responsive">
-                    <div class="mb-3">
-                    </div>
-                    <table id="tblActivo" class="table table-striped"></table>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                    <table id="tblActivo" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Serial</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
+    </form>
+</div>
 
-        </form>
-    </div>
-   
+<script>
+    var tablaActivo;
 
+    $(document).ready(function () {
+        InicializarDataTable();
+        ConsultarTodosLosActivos();
+
+        // Evento: al cambiar la marca, cargar modelos
+        $("#ddlMarca").change(function () {
+            var marcaId = $(this).val();
+
+            // Limpiar el DDL de modelos
+            $("#ddlModelo").empty().append('<option value="">Seleccione un modelo</option>');
+            $("#Modelo_Id").val('');
+
+            if (marcaId) {
+                // Mostrar spinner de carga en el DDL de modelos
+                $("#ddlModelo").html('<option value="">Cargando modelos...</option>');
+
+                GetMVC("/Catalogs/ConsultarModelosPorMarca?marcaId=" + marcaId, function (response) {
+                    var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+                    // Limpiar y restaurar el DDL de modelos
+                    $("#ddlModelo").empty().append('<option value="">Seleccione un modelo</option>');
+
+                    if (result.IsSuccess && result.Response) {
+                        var modelos = result.Response;
+                        if (modelos.length > 0) {
+                            modelos.forEach(function (m) {
+                                $("#ddlModelo").append('<option value="' + m.Id + '">' + m.Nombre + '</option>');
+                            });
+                        } else {
+                            $("#ddlModelo").append('<option value="">No hay modelos disponibles</option>');
+                        }
+                    } else {
+                        $("#ddlModelo").append('<option value="">Error al cargar modelos</option>');
+                        Swal.fire({
+                            title: 'Error',
+                            text: result.Message || 'No se pudieron cargar los modelos',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    });
+
+    $(function () {
+        $("#frmActivo").validate({
+            rules: {
+                "Nombre": {
+                    required: true,
+                    maxlength: 250
+                },
+                "Descripcion": {
+                    required: true
+                }
+            },
+            messages: {
+                "Nombre": {
+                    required: "El campo 'Nombre' es requerido.",
+                    maxlength: "El nombre no puede superar los 250 caracteres."
+                },
+                "Descripcion": {
+                    required: "El campo 'Descripción' es requerido."
+                }
+            },
+            errorElement: "span",
+            errorClass: "text-danger",
+            highlight: function (element) {
+                $(element).addClass("is-invalid").removeClass("is-valid");
+            },
+            unhighlight: function (element) {
+                $(element).removeClass("is-invalid").addClass("is-valid");
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element);
+            }
+        });
+    });
+
+    function InicializarDataTable() {
+        tablaActivo = $('#tblActivo').DataTable({
+            columns: [
+                { data: 'Id', title: 'ID', visible: false },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Descripcion', title: 'Descripción' },
+                { data: 'Serial', title: 'Serial', defaultContent: '---' },
+                { data: 'Marca.Nombre', title: 'Marca', defaultContent: '---' },
+                { data: 'Modelo.Nombre', title: 'Modelo', defaultContent: '---' },
+                { data: 'TipoActivo.Nombre', title: 'Tipo', defaultContent: '---' },
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        return '<div class="d-flex gap-3">' +
+                            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarActivo(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarActivo(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '</div>';
+                    }
+                }
+            ],
+            language: {
+                url: "/Content/datatables/i18n/es-ES.json"
+            }
+        });
+    }
+
+    function ConsultarTodosLosActivos() {
+        GetMVC("/Catalogs/ConsultarTodosLosActivo", function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+            if (result.IsSuccess && result.Response) {
+                MapingPropertiesDataTable("tblActivo", result.Response);
+            } else {
+                MapingPropertiesDataTable("tblActivo", []);
+                if (!result.IsSuccess) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: result.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            }
+        });
+    }
+
+    function ConsultarTodosLosActivos() {
+        GetMVC("/Catalogs/ConsultarTodosLosActivo", function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+            if (result.IsSuccess && result.Response) {
+                MapingPropertiesDataTable("tblActivo", result.Response);
+            } else {
+                MapingPropertiesDataTable("tblActivo", []);
+                if (!result.IsSuccess) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: result.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            }
+        });
+    }
+
+    function GuardarActualizarActivo() {
+        if ($("#frmActivo").valid()) {
+            if (!$("#ddlTipoActivo").val()) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Debe seleccionar un tipo de activo',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+                return;
+            }
+
+            if (!$("#ddlMarca").val()) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Debe seleccionar una marca',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+                return;
+            }
+
+            if (!$("#ddlModelo").val()) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Debe seleccionar un modelo',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Guardando...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            var activo = {
+                Id: $("#Id").val() || 0,
+                Nombre: $("#Nombre").val(),
+                Descripcion: $("#Descripcion").val(),
+                Serial: $("#Serial").val(),
+                Notas: $("#Notas").val(),
+                FechaCompra: $("#FechaCompra").val(),
+                TipoActivo: { Id: parseInt($("#ddlTipoActivo").val()) },
+                Marca: { Id: parseInt($("#ddlMarca").val()) },
+                Modelo: { Id: parseInt($("#ddlModelo").val()) },
+                CreadoPor: $("#CreadoPor").val(),
+                FechaCreacion: $("#FechaCreacion").val(),
+                ModificadoPor: $("#ModificadoPor").val() || null,
+                FechaModificacion: null,
+                Estatus: true
+            };
+
+            PostMVC('/Catalogs/GuardarOActualizarActivos', activo, function (response) {
+                Swal.close();
+
+                if (response.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    }).then(() => {
+                        window.location.href = '/Catalogs/Active';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
+        }
+    }
+
+    function EditarActivo(id) {
+        window.location.href = '/Catalogs/Active/' + id;
+    }
+
+    function EliminarActivo(id) {
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Esta acción eliminará lógicamente el registro',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                var activo = {
+                    Id: id,
+                    ModificadoPor: $("#ModificadoPor").val() || "system",
+                    FechaModificacion: new Date().toISOString()
+                };
+
+                PostMVC('/Catalogs/EliminarActivos', activo, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: response.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            ConsultarTodosLosActivos();
+                            $("#frmActivo")[0].reset();
+                            $("#Id").val(0);
+                            $("#ddlModelo").empty().append('<option value="">Seleccione un modelo</option>');
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>

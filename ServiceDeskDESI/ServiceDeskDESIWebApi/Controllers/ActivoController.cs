@@ -15,7 +15,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpGet, Route("List")]
         public ModelResponse ObtenerActivos()
         {
-            var result = dbWrapper.ObtenerTodosActivos();
+            var result = dbWrapper.ObtenerTodosLosActivos();
             return result;
         }
         [HttpGet, Route("{id:long}")]

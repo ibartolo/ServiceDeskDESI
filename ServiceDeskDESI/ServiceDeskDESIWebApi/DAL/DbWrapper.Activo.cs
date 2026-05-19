@@ -11,30 +11,52 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodosActivos()
+        public ModelResponse ObtenerTodosLosActivos()
         {
             var modelResponse = new ModelResponse();
+
             try
             {
-                var Activos = GetObjects("ObtenerActivos", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                var activos = GetObjects("ObtenerActivos", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
                     new Func<IDataReader, Activo>((reader) =>
                     {
                         var activo = LlenarEntidad<Activo>(reader);
+
+                        activo.TipoActivo = new TipoActivo()
+                        {
+                            Id = MapearPorpiedades<long>(reader["TipoActivoId"]),
+                            Nombre = MapearPorpiedades<string>(reader["TipoActivoNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["TipoActivoDescripcion"])
+                        };
+
+                        activo.Marca = new Marca()
+                        {
+                            Id = MapearPorpiedades<long>(reader["MarcaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
+                        };
+
+                        activo.Modelo = new Modelo()
+                        {
+                            Id = MapearPorpiedades<long>(reader["ModeloId"]),
+                            Nombre = MapearPorpiedades<string>(reader["ModeloNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["ModeloDescripcion"])
+                        };
+
                         return activo;
                     }));
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = Activos;
-                modelResponse.Message = "Activos obtenidos correctamente";
 
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = activos;
+                modelResponse.Message = "Activos obtenidos correctamente";
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al obtener los activos";
             }
-            return modelResponse;
 
+            return modelResponse;
         }
 
         public ModelResponse GuardarOActualizarActivo(Activo a)

@@ -151,20 +151,6 @@ namespace ServiceDeskDESIMVC.Controllers
             }
             ViewBag.Modelos = selectLista;
 
-            var selectListas = MappingPropertiToDropDownList(marcasList, "Id", "Nombre");
-            if (activo.Marca != null && activo.Marca.Id > 0)
-            {
-                foreach (var item in selectListas)
-                {
-                    if (item.Value == activo.Marca.Id.ToString())
-                    {
-                        item.Selected = true;
-                        break;
-                    }
-                }
-            }
-            ViewBag.Marcass = selectList;
-
             return View(activo);        
         }
         public async Task<ActionResult> Model(long id = 0)
@@ -223,6 +209,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 {
                        marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
                 }
+                else
                 {
                     ViewBag.ErrorMessage = response.Message;
                 }
@@ -498,6 +485,16 @@ namespace ServiceDeskDESIMVC.Controllers
         {
             var response = await httpClientConnection.EliminarCompania(c);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarModelosPorMarca(long marcaId)
+        {
+            var response = await httpClientConnection.ObtenerTodosLosModelos();
+            var listModels = JsonConvert.DeserializeObject<List<Modelo>>(response.Response.ToString());
+            var modelosPorMarca = listModels.Where(m => m.Marca.Id == marcaId).ToList();
+            mr.Response = modelosPorMarca;
+            mr.IsSuccess = true;
+
+            return JsonConvert.SerializeObject(mr);
         }
         #endregion
 

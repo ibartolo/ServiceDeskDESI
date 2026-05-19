@@ -18,7 +18,7 @@
             </div>
         }
         <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Marca</h3>
-        <form enctype="multipart/form-data" id="frmMarca" name="frmMarca" method="post">
+        <form id="frmMarca" name="frmMarca" method="post">
             @Html.HiddenFor(x => x.Id)
             @Html.HiddenFor(x => x.CreadoPor)
             @Html.HiddenFor(x => x.FechaCreacion)
@@ -26,13 +26,13 @@
             @Html.HiddenFor(x => x.FechaModificacion)
             @Html.HiddenFor(x => x.Estatus)
             <div class="row">
-                <div class="cold-md-8">
+                <div class="col-md-4">
                     <div class="mb-3">
                         <label>Nombre</label>
                         @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Marca" })
                     </div>
                 </div>
-                <div class="cold-md-4">
+                <div class="col-md-8">
                     <div class="mb-3">
                         <label>Descripcion</label>
                         @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion Marca" })
@@ -102,9 +102,10 @@
                 { data: 'Descripcion', title: 'Descripcion' },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
+                        // Dentro del render de la columna "Acciones" añade type="button"
                         return '<div class="d-flex gap-3">' +
-                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarMarca(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarMarca(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarMarca(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarMarca(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
                             '</div>';
                     }
 
@@ -164,6 +165,7 @@
             });
         }
     }
+
     function ConsultarTodasMarcas() {
         GetMVC("/Catalogs/ConsultarTodosLasMarcas", function (r) {
             var result = typeof r == 'string' ? JSON.parse(r) : r;
@@ -182,14 +184,13 @@
             }
         });
     }
+
     function EditarMarca(id) {
-        vent.preventDefault();
-        event.stopPropagation();
         window.location.href = '/Catalogs/Mark/' + id;
     }
+
     function EliminarMarca(event, id) {
-        event.preventDefault();
-        event.stopPropagation();
+
         Swal.fire({
             title: '¿Está seguro?',
             text: 'Esta acción eliminará lógicamente el registro',
