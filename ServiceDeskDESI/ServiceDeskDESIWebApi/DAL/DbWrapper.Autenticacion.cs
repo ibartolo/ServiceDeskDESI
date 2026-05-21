@@ -12,25 +12,36 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerUsuarios()
+        public ModelResponse ObtenerUsuarios(long empresaId)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
-                var usuarios = GetObjects("ObtenerUsuarios", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+
+                var usuarios = GetObjects("ObtenerUsuarios", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@EmpresaId", empresaId) },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
                         var usuario = LlenarEntidad<Usuario>(reader);
 
                         usuario.Sucursal = new Sucursal()
                         {
-                            Id = MapearPorpiedades<long>(reader["SucursalId"])
+                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
+                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
                         };
 
                         usuario.Area = new Area()
                         {
-                            Id = MapearPorpiedades<long>(reader["AreaId"])
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
+                        };
+
+                        usuario.Empresa = new Empresa()
+                        {
+                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
+                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
                         };
 
                         return usuario;
@@ -38,28 +49,35 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = usuarios;
+                modelResponse.Message = "Usuarios obtenidos correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al obtener los usuarios";
             }
 
             return modelResponse;
         }
 
-        public ModelResponse ObtenerUsuarioPorId(long id)
+        public ModelResponse ObtenerUsuarioPorId(long id, long empresaId)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
                 if (id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
 
                 var usuario = GetObject("ObtenerUsuarioPorId", CommandType.StoredProcedure,
                     new[] {
-                        new SqlParameter("@Id", id)
+                new SqlParameter("@Id", id),
+                new SqlParameter("@EmpresaId", empresaId)
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
@@ -67,12 +85,20 @@ namespace ServiceDeskDESIWebApi.DAL
 
                         u.Sucursal = new Sucursal()
                         {
-                            Id = MapearPorpiedades<long>(reader["SucursalId"])
+                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
+                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
                         };
 
                         u.Area = new Area()
                         {
-                            Id = MapearPorpiedades<long>(reader["AreaId"])
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
+                        };
+
+                        u.Empresa = new Empresa()
+                        {
+                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
+                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
                         };
 
                         return u;
@@ -87,6 +113,7 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = usuario;
+                modelResponse.Message = "Usuario obtenido correctamente";
             }
             catch (ArgumentException ex)
             {
@@ -96,8 +123,7 @@ namespace ServiceDeskDESIWebApi.DAL
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener el usuario.";
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al obtener el usuario";
             }
 
             return modelResponse;
@@ -122,14 +148,47 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (u.Apellido.Length > 250) { throw new ArgumentException("El apellido no puede exceder los 250 caracteres."); }
                 if (u.Sucursal == null || u.Sucursal.Id <= 0) { throw new ArgumentException("La sucursal es requerida."); }
                 if (u.Area == null || u.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
+                if (u.Empresa == null || u.Empresa.Id <= 0) { throw new ArgumentException("La empresa es requerida."); }
                 if (string.IsNullOrWhiteSpace(u.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
 
-                var parametros = ObtenerParametrosSQL(u).ToArray();
+                // Crear objeto anónimo con los nombres de parámetros correctos
+                var parametrosObj = new
+                {
+                    u.Id,
+                    u.NombreUsuario,
+                    u.Contrasena,
+                    u.ImagenPerfil,
+                    u.Correo,
+                    u.Nombre,
+                    u.Apellido,
+                    u.Celular,
+                    u.CreadoPor,
+                    u.FechaCreacion,
+                    u.ModificadoPor,
+                    u.FechaModificacion,
+                    u.Estatus,
+                    SucursalId = u.Sucursal.Id,
+                    u.Firma,
+                    u.RFC,
+                    AreaId = u.Area.Id,
+                    EmpresaId = u.Empresa.Id,
+                };
+
+                var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
                 var usuarioId = ExecuteScalar("GuardarOActualizarUsuario", CommandType.StoredProcedure, parametros);
+
+                if (Convert.ToInt64(usuarioId) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para modificar este usuario.";
+                    return modelResponse;
+                }
+
                 u.Id = Convert.ToInt64(usuarioId);
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = u;
+                modelResponse.Message = "Usuario guardado correctamente";
             }
             catch (ArgumentException ex)
             {
@@ -139,8 +198,7 @@ namespace ServiceDeskDESIWebApi.DAL
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al guardar el usuario.";
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al guardar el usuario";
             }
 
             return modelResponse;
@@ -190,8 +248,8 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 var usuario = GetObject("AutenticarUsuario", CommandType.StoredProcedure,
                     new[] {
-                        new SqlParameter("@NombreUsuario", nombreUsuario),
-                        new SqlParameter("@Contrasena", contrasena)
+                new SqlParameter("@NombreUsuario", nombreUsuario),
+                new SqlParameter("@Contrasena", contrasena)
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
@@ -214,6 +272,24 @@ namespace ServiceDeskDESIWebApi.DAL
                             Nombre = MapearPorpiedades<string>(reader["AreaNombre"]),
                             Descripcion = MapearPorpiedades<string>(reader["AreaDescripcion"]),
                             Correo = MapearPorpiedades<string>(reader["AreaCorreo"])
+                        };
+
+                        u.Empresa = new Empresa()
+                        {
+                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
+                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombreComercial"]),
+                            RazonSocial = MapearPorpiedades<string>(reader["EmpresaRazonSocial"]),
+                            RFC = MapearPorpiedades<string>(reader["EmpresaRFC"]),
+                            Responsable = MapearPorpiedades<string>(reader["EmpresaResponsable"]),
+                            Direccion = MapearPorpiedades<string>(reader["EmpresaDireccion"]),
+                            Ciudad = MapearPorpiedades<string>(reader["EmpresaCiudad"]),
+                            Estado = MapearPorpiedades<string>(reader["EmpresaEstado"]),
+                            CodigoPostal = MapearPorpiedades<string>(reader["EmpresaCodigoPostal"]),
+                            Telefono = MapearPorpiedades<string>(reader["EmpresaTelefono"]),
+                            CorreoContacto = MapearPorpiedades<string>(reader["EmpresaCorreoContacto"]),
+                            FechaVigenciaInicio = MapearPorpiedades<DateTime>(reader["FechaVigenciaInicio"]),
+                            FechaVigenciaFin = MapearPorpiedades<DateTime>(reader["FechaVigenciaFin"]),
+                            EsPeriodoPrueba = MapearPorpiedades<bool>(reader["EsPeriodoPrueba"])
                         };
 
                         return u;
@@ -254,7 +330,7 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 var usuario = GetObject("ObtenerUsuarioPorNombreUsuario", CommandType.StoredProcedure,
                     new[] {
-                        new SqlParameter("@NombreUsuario", nombreUsuario)
+                new SqlParameter("@NombreUsuario", nombreUsuario),
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
@@ -279,11 +355,25 @@ namespace ServiceDeskDESIWebApi.DAL
                             Correo = MapearPorpiedades<string>(reader["AreaCorreo"])
                         };
 
+                        u.Empresa = new Empresa()
+                        {
+                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
+                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
+                        };
+
                         return u;
                     }));
 
+                if (usuario == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró el usuario especificado.";
+                    return modelResponse;
+                }
+
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = usuario;
+                modelResponse.Message = "Usuario obtenido correctamente";
             }
             catch (ArgumentException ex)
             {
@@ -293,7 +383,7 @@ namespace ServiceDeskDESIWebApi.DAL
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener el usuario.";
+                modelResponse.Message = "Ocurrió un error al obtener el usuario";
             }
 
             return modelResponse;
@@ -466,6 +556,58 @@ namespace ServiceDeskDESIWebApi.DAL
             {
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al actualizar la contraseña.";
+            }
+
+            return modelResponse;
+        }
+        public ModelResponse ObtenerUsuarioPorCorreo(string correo)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(correo)) { throw new ArgumentException("El correo es requerido."); }
+
+                var usuario = GetObject("ObtenerUsuarioPorCorreo", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Correo", correo) },
+                    new Func<IDataReader, Usuario>((reader) =>
+                    {
+                        var u = LlenarEntidad<Usuario>(reader);
+
+                        u.Sucursal = new Sucursal()
+                        {
+                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
+                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
+                        };
+
+                        u.Area = new Area()
+                        {
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
+                        };
+
+                        u.Empresa = new Empresa()
+                        {
+                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
+                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
+                        };
+
+                        return u;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = usuario;
+                modelResponse.Message = "Usuario obtenido correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener el usuario";
             }
 
             return modelResponse;

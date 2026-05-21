@@ -97,8 +97,8 @@
         Swal.fire({
             title: 'Recuperar Contraseña',
             html: `
-                <p>Ingresa tu nombre de usuario para recibir instrucciones:</p>
-                <input type="text" id="resetEmail" class="form-control mt-3" placeholder="juan.perez">
+                <p>Ingresa tu correo para recibir instrucciones:</p>
+                <input type="text" id="resetEmail" class="form-control mt-3" placeholder="juan.perez@gmail.com">
             `,
             icon: 'info',
             confirmButtonText: 'Enviar',
@@ -127,7 +127,7 @@
                 });
 
                 var usuario = {
-                    NombreUsuario: nombreUsuario
+                    Correo: nombreUsuario
                 };
 
                 PostMVC('/Home/ValidarRecetearContrasenia', usuario, function (response) {

@@ -20,5 +20,6 @@ namespace ServiceDeskDESIEntities.Autenticacion
         public string Firma { get; set; }
         public string RFC { get; set; }
         public Area Area { get; set; }
+        public Empresa Empresa { get; set; }
     }
 }

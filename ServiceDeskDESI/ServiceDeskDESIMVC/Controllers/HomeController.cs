@@ -68,6 +68,7 @@ namespace ServiceDeskDESIMVC.Controllers
                         {
                             Token = token,
                             UserID = usuarioAutenticado.Id,
+                            EmpresaID = usuarioAutenticado.Empresa != null ? usuarioAutenticado.Empresa.Id : 0,
                             UserName = user,
                             ProfileImage = usuarioAutenticado.ImagenPerfil,
                             UserAvatar = GenerarAvatarIniciales(usuarioAutenticado.NombreUsuario)

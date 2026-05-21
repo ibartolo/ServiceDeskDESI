@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
 {
-    [RoutePrefix("api/empresas")]
+    [RoutePrefix("api/Empresas")]
     public class EmpresaController : BaseController
     {
         [HttpGet, Route("List")]
@@ -24,10 +24,10 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.ObtenerEmpresasPorId(id);
             return result;
         }
-        [HttpGet, Route("{id:string}")]
-        public ModelResponse ObtenerEmpresasPorRFC(string rfc)
+        [HttpPost, Route("RFC")]
+        public ModelResponse ObtenerEmpresasPorRFC(Empresa empresa)
         {
-            var result = dbWrapper.ObtenerEmpresaPorRFC(rfc);
+            var result = dbWrapper.ObtenerEmpresaPorRFC(empresa.RFC);
             return result;
         }
         [HttpPost, Route("")]
