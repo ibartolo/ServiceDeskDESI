@@ -187,6 +187,7 @@
     <Content Include="Views\Catalogs\Mark.cshtml" />
     <Content Include="Views\Catalogs\Active.cshtml" />
     <Content Include="Views\Catalogs\Branch.cshtml" />
+    <Content Include="Views\Home\NewCompany.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

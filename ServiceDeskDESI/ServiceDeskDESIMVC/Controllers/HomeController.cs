@@ -32,7 +32,11 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Token = id;
             return View();
         }
-        
+        public ActionResult NewCompany()
+        {
+            return View();
+        }
+
 
         #region Data Access
         [HttpPost]
