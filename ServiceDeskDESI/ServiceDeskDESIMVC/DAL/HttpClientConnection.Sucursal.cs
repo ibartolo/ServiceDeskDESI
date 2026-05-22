@@ -14,7 +14,7 @@ namespace ServiceDeskDESIMVC.DAL
     {
         public async Task <ModelResponse> ObtenerTodasLasSucursales()
         {
-            var result = await RequestAsync($"api/sucursales/List", HttpMethod.Get, null,
+            var result = await RequestAsync($"api/Sucursales/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -27,7 +27,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> GuardarActualizarSucursales(Sucursal s)
         {
             MappingColumSecurity(s);
-            var result = await RequestAsync<object>($"api/sucursales/Guardar", HttpMethod.Post, s,
+            var result = await RequestAsync<object>($"api/Sucursales/Guardar", HttpMethod.Post, s,
                new Func<string, string>((responseString) =>
                {
                    return responseString;
@@ -39,7 +39,7 @@ namespace ServiceDeskDESIMVC.DAL
 
         public async Task<ModelResponse> ObtenerSucursalesPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/sucursales/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Sucursales/{id}", HttpMethod.Get, null,
             new Func<string, string>((responseString) =>
             {
                 return responseString;
@@ -51,7 +51,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse>EliminarSucursal (Sucursal s)
         {
             MappingColumSecurity(s);
-            var result= await RequestAsync<object>($"api/sucursales/Eliminar", HttpMethod.Delete, s,
+            var result= await RequestAsync<object>($"api/Sucursales/Eliminar", HttpMethod.Delete, s,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

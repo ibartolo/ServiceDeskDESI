@@ -14,7 +14,7 @@ namespace ServiceDeskDESIMVC.DAL
     {
         public async Task  <ModelResponse> ObtenerTodosLosActivos ()
         {
-            var result = await RequestAsync<object>($"api/activos/List", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Activos/List", HttpMethod.Get, null,
                  new Func<string, string>((responseString) =>
                  {
                      return responseString;
@@ -26,7 +26,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> GuardarActualizarActivos(Activo a)
         {
             MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/activos", HttpMethod.Post, a,
+            var result = await RequestAsync<object>($"api/Activos", HttpMethod.Post, a,
                  new Func<string, string>((responseString) =>
                  {
                      return responseString;
@@ -37,7 +37,7 @@ namespace ServiceDeskDESIMVC.DAL
         }
         public async Task<ModelResponse> ObtenerActivoPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/activos/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Activos/{id}", HttpMethod.Get, null,
                  new Func<string, string>((responseString) =>
                  {
                      return responseString;
@@ -49,7 +49,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> EliminarActivos(Activo a)
         {
             MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/activos", HttpMethod.Delete, a,
+            var result = await RequestAsync<object>($"api/Activos", HttpMethod.Delete, a,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

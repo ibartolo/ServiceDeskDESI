@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
 {
-    [RoutePrefix("api/marca")]
+    [RoutePrefix("api/Marca")]
     public class MarcaController : BaseController
     {
         [HttpGet, Route("List")]

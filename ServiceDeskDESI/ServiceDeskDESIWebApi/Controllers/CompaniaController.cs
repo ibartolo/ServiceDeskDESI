@@ -10,7 +10,7 @@ using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
 {
-    [RoutePrefix("api/compania")]
+    [RoutePrefix("api/Compania")]
     public class CompaniaController : BaseController
     {
         //private DbWrapper dbWrapper;

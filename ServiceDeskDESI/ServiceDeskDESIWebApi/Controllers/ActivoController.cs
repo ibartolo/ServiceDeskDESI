@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
 {
-    [RoutePrefix("api/activos")]
+    [RoutePrefix("api/Activos")]
     public class ActivoController : BaseController
     {
         [HttpGet, Route("List")]

@@ -14,7 +14,7 @@ namespace ServiceDeskDESIMVC.DAL
     {
         public async Task<ModelResponse> ObtenerTodosLasMarcas()
         {
-            var result = await RequestAsync($"api/marca/List", HttpMethod.Get, null,
+            var result = await RequestAsync($"api/Marca/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -25,7 +25,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> GuardarOActualizarMarca(Marca m)
         {
             MappingColumSecurity(m);
-            var result = await RequestAsync<object>($"api/marca/Guardar", HttpMethod.Post, m,
+            var result = await RequestAsync<object>($"api/Marca/Guardar", HttpMethod.Post, m,
                new Func<string, string>((responseString) =>
                {
                    return responseString;
@@ -35,7 +35,7 @@ namespace ServiceDeskDESIMVC.DAL
         }
         public async Task<ModelResponse> ObtenerMarcaPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/marca/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Marca/{id}", HttpMethod.Get, null,
             new Func<string, string>((responseString) =>
             {
                 return responseString;
@@ -47,7 +47,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> EliminarMarcas(Marca m)
         {
             MappingColumSecurity(m);
-            var result = await RequestAsync<object>($"api/marca/Eliminar", HttpMethod.Delete, m,
+            var result = await RequestAsync<object>($"api/Marca/Eliminar", HttpMethod.Delete, m,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
