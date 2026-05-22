@@ -152,6 +152,7 @@
     <Compile Include="DAL\HttpClientConnection.Categoria.cs" />
     <Compile Include="DAL\HttpClientConnection.Compania.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
+    <Compile Include="DAL\HttpClientConnection.Empresa.cs" />
     <Compile Include="DAL\HttpClientConnection.Marca.cs" />
     <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
     <Compile Include="DAL\HttpClientConnection.Sucursal.cs" />

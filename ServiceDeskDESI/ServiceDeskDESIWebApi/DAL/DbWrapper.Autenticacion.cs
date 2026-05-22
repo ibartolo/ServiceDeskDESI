@@ -1,6 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -199,6 +200,142 @@ namespace ServiceDeskDESIWebApi.DAL
             {
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar el usuario";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse GuardarNuevaEmpresaConDatosIniciales(Empresa empresa)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                // =========================================
+                // VALIDACIONES DE EMPRESA
+                // =========================================
+                if (string.IsNullOrWhiteSpace(empresa.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
+                if (empresa.NombreComercial.Length > 250) { throw new ArgumentException("El nombre comercial no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(empresa.RazonSocial)) { throw new ArgumentException("La razón social es requerida."); }
+                if (empresa.RazonSocial.Length > 250) { throw new ArgumentException("La razón social no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(empresa.RFC)) { throw new ArgumentException("El RFC es requerido."); }
+                if (empresa.RFC.Length > 50) { throw new ArgumentException("El RFC no puede exceder los 50 caracteres."); }
+                if (string.IsNullOrWhiteSpace(empresa.Responsable)) { throw new ArgumentException("El responsable es requerido."); }
+                if (empresa.Responsable.Length > 250) { throw new ArgumentException("El responsable no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(empresa.Direccion)) { throw new ArgumentException("La dirección es requerida."); }
+                if (empresa.Direccion.Length > 500) { throw new ArgumentException("La dirección no puede exceder los 500 caracteres."); }
+                if (string.IsNullOrWhiteSpace(empresa.CorreoContacto)) { throw new ArgumentException("El correo de contacto es requerido."); }
+                if (empresa.CorreoContacto.Length > 250) { throw new ArgumentException("El correo de contacto no puede exceder los 250 caracteres."); }
+
+                // =========================================
+                // PASO 1: GUARDAR EMPRESA
+                // =========================================
+                empresa.FechaVigenciaInicio = DateTime.Now;
+                empresa.FechaVigenciaFin = DateTime.Now.AddDays(30);
+                empresa.EsPeriodoPrueba = true;
+                empresa.CreadoPor = "system.register";
+                empresa.FechaCreacion = DateTime.Now;
+                empresa.Estatus = true;
+
+                var empresaResponse = GuardarOActualizarEmpresas(empresa);
+
+                if (!empresaResponse.IsSuccess || empresaResponse.Response == null)
+                {
+                    throw new Exception(empresaResponse.Message ?? "Error al guardar la empresa");
+                }
+
+                var empresaGuardada = (Empresa)empresaResponse.Response;
+                var usernameAdmin = $"admin_{empresaGuardada.Id}";
+
+                // =========================================
+                // PASO 2: GUARDAR SUCURSAL
+                // =========================================
+                var sucursal = new Sucursal()
+                {
+                    Nombre = empresaGuardada.NombreComercial,
+                    Descripcion = $"Sucursal principal de {empresaGuardada.NombreComercial}",
+                    Calle = empresaGuardada.Direccion,
+                    Ciudad = empresaGuardada.Ciudad,
+                    Colonia = null,
+                    CodigoPostal = empresaGuardada.CodigoPostal,
+                    CreadoPor = usernameAdmin,
+                    FechaCreacion = DateTime.Now,
+                    Estatus = true
+                };
+
+                var sucursalResponse = GuardarOActualizarSucursales(sucursal);
+
+                if (!sucursalResponse.IsSuccess || sucursalResponse.Response == null)
+                {
+                    throw new Exception(sucursalResponse.Message ?? "Error al guardar la sucursal");
+                }
+
+                var sucursalGuardada = (Sucursal)sucursalResponse.Response;
+
+                // =========================================
+                // PASO 3: GUARDAR ÁREA (TI)
+                // =========================================
+                var area = new Area()
+                {
+                    Nombre = "TI",
+                    Descripcion = "Área de Tecnologías de la Información",
+                    Correo = empresaGuardada.CorreoContacto,
+                    CreadoPor = usernameAdmin,
+                    FechaCreacion = DateTime.Now,
+                    Estatus = true
+                };
+
+                var areaResponse = GuardarOActualizarArea(area);
+
+                if (!areaResponse.IsSuccess || areaResponse.Response == null)
+                {
+                    throw new Exception(areaResponse.Message ?? "Error al guardar el área");
+                }
+
+                var areaGuardada = (Area)areaResponse.Response;
+
+                // =========================================
+                // PASO 4: GUARDAR USUARIO ADMINISTRADOR
+                // =========================================
+                var usuarioAdmin = new Usuario()
+                {
+                    NombreUsuario = usernameAdmin,
+                    Contrasena = Cryptography.Encrypt("Admin123!"),
+                    ImagenPerfil = null,
+                    Correo = empresaGuardada.CorreoContacto,
+                    Nombre = "Administrador",
+                    Apellido = "Sistema",
+                    Celular = empresaGuardada.Telefono,
+                    Sucursal = sucursalGuardada,
+                    Firma = null,
+                    RFC = empresaGuardada.RFC,
+                    Area = areaGuardada,
+                    Empresa = empresaGuardada,
+                    CreadoPor = usernameAdmin,
+                    FechaCreacion = DateTime.Now,
+                    Estatus = true
+                };
+
+                var usuarioResponse = GuardarOActualizarUsuario(usuarioAdmin);
+
+                if (!usuarioResponse.IsSuccess)
+                {
+                    throw new Exception(usuarioResponse.Message ?? "Error al guardar el usuario administrador");
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = empresaGuardada;
+                modelResponse.Message = "Empresa registrada correctamente con sucursal, área y usuario administrador.";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
 
             return modelResponse;

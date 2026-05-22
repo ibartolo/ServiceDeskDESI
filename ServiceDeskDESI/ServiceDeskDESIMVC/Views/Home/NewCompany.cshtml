@@ -1,5 +1,4 @@
-﻿
-@{
+﻿﻿@{
     Layout = null;
 }
 
@@ -136,6 +135,11 @@
                 outline: none;
             }
 
+            .form-control.is-invalid {
+                border-color: var(--danger);
+                border-left: 1px solid var(--danger);
+            }
+
         textarea.form-control {
             border-left: 1px solid #e3e6f0;
             border-radius: 8px;
@@ -186,25 +190,6 @@
                 background: #dddfeb;
             }
 
-        .alert-message {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .alert-error {
-            background: #fff5f5;
-            border-left: 4px solid var(--danger);
-            color: var(--danger);
-        }
-
-        .alert-success {
-            background: #e8f5e9;
-            border-left: 4px solid var(--success);
-            color: #2e7d32;
-        }
-
         .footer-links {
             text-align: center;
             margin-top: 25px;
@@ -221,23 +206,6 @@
                 .footer-links a:hover {
                     text-decoration: underline;
                 }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-        }
-
-        @@keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
 
         .row {
             margin-bottom: 10px;
@@ -267,6 +235,7 @@
             }
         }
     </style>
+    <script src="~/Scripts/Comun/Comun.js"></script>
 </head>
 <body>
     <div class="register-container">
@@ -279,11 +248,7 @@
 
         <!-- Cuerpo del formulario -->
         <div class="register-body">
-            <!-- Mensaje de alerta -->
-            <div id="alertMessage" class="alert-message"></div>
-
-            <!-- Formulario de registro -->
-            <form id="registerForm" autocomplete="off">
+            <form id="frmEmpresa" name="frmEmpresa" autocomplete="off">
                 <!-- Sección: Información de la Empresa -->
                 <div class="section-title">
                     <i class="fas fa-info-circle me-2"></i> Información de la Empresa
@@ -292,25 +257,19 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-store me-1"></i> Nombre Comercial
-                                <span class="required">*</span>
-                            </label>
+                            <label class="form-label">Nombre Comercial <span class="required">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-building"></i></span>
-                                <input type="text" class="form-control" id="nombreComercial" placeholder="Ej: ServiTech Solutions" maxlength="250">
+                                <input type="text" class="form-control" id="NombreComercial" name="NombreComercial" placeholder="Ej: ServiTech Solutions" maxlength="250">
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-file-signature me-1"></i> Razón Social
-                                <span class="required">*</span>
-                            </label>
+                            <label class="form-label">Razón Social <span class="required">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-building"></i></span>
-                                <input type="text" class="form-control" id="razonSocial" placeholder="Ej: ServiTech Solutions S.A. de C.V." maxlength="250">
+                                <span class="input-group-text"><i class="fas fa-file-signature"></i></span>
+                                <input type="text" class="form-control" id="RazonSocial" name="RazonSocial" placeholder="Ej: ServiTech Solutions S.A. de C.V." maxlength="250">
                             </div>
                         </div>
                     </div>
@@ -319,25 +278,19 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-id-card me-1"></i> RFC
-                                <span class="required">*</span>
-                            </label>
+                            <label class="form-label">RFC <span class="required">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
-                                <input type="text" class="form-control" id="rfc" placeholder="Ej: ABC123456DEF" maxlength="50">
+                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                <input type="text" class="form-control" id="RFC" name="RFC" placeholder="Ej: ABC123456DEF" maxlength="50">
                             </div>
                         </div>
                     </div>
                     <div class="col-md-8">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-user-tie me-1"></i> Responsable
-                                <span class="required">*</span>
-                            </label>
+                            <label class="form-label">Responsable <span class="required">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input type="text" class="form-control" id="responsable" placeholder="Nombre del representante legal" maxlength="250">
+                                <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
+                                <input type="text" class="form-control" id="Responsable" name="Responsable" placeholder="Nombre del representante legal" maxlength="250">
                             </div>
                         </div>
                     </div>
@@ -351,11 +304,8 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-address-card me-1"></i> Dirección
-                                <span class="required">*</span>
-                            </label>
-                            <textarea class="form-control" id="direccion" rows="2" placeholder="Calle, número, colonia, etc." maxlength="500"></textarea>
+                            <label class="form-label">Dirección <span class="required">*</span></label>
+                            <textarea class="form-control" id="Direccion" name="Direccion" rows="2" placeholder="Calle, número, colonia, etc." maxlength="500"></textarea>
                         </div>
                     </div>
                 </div>
@@ -363,26 +313,20 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-city me-1"></i> Ciudad
-                            </label>
-                            <input type="text" class="form-control" id="ciudad" placeholder="Ciudad" maxlength="100">
+                            <label class="form-label">Ciudad</label>
+                            <input type="text" class="form-control" id="Ciudad" name="Ciudad" placeholder="Ciudad" maxlength="100">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-map-pin me-1"></i> Estado
-                            </label>
-                            <input type="text" class="form-control" id="estado" placeholder="Estado" maxlength="100">
+                            <label class="form-label">Estado</label>
+                            <input type="text" class="form-control" id="Estado" name="Estado" placeholder="Estado" maxlength="100">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-mail-bulk me-1"></i> Código Postal
-                            </label>
-                            <input type="text" class="form-control" id="codigoPostal" placeholder="Código Postal" maxlength="10">
+                            <label class="form-label">Código Postal</label>
+                            <input type="text" class="form-control" id="CodigoPostal" name="CodigoPostal" placeholder="Código Postal" maxlength="10">
                         </div>
                     </div>
                 </div>
@@ -395,31 +339,23 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-phone me-1"></i> Teléfono
-                            </label>
+                            <label class="form-label">Teléfono</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-phone-alt"></i></span>
-                                <input type="tel" class="form-control" id="telefono" placeholder="Ej: 555-123-4567" maxlength="50">
+                                <input type="tel" class="form-control" id="Telefono" name="Telefono" placeholder="Ej: 555-123-4567" maxlength="50">
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-envelope me-1"></i> Correo de Contacto
-                                <span class="required">*</span>
-                            </label>
+                            <label class="form-label">Correo de Contacto <span class="required">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-at"></i></span>
-                                <input type="email" class="form-control" id="correoContacto" placeholder="contacto@empresa.com" maxlength="250">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="CorreoContacto" name="CorreoContacto" placeholder="contacto@empresa.com" maxlength="250">
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Campos ocultos que se enviarán al servidor -->
-                <input type="hidden" id="fechaRegistro" value="">
 
                 <!-- Botones de acción -->
                 <div class="row mt-4">
@@ -427,7 +363,7 @@
                         <button type="button" class="btn-cancel me-2" id="btnCancelar">
                             <i class="fas fa-times"></i> Cancelar
                         </button>
-                        <button type="submit" class="btn-register" id="btnRegistrar">
+                        <button type="button" class="btn-register" id="btnRegistrar">
                             <i class="fas fa-save"></i> Registrar Empresa
                         </button>
                     </div>
@@ -443,172 +379,138 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 
     <script>
         $(document).ready(function () {
-            // Establecer fecha actual
-            var hoy = new Date();
-            var fechaFormateada = hoy.toISOString();
-            $('#fechaRegistro').val(fechaFormateada);
-
-            // Validación en tiempo real del RFC
-            $('#rfc').on('input', function () {
-                var rfc = $(this).val().toUpperCase();
-                $(this).val(rfc);
+            // Convertir RFC a mayúsculas
+            $('#RFC').on('input', function () {
+                $(this).val($(this).val().toUpperCase());
             });
 
-            // Validación en tiempo real del correo
-            $('#correoContacto').on('input', function () {
-                validarCorreo();
+            // Validaciones con jQuery Validate
+            $("#frmEmpresa").validate({
+                rules: {
+                    "NombreComercial": {
+                        required: true,
+                        maxlength: 250
+                    },
+                    "RazonSocial": {
+                        required: true,
+                        maxlength: 250
+                    },
+                    "RFC": {
+                        required: true,
+                        maxlength: 50,
+                        minlength: 12
+                    },
+                    "Responsable": {
+                        required: true,
+                        maxlength: 250
+                    },
+                    "Direccion": {
+                        required: true,
+                        maxlength: 500
+                    },
+                    "CorreoContacto": {
+                        required: true,
+                        email: true,
+                        maxlength: 250
+                    }
+                },
+                messages: {
+                    "NombreComercial": {
+                        required: "El campo 'Nombre Comercial' es requerido.",
+                        maxlength: "El nombre comercial no puede superar los 250 caracteres."
+                    },
+                    "RazonSocial": {
+                        required: "El campo 'Razón Social' es requerido.",
+                        maxlength: "La razón social no puede superar los 250 caracteres."
+                    },
+                    "RFC": {
+                        required: "El campo 'RFC' es requerido.",
+                        maxlength: "El RFC no puede superar los 50 caracteres.",
+                        minlength: "El RFC debe tener al menos 12 caracteres."
+                    },
+                    "Responsable": {
+                        required: "El campo 'Responsable' es requerido.",
+                        maxlength: "El responsable no puede superar los 250 caracteres."
+                    },
+                    "Direccion": {
+                        required: "El campo 'Dirección' es requerido.",
+                        maxlength: "La dirección no puede superar los 500 caracteres."
+                    },
+                    "CorreoContacto": {
+                        required: "El campo 'Correo de Contacto' es requerido.",
+                        email: "Ingrese un correo electrónico válido.",
+                        maxlength: "El correo no puede superar los 250 caracteres."
+                    }
+                },
+                errorElement: "span",
+                errorClass: "text-danger",
+                highlight: function (element) {
+                    $(element).addClass("is-invalid").removeClass("is-valid");
+                },
+                unhighlight: function (element) {
+                    $(element).removeClass("is-invalid").addClass("is-valid");
+                },
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element);
+                }
             });
 
-            function validarCorreo() {
-                var correo = $('#correoContacto').val();
-                var regex = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            // Botón Registrar
+            $('#btnRegistrar').on('click', function () {
+                if ($("#frmEmpresa").valid()) {
+                    Swal.fire({
+                        title: 'Registrando...',
+                        text: 'Por favor espere',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
 
-                if (correo && !regex.test(correo)) {
-                    $('#correoContacto').css('border-color', '#e74a3b');
-                    return false;
-                } else {
-                    $('#correoContacto').css('border-color', '#e3e6f0');
-                    return true;
-                }
-            }
+                    var empresa = {
+                        NombreComercial: $('#NombreComercial').val().trim(),
+                        RazonSocial: $('#RazonSocial').val().trim(),
+                        RFC: $('#RFC').val().trim().toUpperCase(),
+                        Responsable: $('#Responsable').val().trim(),
+                        Direccion: $('#Direccion').val().trim(),
+                        Ciudad: $('#Ciudad').val().trim() || null,
+                        Estado: $('#Estado').val().trim() || null,
+                        CodigoPostal: $('#CodigoPostal').val().trim() || null,
+                        Telefono: $('#Telefono').val().trim() || null,
+                        CorreoContacto: $('#CorreoContacto').val().trim()
+                    };
 
-            // Validar campos requeridos
-            function validarCamposRequeridos() {
-                var campos = [
-                    { id: '#nombreComercial', nombre: 'Nombre Comercial' },
-                    { id: '#razonSocial', nombre: 'Razón Social' },
-                    { id: '#rfc', nombre: 'RFC' },
-                    { id: '#responsable', nombre: 'Responsable' },
-                    { id: '#direccion', nombre: 'Dirección' },
-                    { id: '#correoContacto', nombre: 'Correo de Contacto' }
-                ];
+                    PostMVC('/Home/GuardarNuevaEmpresa', empresa, function (response) {
+                        Swal.close();
 
-                var faltantes = [];
-
-                for (var i = 0; i < campos.length; i++) {
-                    var valor = $(campos[i].id).val().trim();
-                    if (!valor) {
-                        faltantes.push(campos[i].nombre);
-                        $(campos[i].id).css('border-color', '#e74a3b');
-                    } else {
-                        $(campos[i].id).css('border-color', '#e3e6f0');
-                    }
-                }
-
-                // Validar formato de correo
-                if ($('#correoContacto').val()) {
-                    if (!validarCorreo()) {
-                        faltantes.push('Correo electrónico inválido');
-                    }
-                }
-
-                // Validar formato de RFC (básico)
-                var rfc = $('#rfc').val();
-                if (rfc && rfc.length < 12) {
-                    faltantes.push('RFC debe tener al menos 12 caracteres');
-                    $('#rfc').css('border-color', '#e74a3b');
-                }
-
-                return faltantes;
-            }
-
-            // Mostrar mensaje de error
-            function mostrarError(mensaje) {
-                $('#alertMessage').removeClass().addClass('alert-message alert-error').html('<i class="fas fa-exclamation-circle"></i> ' + mensaje).show();
-                setTimeout(function () {
-                    $('#alertMessage').fadeOut();
-                }, 5000);
-            }
-
-            function limpiarAlertas() {
-                $('#alertMessage').hide().empty();
-            }
-
-            // Manejo del envío del formulario
-            $('#registerForm').on('submit', function (e) {
-                e.preventDefault();
-                limpiarAlertas();
-
-                var camposFaltantes = validarCamposRequeridos();
-
-                if (camposFaltantes.length > 0) {
-                    mostrarError('Por favor complete los siguientes campos: ' + camposFaltantes.join(', '));
-                    return;
-                }
-
-                // Construir objeto con los datos del formulario
-                var empresaData = {
-                    NombreComercial: $('#nombreComercial').val().trim(),
-                    RazonSocial: $('#razonSocial').val().trim(),
-                    RFC: $('#rfc').val().trim().toUpperCase(),
-                    Responsable: $('#responsable').val().trim(),
-                    Direccion: $('#direccion').val().trim(),
-                    Ciudad: $('#ciudad').val().trim() || null,
-                    Estado: $('#estado').val().trim() || null,
-                    CodigoPostal: $('#codigoPostal').val().trim() || null,
-                    Telefono: $('#telefono').val().trim() || null,
-                    CorreoContacto: $('#correoContacto').val().trim(),
-                    FechaRegistro: $('#fechaRegistro').val()
-                };
-
-                // Mostrar loading en el botón
-                var $btn = $('#btnRegistrar');
-                var originalHtml = $btn.html();
-                $btn.prop('disabled', true).html('<span class="loading-spinner"></span> Registrando...');
-
-                // Llamada AJAX para registrar la empresa
-                $.ajax({
-                    url: '/api/Empresa/Registrar', // Reemplazar con tu endpoint real
-                    type: 'POST',
-                    data: JSON.stringify(empresaData),
-                    contentType: 'application/json',
-                    success: function (response) {
                         if (response.IsSuccess) {
                             Swal.fire({
                                 title: '¡Registro Exitoso!',
-                                text: 'Su empresa ha sido registrada correctamente. En breve recibirá un correo con sus credenciales de acceso.',
+                                text: response.Message || 'Su empresa ha sido registrada correctamente.',
                                 icon: 'success',
                                 confirmButtonColor: '#4e73df',
                                 confirmButtonText: 'Aceptar'
                             }).then(function () {
-                                window.location.href = '/Login';
+                                window.location.href = '/Home/Autentication';
                             });
                         } else {
-                            mostrarError(response.Message || 'Error al registrar la empresa. Intente nuevamente.');
-                            $btn.prop('disabled', false).html(originalHtml);
+                            Swal.fire({
+                                title: 'Error',
+                                text: response.Message || 'Error al registrar la empresa. Intente nuevamente.',
+                                icon: 'error',
+                                confirmButtonColor: '#4e73df',
+                                confirmButtonText: 'Aceptar'
+                            });
                         }
-                    },
-                    error: function (xhr) {
-                        console.error('Error en la petición:', xhr);
-                        var mensaje = 'Error de conexión. Por favor, intente más tarde.';
-                        if (xhr.responseJSON && xhr.responseJSON.Message) {
-                            mensaje = xhr.responseJSON.Message;
-                        }
-                        mostrarError(mensaje);
-                        $btn.prop('disabled', false).html(originalHtml);
-                    }
-                });
-
-                // SIMULACIÓN PARA PRUEBAS (Eliminar en producción)
-                /*
-                setTimeout(function() {
-                    Swal.fire({
-                        title: '¡Registro Exitoso!',
-                        text: 'Su empresa ha sido registrada correctamente. En breve recibirá un correo con sus credenciales.',
-                        icon: 'success',
-                        confirmButtonColor: '#4e73df'
-                    }).then(function() {
-                        window.location.href = '/Login';
                     });
-                    $btn.prop('disabled', false).html(originalHtml);
-                }, 1500);
-                */
+                }
             });
 
-            // Botón cancelar
+            // Botón Cancelar
             $('#btnCancelar').on('click', function () {
                 Swal.fire({
                     title: '¿Cancelar registro?',
@@ -621,17 +523,10 @@
                     cancelButtonText: 'No, continuar'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        $('#registerForm')[0].reset();
-                        $('#alertMessage').hide().empty();
-                        $('#fechaRegistro').val(fechaFormateada);
+                        $('#frmEmpresa')[0].reset();
                         Swal.fire('Formulario limpio', 'Puedes comenzar de nuevo.', 'info');
                     }
                 });
-            });
-
-            // Limpiar bordes rojos al escribir
-            $('.form-control').on('input', function () {
-                $(this).css('border-color', '#e3e6f0');
             });
         });
     </script>

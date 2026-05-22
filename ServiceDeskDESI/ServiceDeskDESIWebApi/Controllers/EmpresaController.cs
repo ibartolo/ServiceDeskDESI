@@ -9,9 +9,11 @@ using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
 {
+    [Authorize]
     [RoutePrefix("api/Empresas")]
     public class EmpresaController : BaseController
     {
+        [AllowAnonymous]
         [HttpGet, Route("List")]
         public ModelResponse ObtenerEmpresas()
         {
@@ -36,10 +38,16 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.GuardarOActualizarEmpresas(e);
             return result;
         }
+        [AllowAnonymous]
+        [HttpPost, Route("Nueva")]
+        public ModelResponse GuardarNuevaEmpresas(Empresa e)
+        {
+            var result = dbWrapper.GuardarNuevaEmpresaConDatosIniciales(e);
+            return result;
+        }
         [HttpDelete, Route("")]
         public ModelResponse EliminarEmpresas(Empresa e)
         {
-            e.FechaModificacion = DateTime.Now;
             var result = dbWrapper.EliminarEmpresa(e.Id, e.ModificadoPor, e.FechaModificacion.Value);
             return result;
         }

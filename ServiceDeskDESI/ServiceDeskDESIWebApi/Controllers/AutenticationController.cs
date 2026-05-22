@@ -60,6 +60,19 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         /// <summary>
+        /// Guarda o actualiza un usuario en una empresa
+        /// </summary>
+        /// <param name="u">Objeto usuario con los datos</param>
+        /// <returns>Usuario guardado con su ID actualizado</returns>
+        [AllowAnonymous]
+        [HttpPost, Route("User/Empresa")]
+        public ModelResponse GuardarUsuarioEmpresa(Usuario u)
+        {
+            var result = dbWrapper.GuardarOActualizarUsuario(u);
+            return result;
+        }
+
+        /// <summary>
         /// Elimina lógicamente un usuario
         /// </summary>
         /// <param name="u">Usuario a eliminar (debe incluir Id y ModificadoPor)</param>
@@ -71,6 +84,7 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.EliminarUsuario(u.Id, u.ModificadoPor, u.FechaModificacion.Value);
             return result;
         }
+        
 
         /// <summary>
         /// Autentica un usuario en el sistema

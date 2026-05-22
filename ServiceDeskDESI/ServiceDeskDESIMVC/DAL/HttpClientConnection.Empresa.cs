@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using ServiceDeskDESIEntities.Autenticacion;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
@@ -12,94 +12,77 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerUsuarios(long empresaId)
+        public async Task<ModelResponse> ObtenerTodasLasEmpresas()
         {
-            var result = await RequestAsync<object>($"api/Autentication/User/Lista/{empresaId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse> ObtenerUsuarioPorId(long id, long empresaId)
-        {
-            var result = await RequestAsync<object>($"api/Autentication/User/{id}/{empresaId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse> GuardarOActualizarUsuario(Usuario usuario)
-        {
-            var result = await RequestAsync<object>($"api/Autentication/User", HttpMethod.Post, usuario,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse> GuardarUsuarioEmpresa(Usuario usuario)
-        {
-            var result = await RequestAsync<object>($"api/Autentication/User/Empresa", HttpMethod.Post, usuario,
+            var result = await RequestAsync<object>($"api/Empresas/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }));
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
             return modelResponse;
         }
 
-        public async Task<ModelResponse> EliminarUsuario(Usuario usuario)
+        public async Task<ModelResponse> ObtenerEmpresasPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Autentication/User", HttpMethod.Delete, usuario,
+            var result = await RequestAsync<object>($"api/Empresas/{id}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ActualizarContrasena(Usuario usuario)
+        public async Task<ModelResponse> ObtenerEmpresasPorRFC(string rfc)
         {
-            var result = await RequestAsync<object>($"api/Autentication/actualizar-contrasena", HttpMethod.Post, usuario,
+            var empresa = new Empresa { RFC = rfc };
+
+            var result = await RequestAsync<object>($"api/Empresas/RFC", HttpMethod.Post, empresa,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerSucursales()
+        public async Task<ModelResponse> GuardarOActualizarEmpresa(Empresa empresa)
         {
-            var result = await RequestAsync<object>($"api/Catalogs/obtener-sucursales", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Empresas", HttpMethod.Post, empresa,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
 
+        public async Task<ModelResponse> GuardarNuevaEmpresa(Empresa empresa)
+        {
+            var result = await RequestAsync<object>($"api/Empresas/Nueva", HttpMethod.Post, empresa,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }));
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> EliminarEmpresa(Empresa empresa)
+        {
+            var result = await RequestAsync<object>($"api/Empresas", HttpMethod.Delete, empresa,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
     }
