@@ -134,6 +134,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
+    <Content Include="Template\Template_AltaEmpresa.html" />
+    <Content Include="Template\Template_NuevoPass.html" />
     <Content Include="Template\Template_RecuperarEmail.html" />
     <Content Include="Web.config" />
   </ItemGroup>

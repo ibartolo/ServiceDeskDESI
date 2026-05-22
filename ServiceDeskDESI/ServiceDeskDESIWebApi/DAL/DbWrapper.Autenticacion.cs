@@ -325,7 +325,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = empresaGuardada;
-                modelResponse.Message = "Empresa registrada correctamente con sucursal, área y usuario administrador.";
+                modelResponse.Message = "Empresa registrada correctamente con sucursal, área y usuario administrador te llegara un correo con tus datos para poder autenticarte.";
+
+                // Enviar correo de bienvenida
+                EnviarCorreoBienvenida(empresaGuardada, usernameAdmin, "Admin123!");
             }
             catch (ArgumentException ex)
             {
@@ -748,6 +751,38 @@ namespace ServiceDeskDESIWebApi.DAL
             }
 
             return modelResponse;
+        }
+
+        private void EnviarCorreoBienvenida(Empresa empresa, string usuario, string contrasenaTemporal)
+        {
+            try
+            {
+                // Obtener URL base del Web.config
+                string baseUri = System.Configuration.ConfigurationManager.AppSettings["BaseUri"];
+                string urlLogin = $"{baseUri}Home/Autentication";
+
+                // Leer template
+                string templatePath = System.Web.Hosting.HostingEnvironment.MapPath("~/Template/Template_AltaEmpresa.html");
+                string templateHtml = System.IO.File.ReadAllText(templatePath);
+
+                // Reemplazar variables en el template
+                templateHtml = templateHtml.Replace("{{NombreCompleto}}", empresa.Responsable);
+                templateHtml = templateHtml.Replace("{{NombreEmpresa}}", empresa.NombreComercial);
+                templateHtml = templateHtml.Replace("{{RFC}}", empresa.RFC);
+                templateHtml = templateHtml.Replace("{{CorreoContacto}}", empresa.CorreoContacto);
+                templateHtml = templateHtml.Replace("{{Usuario}}", usuario);
+                templateHtml = templateHtml.Replace("{{ContrasenaTemporal}}", contrasenaTemporal);
+                templateHtml = templateHtml.Replace("{{UrlLogin}}", urlLogin);
+
+                // Enviar correo
+                var para = new List<string> { empresa.CorreoContacto };
+                EmailHelper.EnvioEmaiil(para, "Bienvenido a Service Desk DESI - Tus credenciales de acceso", templateHtml, false);
+            }
+            catch (Exception ex)
+            {
+                // Solo registrar el error, no afectar el flujo principal
+                // Logger.Error("Error al enviar correo de bienvenida", ex);
+            }
         }
     }
 }
