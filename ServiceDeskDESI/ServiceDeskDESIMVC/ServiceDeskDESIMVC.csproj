@@ -144,7 +144,6 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\UserController.cs" />
-    <Compile Include="DAL\Borrarlo.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
     <Compile Include="DAL\HttpClientConnection.Activo.cs" />
     <Compile Include="DAL\HttpClientConnection.Autentication.cs" />

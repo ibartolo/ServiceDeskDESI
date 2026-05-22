@@ -14,7 +14,7 @@ namespace ServiceDeskDESIMVC.DAL
     {
         public async Task<ModelResponse> ObtenerTodosLosTipoActivos()
         {
-            var result = await RequestAsync($"api/tipoActivo/List", HttpMethod.Get, null,
+            var result = await RequestAsync($"api/TipoActivo/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -26,7 +26,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> GuardarOActualizarTipoActivo (TipoActivo t)
         {
             MappingColumSecurity(t);
-            var result = await RequestAsync<object>($"api/tipoActivo/Guardar", HttpMethod.Post, t,
+            var result = await RequestAsync<object>($"api/TipoActivo/Guardar", HttpMethod.Post, t,
                new Func<string, string>((responseString) =>
                {
                    return responseString;
@@ -37,7 +37,7 @@ namespace ServiceDeskDESIMVC.DAL
 
         public async Task<ModelResponse> ObtenerTipoActivoPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/tipoActivo/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/TipoActivo/{id}", HttpMethod.Get, null,
             new Func<string, string>((responseString) =>
             {
                 return responseString;
@@ -50,7 +50,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> EliminarTipoActivo (TipoActivo t)
         {
             MappingColumSecurity(t);
-            var result = await RequestAsync<object>($"api/tipoActivo/Eliminar", HttpMethod.Delete, t,
+            var result = await RequestAsync<object>($"api/TipoActivo/Eliminar", HttpMethod.Delete, t,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
