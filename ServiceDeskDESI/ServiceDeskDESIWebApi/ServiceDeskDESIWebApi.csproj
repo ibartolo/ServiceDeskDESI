@@ -151,6 +151,7 @@
     <Compile Include="Controllers\EmpresaController.cs" />
     <Compile Include="Controllers\MarcaController.cs" />
     <Compile Include="Controllers\ModeloController.cs" />
+    <Compile Include="Controllers\RelacionController.cs" />
     <Compile Include="Controllers\RolController.cs" />
     <Compile Include="Controllers\SucursalController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
@@ -165,6 +166,7 @@
     <Compile Include="DAL\DbWrapper.Empresa.cs" />
     <Compile Include="DAL\DbWrapper.Marca.cs" />
     <Compile Include="DAL\DbWrapper.Modelo.cs" />
+    <Compile Include="DAL\DbWrapper.Relacion.cs" />
     <Compile Include="DAL\DbWrapper.Sucursal.cs" />
     <Compile Include="DAL\DbWrapper.TipoActivo.cs" />
     <Compile Include="DAL\DbWrapper.Ticket.cs" />
