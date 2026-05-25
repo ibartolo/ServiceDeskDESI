@@ -50,6 +50,7 @@
     <Compile Include="Catalogos\Empresa.cs" />
     <Compile Include="Catalogos\Marca.cs" />
     <Compile Include="Catalogos\Modelo.cs" />
+    <Compile Include="Catalogos\Relacion.cs" />
     <Compile Include="Catalogos\Sucursal.cs" />
     <Compile Include="Catalogos\TipoActivo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
