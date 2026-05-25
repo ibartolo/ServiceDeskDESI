@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Reflection;
+using Serilog; // << añadido
+using Serilog.Events; // opcional
 
 [assembly: OwinStartup(typeof(ServiceDeskDESIWebApi.App_Start.Startup))]
 namespace ServiceDeskDESIWebApi.App_Start
@@ -18,9 +20,39 @@ namespace ServiceDeskDESIWebApi.App_Start
     {
         public void Configuration(IAppBuilder app)
         {
+            // Inicializar Serilog (archivo diario en App_Data\logs)
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .Enrich.FromLogContext()
+                .WriteTo.File(
+                    path: System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "logs", "log-.txt"),
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 31,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                )
+                .CreateLogger();
+
+            //Log.Information("Inicializando aplicación Web API");
+
             ConfigureOAuth(app);
 
             HttpConfiguration config = new HttpConfiguration();
+
+            // Middleware OWIN simple para log de requests y errores
+            app.Use(async (context, next) =>
+            {
+                try
+                {
+                    //Log.Information("Request {Method} {Path}", context.Request.Method, context.Request.Path);
+                    await next.Invoke();
+                    //Log.Information("Response {StatusCode} {Method} {Path}", context.Response.StatusCode, context.Request.Method, context.Request.Path);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Unhandled exception processing {Method} {Path}", context.Request.Method, context.Request.Path);
+                    throw;
+                }
+            });
 
             // Configuración de rutas Web API
             config.MapHttpAttributeRoutes();

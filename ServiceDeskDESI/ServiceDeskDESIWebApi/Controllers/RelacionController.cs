@@ -27,12 +27,12 @@ namespace ServiceDeskDESIWebApi.Controllers
             return result;
         }
         [HttpPost, Route("")]
-        public ModelResponse GuardarOActualizarRelaciones(Relacion r)
+        public ModelResponse GuardarOActualizarRelaciones(UsuarioPagina r)
         {
             var result = dbWrapper.GuardarOActualizarRelacion(r);
             return result;
         }
-        public ModelResponse EliminarRelaciones (Relacion r)
+        public ModelResponse EliminarRelaciones (UsuarioPagina r)
         {
             var result = dbWrapper.EliminarEmpresa(r.Id, r.ModificadoPor, r.FechaModificacion.Value);
             return result;
