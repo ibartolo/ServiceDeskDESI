@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
+using Serilog;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
@@ -208,12 +209,19 @@ namespace ServiceDeskDESIWebApi.DAL
         public ModelResponse GuardarNuevaEmpresaConDatosIniciales(Empresa empresa)
         {
             var modelResponse = new ModelResponse();
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             try
             {
+                Log.Information("=== INICIO REGISTRO DE NUEVA EMPRESA ===");
+                Log.Information("Datos recibidos - NombreComercial: {NombreComercial}, RazonSocial: {RazonSocial}, RFC: {RFC}, Correo: {CorreoContacto}, Responsable: {Responsable}",
+                    empresa?.NombreComercial, empresa?.RazonSocial, empresa?.RFC, empresa?.CorreoContacto, empresa?.Responsable);
+
                 // =========================================
                 // VALIDACIONES DE EMPRESA
                 // =========================================
+                Log.Debug("Iniciando validaciones de campos requeridos...");
+
                 if (string.IsNullOrWhiteSpace(empresa.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
                 if (empresa.NombreComercial.Length > 250) { throw new ArgumentException("El nombre comercial no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(empresa.RazonSocial)) { throw new ArgumentException("La razón social es requerida."); }
@@ -227,9 +235,13 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (string.IsNullOrWhiteSpace(empresa.CorreoContacto)) { throw new ArgumentException("El correo de contacto es requerido."); }
                 if (empresa.CorreoContacto.Length > 250) { throw new ArgumentException("El correo de contacto no puede exceder los 250 caracteres."); }
 
+                Log.Information("Validaciones completadas exitosamente para RFC: {RFC}", empresa.RFC);
+
                 // =========================================
                 // PASO 1: GUARDAR EMPRESA
                 // =========================================
+                Log.Information("PASO 1/5 - Iniciando guardado de empresa en BD...");
+
                 empresa.FechaVigenciaInicio = DateTime.Now;
                 empresa.FechaVigenciaFin = DateTime.Now.AddDays(30);
                 empresa.EsPeriodoPrueba = true;
@@ -241,15 +253,22 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 if (!empresaResponse.IsSuccess || empresaResponse.Response == null)
                 {
+                    Log.Error("❌ PASO 1/5 - FALLÓ el guardado de empresa. RFC: {RFC}, Error: {Error}", empresa.RFC, empresaResponse.Message);
                     throw new Exception(empresaResponse.Message ?? "Error al guardar la empresa");
                 }
 
                 var empresaGuardada = (Empresa)empresaResponse.Response;
+                Log.Information("✅ PASO 1/5 - Empresa guardada exitosamente. Id: {EmpresaId}, Nombre: {NombreEmpresa}",
+                    empresaGuardada.Id, empresaGuardada.NombreComercial);
+
                 var usernameAdmin = $"admin_{empresaGuardada.Id}";
+                Log.Debug("Username administrador generado: {Username}", usernameAdmin);
 
                 // =========================================
                 // PASO 2: GUARDAR SUCURSAL
                 // =========================================
+                Log.Information("PASO 2/5 - Creando sucursal para la empresa...");
+
                 var sucursal = new Sucursal()
                 {
                     Nombre = empresaGuardada.NombreComercial,
@@ -267,14 +286,20 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 if (!sucursalResponse.IsSuccess || sucursalResponse.Response == null)
                 {
+                    Log.Error("❌ PASO 2/5 - FALLÓ la creación de sucursal. EmpresaId: {EmpresaId}, Error: {Error}",
+                        empresaGuardada.Id, sucursalResponse.Message);
                     throw new Exception(sucursalResponse.Message ?? "Error al guardar la sucursal");
                 }
 
                 var sucursalGuardada = (Sucursal)sucursalResponse.Response;
+                Log.Information("✅ PASO 2/5 - Sucursal creada exitosamente. Id: {SucursalId}, Nombre: {SucursalNombre}",
+                    sucursalGuardada.Id, sucursalGuardada.Nombre);
 
                 // =========================================
                 // PASO 3: GUARDAR ÁREA (TI)
                 // =========================================
+                Log.Information("PASO 3/5 - Creando área 'TI' para la empresa...");
+
                 var area = new Area()
                 {
                     Nombre = "TI",
@@ -289,14 +314,20 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 if (!areaResponse.IsSuccess || areaResponse.Response == null)
                 {
+                    Log.Error("❌ PASO 3/5 - FALLÓ la creación del área. EmpresaId: {EmpresaId}, Error: {Error}",
+                        empresaGuardada.Id, areaResponse.Message);
                     throw new Exception(areaResponse.Message ?? "Error al guardar el área");
                 }
 
                 var areaGuardada = (Area)areaResponse.Response;
+                Log.Information("✅ PASO 3/5 - Área 'TI' creada exitosamente. Id: {AreaId}, Nombre: {AreaNombre}",
+                    areaGuardada.Id, areaGuardada.Nombre);
 
                 // =========================================
                 // PASO 4: GUARDAR USUARIO ADMINISTRADOR
                 // =========================================
+                Log.Information("PASO 4/5 - Creando usuario administrador para la empresa...");
+
                 var usuarioAdmin = new Usuario()
                 {
                     NombreUsuario = usernameAdmin,
@@ -320,23 +351,55 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 if (!usuarioResponse.IsSuccess)
                 {
+                    Log.Error("❌ PASO 4/5 - FALLÓ la creación del usuario administrador. EmpresaId: {EmpresaId}, Username: {Username}, Error: {Error}",
+                        empresaGuardada.Id, usernameAdmin, usuarioResponse.Message);
                     throw new Exception(usuarioResponse.Message ?? "Error al guardar el usuario administrador");
                 }
 
+                Log.Information("✅ PASO 4/5 - Usuario administrador creado exitosamente. Username: {Username}, Correo: {Correo}",
+                    usernameAdmin, empresaGuardada.CorreoContacto);
+
+                // =========================================
+                // PASO 5: ENVÍO DE CORREO DE BIENVENIDA
+                // =========================================
+                Log.Information("PASO 5/5 - Enviando correo de bienvenida a: {Correo}...", empresaGuardada.CorreoContacto);
+
+                var emailSent = EnviarCorreoBienvenida(empresaGuardada, usernameAdmin, "Admin123!");
+
+                if (emailSent)
+                {
+                    Log.Information("✅ PASO 5/5 - Correo de bienvenida enviado exitosamente a: {Correo}", empresaGuardada.CorreoContacto);
+                }
+                else
+                {
+                    Log.Warning("⚠️ PASO 5/5 - El correo de bienvenida NO pudo ser enviado a: {Correo}. La empresa y usuario fueron creados correctamente, pero el usuario no recibirá sus credenciales por correo.",
+                        empresaGuardada.CorreoContacto);
+                }
+
+                stopwatch.Stop();
+                Log.Information("=== REGISTRO DE EMPRESA COMPLETADO EXITOSAMENTE ===");
+                Log.Information("Resumen final - EmpresaId: {EmpresaId}, SucursalId: {SucursalId}, AreaId: {AreaId}, Username: {Username}, Duración total: {Duration}ms",
+                    empresaGuardada.Id, sucursalGuardada.Id, areaGuardada.Id, usernameAdmin, stopwatch.ElapsedMilliseconds);
+
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = empresaGuardada;
-                modelResponse.Message = "Empresa registrada correctamente con sucursal, área y usuario administrador te llegara un correo con tus datos para poder autenticarte.";
-
-                // Enviar correo de bienvenida
-                EnviarCorreoBienvenida(empresaGuardada, usernameAdmin, "Admin123!");
+                modelResponse.Message = "Empresa registrada correctamente con sucursal, área y usuario administrador. Te llegará un correo con tus datos para poder autenticarte.";
             }
             catch (ArgumentException ex)
             {
+                stopwatch.Stop();
+                Log.Warning(ex, "⚠️ VALIDACIÓN FALLIDA - Error de validación al registrar empresa. Datos: {@Empresa}, Duración: {Duration}ms",
+                    new { empresa?.NombreComercial, empresa?.RFC, empresa?.CorreoContacto }, stopwatch.ElapsedMilliseconds);
+
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
+                stopwatch.Stop();
+                Log.Error(ex, "❌ ERROR CRÍTICO - Fallo en el registro de empresa. Datos: {@Empresa}, Duración: {Duration}ms",
+                    new { empresa?.NombreComercial, empresa?.RFC, empresa?.CorreoContacto }, stopwatch.ElapsedMilliseconds);
+
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
             }
@@ -753,16 +816,25 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        private void EnviarCorreoBienvenida(Empresa empresa, string usuario, string contrasenaTemporal)
+        private bool EnviarCorreoBienvenida(Empresa empresa, string usuario, string contrasenaTemporal)
         {
             try
             {
+                Log.Debug("Preparando plantilla de correo para: {Email}", empresa.CorreoContacto);
+
                 // Obtener URL base del Web.config
                 string baseUri = System.Configuration.ConfigurationManager.AppSettings["BaseUri"];
                 string urlLogin = $"{baseUri}Home/Autentication";
 
                 // Leer template
                 string templatePath = System.Web.Hosting.HostingEnvironment.MapPath("~/Template/Template_AltaEmpresa.html");
+
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    Log.Error("No se encontró la plantilla de correo en: {TemplatePath}", templatePath);
+                    return false;
+                }
+
                 string templateHtml = System.IO.File.ReadAllText(templatePath);
 
                 // Reemplazar variables en el template
@@ -774,14 +846,20 @@ namespace ServiceDeskDESIWebApi.DAL
                 templateHtml = templateHtml.Replace("{{ContrasenaTemporal}}", contrasenaTemporal);
                 templateHtml = templateHtml.Replace("{{UrlLogin}}", urlLogin);
 
+                Log.Debug("Plantilla procesada, enviando correo a: {Email}", empresa.CorreoContacto);
+
                 // Enviar correo
                 var para = new List<string> { empresa.CorreoContacto };
                 EmailHelper.EnvioEmaiil(para, "Bienvenido a Service Desk DESI - Tus credenciales de acceso", templateHtml, false);
+
+                Log.Information("Correo enviado exitosamente a: {Email}", empresa.CorreoContacto);
+                return true;
             }
             catch (Exception ex)
             {
-                // Solo registrar el error, no afectar el flujo principal
-                // Logger.Error("Error al enviar correo de bienvenida", ex);
+                Log.Error(ex, "FALLO al enviar correo de bienvenida a: {Email}. La empresa quedó registrada sin credenciales enviadas.",
+                    empresa.CorreoContacto);
+                return false;
             }
         }
     }

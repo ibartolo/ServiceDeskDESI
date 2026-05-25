@@ -17,9 +17,9 @@ namespace ServiceDeskDESIWebApi.DAL
             try 
             {
                 var relacion = GetObjects("ObtenerRelacion", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
-                  new Func<IDataReader, Relacion>((reader) =>
+                  new Func<IDataReader, UsuarioPagina>((reader) =>
                   {
-                      var relaciones = LlenarEntidad<Relacion>(reader);
+                      var relaciones = LlenarEntidad<UsuarioPagina>(reader);
                       return relaciones;
                   }));
                 modelResponse.IsSuccess = true;
@@ -34,7 +34,7 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             return modelResponse;
         }
-        public ModelResponse GuardarOActualizarRelacion(Relacion r)
+        public ModelResponse GuardarOActualizarRelacion(UsuarioPagina r)
         {
             var modelResponse = new ModelResponse();
             try
@@ -72,9 +72,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 });
 
                 var result = GetObject("ObtenerRelacionPorId", System.Data.CommandType.StoredProcedure,
-                    parameters, new Func<System.Data.IDataReader, Relacion>((reader) =>
+                    parameters, new Func<System.Data.IDataReader, UsuarioPagina>((reader) =>
                     {
-                        var r = LlenarEntidad<Relacion>(reader);
+                        var r = LlenarEntidad<UsuarioPagina>(reader);
                         return r;
                     }));
                 modelResponse.Response = result;
