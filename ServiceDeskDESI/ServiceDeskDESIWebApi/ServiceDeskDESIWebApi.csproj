@@ -168,6 +168,7 @@
     <Compile Include="Controllers\SucursalController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\TipoActivoController.cs" />
+    <Compile Include="Controllers\UsuarioPaginaController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Activo.cs" />
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
@@ -182,6 +183,7 @@
     <Compile Include="DAL\DbWrapper.Sucursal.cs" />
     <Compile Include="DAL\DbWrapper.TipoActivo.cs" />
     <Compile Include="DAL\DbWrapper.Ticket.cs" />
+    <Compile Include="DAL\DbWrapper.UsuarioPagina.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
