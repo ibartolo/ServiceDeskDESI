@@ -12,29 +12,55 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Sucursales")]
     public class SucursalController : BaseController
     {
-        [HttpGet, Route("List")]
-        public ModelResponse ObtenerSucursales()
+        /// <summary>
+        /// Obtiene todas las sucursales de la empresa
+        /// </summary>
+        /// <param name="empresaId">ID de la empresa</param>
+        /// <returns>Lista de sucursales</returns>
+        [HttpGet, Route("List/{empresaId:long}")]
+        public ModelResponse ObtenerSucursales(long empresaId)
         {
-            var result = dbWrapper.ObtenerTodosLasSucursales();
+            var result = dbWrapper.ObtenerSucursales(empresaId);
             return result;
         }
-        [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerSucursalesPorId(long id)
+
+        /// <summary>
+        /// Obtiene una sucursal por su ID
+        /// </summary>
+        /// <param name="id">ID de la sucursal</param>
+        /// <param name="empresaId">ID de la empresa</param>
+        /// <returns>Sucursal encontrada</returns>
+        [HttpGet, Route("{id:long}/{empresaId:long}")]
+        public ModelResponse ObtenerSucursalPorId(long id, long empresaId)
         {
-            var result = dbWrapper.ObtenerSucursalesPorId(id);
+            var result = dbWrapper.ObtenerSucursalPorId(id, empresaId);
             return result;
         }
-        [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarActualizarSucursal(Sucursal s)
+
+        /// <summary>
+        /// Guarda o actualiza una sucursal
+        /// </summary>
+        /// <param name="sucursal">Objeto sucursal con los datos</param>
+        /// <param name="empresaId">ID de la empresa</param>
+        /// <returns>Sucursal guardada con su ID actualizado</returns>
+        [HttpPost, Route("Guardar/{empresaId:long}")]
+        public ModelResponse GuardarActualizarSucursal(Sucursal sucursal, long empresaId)
         {
-            var result = dbWrapper.GuardarOActualizarSucursales(s);
+            var result = dbWrapper.GuardarOActualizarSucursal(sucursal, empresaId);
             return result;
         }
-        [HttpDelete, Route("Eliminar")]
-        public ModelResponse EliminarSucursal( Sucursal s)
+
+        /// <summary>
+        /// Elimina lógicamente una sucursal
+        /// </summary>
+        /// <param name="sucursal">Sucursal a eliminar (debe incluir Id, ModificadoPor)</param>
+        /// <param name="empresaId">ID de la empresa</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpDelete, Route("Eliminar/{empresaId:long}")]
+        public ModelResponse EliminarSucursal(Sucursal sucursal, long empresaId)
         {
-            s.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarSucursales(s);
+            sucursal.FechaModificacion = DateTime.Now;
+            var result = dbWrapper.EliminarSucursal(sucursal.Id, sucursal.ModificadoPor, sucursal.FechaModificacion.Value, empresaId);
             return result;
         }
     }

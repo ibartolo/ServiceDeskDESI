@@ -14,7 +14,7 @@ namespace ServiceDeskDESIMVC.Controllers
     public class BaseController : Controller
     {
         public HttpClientConnection httpClientConnection;
-        Usuario usuarioAutenticado;
+        public Usuario usuarioAutenticado;
         public ModelResponse mr { get; set; }
 
         public BaseController()
