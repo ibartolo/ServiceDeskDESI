@@ -12,53 +12,51 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task <ModelResponse> ObtenerTodasLasSucursales()
+        public async Task<ModelResponse> ObtenerTodasLasSucursales(long empresaId)
         {
-            var result = await RequestAsync($"api/Sucursales/List", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Sucursales/List/{empresaId}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }),
                 token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result);
-            return modelresponse;
-        }
-
-        public async Task<ModelResponse> GuardarActualizarSucursales(Sucursal s)
-        {
-            MappingColumSecurity(s);
-            var result = await RequestAsync<object>($"api/Sucursales/Guardar", HttpMethod.Post, s,
-               new Func<string, string>((responseString) =>
-               {
-                   return responseString;
-               }), 
-               token.Token.access_token);
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerSucursalesPorId(long id)
+        public async Task<ModelResponse> ObtenerSucursalPorId(long id, long empresaId)
         {
-            var result = await RequestAsync<object>($"api/Sucursales/{id}", HttpMethod.Get, null,
-            new Func<string, string>((responseString) =>
-            {
-                return responseString;
-            }));
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse>EliminarSucursal (Sucursal s)
-        {
-            MappingColumSecurity(s);
-            var result= await RequestAsync<object>($"api/Sucursales/Eliminar", HttpMethod.Delete, s,
+            var result = await RequestAsync<object>($"api/Sucursales/{id}/{empresaId}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
-                }), 
-                token.Token.access_token);
-            var modelreponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelreponse;
+                }), token.Token.access_token);
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> GuardarActualizarSucursal(Sucursal sucursal, long empresaId)
+        {
+            MappingColumSecurity(sucursal);
+            var result = await RequestAsync<object>($"api/Sucursales/Guardar/{empresaId}", HttpMethod.Post, sucursal,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> EliminarSucursal(Sucursal sucursal, long empresaId)
+        {
+            MappingColumSecurity(sucursal);
+            var result = await RequestAsync<object>($"api/Sucursales/Eliminar/{empresaId}", HttpMethod.Delete, sucursal,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
         }
     }
-} 
+}

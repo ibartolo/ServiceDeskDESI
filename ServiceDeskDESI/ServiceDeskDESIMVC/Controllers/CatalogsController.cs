@@ -17,6 +17,11 @@ namespace ServiceDeskDESIMVC.Controllers
     [Autenticated]
     public class CatalogsController : BaseController
     {
+        TokenCookie token;
+        public CatalogsController() : base()
+        {
+            token = SessionHelper.GetSessionUser();
+        }
         #region Views
         public async Task<ActionResult> WorkArea(long id = 0)
         {
@@ -80,7 +85,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var sucursal = new Sucursal();
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerSucursalesPorId(id);
+                var response = await httpClientConnection.ObtenerSucursalPorId(id,  token.EmpresaID);
                 if (response.IsSuccess && response.Response !=null)
                 {
                     sucursal = JsonConvert.DeserializeObject<Sucursal>(response.Response.ToString());
@@ -515,22 +520,22 @@ namespace ServiceDeskDESIMVC.Controllers
         #region 5catalogos
         public async Task<string> ConsultarTodasLasSucursales()
         {
-            var response = await httpClientConnection.ObtenerTodasLasSucursales();
+            var response = await httpClientConnection.ObtenerTodasLasSucursales(token.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodasLasSucursalesPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerSucursalesPorId(id);
+            var response = await httpClientConnection.ObtenerSucursalPorId(id, token.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarActualizarSucursales(Sucursal s)
         {
-            var response = await httpClientConnection.GuardarActualizarSucursales(s);
+            var response = await httpClientConnection.GuardarActualizarSucursal(s, token.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarSucurales(Sucursal s)
         {
-            var response = await httpClientConnection.EliminarSucursal(s);
+            var response = await httpClientConnection.EliminarSucursal(s, token.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodosLosTipoActivos()
