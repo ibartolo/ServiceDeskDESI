@@ -15,15 +15,16 @@ namespace ServiceDeskDESIMVC.Controllers
     {
         public HttpClientConnection httpClientConnection;
         public Usuario usuarioAutenticado;
+        public TokenCookie tokenCookie;
         public ModelResponse mr { get; set; }
 
         public BaseController()
         {
             httpClientConnection = new HttpClientConnection();
             mr = new ModelResponse();
-            var token = SessionHelper.GetSessionUser();
+            tokenCookie = SessionHelper.GetSessionUser();
 
-            if (token?.Token?.ExpirationDate <= DateTime.Now)
+            if (tokenCookie?.Token?.ExpirationDate <= DateTime.Now)
             {
                 SessionHelper.CloseSession();
                 Redirect("~/Home/Autenticacion");

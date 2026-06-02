@@ -310,7 +310,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     Estatus = true
                 };
 
-                var areaResponse = GuardarOActualizarArea(area);
+                var areaResponse = GuardarOActualizarArea(area, empresaGuardada.Id);
 
                 if (!areaResponse.IsSuccess || areaResponse.Response == null)
                 {

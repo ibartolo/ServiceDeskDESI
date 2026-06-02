@@ -156,6 +156,7 @@
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ActivoController.cs" />
+    <Compile Include="Controllers\AreaController.cs" />
     <Compile Include="Controllers\AutenticationController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CatalogsController.cs" />

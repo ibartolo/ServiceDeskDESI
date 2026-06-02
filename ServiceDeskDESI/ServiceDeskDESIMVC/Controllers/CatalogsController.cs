@@ -29,7 +29,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerAreaPorId(id);
+                var response = await httpClientConnection.ObtenerAreaPorId(id, tokenCookie.EmpresaID);
 
                 if (response.IsSuccess && response.Response != null)
                 {
@@ -264,7 +264,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 ViewBag.Sucursales = sucursalesResponse.Response;
             }
 
-            var areasResponse = await httpClientConnection.ObtenerAreas();
+            var areasResponse = await httpClientConnection.ObtenerAreas(tokenCookie.EmpresaID);
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
                 ViewBag.Areas = areasResponse.Response;
@@ -299,7 +299,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             // Cargar áreas para el dropdown
-            var areasResponse = await httpClientConnection.ObtenerAreas();
+            var areasResponse = await httpClientConnection.ObtenerAreas(tokenCookie.EmpresaID);
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
                 ViewBag.Areas = areasResponse.Response;
@@ -328,22 +328,22 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Data Access
         public async Task<string> ConsutlarTodasAreas()
         {
-            var response = await httpClientConnection.ObtenerAreas();
+            var response = await httpClientConnection.ObtenerAreas(tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarAreaPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerAreaPorId(id);
+            var response = await httpClientConnection.ObtenerAreaPorId(id, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarArea(Area a)
         {
-            var response = await httpClientConnection.GuardarOActualizarArea(a);
+            var response = await httpClientConnection.GuardarOActualizarArea(a, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarArea(Area a)
         {
-            var response = await httpClientConnection.EliminarArea(a);
+            var response = await httpClientConnection.EliminarArea(a, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarPerfil()
