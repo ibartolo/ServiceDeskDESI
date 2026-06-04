@@ -11,12 +11,14 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodasLasMarcas()
+        public ModelResponse ObtenerTodasLasMarcas(long empresaId)
         {
             var modelResponse = new ModelResponse();
             try
             {
-                var marcas = GetObjects("ObtenerMarca", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                var marcas = GetObjects("ObtenerMarca", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@EmpresaId", empresaId) },
                     new Func<IDataReader, Marca>((reader) =>
                     {
                         var marca = LlenarEntidad<Marca>(reader);
@@ -27,11 +29,15 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Message = "Marcas Obtenidos Correctamente";
 
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener las Marcas";
             }
             return modelResponse;
         }
@@ -57,37 +63,45 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
-        public ModelResponse ObtenerMarcasPorId(long id)
+        public ModelResponse ObtenerMarcasPorId(long id, long empresaId)
         {
             var modelResponse = new ModelResponse();
             try
             {
-                modelResponse.IsSuccess = true;
-                var parameters = new List<SqlParameter>();
-                parameters.Add(new SqlParameter()
-                {
-                    Value = id,
-                    IsNullable = true,
-                    ParameterName = "@Id",
-                    SqlDbType = System.Data.SqlDbType.Int
-                });
-
-                var result = GetObject("ObtenerMarcaPorId", System.Data.CommandType.StoredProcedure,
-                    parameters, new Func<System.Data.IDataReader, Marca>((reader) =>
+                if (id <= 0) { throw new ArgumentException("El ID de la Marca es requerido."); }
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                var marca = GetObject("ObtenerMarcaPorId", CommandType.StoredProcedure,
+                    new[] {
+                new SqlParameter("@Id", id),
+                new SqlParameter("@EmpresaId", empresaId)
+                    },
+                    new Func<IDataReader, Marca>((reader) =>
                     {
-                        var r = LlenarEntidad<Marca>(reader);
-                        return r;
+                        var a = LlenarEntidad<Marca>(reader);
+                        return a;
                     }));
-                modelResponse.Response = result;
+                if (marca == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró la Marca especificada.";
+                    return modelResponse;
+                }
                 modelResponse.IsSuccess = true;
-                modelResponse.Message = "Marca Obtenida Correctamente";
+                modelResponse.Response = marca;
+                modelResponse.Message = "Marca obtenida correctamente";
+            }
+
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
+                modelResponse.Message = "Ocurrió un error al obtener Marca";
             }
+
 
             return modelResponse;
         }
