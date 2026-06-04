@@ -13,15 +13,15 @@ namespace ServiceDeskDESIWebApi.Controllers
     public class MarcaController : BaseController
     {
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerMarcas()
+        public ModelResponse ObtenerMarcas(long empresaId)
         {
-            var result = dbWrapper.ObtenerTodasLasMarcas();
+            var result = dbWrapper.ObtenerTodasLasMarcas(empresaId);
             return result;
         }
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerMarcaPorId(long id)
+        public ModelResponse ObtenerMarcaPorId(long id, long empresaId)
         {
-            var result = dbWrapper.ObtenerMarcasPorId(id);
+            var result = dbWrapper.ObtenerMarcasPorId(id, empresaId);
             return result;
         }
         [HttpPost, Route("Guardar")]
