@@ -11,13 +11,16 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodosLosActivos()
+        public ModelResponse ObtenerTodosLosActivos(long empresaId)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
-                var activos = GetObjects("ObtenerActivos", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+
+                var activos = GetObjects("ObtenerActivos", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@EmpresaId", empresaId) },
                     new Func<IDataReader, Activo>((reader) =>
                     {
                         var activo = LlenarEntidad<Activo>(reader);
@@ -50,10 +53,15 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = activos;
                 modelResponse.Message = "Activos obtenidos correctamente";
             }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
             catch (Exception ex)
             {
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener los activos";
+                modelResponse.Message = "Ocurrió un error al obtener las activos";
             }
 
             return modelResponse;
@@ -64,6 +72,8 @@ namespace ServiceDeskDESIWebApi.DAL
             var modelResponse = new ModelResponse();
             try
             {
+                // Validaciones
+
                 var parametros = ObtenerParametrosSQL(a).ToArray();
                 var activoId = ExecuteScalar("GuardarOActualizarActivo", CommandType.StoredProcedure, parametros);
                 a.Id = Convert.ToInt64(activoId);
@@ -82,16 +92,20 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerActivoPorId(long id)
+        public ModelResponse ObtenerActivoPorId(long id, long empresaId)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
                 if (id <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
 
                 var activo = GetObject("ObtenerActivoPorId", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) },
+                    new[] { new SqlParameter("@Id", id),
+                     new SqlParameter("@EmpresaId", empresaId)
+                    },
+
                     new Func<IDataReader, Activo>((reader) =>
                     {
                         var a = LlenarEntidad<Activo>(reader);
@@ -145,21 +159,29 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse EliminarActivo(long id, string modificadoPor, DateTime fechaModificacion)
+        public ModelResponse EliminarActivo(long id, string modificadoPor, DateTime fechaModificacion, long empresaId)
         {
             var modelResponse = new ModelResponse();
             try
             {
                 if (id <= 0) { throw new ArgumentException("El ID del Modelo es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El activo modificador es requerido."); }
-                ExecuteNonQuery("EliminarActivo", CommandType.StoredProcedure, new SqlParameter[]
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+
+                var result =  ExecuteNonQuery("EliminarActivo", CommandType.StoredProcedure, new SqlParameter[]
                 {
                     new SqlParameter("@Id", id),
                     new SqlParameter("@ModificadoPor", modificadoPor),
                     new SqlParameter("@FechaModificacion", fechaModificacion)
                 });
+                if (Convert.ToInt64(result) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para eliminar este Activo.";
+                    return modelResponse;
+                }
 
-                modelResponse.IsSuccess = true;
+                  modelResponse.IsSuccess = true;
                 modelResponse.Message = "Activo eliminado correctamente";
             }
             catch (ArgumentException ex)

@@ -24,6 +24,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     new Func<IDataReader, Area>((reader) =>
                     {
                         var area = LlenarEntidad<Area>(reader);
+
                         return area;
                     }));
 
