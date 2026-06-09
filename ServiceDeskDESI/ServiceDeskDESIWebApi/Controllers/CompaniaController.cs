@@ -19,31 +19,31 @@ namespace ServiceDeskDESIWebApi.Controllers
         //    dbWrapper = new DbWrapper();
         //}
 
-        [HttpGet, Route("List")]
-        public ModelResponse ObtenerCompania()
+        [HttpGet, Route("List/{empresaId:long}")]
+        public ModelResponse ObtenerCompania(long empresaId)
         {
-            var result = dbWrapper.ObtenerCompania();
+            var result = dbWrapper.ObtenerCompania(empresaId);
             return result;
         }
-        [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerCompaniaPorId(long id)
+        [HttpGet, Route("{id:long}/{empresaId:long}")]
+        public ModelResponse ObtenerCompaniaPorId(long id, long empresaId)
         {
-            var result = dbWrapper.ObtenerCompaniaPorId(id);
+            var result = dbWrapper.ObtenerCompaniaPorId(id,empresaId);
             return result;
         }
 
-        [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarCompania(Compania c)
+        [HttpPost, Route("Guardar/{empresaId:long}")]
+        public ModelResponse GuardarOActualizarCompania(Compania c, long empresaId)
         {
-            var result = dbWrapper.GuardarOActualizarCompania(c);
+            var result = dbWrapper.GuardarOActualizarCompania(c,empresaId);
             return result;
         }
 
         [HttpDelete, Route("Compania")]
-        public ModelResponse EliminarCompania(Compania c)
+        public ModelResponse EliminarCompania(Compania c, long empresaId)
         {
             c.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarCompania(c);
+            var result = dbWrapper.EliminarCompania(c.Id,c.ModificadoPor,c.FechaModificacion.Value,empresaId);
             return result;
         }
 

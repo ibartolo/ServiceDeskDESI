@@ -14,16 +14,16 @@ namespace ServiceDeskDESIWebApi.Controllers
     public class EmpresaController : BaseController
     {
         [AllowAnonymous]
-        [HttpGet, Route("List")]
-        public ModelResponse ObtenerEmpresas()
+        [HttpGet, Route("List/{empresaId:long}")]
+        public ModelResponse ObtenerEmpresas(long empresaId)
         {
-            var result = dbWrapper.ObtenerTodasLasEmpresas();
+            var result = dbWrapper.ObtenerTodasLasEmpresas(empresaId);
             return result;
         }
-        [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerEmpresasPorId(long id)
+        [HttpGet, Route("{id:long}/{empresaId:long}")]
+        public ModelResponse ObtenerEmpresasPorId(long id,long empresaId)
         {
-            var result = dbWrapper.ObtenerEmpresasPorId(id);
+            var result = dbWrapper.ObtenerEmpresasPorId(id,empresaId);
             return result;
         }
         [HttpPost, Route("RFC")]
@@ -32,10 +32,10 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.ObtenerEmpresaPorRFC(empresa.RFC);
             return result;
         }
-        [HttpPost, Route("")]
-        public ModelResponse GuardarOActualizarEmpresas(Empresa e)
+        [HttpPost, Route("Guardar/{empresaId:long}")]
+        public ModelResponse GuardarOActualizarEmpresas(Empresa e,long empresaId)
         {
-            var result = dbWrapper.GuardarOActualizarEmpresas(e);
+            var result = dbWrapper.GuardarOActualizarEmpresas(e,empresaId);
             return result;
         }
         [AllowAnonymous]
@@ -45,10 +45,11 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.GuardarNuevaEmpresaConDatosIniciales(e);
             return result;
         }
-        [HttpDelete, Route("")]
-        public ModelResponse EliminarEmpresas(Empresa e)
+        [HttpDelete, Route("Eliminar/{empresaId:long}")]
+        public ModelResponse EliminarEmpresas(Empresa e, long empresaId)
         {
-            var result = dbWrapper.EliminarEmpresa(e.Id, e.ModificadoPor, e.FechaModificacion.Value);
+            e.FechaModificacion = DateTime.Now;
+            var result = dbWrapper.EliminarEmpresa(e.Id, e.ModificadoPor, e.FechaModificacion.Value,empresaId);
             return result;
         }
     }
