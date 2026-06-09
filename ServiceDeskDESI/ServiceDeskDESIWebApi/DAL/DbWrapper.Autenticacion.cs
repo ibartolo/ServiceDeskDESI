@@ -257,6 +257,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     throw new Exception(empresaResponse.Message ?? "Error al guardar la empresa");
                 }
 
+
                 var empresaGuardada = (Empresa)empresaResponse.Response;
                 Log.Information("✅ PASO 1/5 - Empresa guardada exitosamente. Id: {EmpresaId}, Nombre: {NombreEmpresa}",
                     empresaGuardada.Id, empresaGuardada.NombreComercial);
