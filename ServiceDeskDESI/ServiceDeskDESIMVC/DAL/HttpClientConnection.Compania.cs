@@ -14,7 +14,7 @@ namespace ServiceDeskDESIMVC.DAL
     {
         public async Task<ModelResponse> ObtenerTodasCompanias()
         {
-            var result = await RequestAsync($"api/compania/List", HttpMethod.Get, null,
+            var result = await RequestAsync($"api/Compania/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -26,7 +26,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> GuardarActualizarCompania(Compania c)
         {
             MappingColumSecurity(c);
-           var result = await RequestAsync<object>($"api/compania/Guardar", HttpMethod.Post, c,
+           var result = await RequestAsync<object>($"api/Compania/Guardar", HttpMethod.Post, c,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -37,7 +37,7 @@ namespace ServiceDeskDESIMVC.DAL
 
         public async Task<ModelResponse> ObtenerCompaniaPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/compania/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Compania/{id}", HttpMethod.Get, null,
             new Func<string, string>((responseString) =>
             {
                 return responseString;
@@ -51,7 +51,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> EliminarCompania(Compania c )
         {
             MappingColumSecurity(c);
-            var result = await RequestAsync<object>($"api/compania/Compania", HttpMethod.Delete, c,
+            var result = await RequestAsync<object>($"api/Compania/Compania", HttpMethod.Delete, c,
                 new Func<string, string>((responseString) =>
                {
                    return responseString;

@@ -1,0 +1,226 @@
+﻿using ServiceDeskDESIEntities.Catalogos;
+using ServiceDeskDESIEntities.Seguridad;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+
+namespace ServiceDeskDESIWebApi.DAL
+{
+    public partial class DbWrapper
+    {
+        public ModelResponse ObtenerTodasLasEmpresas (long empresaId)
+        {
+            var modelResponse = new ModelResponse();
+            try
+            {
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+
+                var empresa = GetObjects("ObtenerEmpresas", CommandType.StoredProcedure,
+               new[] { new SqlParameter("@EmpresaId", empresaId) },
+               new Func<IDataReader, Empresa>((reader) =>
+               {
+                   var empresas = LlenarEntidad<Empresa>(reader);
+                   return empresas;
+               }));
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = empresa;
+                modelResponse.Message = "Empresas obtenidas correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener las áreas";
+            }
+            return modelResponse;
+        }
+
+        public ModelResponse GuardarOActualizarEmpresas(Empresa e, long empresaId)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                // Validaciones
+                if (string.IsNullOrWhiteSpace(e.NombreComercial)) { throw new ArgumentException("El Nombre es requerido."); }
+                if (e.RazonSocial.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
+                if (e.RFC.Length > 250) { throw new ArgumentException("El RFC no puede exceder los 250 caracteres."); }
+                if (e.Responsable != null && e.Responsable.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
+                if (e.Direccion.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
+                if (e.Ciudad.Length > 250) { throw new ArgumentException("El RFC no puede exceder los 250 caracteres."); }
+                if (e.Estado.Length > 250) { throw new ArgumentException("El RFC no puede exceder los 250 caracteres."); }
+                if (e.CodigoPostal.Length > 250) { throw new ArgumentException("El RFC no puede exceder los 250 caracteres."); }
+                if (e.Telefono.Length > 250) { throw new ArgumentException("El RFC no puede exceder los 250 caracteres."); }
+                if (e.CorreoContacto != null && e.CorreoContacto.Length > 100) { throw new ArgumentException("El correo no puede exceder los 100 caracteres."); }
+                // Ing me falta esto: FechaVigenciaInicio,FechaVigenciaFin,EsPeriodoPrueba
+                if (string.IsNullOrWhiteSpace(e.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                    var parametrosObj = new
+                    {
+                        e.Id,
+                        e.NombreComercial,
+                        e.RFC,
+                        e.Responsable,
+                        e.Direccion,
+                        e.Ciudad,
+                        e.Estado,
+                        e.CodigoPostal,
+                        e.Telefono,
+                        e.CorreoContacto,
+                        e.FechaVigenciaInicio,
+                        e.FechaVigenciaFin,
+                        e.EsPeriodoPrueba,
+                        e.CreadoPor,
+                        e.FechaCreacion,
+                        e.ModificadoPor,
+                        e.FechaModificacion,
+                        e.Estatus,
+                        EmpresaId = empresaId
+                    };
+                var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
+                var empressaId = ExecuteScalar("GuardarOActualizarEmpresa", CommandType.StoredProcedure, parametros);
+                    if (Convert.ToInt64(empressaId) == 0)
+                    {
+                        modelResponse.IsSuccess = false;
+                        modelResponse.Message = "No tiene permisos para realizar esta operación.";
+                        return modelResponse;
+                    }
+                e.Id = Convert.ToInt64(empressaId);
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = e;
+                modelResponse.Message = "Empresas Guardados Correctamente";
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+                modelResponse.Response = null;
+            }
+
+            return modelResponse;
+        }
+        public ModelResponse ObtenerEmpresaPorRFC(string rfc)
+        {
+            var modelResponse = new ModelResponse();
+            try
+            {
+
+                modelResponse.IsSuccess = true;
+                var parameters = new List<SqlParameter>();
+                parameters.Add(new SqlParameter()
+                {
+                    Value = rfc,
+                    IsNullable = true,
+                    ParameterName = "@RFC",
+                    SqlDbType = System.Data.SqlDbType.Int
+                });
+
+                var result = GetObject("ObtenerEmpresaPorId", System.Data.CommandType.StoredProcedure,
+                    parameters, new Func<System.Data.IDataReader, Empresa>((reader) =>
+                    {
+                        var r = LlenarEntidad<Empresa>(reader);
+                        return r;
+                    }));
+                modelResponse.Response = result;
+                modelResponse.IsSuccess = true;
+                modelResponse.Message = "Empresa Obtenido Correctamente";
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+                modelResponse.Response = null;
+            }
+
+            return modelResponse;
+        }
+        public ModelResponse ObtenerEmpresasPorId(long id, long empresaId)
+        {
+            var modelResponse = new ModelResponse();
+            try
+            {
+                if (id <= 0) { throw new ArgumentException("El ID de la Compania es requerido."); }
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                var result = GetObject("ObtenerEmpresaPorId", CommandType.StoredProcedure,
+                     new[] {
+                new SqlParameter("@Id", id),
+                new SqlParameter("@EmpresaId", empresaId)
+                    },                                              
+                    new Func<IDataReader, Empresa>((reader) =>
+                    {
+                        var r = LlenarEntidad<Empresa>(reader);
+                        return r;
+                    }));
+                if (result == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró la Empresa especificada.";
+                    return modelResponse;
+                }
+                modelResponse.Response = result;
+                modelResponse.IsSuccess = true;
+                modelResponse.Message = "Empresa Obtenido Correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener la Empresa";
+            }
+
+            return modelResponse;
+        }
+        public ModelResponse EliminarEmpresa(long id, string modificadoPor, DateTime fechaModificacion, long empresaId)
+        {
+            var modelResponse = new ModelResponse();
+            try
+            {
+                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
+                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+
+                var result = ExecuteScalar("EliminarEmpresa", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                   new SqlParameter("@Id", id),
+            new SqlParameter("@ModificadoPor", modificadoPor),
+            new SqlParameter("@FechaModificacion", fechaModificacion),
+            new SqlParameter("@EmpresaId", empresaId)
+                });
+
+                if (Convert.ToInt64(result) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para eliminar la Empresa.";
+                    return modelResponse;
+                }
+                modelResponse.IsSuccess = true;
+                modelResponse.Message = "Empresa Eliminado Correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al eliminar La Empresa";
+            }
+
+            return modelResponse;
+        }
+
+    }
+}

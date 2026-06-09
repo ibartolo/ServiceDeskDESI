@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Mi Perfil";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
@@ -36,6 +37,7 @@
         @Html.HiddenFor(x => x.FechaModificacion)
         @Html.HiddenFor(x => x.Estatus)
         @Html.HiddenFor(x => x.Contrasena)
+        @Html.HiddenFor(x => x.Empresa.Id)
 
         <div class="row">
             <div class="col-md-6">
@@ -144,6 +146,7 @@
 </div>
 
 <script>
+    var perfilTemp = '@Model.ImagenPerfil';
     function AbrirModalCambioPass() {
         $('#partialChangePass').empty().load('/User/PartialChangePass', function () {
             $('#modalChangePass').modal('show');
@@ -229,6 +232,10 @@
             parameters.push({ Name: "Contrasena", Value: $("#Contrasena").val() });
             parameters.push({ Name: "NombreUsuario", Value: $("#NombreUsuario").val() });
             parameters.push({ Name: "Correo", Value: $("#Correo").val() });
+            parameters.push({ Name: "Empresa.Id", Value: $("#Empresa_Id").val() });
+            parameters.push({ Name: "ImagenPerfil", Value: perfilTemp });
+
+
 
             var file = document.getElementById("ImagenPerfil").files[0];
             if (file) {

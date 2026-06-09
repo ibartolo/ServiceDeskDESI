@@ -14,7 +14,7 @@ namespace ServiceDeskDESIMVC.DAL
     {
         public async Task <ModelResponse> ObtenerTodosLosModelos()
         {
-            var result = await RequestAsync<object>($"api/modelo/List", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Modelo/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -25,7 +25,7 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> GuardarActualizarModelos (Modelo m)
         {
             MappingColumSecurity(m);
-            var result = await RequestAsync<object>($"api/modelo/Guardar", HttpMethod.Post, m,
+            var result = await RequestAsync<object>($"api/Modelo", HttpMethod.Post, m,
                new Func<string, string>((responseString) =>
                {
                    return responseString;
@@ -35,7 +35,7 @@ namespace ServiceDeskDESIMVC.DAL
         }
         public async Task<ModelResponse> ObtenerModelosPorId (long id)
         {
-            var result = await RequestAsync<object>($"api/modelo/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Modelo/{id}", HttpMethod.Get, null,
             new Func<string, string>((responseString) =>
             {
                 return responseString;
@@ -46,7 +46,8 @@ namespace ServiceDeskDESIMVC.DAL
         }
         public async Task<ModelResponse> EliminarModelos(Modelo m)
         {
-                var result = await RequestAsync<object>($"api/modelo/Eliminar", HttpMethod.Delete, m,
+            MappingColumSecurity(m);
+                var result = await RequestAsync<object>($"api/Modelo", HttpMethod.Delete, m,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

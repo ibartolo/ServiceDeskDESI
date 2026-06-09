@@ -15,7 +15,6 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Autentication")]
     public class AutenticationController : BaseController
     {
-
         private readonly DbWrapper dbWrapper;
 
         public AutenticationController()
@@ -24,13 +23,14 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         /// <summary>
-        /// Obtiene todos los usuarios activos
+        /// Obtiene todos los usuarios activos de una empresa
         /// </summary>
-        /// <returns>Lista de usuarios con sus sucursales y áreas</returns>
-        [HttpGet, Route("User/Lista")]
-        public ModelResponse ObtenerUsuarios()
+        /// <param name="empresaId">ID de la empresa</param>
+        /// <returns>Lista de usuarios con sus sucursales, áreas y empresa</returns>
+        [HttpGet, Route("User/Lista/{empresaId:long}")]
+        public ModelResponse ObtenerUsuarios(long empresaId)
         {
-            var result = dbWrapper.ObtenerUsuarios();
+            var result = dbWrapper.ObtenerUsuarios(empresaId);
             return result;
         }
 
@@ -38,11 +38,12 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// Obtiene un usuario por su ID
         /// </summary>
         /// <param name="id">ID del usuario</param>
+        /// <param name="empresaId">ID de la empresa</param>
         /// <returns>Usuario encontrado</returns>
-        [HttpGet, Route("User/{id:long}")]
-        public ModelResponse ObtenerUsuarioPorId(long id)
+        [HttpGet, Route("User/{id:long}/{empresaId:long}")]
+        public ModelResponse ObtenerUsuarioPorId(long id, long empresaId)
         {
-            var result = dbWrapper.ObtenerUsuarioPorId(id);
+            var result = dbWrapper.ObtenerUsuarioPorId(id, empresaId);
             return result;
         }
 
@@ -53,6 +54,19 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Usuario guardado con su ID actualizado</returns>
         [HttpPost, Route("User")]
         public ModelResponse GuardarOActualizarUsuario(Usuario u)
+        {
+            var result = dbWrapper.GuardarOActualizarUsuario(u);
+            return result;
+        }
+
+        /// <summary>
+        /// Guarda o actualiza un usuario en una empresa
+        /// </summary>
+        /// <param name="u">Objeto usuario con los datos</param>
+        /// <returns>Usuario guardado con su ID actualizado</returns>
+        [AllowAnonymous]
+        [HttpPost, Route("User/Empresa")]
+        public ModelResponse GuardarUsuarioEmpresa(Usuario u)
         {
             var result = dbWrapper.GuardarOActualizarUsuario(u);
             return result;
@@ -70,12 +84,13 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.EliminarUsuario(u.Id, u.ModificadoPor, u.FechaModificacion.Value);
             return result;
         }
+        
 
         /// <summary>
         /// Autentica un usuario en el sistema
         /// </summary>
         /// <param name="u">Objeto usuario con NombreUsuario y Contrasena</param>
-        /// <returns>Usuario autenticado con sus datos completos</returns>
+        /// <returns>Usuario autenticado con sus datos completos y empresa</returns>
         [HttpPost, Route("autenticar")]
         public ModelResponse AutenticarUsuario(Usuario u)
         {
@@ -84,7 +99,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         /// <summary>
-        /// Método que se va a encargar de mandar un correo para resaurar la contraseña
+        /// Método que se va a encargar de mandar un correo para restaurar la contraseña
         /// </summary>
         /// <param name="u"></param>
         /// <returns></returns>
@@ -95,7 +110,18 @@ namespace ServiceDeskDESIWebApi.Controllers
 
             try
             {
-                var userResponse = dbWrapper.ObtenerUsuarioPorNombreUsuario(u.NombreUsuario);
+                //// Obtener empresaId del usuario desde la sesión o del objeto
+                //// Por ahora se asume que el usuario tiene empresa, si no, se debe obtener de otra manera
+                //long empresaId = u.Empresa?.Id ?? 0;
+
+                //if (empresaId == 0)
+                //{
+                //    modelResponse.IsSuccess = false;
+                //    modelResponse.Message = "No se pudo identificar la empresa del usuario";
+                //    return modelResponse;
+                //}
+
+                var userResponse = dbWrapper.ObtenerUsuarioPorCorreo(u.Correo);
 
                 if (userResponse == null || !userResponse.IsSuccess || userResponse.Response == null)
                 {
@@ -150,6 +176,7 @@ namespace ServiceDeskDESIWebApi.Controllers
             return modelResponse;
         }
 
+        /// <summary>
         /// Valida el token de recuperación de contraseña
         /// </summary>
         /// <param name="token">Token GUID</param>

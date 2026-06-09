@@ -12,9 +12,22 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerUsuarioPorId(long id)
+        public async Task<ModelResponse> ObtenerUsuarios(long empresaId)
         {
-            var result = await RequestAsync<object>($"api/Autentication/User/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Autentication/User/Lista/{empresaId}", HttpMethod.Get, null,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> ObtenerUsuarioPorId(long id, long empresaId)
+        {
+            var result = await RequestAsync<object>($"api/Autentication/User/{id}/{empresaId}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -28,6 +41,32 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse> GuardarOActualizarUsuario(Usuario usuario)
         {
             var result = await RequestAsync<object>($"api/Autentication/User", HttpMethod.Post, usuario,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> GuardarUsuarioEmpresa(Usuario usuario)
+        {
+            var result = await RequestAsync<object>($"api/Autentication/User/Empresa", HttpMethod.Post, usuario,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }));
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> EliminarUsuario(Usuario usuario)
+        {
+            var result = await RequestAsync<object>($"api/Autentication/User", HttpMethod.Delete, usuario,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

@@ -11,12 +11,15 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodosTipoActivos()
+        public ModelResponse ObtenerTodosTipoActivos(long empresaId)
         {
             var modelResponse = new ModelResponse();
             try
             {
-                var TipoActivos = GetObjects("ObtenerTipoActivo", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+
+                var TipoActivos = GetObjects("ObtenerTipoActivo", CommandType.StoredProcedure,
+                     new[] { new SqlParameter("@EmpresaId", empresaId) },
                     new Func<IDataReader, TipoActivo>((reader) =>
                     {
                         var activo = LlenarEntidad<TipoActivo>(reader);
@@ -27,12 +30,17 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Message = "TiposActivos obtenidos correctamente";
 
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
             }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener TipoActivo";
+            }
+
             return modelResponse;
         }
         public ModelResponse GuardarOActualizarTipoActivo(TipoActivo ta)
@@ -58,37 +66,44 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerTipoActivoPorId (long id)
+        public ModelResponse ObtenerTipoActivoPorId (long id, long empresaId)
         {
             var modelResponse = new ModelResponse();
             try
             {
-                modelResponse.IsSuccess = true;
-                var parameters = new List<SqlParameter>();
-                parameters.Add(new SqlParameter()
+                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
+                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                var result = GetObject("ObtenerTipoActivoPorId", CommandType.StoredProcedure,
+                 new[] {
+                new SqlParameter("@Id", id),
+                new SqlParameter("@EmpresaId", empresaId)
+                    },
+                  new Func<IDataReader, TipoActivo>((reader) =>
+                  {
+                      var r = LlenarEntidad<TipoActivo>(reader);
+                      return r;
+                  }));
+                if (result ==null)
                 {
-                    Value = id,
-                    IsNullable = true,
-                    ParameterName = "@Id",
-                    SqlDbType = System.Data.SqlDbType.Int
-                });
-
-                var result = GetObject("ObtenerTipoActivoPorId", System.Data.CommandType.StoredProcedure,
-                    parameters, new Func<System.Data.IDataReader, TipoActivo>((reader) =>
-                    {
-                        var r = LlenarEntidad<TipoActivo>(reader);
-                        return r;
-                    }));
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró el TipoActivo especificado.";
+                    return modelResponse;
+                }
                 modelResponse.Response = result;
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "TipoActivo Obtenido Correctamente";
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
             }
+            catch (Exception ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener el TipoActivo";
+            }
+
 
             return modelResponse;
         }

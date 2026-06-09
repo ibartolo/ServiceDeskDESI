@@ -24,9 +24,10 @@ namespace ServiceDeskDESIMVC.DAL
 
             return modelResponse;
         }
+
         public async Task<ModelResponse> ValidarTokenRecuperacion(string token)
         {
-            var result = await RequestAsync<object>($"api/Autentication/validarToken/"+ token, HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Autentication/validarToken/{token}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -36,6 +37,7 @@ namespace ServiceDeskDESIMVC.DAL
 
             return modelResponse;
         }
+
         public async Task<ModelResponse> RestablecerContrasenia(string token, string nuevaContrasena)
         {
             var request = new
@@ -54,6 +56,7 @@ namespace ServiceDeskDESIMVC.DAL
 
             return modelResponse;
         }
+
         public async Task<ModelResponse> ValidarRecetearContrasenia(Usuario usuario)
         {
             var result = await RequestAsync<object>($"api/Autentication/ValidarRecetearContrasenia", HttpMethod.Post, usuario,

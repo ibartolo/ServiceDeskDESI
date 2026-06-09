@@ -12,32 +12,9 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerAreas()
+        public async Task<ModelResponse> ObtenerAreas(long empresaId)
         {
-            var result = await RequestAsync($"api/Catalogs/Area/Lista", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result);
-
-            return modelResponse;
-        }
-        public async Task<ModelResponse> ObtenerAreaPorId(long id)
-        {
-            var result = await RequestAsync($"api/Catalogs/Area/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result);
-            return modelResponse;
-        }
-        public async Task<ModelResponse> GuardarOActualizarArea(Area a)
-        {
-            MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/Catalogs/Area", HttpMethod.Post, a,
+            var result = await RequestAsync<object>($"api/Area/List/{empresaId}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -45,10 +22,34 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
-        public async Task<ModelResponse> EliminarArea(Area a)
+
+        public async Task<ModelResponse> ObtenerAreaPorId(long id, long empresaId)
         {
-            MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/Catalogs/Area", HttpMethod.Delete, a,
+            var result = await RequestAsync<object>($"api/Area/{id}/{empresaId}", HttpMethod.Get, null,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> GuardarOActualizarArea(Area area, long empresaId)
+        {
+            MappingColumSecurity(area);
+            var result = await RequestAsync<object>($"api/Area/Guardar/{empresaId}", HttpMethod.Post, area,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> EliminarArea(Area area, long empresaId)
+        {
+            MappingColumSecurity(area);
+            var result = await RequestAsync<object>($"api/Area/Eliminar/{empresaId}", HttpMethod.Delete, area,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

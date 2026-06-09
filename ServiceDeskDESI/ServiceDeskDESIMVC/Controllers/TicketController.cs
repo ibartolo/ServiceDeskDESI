@@ -20,7 +20,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var ticket = new Ticket();
 
             // Cargar áreas
-            var areasResponse = await httpClientConnection.ObtenerAreas();
+            var areasResponse = await httpClientConnection.ObtenerAreas(tokenCookie.EmpresaID);
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
                 ViewBag.Areas = areasResponse.Response;

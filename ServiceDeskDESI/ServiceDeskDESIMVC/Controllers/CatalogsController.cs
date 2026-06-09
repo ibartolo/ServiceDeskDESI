@@ -17,6 +17,11 @@ namespace ServiceDeskDESIMVC.Controllers
     [Autenticated]
     public class CatalogsController : BaseController
     {
+        TokenCookie token;
+        public CatalogsController() : base()
+        {
+            token = SessionHelper.GetSessionUser();
+        }
         #region Views
         public async Task<ActionResult> WorkArea(long id = 0)
         {
@@ -24,7 +29,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerAreaPorId(id);
+                var response = await httpClientConnection.ObtenerAreaPorId(id, tokenCookie.EmpresaID);
 
                 if (response.IsSuccess && response.Response != null)
                 {
@@ -74,16 +79,111 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
             }
             return View(tipoactivo);
-
         }
-        public async Task<ActionResult> Model (long id = 0)
+        public async Task<ActionResult> Branch(long id = 0)
         {
-            var modelo = new Modelo();
-            // Cargar marcas 
+            var sucursal = new Sucursal();
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerSucursalPorId(id,  token.EmpresaID);
+                if (response.IsSuccess && response.Response !=null)
+                {
+                    sucursal = JsonConvert.DeserializeObject<Sucursal>(response.Response.ToString());
+                }
+                else 
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }                
+            }
+            return View(sucursal);
+        }
+
+        public async Task<ActionResult>Active(long id = 0)
+        {
+            var activo = new Activo();
+            // cargar tipo activo, modelo, marca
+            var tipoactivoResponse = await httpClientConnection.ObtenerTodosLosTipoActivos();
+            var tipoactivoList = new List<TipoActivo>();
+            if (tipoactivoResponse.IsSuccess && tipoactivoResponse.Response != null)
+            {
+                ViewBag.TipoActivoss = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<TipoActivo>>(tipoactivoResponse.Response.ToString()), "Id", "Nombre");
+                tipoactivoList = JsonConvert.DeserializeObject<List<TipoActivo>>(tipoactivoResponse.Response.ToString());
+            }
+            
+
+
+            var modeloResponse = await httpClientConnection.ObtenerTodosLosModelos();
+            var modeloList = new List<Modelo>();
+            if (modeloResponse.IsSuccess && modeloResponse.Response != null)
+            {
+                ViewBag.Modelos = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Modelo>>(modeloResponse.Response.ToString()), "Id", "Nombre");
+                modeloList = JsonConvert.DeserializeObject<List<Modelo>>(modeloResponse.Response.ToString());
+            }
+
             var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
+            var marcasList = new List<Marca>();
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
-                ViewBag.Marcas = marcaResponse.Response;
+                ViewBag.Marcass = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString()), "Id", "Nombre");
+                marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
+            }
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerActivoPorId(id);
+
+                if (response.IsSuccess && response.Response != null)
+                {
+                    activo = JsonConvert.DeserializeObject<Activo>(response.Response.ToString());
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+            // Después de obtener el objeto activo, setea el valor seleccionado
+            var selectListTipo = MappingPropertiToDropDownList(tipoactivoList, "Id", "Nombre");
+            if (activo.TipoActivo != null && activo.TipoActivo.Id > 0)
+            {
+                foreach (var item in selectListTipo)
+                {
+                    if (item.Value == activo.TipoActivo.Id.ToString())
+                    {
+                        item.Selected = true;
+                        break;
+                    }
+                }
+            }
+            ViewBag.TipoActivoss = selectListTipo;
+
+            var selectLista = MappingPropertiToDropDownList(modeloList, "Id", "Nombre");
+            if (activo.Modelo != null && activo.Modelo.Id > 0)
+            {
+                //seleccionar item correspondiente
+                foreach (var item in selectLista)
+                {
+                    if (item.Value == activo.Modelo.Id.ToString())
+                    {
+                        item.Selected = true;
+                        break;
+                    }
+                }
+            }
+            ViewBag.Modelos = selectLista;
+
+            return View(activo);        
+        }
+        public async Task<ActionResult> Model(long id = 0)
+        {
+            var modelo = new Modelo();
+
+            // Cargar marcas 
+            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
+            var marcasList = new List<Marca>();
+
+            if (marcaResponse.IsSuccess && marcaResponse.Response != null)
+            {
+                ViewBag.Marcas = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString()), "Id", "Nombre");
+                marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
             }
 
             if (id > 0)
@@ -93,12 +193,30 @@ namespace ServiceDeskDESIMVC.Controllers
                 {
                     modelo = JsonConvert.DeserializeObject<Modelo>(response.Response.ToString());
                 }
+                else
                 {
                     ViewBag.ErrorMessage = response.Message;
                 }
             }
-            return View(modelo);
 
+            // Asignar el DropDownList con el valor seleccionado si existe
+            var selectList = MappingPropertiToDropDownList(marcasList, "Id", "Nombre");
+            if (modelo.Marca != null && modelo.Marca.Id > 0)
+            {
+                // Seleccionar el item correspondiente
+                foreach (var item in selectList)
+                {
+                    if (item.Value == modelo.Marca.Id.ToString())
+                    {
+                        item.Selected = true;
+                        break;
+                    }
+                }
+            }
+
+            ViewBag.Marcas = selectList;
+
+            return View(modelo);
         }
         public async Task<ActionResult> Mark(long id = 0)
         {
@@ -110,6 +228,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 {
                        marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
                 }
+                else
                 {
                     ViewBag.ErrorMessage = response.Message;
                 }
@@ -127,7 +246,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             var usuario = new Usuario();
-            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
+            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID, tokenCookie.EmpresaID);
 
             if (response.IsSuccess && response.Response != null)
             {
@@ -145,7 +264,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 ViewBag.Sucursales = sucursalesResponse.Response;
             }
 
-            var areasResponse = await httpClientConnection.ObtenerAreas();
+            var areasResponse = await httpClientConnection.ObtenerAreas(tokenCookie.EmpresaID);
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
                 ViewBag.Areas = areasResponse.Response;
@@ -180,7 +299,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             // Cargar áreas para el dropdown
-            var areasResponse = await httpClientConnection.ObtenerAreas();
+            var areasResponse = await httpClientConnection.ObtenerAreas(tokenCookie.EmpresaID);
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
                 ViewBag.Areas = areasResponse.Response;
@@ -209,22 +328,22 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Data Access
         public async Task<string> ConsutlarTodasAreas()
         {
-            var response = await httpClientConnection.ObtenerAreas();
+            var response = await httpClientConnection.ObtenerAreas(tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarAreaPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerAreaPorId(id);
+            var response = await httpClientConnection.ObtenerAreaPorId(id, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarArea(Area a)
         {
-            var response = await httpClientConnection.GuardarOActualizarArea(a);
+            var response = await httpClientConnection.GuardarOActualizarArea(a, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarArea(Area a)
         {
-            var response = await httpClientConnection.EliminarArea(a);
+            var response = await httpClientConnection.EliminarArea(a, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarPerfil()
@@ -293,7 +412,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
 
                 // Validar contraseña actual
-                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
+                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID, tokenCookie.EmpresaID);
 
                 if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
                 {
@@ -386,30 +505,63 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await httpClientConnection.EliminarCompania(c);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        public async Task<string> ConsultarModelosPorMarca(long marcaId)
+        {
+            var response = await httpClientConnection.ObtenerTodosLosModelos();
+            var listModels = JsonConvert.DeserializeObject<List<Modelo>>(response.Response.ToString());
+            var modelosPorMarca = listModels.Where(m => m.Marca.Id == marcaId).ToList();
+            mr.Response = modelosPorMarca;
+            mr.IsSuccess = true;
+
+            return JsonConvert.SerializeObject(mr);
+        }
         #endregion
 
-        #region 4catalogos
+        #region 5catalogos
+        public async Task<string> ConsultarTodasLasSucursales()
+        {
+            var response = await httpClientConnection.ObtenerTodasLasSucursales(token.EmpresaID);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarTodasLasSucursalesPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerSucursalPorId(id, token.EmpresaID);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> GuardarActualizarSucursales(Sucursal s)
+        {
+            var response = await httpClientConnection.GuardarActualizarSucursal(s, token.EmpresaID);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> EliminarSucurales(Sucursal s)
+        {
+            var response = await httpClientConnection.EliminarSucursal(s, token.EmpresaID);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
         public async Task<string> ConsultarTodosLosTipoActivos()
         {
             var response = await httpClientConnection.ObtenerTodosLosTipoActivos();
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        
         public async Task<string> ConsultarTodosLosTipoActivoPorId(long id)
         {
             var response = await httpClientConnection.ObtenerTipoActivoPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+     
         public async Task<string>GuardarOActualizarTipoActivo(TipoActivo t)
         {
             var response = await httpClientConnection.GuardarOActualizarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+       
         public async Task<string>EliminarTipoActivo(TipoActivo t)
         {
             var response = await httpClientConnection.EliminarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
-
+        
         public async Task<string> ConsultarTodosLosModelos()
         {
             var response = await httpClientConnection.ObtenerTodosLosModelos();
@@ -428,9 +580,6 @@ namespace ServiceDeskDESIMVC.Controllers
         }
         public async Task<string> EliminarModelos (Modelo m)
         {
-            var tokenCookie = SessionHelper.GetSessionUser();
-            m.ModificadoPor = tokenCookie?.UserName ?? "System";
-            m.FechaModificacion = DateTime.Now;
             var response = await httpClientConnection.EliminarModelos(m);
             return JsonConvert.SerializeObject(response);
         }
@@ -456,6 +605,27 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        public async Task<string> ConsultarTodosLosActivo()
+        {
+            var response = await httpClientConnection.ObtenerTodosLosActivos();
+            return JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarTodosLosActivosPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerActivoPorId(id);
+            return JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> GuardarOActualizarActivos(Activo a)
+        {
+            var response = await httpClientConnection.GuardarActualizarActivos(a);
+            return JsonConvert.SerializeObject(response);
+
+        }
+        public async Task<string> EliminarActivos(Activo a)
+        {
+            var response = await httpClientConnection.EliminarActivos(a);
+            return JsonConvert.SerializeObject(response);
+        }
         #endregion
     }
 }

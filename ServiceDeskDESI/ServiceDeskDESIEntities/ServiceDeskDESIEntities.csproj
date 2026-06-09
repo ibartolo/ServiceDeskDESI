@@ -47,13 +47,17 @@
     <Compile Include="Catalogos\Area.cs" />
     <Compile Include="Catalogos\Categoria.cs" />
     <Compile Include="Catalogos\Compania.cs" />
+    <Compile Include="Catalogos\Empresa.cs" />
     <Compile Include="Catalogos\Marca.cs" />
     <Compile Include="Catalogos\Modelo.cs" />
+    <Compile Include="Catalogos\UsuarioPagina.cs" />
     <Compile Include="Catalogos\Sucursal.cs" />
     <Compile Include="Catalogos\TipoActivo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Seguridad\ModelResponse.cs" />
+    <Compile Include="Seguridad\Pagina.cs" />
     <Compile Include="Seguridad\RestablecerContraseniaRequest.cs" />
+    <Compile Include="Seguridad\Rol.cs" />
     <Compile Include="Seguridad\Token.cs" />
     <Compile Include="Seguridad\TokenCookie.cs" />
     <Compile Include="Tickets\Ticket.cs" />
