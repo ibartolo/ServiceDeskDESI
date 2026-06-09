@@ -12,7 +12,7 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Activos")]
     public class ActivoController : BaseController
     {
-        [HttpGet, Route("empresaId:long")]
+        [HttpGet, Route("List/{empresaId:long}")]
         public ModelResponse ObtenerActivos(long empresaId)
         {
             var result = dbWrapper.ObtenerTodosLosActivos(empresaId);
