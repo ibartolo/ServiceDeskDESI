@@ -184,7 +184,8 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
 
                 // Obtener todas las empresas
-                var empresasResponse = await httpClientConnection.ObtenerTodasLasEmpresas();
+                //  ING AQUI TAMBIEN LE PUESE 0 
+                var empresasResponse = await httpClientConnection.ObtenerTodasLasEmpresas(0);
 
                 if (!empresasResponse.IsSuccess)
                 {
