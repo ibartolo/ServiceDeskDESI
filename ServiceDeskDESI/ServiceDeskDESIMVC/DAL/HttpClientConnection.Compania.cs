@@ -12,21 +12,21 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodasCompanias()
+        public async Task<ModelResponse> ObtenerTodasCompanias(long empresaId)
         {
-            var result = await RequestAsync($"api/Compania/List", HttpMethod.Get, null,
+            var result = await RequestAsync($"api/Compania/List/{empresaId}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result);
+            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelresponse;
         }
 
-        public async Task<ModelResponse> GuardarActualizarCompania(Compania c)
+        public async Task<ModelResponse> GuardarActualizarCompania(Compania c, long empresaId)
         {
             MappingColumSecurity(c);
-           var result = await RequestAsync<object>($"api/Compania/Guardar", HttpMethod.Post, c,
+           var result = await RequestAsync<object>($"api/Compania/Guardar/{empresaId}", HttpMethod.Post, c,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -35,9 +35,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerCompaniaPorId(long id)
+        public async Task<ModelResponse> ObtenerCompaniaPorId(long id, long empresaId)
         {
-            var result = await RequestAsync<object>($"api/Compania/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Compania/{id}/{empresaId}", HttpMethod.Get, null,
             new Func<string, string>((responseString) =>
             {
                 return responseString;
@@ -48,10 +48,10 @@ namespace ServiceDeskDESIMVC.DAL
 
         }
 
-        public async Task<ModelResponse> EliminarCompania(Compania c )
+        public async Task<ModelResponse> EliminarCompania(Compania c, long empresaId )
         {
             MappingColumSecurity(c);
-            var result = await RequestAsync<object>($"api/Compania/Compania", HttpMethod.Delete, c,
+            var result = await RequestAsync<object>($"api/Compania/Compania/{empresaId}", HttpMethod.Delete, c,
                 new Func<string, string>((responseString) =>
                {
                    return responseString;

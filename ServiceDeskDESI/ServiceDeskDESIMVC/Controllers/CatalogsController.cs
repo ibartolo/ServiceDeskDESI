@@ -49,7 +49,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var compania = new Compania();
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerCompaniaPorId(id);
+                var response = await httpClientConnection.ObtenerCompaniaPorId(id,tokenCookie.EmpresaID);
                 if (response.IsSuccess && response.Response !=null)
                 {
                     compania = JsonConvert.DeserializeObject<Compania>(response.Response.ToString());
@@ -67,7 +67,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var tipoactivo = new TipoActivo();
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerTipoActivoPorId(id);
+                var response = await httpClientConnection.ObtenerTipoActivoPorId(id,tokenCookie.EmpresaID);
                 if (response.IsSuccess && response.Response !=null)
                 {
                     tipoactivo = JsonConvert.DeserializeObject<TipoActivo>(response.Response.ToString());
@@ -100,9 +100,10 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<ActionResult>Active(long id = 0)
         {
+            // ING AQUI TAMBIEN LE PUSE 0 POR QUE ME MARCABA ERROR 
             var activo = new Activo();
             // cargar tipo activo, modelo, marca
-            var tipoactivoResponse = await httpClientConnection.ObtenerTodosLosTipoActivos();
+            var tipoactivoResponse = await httpClientConnection.ObtenerTodosLosTipoActivos(0);
             var tipoactivoList = new List<TipoActivo>();
             if (tipoactivoResponse.IsSuccess && tipoactivoResponse.Response != null)
             {
@@ -112,7 +113,7 @@ namespace ServiceDeskDESIMVC.Controllers
             
 
 
-            var modeloResponse = await httpClientConnection.ObtenerTodosLosModelos();
+            var modeloResponse = await httpClientConnection.ObtenerTodosLosModelos(0);
             var modeloList = new List<Modelo>();
             if (modeloResponse.IsSuccess && modeloResponse.Response != null)
             {
@@ -120,7 +121,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 modeloList = JsonConvert.DeserializeObject<List<Modelo>>(modeloResponse.Response.ToString());
             }
 
-            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
+            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas(0);
             var marcasList = new List<Marca>();
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
@@ -129,7 +130,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerActivoPorId(id);
+                var response = await httpClientConnection.ObtenerActivoPorId(id, tokenCookie.EmpresaID);
 
                 if (response.IsSuccess && response.Response != null)
                 {
@@ -177,7 +178,8 @@ namespace ServiceDeskDESIMVC.Controllers
             var modelo = new Modelo();
 
             // Cargar marcas 
-            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
+            //ING AQUI ME MARCABA ERROR EN OBTENERTODOSLASMARCAS Y LE PUSE 0
+            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas(0);
             var marcasList = new List<Marca>();
 
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
@@ -188,7 +190,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerModelosPorId(id);
+                var response = await httpClientConnection.ObtenerModelosPorId(id,tokenCookie.EmpresaID);
                 if (response.IsSuccess && response.Response != null)
                 {
                     modelo = JsonConvert.DeserializeObject<Modelo>(response.Response.ToString());
@@ -223,7 +225,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var marca = new Marca();
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerMarcaPorId(id);
+                var response = await httpClientConnection.ObtenerMarcaPorId(id,tokenCookie.EmpresaID);
                 if (response.IsSuccess && response.Response != null)
                 {
                        marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
@@ -487,27 +489,28 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<string> ConsultarTodasLasCompanias()
         {
-            var response = await httpClientConnection.ObtenerTodasCompanias();
+            var response = await httpClientConnection.ObtenerTodasCompanias(tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarCompaniasPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerCompaniaPorId(id);
+            var response = await httpClientConnection.ObtenerCompaniaPorId(id,tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string>GuardarOActualizarCompanias(Compania c)
         {
-            var response = await httpClientConnection.GuardarActualizarCompania(c);
+            var response = await httpClientConnection.GuardarActualizarCompania(c, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string>EliminarCompanias(Compania c)
         {
-            var response = await httpClientConnection.EliminarCompania(c);
+            var response = await httpClientConnection.EliminarCompania(c, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+
         public async Task<string> ConsultarModelosPorMarca(long marcaId)
         {
-            var response = await httpClientConnection.ObtenerTodosLosModelos();
+            var response = await httpClientConnection.ObtenerTodosLosModelos(tokenCookie.EmpresaID);
             var listModels = JsonConvert.DeserializeObject<List<Modelo>>(response.Response.ToString());
             var modelosPorMarca = listModels.Where(m => m.Marca.Id == marcaId).ToList();
             mr.Response = modelosPorMarca;
@@ -538,92 +541,90 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await httpClientConnection.EliminarSucursal(s, token.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+
         public async Task<string> ConsultarTodosLosTipoActivos()
         {
-            var response = await httpClientConnection.ObtenerTodosLosTipoActivos();
+            var response = await httpClientConnection.ObtenerTodosLosTipoActivos(tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        }
-        
+        }        
         public async Task<string> ConsultarTodosLosTipoActivoPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerTipoActivoPorId(id);
+            var response = await httpClientConnection.ObtenerTipoActivoPorId(id, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        }
-     
+        }     
         public async Task<string>GuardarOActualizarTipoActivo(TipoActivo t)
         {
-            var response = await httpClientConnection.GuardarOActualizarTipoActivo(t);
+            var response = await httpClientConnection.GuardarOActualizarTipoActivo(t, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        }
-       
+        }       
         public async Task<string>EliminarTipoActivo(TipoActivo t)
         {
-            var response = await httpClientConnection.EliminarTipoActivo(t);
+            var response = await httpClientConnection.EliminarTipoActivo(t, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         
         public async Task<string> ConsultarTodosLosModelos()
         {
-            var response = await httpClientConnection.ObtenerTodosLosModelos();
+            var response = await httpClientConnection.ObtenerTodosLosModelos(tokenCookie.EmpresaID);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodosModelosPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerModelosPorId(id);
+            var response = await httpClientConnection.ObtenerModelosPorId(id, tokenCookie.EmpresaID);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarModelos(Modelo m)
         {
             m.Estatus = true;
-            var response = await httpClientConnection.GuardarActualizarModelos(m);
+            var response = await httpClientConnection.GuardarActualizarModelos(m, tokenCookie.EmpresaID);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarModelos (Modelo m)
         {
-            var response = await httpClientConnection.EliminarModelos(m);
+            var response = await httpClientConnection.EliminarModelos(m, tokenCookie.EmpresaID);
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ConsultarTodosLasMarcas()
         {
-            var response = await httpClientConnection.ObtenerTodosLasMarcas();
+            var response = await httpClientConnection.ObtenerTodosLasMarcas(tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodasMarcasPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerMarcaPorId(id);
+            var response = await httpClientConnection.ObtenerMarcaPorId(id, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarMarca(Marca m)
         {
-            var response = await httpClientConnection.GuardarOActualizarMarca(m);
+            var response = await httpClientConnection.GuardarOActualizarMarca(m, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarMarcas(Marca m)
         {
-            var response = await httpClientConnection.EliminarMarcas(m);
+            var response = await httpClientConnection.EliminarMarcas(m, tokenCookie.EmpresaID);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ConsultarTodosLosActivo()
         {
-            var response = await httpClientConnection.ObtenerTodosLosActivos();
+            var response = await httpClientConnection.ObtenerTodosLosActivos(tokenCookie.EmpresaID);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodosLosActivosPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerActivoPorId(id);
+            var response = await httpClientConnection.ObtenerActivoPorId(id, tokenCookie.EmpresaID);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarActivos(Activo a)
         {
-            var response = await httpClientConnection.GuardarActualizarActivos(a);
+            var response = await httpClientConnection.GuardarActualizarActivos(a, tokenCookie.EmpresaID);
             return JsonConvert.SerializeObject(response);
 
         }
         public async Task<string> EliminarActivos(Activo a)
         {
-            var response = await httpClientConnection.EliminarActivos(a);
+            var response = await httpClientConnection.EliminarActivos(a, tokenCookie.EmpresaID);
             return JsonConvert.SerializeObject(response);
         }
         #endregion

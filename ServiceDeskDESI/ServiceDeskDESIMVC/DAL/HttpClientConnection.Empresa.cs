@@ -12,9 +12,9 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodasLasEmpresas()
+        public async Task<ModelResponse> ObtenerTodasLasEmpresas(long empresaId)
         {
-            var result = await RequestAsync<object>($"api/Empresas/List", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Empresas/List/{empresaId}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -24,9 +24,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerEmpresasPorId(long id)
+        public async Task<ModelResponse> ObtenerEmpresasPorId(long id, long empresaId)
         {
-            var result = await RequestAsync<object>($"api/Empresas/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Empresas/{id}/{empresaId}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -50,9 +50,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarEmpresa(Empresa empresa)
+        public async Task<ModelResponse> GuardarOActualizarEmpresa(Empresa empresa,long empresaId)
         {
-            var result = await RequestAsync<object>($"api/Empresas", HttpMethod.Post, empresa,
+            var result = await RequestAsync<object>($"api/Empresas/{empresaId}", HttpMethod.Post, empresa,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -74,9 +74,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> EliminarEmpresa(Empresa empresa)
+        public async Task<ModelResponse> EliminarEmpresa(Empresa empresa,long empresaId)
         {
-            var result = await RequestAsync<object>($"api/Empresas", HttpMethod.Delete, empresa,
+            var result = await RequestAsync<object>($"api/Empresas/{empresaId}", HttpMethod.Delete, empresa,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
