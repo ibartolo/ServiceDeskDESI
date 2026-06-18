@@ -12,9 +12,9 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodasLasSucursales(long empresaId)
+        public async Task<ModelResponse> ObtenerTodasLasSucursales()
         {
-            var result = await RequestAsync<object>($"api/Sucursales/List/{empresaId}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Sucursales/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -24,9 +24,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerSucursalPorId(long id, long empresaId)
+        public async Task<ModelResponse> ObtenerSucursalPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Sucursales/{id}/{empresaId}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Sucursales/{id}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -35,10 +35,10 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> GuardarActualizarSucursal(Sucursal sucursal, long empresaId)
+        public async Task<ModelResponse> GuardarActualizarSucursal(Sucursal sucursal)
         {
             MappingColumSecurity(sucursal);
-            var result = await RequestAsync<object>($"api/Sucursales/Guardar/{empresaId}", HttpMethod.Post, sucursal,
+            var result = await RequestAsync<object>($"api/Sucursales/Guardar", HttpMethod.Post, sucursal,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -47,10 +47,10 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> EliminarSucursal(Sucursal sucursal, long empresaId)
+        public async Task<ModelResponse> EliminarSucursal(Sucursal sucursal)
         {
             MappingColumSecurity(sucursal);
-            var result = await RequestAsync<object>($"api/Sucursales/Eliminar/{empresaId}", HttpMethod.Delete, sucursal,
+            var result = await RequestAsync<object>($"api/Sucursales/Eliminar", HttpMethod.Delete, sucursal,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

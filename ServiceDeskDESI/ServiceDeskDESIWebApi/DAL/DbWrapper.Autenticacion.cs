@@ -283,7 +283,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     Estatus = true
                 };
 
-                var sucursalResponse = GuardarOActualizarSucursal(sucursal, empresaGuardada.Id);
+                var sucursalResponse = GuardarNuevaSucursalParaEmpresa(sucursal);
 
                 if (!sucursalResponse.IsSuccess || sucursalResponse.Response == null)
                 {
