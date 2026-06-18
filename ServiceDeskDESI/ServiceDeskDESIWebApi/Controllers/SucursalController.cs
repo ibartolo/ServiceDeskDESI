@@ -17,7 +17,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="empresaId">ID de la empresa</param>
         /// <returns>Lista de sucursales</returns>
-        [HttpGet, Route("List/{empresaId:long}")]
+        [HttpGet, Route("List")]
         public ModelResponse ObtenerSucursales(long empresaId)
         {
             var result = dbWrapper.ObtenerSucursales(empresaId);
@@ -30,7 +30,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID de la sucursal</param>
         /// <param name="empresaId">ID de la empresa</param>
         /// <returns>Sucursal encontrada</returns>
-        [HttpGet, Route("{id:long}/{empresaId:long}")]
+        [HttpGet, Route("{id:long}")]
         public ModelResponse ObtenerSucursalPorId(long id, long empresaId)
         {
             var result = dbWrapper.ObtenerSucursalPorId(id, empresaId);
@@ -43,7 +43,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="sucursal">Objeto sucursal con los datos</param>
         /// <param name="empresaId">ID de la empresa</param>
         /// <returns>Sucursal guardada con su ID actualizado</returns>
-        [HttpPost, Route("Guardar/{empresaId:long}")]
+        [HttpPost, Route("Guardar")]
         public ModelResponse GuardarActualizarSucursal(Sucursal sucursal, long empresaId)
         {
             var result = dbWrapper.GuardarOActualizarSucursal(sucursal, empresaId);
@@ -56,7 +56,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="sucursal">Sucursal a eliminar (debe incluir Id, ModificadoPor)</param>
         /// <param name="empresaId">ID de la empresa</param>
         /// <returns>Resultado de la operación</returns>
-        [HttpDelete, Route("Eliminar/{empresaId:long}")]
+        [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarSucursal(Sucursal sucursal, long empresaId)
         {
             sucursal.FechaModificacion = DateTime.Now;

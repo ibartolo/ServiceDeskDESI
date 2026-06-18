@@ -12,13 +12,13 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Activos")]
     public class ActivoController : BaseController
     {
-        [HttpGet, Route("List/{empresaId:long}")]
+        [HttpGet, Route("List")]
         public ModelResponse ObtenerActivos(long empresaId)
         {
             var result = dbWrapper.ObtenerTodosLosActivos(empresaId);
             return result;
         }
-        [HttpGet, Route("{id:long}/{empresaId:long}")]
+        [HttpGet, Route("{id:long}")]
         public ModelResponse ObtenerActivosPorId(long id, long empresaId)
         {
             var result = dbWrapper.ObtenerActivoPorId(id,empresaId);
@@ -30,7 +30,7 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.GuardarOActualizarActivo(a);
             return result;
         }
-        [HttpDelete, Route("Eliminar/{empresaId:long}")]
+        [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarActivos(Activo a, long empresaId)
         {
             a.FechaModificacion = DateTime.Now;
