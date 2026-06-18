@@ -12,21 +12,21 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodosLosTipoActivos()
+        public async Task<ModelResponse> ObtenerTodosLosTipoActivos(long empresaId)
         {
-            var result = await RequestAsync($"api/TipoActivo/List", HttpMethod.Get, null,
+            var result = await RequestAsync($"api/TipoActivo/List/{empresaId}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result);
+            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelresponse;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarTipoActivo (TipoActivo t)
+        public async Task<ModelResponse> GuardarOActualizarTipoActivo (TipoActivo t,long empresaId)
         {
             MappingColumSecurity(t);
-            var result = await RequestAsync<object>($"api/TipoActivo/Guardar", HttpMethod.Post, t,
+            var result = await RequestAsync<object>($"api/TipoActivo/Guardar/{empresaId}", HttpMethod.Post, t,
                new Func<string, string>((responseString) =>
                {
                    return responseString;
@@ -35,9 +35,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerTipoActivoPorId(long id)
+        public async Task<ModelResponse> ObtenerTipoActivoPorId(long id, long empresaId)
         {
-            var result = await RequestAsync<object>($"api/TipoActivo/{id}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/TipoActivo/{id}/{empresaId}", HttpMethod.Get, null,
             new Func<string, string>((responseString) =>
             {
                 return responseString;
@@ -47,10 +47,10 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> EliminarTipoActivo (TipoActivo t)
+        public async Task<ModelResponse> EliminarTipoActivo (TipoActivo t, long empresaId)
         {
             MappingColumSecurity(t);
-            var result = await RequestAsync<object>($"api/TipoActivo/Eliminar", HttpMethod.Delete, t,
+            var result = await RequestAsync<object>($"api/TipoActivo/Eliminar/{empresaId}", HttpMethod.Delete, t,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
