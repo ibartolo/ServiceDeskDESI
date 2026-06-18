@@ -12,25 +12,25 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Modelo")]
     public class ModeloController : BaseController
     {
-        [HttpGet, Route("List/{empresaId:long}")]
+        [HttpGet, Route("List")]
         public ModelResponse ObtenerModelos(long empresaId)
         {
             var result = dbWrapper.ObtenerModelos(empresaId);
             return result;
         }
-        [HttpGet, Route("{id:long/{empresaId:long}}")]
+        [HttpGet, Route("{id:long}")]
         public ModelResponse ObtenerModelosPorId(long id, long empresaId)
         {
             var result = dbWrapper.ObtenerModeloPorId(id,empresaId);
             return result;
         }
-        [HttpPost, Route("Guardar/{empresaId:long}")]
+        [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarModelos(Modelo m,long empresaId)
         {
             var result = dbWrapper.GuardarOActualizarModelo(m,empresaId);
             return result;
         }
-        [HttpDelete, Route("Eliminar/{empresaId:long}")]
+        [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarModelos(Modelo m, long empresaId)
         {
             m.FechaModificacion = DateTime.Now;

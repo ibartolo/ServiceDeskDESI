@@ -159,7 +159,7 @@ namespace ServiceDeskDESIWebApi.App_Start
             }
 
             var identity = new ClaimsIdentity(context.Options.AuthenticationType);
-            identity.AddClaim(new Claim("sub", context.UserName));
+            identity.AddClaim(new Claim(ClaimTypes.Name, context.UserName)); // ← Usar ClaimTypes.Name
             identity.AddClaim(new Claim("role", "user"));
 
             context.Validated(identity);

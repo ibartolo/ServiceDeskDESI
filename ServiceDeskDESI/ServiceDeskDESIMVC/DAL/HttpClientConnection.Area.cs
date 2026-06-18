@@ -12,9 +12,9 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerAreas(long empresaId)
+        public async Task<ModelResponse> ObtenerAreas()
         {
-            var result = await RequestAsync<object>($"api/Area/List/{empresaId}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Area/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -23,9 +23,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerAreaPorId(long id, long empresaId)
+        public async Task<ModelResponse> ObtenerAreaPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Area/{id}/{empresaId}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Area/{id}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -34,10 +34,10 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarArea(Area area, long empresaId)
+        public async Task<ModelResponse> GuardarOActualizarArea(Area area)
         {
             MappingColumSecurity(area);
-            var result = await RequestAsync<object>($"api/Area/Guardar/{empresaId}", HttpMethod.Post, area,
+            var result = await RequestAsync<object>($"api/Area/Guardar", HttpMethod.Post, area,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -46,10 +46,10 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> EliminarArea(Area area, long empresaId)
+        public async Task<ModelResponse> EliminarArea(Area area)
         {
             MappingColumSecurity(area);
-            var result = await RequestAsync<object>($"api/Area/Eliminar/{empresaId}", HttpMethod.Delete, area,
+            var result = await RequestAsync<object>($"api/Area/Eliminar", HttpMethod.Delete, area,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

@@ -12,14 +12,14 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/TipoActivo")]
     public class TipoActivoController : BaseController
     {
-        [HttpGet, Route("List/{empresaId:long}")]
+        [HttpGet, Route("List")]
         public ModelResponse ObtenerTipoActivo(long empresaId)
         {
             var result = dbWrapper.ObtenerTodosTipoActivos(empresaId);
             return result;
 
         }
-        [HttpGet, Route("{id:long}/{empresaId:long}")]
+        [HttpGet, Route("{id:long}")]
         public ModelResponse ObtenerTipoActivoPorId(long id,long empresaId)
         {
             var result = dbWrapper.ObtenerTipoActivoPorId(id,empresaId);

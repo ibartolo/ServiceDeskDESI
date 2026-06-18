@@ -12,25 +12,25 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Marca")]
     public class MarcaController : BaseController
     {
-        [HttpGet, Route("List/{empresaId:long}")]
+        [HttpGet, Route("List")]
         public ModelResponse ObtenerMarcas(long empresaId)
         {
             var result = dbWrapper.ObtenerTodasLasMarcas(empresaId);
             return result;
         }
-        [HttpGet, Route("{id:long}/{empresaId:long}")]
+        [HttpGet, Route("{id:long}")]
         public ModelResponse ObtenerMarcaPorId(long id, long empresaId)
         {
             var result = dbWrapper.ObtenerMarcasPorId(id, empresaId);
             return result;
         }
-        [HttpPost, Route("Guardar/{empresaId:long")]
+        [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarMarca(Marca m,long empresaId)
         {
             var result = dbWrapper.GuardarOActualizarMarca(m, empresaId);
             return result;
         }
-        [HttpDelete, Route("Eliminar/{empresaId:long}")]
+        [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarMarcas(Marca m, long empresaId)
         {
             m.FechaModificacion = DateTime.Now;
