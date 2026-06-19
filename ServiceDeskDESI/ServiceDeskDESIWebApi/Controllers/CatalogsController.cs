@@ -14,6 +14,30 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Catalogs")]
     public class CatalogsController : BaseController
     {
+        /// <summary>
+        /// Obtiene todas las categorías con jerarquía (ordenadas: padres primero, luego hijas)
+        /// </summary>
+        /// <returns>Lista de categorías ordenadas jerárquicamente</returns>
+        [HttpGet, Route("Categoria/List")]
+        public ModelResponse ObtenerCategorias()
+        {
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerCategorias(usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene todas las categorías por área
+        /// </summary>
+        /// <param name="areaId">ID del área</param>
+        /// <returns>Lista de categorías con jerarquía</returns>
+        [HttpGet, Route("Categoria/Lista/{areaId:long}")]
+        public ModelResponse ObtenerCategoriasPorArea(long areaId)
+        {
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerCategoriasPorArea(areaId, usuario);
+            return result;
+        }
 
         /// <summary>
         /// Obtiene una categoría por su ID
@@ -23,7 +47,8 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpGet, Route("Categoria/{id:long}")]
         public ModelResponse ObtenerCategoriaPorId(long id)
         {
-            var result = dbWrapper.ObtenerCategoriaPorId(id);
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerCategoriaPorId(id, usuario);
             return result;
         }
 
@@ -35,7 +60,8 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpGet, Route("Categoria/Subcategorias/{categoriaPadreId:long}")]
         public ModelResponse ObtenerCategoriasPorPadre(long categoriaPadreId)
         {
-            var result = dbWrapper.ObtenerCategoriasPorPadre(categoriaPadreId);
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerCategoriasPorPadre(categoriaPadreId, usuario);
             return result;
         }
 
@@ -47,7 +73,8 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpPost, Route("Categoria")]
         public ModelResponse GuardarOActualizarCategoria(Categoria categoria)
         {
-            var result = dbWrapper.GuardarOActualizarCategoria(categoria);
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.GuardarOActualizarCategoria(categoria, usuario);
             return result;
         }
 
@@ -59,19 +86,9 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpDelete, Route("Categoria")]
         public ModelResponse EliminarCategoria(Categoria categoria)
         {
+            var usuario = User.Identity.Name;
             categoria.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarCategoria(categoria.Id, categoria.ModificadoPor, categoria.FechaModificacion.Value);
-            return result;
-        }
-
-        /// <summary>
-        /// Obtiene todas las categorías con jerarquía (ordenadas: padres primero, luego hijas)
-        /// </summary>
-        /// <returns>Lista de categorías ordenadas jerárquicamente</returns>
-        [HttpGet, Route("Categoria/List")]
-        public ModelResponse ObtenerCategorias()
-        {
-            var result = dbWrapper.ObtenerCategorias();
+            var result = dbWrapper.EliminarCategoria(categoria.Id, categoria.ModificadoPor, categoria.FechaModificacion.Value, usuario);
             return result;
         }
     }

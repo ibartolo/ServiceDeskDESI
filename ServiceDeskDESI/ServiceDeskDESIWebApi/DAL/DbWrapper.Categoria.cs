@@ -1,4 +1,5 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using Serilog;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
@@ -11,16 +12,16 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerCategoriasPorArea(long areaId)
+        public ModelResponse ObtenerCategorias(string usuario)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
-                if (areaId <= 0) { throw new ArgumentException("El ID del área es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                var categorias = GetObjects("ObtenerCategoriasPorArea", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@AreaId", areaId) },
+                var categorias = GetObjects("ObtenerCategorias", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, Categoria>((reader) =>
                     {
                         var categoria = LlenarEntidad<Categoria>(reader);
@@ -54,6 +55,7 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener categorías para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener las categorías";
             }
@@ -61,30 +63,91 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerCategoriaPorId(long id)
+        public ModelResponse ObtenerCategoriasPorArea(long areaId, string usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                if (areaId <= 0) { throw new ArgumentException("El ID del área es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                var categorias = GetObjects("ObtenerCategoriasPorArea", CommandType.StoredProcedure,
+                    new[] {
+                new SqlParameter("@AreaId", areaId),
+                new SqlParameter("@Usuario", usuario)
+                    },
+                    new Func<IDataReader, Categoria>((reader) =>
+                    {
+                        var categoria = LlenarEntidad<Categoria>(reader);
+
+                        categoria.Area = new Area()
+                        {
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
+                        };
+
+                        if (reader["CategoriaPadreId"] != DBNull.Value)
+                        {
+                            categoria.CategoriaPadre = new Categoria()
+                            {
+                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"]),
+                                Nombre = MapearPorpiedades<string>(reader["CategoriaPadreNombre"])
+                            };
+                        }
+
+                        return categoria;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = categorias;
+                modelResponse.Message = "Categorías por área obtenidas correctamente";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener categorías por área {AreaId} para usuario {Usuario}", areaId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener las categorías por área";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ObtenerCategoriaPorId(long id, string usuario)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
                 if (id <= 0) { throw new ArgumentException("El ID de la categoría es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var categoria = GetObject("ObtenerCategoriaPorId", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) },
+                    new[] {
+                new SqlParameter("@Id", id),
+                new SqlParameter("@Usuario", usuario)
+                    },
                     new Func<IDataReader, Categoria>((reader) =>
                     {
                         var c = LlenarEntidad<Categoria>(reader);
 
                         c.Area = new Area()
                         {
-                            Id = MapearPorpiedades<long>(reader["AreaId"])
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
                         };
 
                         if (reader["CategoriaPadreId"] != DBNull.Value)
                         {
                             c.CategoriaPadre = new Categoria()
                             {
-                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"])
+                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"]),
+                                Nombre = MapearPorpiedades<string>(reader["CategoriaPadreNombre"])
                             };
                         }
 
@@ -109,6 +172,7 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener categoría {Id} para usuario {Usuario}", id, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener la categoría";
             }
@@ -116,23 +180,28 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerCategoriasPorPadre(long categoriaPadreId)
+        public ModelResponse ObtenerCategoriasPorPadre(long categoriaPadreId, string usuario)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
                 if (categoriaPadreId <= 0) { throw new ArgumentException("El ID de la categoría padre es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var categorias = GetObjects("ObtenerCategoriasPorPadre", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@CategoriaPadreId", categoriaPadreId) },
+                    new[] {
+                new SqlParameter("@CategoriaPadreId", categoriaPadreId),
+                new SqlParameter("@Usuario", usuario)
+                    },
                     new Func<IDataReader, Categoria>((reader) =>
                     {
                         var c = LlenarEntidad<Categoria>(reader);
 
                         c.Area = new Area()
                         {
-                            Id = MapearPorpiedades<long>(reader["AreaId"])
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
                         };
 
                         return c;
@@ -149,6 +218,7 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener subcategorías para categoría padre {CategoriaPadreId} para usuario {Usuario}", categoriaPadreId, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener las subcategorías";
             }
@@ -156,7 +226,7 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarCategoria(Categoria c)
+        public ModelResponse GuardarOActualizarCategoria(Categoria c, string usuario)
         {
             var modelResponse = new ModelResponse();
 
@@ -165,12 +235,13 @@ namespace ServiceDeskDESIWebApi.DAL
                 // Validaciones
                 if (string.IsNullOrWhiteSpace(c.Nombre)) { throw new ArgumentException("El nombre de la categoría es requerido."); }
                 if (c.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
+                if (c.Descripcion != null && c.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
                 if (c.Area == null || c.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
                 if (c.CategoriaPadre != null && c.CategoriaPadre.Id == c.Id) { throw new ArgumentException("La categoría no puede ser padre de sí misma."); }
                 if (string.IsNullOrWhiteSpace(c.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                // Construir objeto con IDs
-                var categoriaParaSP = new
+                var parametrosObj = new
                 {
                     c.Id,
                     c.Nombre,
@@ -182,11 +253,20 @@ namespace ServiceDeskDESIWebApi.DAL
                     c.FechaCreacion,
                     c.ModificadoPor,
                     c.FechaModificacion,
-                    c.Estatus
+                    c.Estatus,
+                    Usuario = usuario
                 };
 
-                var parametros = ObtenerParametrosSQL(categoriaParaSP).ToArray();
+                var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
                 var categoriaId = ExecuteScalar("GuardarOActualizarCategoria", CommandType.StoredProcedure, parametros);
+
+                if (Convert.ToInt64(categoriaId) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para realizar esta operación.";
+                    return modelResponse;
+                }
+
                 c.Id = Convert.ToInt64(categoriaId);
 
                 modelResponse.IsSuccess = true;
@@ -200,6 +280,7 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al guardar categoría para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar la categoría";
             }
@@ -207,7 +288,7 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse EliminarCategoria(long id, string modificadoPor, DateTime fechaModificacion)
+        public ModelResponse EliminarCategoria(long id, string modificadoPor, DateTime fechaModificacion, string usuario)
         {
             var modelResponse = new ModelResponse();
 
@@ -215,26 +296,22 @@ namespace ServiceDeskDESIWebApi.DAL
             {
                 if (id <= 0) { throw new ArgumentException("El ID de la categoría es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                // Verificar si tiene subcategorías
-                var subcategorias = ObtenerCategoriasPorPadre(id);
-                if (subcategorias.IsSuccess && subcategorias.Response != null)
-                {
-                    var lista = subcategorias.Response as IEnumerable<Categoria>;
-                    if (lista != null && lista.Any())
-                    {
-                        modelResponse.IsSuccess = false;
-                        modelResponse.Message = "No se puede eliminar la categoría porque tiene subcategorías asociadas.";
-                        return modelResponse;
-                    }
-                }
-
-                ExecuteNonQuery("EliminarCategoria", CommandType.StoredProcedure, new SqlParameter[]
+                var result = ExecuteScalar("EliminarCategoria", CommandType.StoredProcedure, new SqlParameter[]
                 {
             new SqlParameter("@Id", id),
             new SqlParameter("@ModificadoPor", modificadoPor),
-            new SqlParameter("@FechaModificacion", fechaModificacion)
+            new SqlParameter("@FechaModificacion", fechaModificacion),
+            new SqlParameter("@Usuario", usuario)
                 });
+
+                if (Convert.ToInt64(result) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para eliminar esta categoría.";
+                    return modelResponse;
+                }
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Categoría eliminada correctamente";
@@ -246,50 +323,9 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al eliminar categoría {Id} para usuario {Usuario}", id, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al eliminar la categoría";
-            }
-
-            return modelResponse;
-        }
-
-        public ModelResponse ObtenerCategorias()
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var categorias = GetObjects("ObtenerCategorias", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
-                    new Func<IDataReader, Categoria>((reader) =>
-                    {
-                        var categoria = LlenarEntidad<Categoria>(reader);
-
-                        categoria.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        if (reader["CategoriaPadreId"] != DBNull.Value)
-                        {
-                            categoria.CategoriaPadre = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"]),
-                                Nombre = MapearPorpiedades<string>(reader["CategoriaPadreNombre"])
-                            };
-                        }
-
-                        return categoria;
-                    }));
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = categorias;
-                modelResponse.Message = "Categorías obtenidas correctamente";
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener las categorías";
             }
 
             return modelResponse;

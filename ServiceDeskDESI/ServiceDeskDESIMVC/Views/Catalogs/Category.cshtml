@@ -76,15 +76,6 @@
         </div>
 
         <div class="row">
-            <div class="col-md-12">
-                <div class="mb-3">
-                    <label>Filtrar por Área:</label>
-                    @Html.DropDownList("ddlFiltroArea", new SelectList(ViewBag.Areas, "Id", "Nombre"), "Todas las áreas", new { @class = "form-control w-25", id = "ddlFiltroArea" })
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
             <div class="col-md-12 table-responsive">
                 <div class="mb-3">
                     <table id="tblCategoria" class="table table-striped">
@@ -101,6 +92,7 @@
     $(document).ready(function () {
         // Cargar todas las categorías para el dropdown de categorías padres
         CargarCategoriasPadre();
+        ConsultarCategorias();
 
         // Inicializar DataTable
         tablaCategoria = $('#tblCategoria').DataTable({
@@ -114,8 +106,8 @@
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
                         return '<div class="d-flex gap-3">' +
-                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarCategoria(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarCategoria(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarCategoria(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarCategoria(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
                             '</div>';
                     }
                 }
@@ -124,15 +116,6 @@
                 url: "/Content/datatables/i18n/es-ES.json"
             }
         });
-
-        // Filtrar por área
-        $("#ddlFiltroArea").change(function () {
-            var areaId = $(this).val();
-            ConsultarCategorias(areaId);
-        });
-
-        // Cargar todas las categorías al iniciar
-        ConsultarCategorias($("#ddlFiltroArea").val());
 
         // Cargar categorías padres al cambiar el área
         $("#ddlArea").change(function () {
@@ -221,50 +204,26 @@
         }
     }
 
-    function ConsultarCategorias(areaId) {
-        if (!areaId || areaId === "") {
-            // Si no hay área seleccionada, traer todas las categorías
-            GetMVC("/Catalogs/ConsultarTodasCategorias", function (response) {
-                var result = typeof response === 'string' ? JSON.parse(response) : response;
+    function ConsultarCategorias() {
+        GetMVC("/Catalogs/ConsultarTodasCategorias", function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
 
-                if (result.IsSuccess && result.Response) {
-                    MapingPropertiesDataTable("tblCategoria", result.Response);
-                } else {
-                    MapingPropertiesDataTable("tblCategoria", []);
-                    if (!result.IsSuccess) {
-                        Swal.fire({
-                            title: 'Error',
-                            text: result.Message,
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                            background: 'white',
-                            confirmButtonColor: '#4e73df'
-                        });
-                    }
+            if (result.IsSuccess && result.Response) {
+                MapingPropertiesDataTable("tblCategoria", result.Response);
+            } else {
+                MapingPropertiesDataTable("tblCategoria", []);
+                if (!result.IsSuccess) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: result.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
                 }
-            });
-        } else {
-            // Si hay área seleccionada, filtrar por área
-            GetMVC("/Catalogs/ConsultarTodasCategoriasPorArea/" + areaId, function (response) {
-                var result = typeof response === 'string' ? JSON.parse(response) : response;
-
-                if (result.IsSuccess && result.Response) {
-                    MapingPropertiesDataTable("tblCategoria", result.Response);
-                } else {
-                    MapingPropertiesDataTable("tblCategoria", []);
-                    if (!result.IsSuccess) {
-                        Swal.fire({
-                            title: 'Error',
-                            text: result.Message,
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                            background: 'white',
-                            confirmButtonColor: '#4e73df'
-                        });
-                    }
-                }
-            });
-        }
+            }
+        });
     }
 
     function GuardarActualizarCategoria() {
@@ -365,7 +324,7 @@
                             background: 'white',
                             iconColor: '#4e73df'
                         }).then(() => {
-                            ConsultarCategorias($("#ddlFiltroArea").val());
+                            ConsultarCategorias();
                             $("#frmCategoria")[0].reset();
                             $("#Id").val(0);
                         });
