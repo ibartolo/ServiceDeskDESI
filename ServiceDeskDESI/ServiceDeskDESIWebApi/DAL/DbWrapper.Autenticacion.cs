@@ -249,7 +249,7 @@ namespace ServiceDeskDESIWebApi.DAL
                 empresa.FechaCreacion = DateTime.Now;
                 empresa.Estatus = true;
 
-                var empresaResponse = GuardarOActualizarEmpresas(empresa, 0);
+                var empresaResponse = GuardarNuevaEmpresa(empresa);
 
                 if (!empresaResponse.IsSuccess || empresaResponse.Response == null)
                 {

@@ -14,10 +14,10 @@ namespace ServiceDeskDESIWebApi.Controllers
     public class EmpresaController : BaseController
     {
         [AllowAnonymous]
-        [HttpGet, Route("List/{empresaId:long}")]
-        public ModelResponse ObtenerEmpresas(long empresaId)
+        [HttpGet, Route("List")]
+        public ModelResponse ObtenerEmpresas()
         {
-            var result = dbWrapper.ObtenerTodasLasEmpresas(empresaId);
+            var result = dbWrapper.ObtenerTodasLasEmpresas();
             return result;
         }
         [HttpGet, Route("{id:long}/{empresaId:long}")]
