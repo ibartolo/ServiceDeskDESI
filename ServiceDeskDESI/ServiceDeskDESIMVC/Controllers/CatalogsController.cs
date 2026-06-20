@@ -248,7 +248,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             var usuario = new Usuario();
-            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID, tokenCookie.EmpresaID);
+            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
 
             if (response.IsSuccess && response.Response != null)
             {
@@ -414,7 +414,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
 
                 // Validar contraseña actual
-                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID, tokenCookie.EmpresaID);
+                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
 
                 if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
                 {

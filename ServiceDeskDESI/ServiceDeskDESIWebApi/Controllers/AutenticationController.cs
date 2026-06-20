@@ -23,14 +23,14 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         /// <summary>
-        /// Obtiene todos los usuarios activos de una empresa
+        /// Obtiene todos los usuarios de la empresa del usuario autenticado
         /// </summary>
-        /// <param name="empresaId">ID de la empresa</param>
-        /// <returns>Lista de usuarios con sus sucursales, áreas y empresa</returns>
-        [HttpGet, Route("User/Lista/{empresaId:long}")]
-        public ModelResponse ObtenerUsuarios(long empresaId)
+        /// <returns>Lista de usuarios</returns>
+        [HttpGet, Route("User/List")]
+        public ModelResponse ObtenerUsuarios()
         {
-            var result = dbWrapper.ObtenerUsuarios(empresaId);
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerUsuarios(usuario);
             return result;
         }
 
@@ -38,12 +38,12 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// Obtiene un usuario por su ID
         /// </summary>
         /// <param name="id">ID del usuario</param>
-        /// <param name="empresaId">ID de la empresa</param>
         /// <returns>Usuario encontrado</returns>
-        [HttpGet, Route("User/{id:long}/{empresaId:long}")]
-        public ModelResponse ObtenerUsuarioPorId(long id, long empresaId)
+        [HttpGet, Route("User/{id:long}")]
+        public ModelResponse ObtenerUsuarioPorId(long id)
         {
-            var result = dbWrapper.ObtenerUsuarioPorId(id, empresaId);
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerUsuarioPorId(id, usuario);
             return result;
         }
 
@@ -69,6 +69,19 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarUsuarioEmpresa(Usuario u)
         {
             var result = dbWrapper.GuardarOActualizarUsuario(u);
+            return result;
+        }
+
+        /// <summary>
+        /// Actualiza el perfil del usuario autenticado
+        /// </summary>
+        /// <param name="usuario">Objeto usuario con los datos a actualizar</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpPost, Route("ActualizarPerfil")]
+        public ModelResponse ActualizarPerfilUsuario(Usuario usuario)
+        {
+            var usuarioAutenticado = User.Identity.Name;
+            var result = dbWrapper.ActualizarPerfilUsuario(usuario, usuarioAutenticado);
             return result;
         }
 
@@ -196,6 +209,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpPost, Route("restablecerContrasenia")]
         public ModelResponse RestablecerContrasenia(RestablecerContraseniaRequest request)
         {
+            var usuarioAutenticado = User.Identity.Name;
             var modelResponse = new ModelResponse();
 
             try
@@ -221,7 +235,7 @@ namespace ServiceDeskDESIWebApi.Controllers
                     FechaModificacion = DateTime.Now
                 };
 
-                var updateResponse = dbWrapper.ActualizarContrasena(usuario);
+                var updateResponse = dbWrapper.ActualizarContrasena(usuario, usuarioAutenticado);
 
                 if (!updateResponse.IsSuccess)
                 {
@@ -243,6 +257,19 @@ namespace ServiceDeskDESIWebApi.Controllers
             }
 
             return modelResponse;
+        }
+
+        /// <summary>
+        /// Guarda o actualiza un usuario por parte del administrador
+        /// </summary>
+        /// <param name="usuario">Objeto usuario con los datos</param>
+        /// <returns>Usuario guardado con su ID actualizado</returns>
+        [HttpPost, Route("Admin/Usuario")]
+        public ModelResponse GuardarOActualizarUsuarioAdmin(Usuario usuario)
+        {
+            var usuarioAdmin = User.Identity.Name;
+            var result = dbWrapper.GuardarOActualizarUsuarioAdmin(usuario, usuarioAdmin);
+            return result;
         }
     }
 }

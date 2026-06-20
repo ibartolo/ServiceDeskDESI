@@ -12,29 +12,27 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerUsuarios(long empresaId)
+        public async Task<ModelResponse> ObtenerUsuarios()
         {
-            var result = await RequestAsync<object>($"api/Autentication/User/Lista/{empresaId}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Autentication/User/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerUsuarioPorId(long id, long empresaId)
+        public async Task<ModelResponse> ObtenerUsuarioPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Autentication/User/{id}/{empresaId}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Autentication/User/{id}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
             return modelResponse;
         }
 
@@ -92,7 +90,7 @@ namespace ServiceDeskDESIMVC.DAL
 
         public async Task<ModelResponse> ObtenerSucursales()
         {
-            var result = await RequestAsync<object>($"api/Catalogs/obtener-sucursales", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Sucursales/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

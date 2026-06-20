@@ -25,6 +25,19 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
+        public async Task<ModelResponse> ActualizarPerfilUsuario(Usuario usuario)
+        {
+            MappingColumSecurity(usuario);
+            var result = await RequestAsync<object>($"api/Autentication/ActualizarPerfil", HttpMethod.Post, usuario,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
         public async Task<ModelResponse> ValidarTokenRecuperacion(string token)
         {
             var result = await RequestAsync<object>($"api/Autentication/validarToken/{token}", HttpMethod.Get, null,
@@ -67,6 +80,19 @@ namespace ServiceDeskDESIMVC.DAL
 
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
 
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> GuardarOActualizarUsuarioAdmin(Usuario usuario)
+        {
+            MappingColumSecurity(usuario);
+            var result = await RequestAsync<object>($"api/Autentication/Admin/Usuario", HttpMethod.Post, usuario,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
     }

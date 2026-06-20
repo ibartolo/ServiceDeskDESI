@@ -242,7 +242,7 @@
                 parameters.push({ Name: "file", Value: file });
             }
 
-            PostFileMVC('/User/GuardarPerfil', parameters, function (response) {
+            PostFileMVC('/User/ActualizarPerfilUsuario', parameters, function (response) {
                 Swal.close();
 
                 if (response.IsSuccess) {
