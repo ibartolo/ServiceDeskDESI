@@ -1,4 +1,5 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using Serilog;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
@@ -11,15 +12,12 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodasLasEmpresas (long empresaId)
+        public ModelResponse ObtenerTodasLasEmpresas()
         {
             var modelResponse = new ModelResponse();
             try
             {
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
-                var empresa = GetObjects("ObtenerEmpresas", CommandType.StoredProcedure,
-               new[] { new SqlParameter("@EmpresaId", empresaId) },
+                var empresa = GetObjects("ObtenerEmpresas", CommandType.StoredProcedure, null,
                new Func<IDataReader, Empresa>((reader) =>
                {
                    var empresas = LlenarEntidad<Empresa>(reader);
@@ -61,37 +59,37 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (e.CorreoContacto != null && e.CorreoContacto.Length > 100) { throw new ArgumentException("El correo no puede exceder los 100 caracteres."); }
                 // Ing me falta esto: FechaVigenciaInicio,FechaVigenciaFin,EsPeriodoPrueba
                 if (string.IsNullOrWhiteSpace(e.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-                    var parametrosObj = new
-                    {
-                        e.Id,
-                        e.NombreComercial,
-                        e.RFC,
-                        e.Responsable,
-                        e.Direccion,
-                        e.Ciudad,
-                        e.Estado,
-                        e.CodigoPostal,
-                        e.Telefono,
-                        e.CorreoContacto,
-                        e.FechaVigenciaInicio,
-                        e.FechaVigenciaFin,
-                        e.EsPeriodoPrueba,
-                        e.CreadoPor,
-                        e.FechaCreacion,
-                        e.ModificadoPor,
-                        e.FechaModificacion,
-                        e.Estatus,
-                        EmpresaId = empresaId
-                    };
+                var parametrosObj = new
+                {
+                    e.Id,
+                    e.NombreComercial,
+                    e.RazonSocial,
+                    e.RFC,
+                    e.Responsable,
+                    e.Direccion,
+                    e.Ciudad,
+                    e.Estado,
+                    e.CodigoPostal,
+                    e.Telefono,
+                    e.CorreoContacto,
+                    e.FechaVigenciaInicio,
+                    e.FechaVigenciaFin,
+                    e.EsPeriodoPrueba,
+                    e.CreadoPor,
+                    e.FechaCreacion,
+                    e.ModificadoPor,
+                    e.FechaModificacion,
+                    e.Estatus,
+                    EmpresaId = empresaId
+                };
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
                 var empressaId = ExecuteScalar("GuardarOActualizarEmpresa", CommandType.StoredProcedure, parametros);
-                    if (Convert.ToInt64(empressaId) == 0)
-                    {
-                        modelResponse.IsSuccess = false;
-                        modelResponse.Message = "No tiene permisos para realizar esta operación.";
-                        return modelResponse;
-                    }
+                if (Convert.ToInt64(empressaId) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para realizar esta operación.";
+                    return modelResponse;
+                }
                 e.Id = Convert.ToInt64(empressaId);
 
                 modelResponse.IsSuccess = true;
@@ -103,6 +101,75 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
                 modelResponse.Response = null;
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse GuardarNuevaEmpresa(Empresa e)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                // Validaciones
+                if (string.IsNullOrWhiteSpace(e.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
+                if (e.NombreComercial.Length > 250) { throw new ArgumentException("El nombre comercial no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(e.RazonSocial)) { throw new ArgumentException("La razón social es requerida."); }
+                if (e.RazonSocial.Length > 250) { throw new ArgumentException("La razón social no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(e.RFC)) { throw new ArgumentException("El RFC es requerido."); }
+                if (e.RFC.Length > 50) { throw new ArgumentException("El RFC no puede exceder los 50 caracteres."); }
+                if (string.IsNullOrWhiteSpace(e.Responsable)) { throw new ArgumentException("El responsable es requerido."); }
+                if (e.Responsable.Length > 250) { throw new ArgumentException("El responsable no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(e.Direccion)) { throw new ArgumentException("La dirección es requerida."); }
+                if (e.Direccion.Length > 500) { throw new ArgumentException("La dirección no puede exceder los 500 caracteres."); }
+                if (e.Ciudad != null && e.Ciudad.Length > 100) { throw new ArgumentException("La ciudad no puede exceder los 100 caracteres."); }
+                if (e.Estado != null && e.Estado.Length > 100) { throw new ArgumentException("El estado no puede exceder los 100 caracteres."); }
+                if (e.CodigoPostal != null && e.CodigoPostal.Length > 10) { throw new ArgumentException("El código postal no puede exceder los 10 caracteres."); }
+                if (e.Telefono != null && e.Telefono.Length > 50) { throw new ArgumentException("El teléfono no puede exceder los 50 caracteres."); }
+                if (string.IsNullOrWhiteSpace(e.CorreoContacto)) { throw new ArgumentException("El correo de contacto es requerido."); }
+                if (e.CorreoContacto.Length > 250) { throw new ArgumentException("El correo de contacto no puede exceder los 250 caracteres."); }
+                if (e.FechaVigenciaInicio == DateTime.MinValue) { throw new ArgumentException("La fecha de vigencia inicio es requerida."); }
+                if (e.FechaVigenciaFin == DateTime.MinValue) { throw new ArgumentException("La fecha de vigencia fin es requerida."); }
+                if (string.IsNullOrWhiteSpace(e.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+
+                var parametrosObj = new
+                {
+                    e.NombreComercial,
+                    e.RazonSocial,
+                    e.RFC,
+                    e.Responsable,
+                    e.Direccion,
+                    e.Ciudad,
+                    e.Estado,
+                    e.CodigoPostal,
+                    e.Telefono,
+                    e.CorreoContacto,
+                    e.FechaVigenciaInicio,
+                    e.FechaVigenciaFin,
+                    e.EsPeriodoPrueba,
+                    e.CreadoPor,
+                    e.FechaCreacion
+                };
+
+                var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
+                var empresaId = ExecuteScalar("GuardarNuevaEmpresa", CommandType.StoredProcedure, parametros);
+                e.Id = Convert.ToInt64(empresaId);
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = e;
+                modelResponse.Message = "Empresa registrada correctamente.";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al registrar nueva empresa");
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al registrar la empresa.";
             }
 
             return modelResponse;
@@ -153,7 +220,7 @@ namespace ServiceDeskDESIWebApi.DAL
                      new[] {
                 new SqlParameter("@Id", id),
                 new SqlParameter("@EmpresaId", empresaId)
-                    },                                              
+                    },
                     new Func<IDataReader, Empresa>((reader) =>
                     {
                         var r = LlenarEntidad<Empresa>(reader);

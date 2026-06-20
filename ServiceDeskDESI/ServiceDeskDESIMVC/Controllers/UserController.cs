@@ -27,7 +27,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             var usuario = new Usuario();
-            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID, tokenCookie.EmpresaID);
+            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
 
             if (response.IsSuccess && response.Response != null)
             {
@@ -60,7 +60,7 @@ namespace ServiceDeskDESIMVC.Controllers
         {
             return PartialView();
         }
-        public async Task<string> GuardarPerfil(Usuario usuario, HttpPostedFileBase file)
+        public async Task<string> ActualizarPerfilUsuario(Usuario usuario, HttpPostedFileBase file)
         {
             var modelResponse = new ModelResponse();
 
@@ -87,7 +87,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     usuario.ImagenPerfil = $"/{pathTemplate}{fileName}";
                 }
 
-                var response = await httpClientConnection.GuardarOActualizarUsuario(usuario);
+                var response = await httpClientConnection.ActualizarPerfilUsuario(usuario);
                 return JsonConvert.SerializeObject(response);
             }
             catch (Exception ex)
@@ -113,7 +113,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
 
                 // Validar contraseña actual
-                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID, tokenCookie.EmpresaID);
+                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
 
                 if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
                 {
@@ -149,9 +149,6 @@ namespace ServiceDeskDESIMVC.Controllers
                 return JsonConvert.SerializeObject(modelResponse);
             }
         }
-
-
-
 
         public async Task<ModelResponse> ObtenerSucursales()
         {
@@ -206,5 +203,124 @@ namespace ServiceDeskDESIMVC.Controllers
 
             return modelResponse;
         }
+
+        #region Catelogo de usuarios
+        public async Task<ActionResult> Users(long id = 0)
+        {
+            var usuario = new Usuario();
+
+            // Cargar listas para los dropdowns
+            var sucursalesResponse = await httpClientConnection.ObtenerSucursales();
+            var sucursalesList = new List<Sucursal>();
+            if (sucursalesResponse.IsSuccess && sucursalesResponse.Response != null)
+            {
+                sucursalesList = JsonConvert.DeserializeObject<List<Sucursal>>(sucursalesResponse.Response.ToString());
+            }
+
+            var areasResponse = await httpClientConnection.ObtenerAreas();
+            var areasList = new List<Area>();
+            if (areasResponse.IsSuccess && areasResponse.Response != null)
+            {
+                areasList = JsonConvert.DeserializeObject<List<Area>>(areasResponse.Response.ToString());
+            }
+
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerUsuarioPorId(id);
+
+                if (response.IsSuccess && response.Response != null)
+                {
+                    usuario = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
+
+                    // Desencriptar la contraseña para mostrarla en el input
+                    if (!string.IsNullOrEmpty(usuario.Contrasena))
+                    {
+                        usuario.Contrasena = Cryptography.Decrypt(usuario.Contrasena);
+                    }
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+
+            // Asignar Sucursales
+            if (id > 0 && usuario.Sucursal != null && usuario.Sucursal.Id > 0)
+            {
+                var selectListSucursales = new List<SelectListItem>();
+                foreach (var s in sucursalesList)
+                {
+                    var item = new SelectListItem
+                    {
+                        Value = s.Id.ToString(),
+                        Text = s.Nombre,
+                        Selected = (s.Id == usuario.Sucursal.Id)
+                    };
+                    selectListSucursales.Add(item);
+                }
+                ViewBag.Sucursales = selectListSucursales;
+            }
+            else
+            {
+                ViewBag.Sucursales = MappingPropertiToDropDownList(sucursalesList, "Id", "Nombre");
+            }
+
+            // Asignar Áreas
+            if (id > 0 && usuario.Area != null && usuario.Area.Id > 0)
+            {
+                var selectListAreas = new List<SelectListItem>();
+                foreach (var a in areasList)
+                {
+                    var item = new SelectListItem
+                    {
+                        Value = a.Id.ToString(),
+                        Text = a.Nombre,
+                        Selected = (a.Id == usuario.Area.Id)
+                    };
+                    selectListAreas.Add(item);
+                }
+                ViewBag.Areas = selectListAreas;
+            }
+            else
+            {
+                ViewBag.Areas = MappingPropertiToDropDownList(areasList, "Id", "Nombre");
+            }
+
+            ViewBag.EmpresaId = tokenCookie.EmpresaID;
+
+            return View(usuario);
+        }
+
+        public async Task<string> ConsultarTodosLosUsuarios()
+        {
+            var response = await httpClientConnection.ObtenerUsuarios();
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> GuardarOActualizarUsuarioAdmin(Usuario usuario)
+        {
+            var tokenCookie = SessionHelper.GetSessionUser();
+
+            // Encriptar la contraseña antes de guardar
+            if (!string.IsNullOrEmpty(usuario.Contrasena))
+            {
+                usuario.Contrasena = Cryptography.Encrypt(usuario.Contrasena);
+            }
+
+            var response = await httpClientConnection.GuardarOActualizarUsuarioAdmin(usuario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> EliminarUsuarioAdmin(Usuario usuario)
+        {
+            var tokenCookie = SessionHelper.GetSessionUser();
+
+            usuario.ModificadoPor = tokenCookie?.UserName ?? "system";
+            usuario.FechaModificacion = DateTime.Now;
+
+            var response = await httpClientConnection.EliminarUsuario(usuario);
+            return JsonConvert.SerializeObject(response);
+        }
+        #endregion
     }
 }

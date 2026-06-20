@@ -248,7 +248,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             var usuario = new Usuario();
-            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID, tokenCookie.EmpresaID);
+            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
 
             if (response.IsSuccess && response.Response != null)
             {
@@ -414,7 +414,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
 
                 // Validar contraseña actual
-                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID, tokenCookie.EmpresaID);
+                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
 
                 if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
                 {
@@ -476,11 +476,6 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await httpClientConnection.EliminarCategoria(categoria);
             return JsonConvert.SerializeObject(response);
         }
-        public async Task<string> ConsultarTodasCategoriasPorArea(long id)
-        {
-            var response = await httpClientConnection.ObtenerCategoriasPorArea(id);
-            return JsonConvert.SerializeObject(response);
-        }
         public async Task<string> ConsultarTodasCategorias()
         {
             var response = await httpClientConnection.ObtenerCategorias();
@@ -520,7 +515,7 @@ namespace ServiceDeskDESIMVC.Controllers
         }
         #endregion
 
-        #region 5catalogos
+        #region Catalogos
         public async Task<string> ConsultarTodasLasSucursales()
         {
             var response = await httpClientConnection.ObtenerTodasLasSucursales();
