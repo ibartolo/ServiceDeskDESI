@@ -1,10 +1,12 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using Serilog;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
@@ -20,7 +22,20 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpGet, Route("List")]
         public ModelResponse ObtenerAreas()
         {
+            var identity = (ClaimsIdentity)User.Identity;
+            if (identity != null)
+            {
+                var claims = identity.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
+                Log.Information("Claims en el token: {@Claims}", claims);
+            }
+            else
+            {
+                Log.Warning("User.Identity es null");
+            }
+
             var usuario = User.Identity.Name;
+            Log.Information("User.Identity.Name: {Name}", usuario ?? "NULL");
+
             var result = dbWrapper.ObtenerAreas(usuario);
             return result;
         }

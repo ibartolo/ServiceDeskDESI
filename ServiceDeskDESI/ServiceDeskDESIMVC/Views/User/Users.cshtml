@@ -142,6 +142,11 @@
         tablaUsuario = $('#tblUsuario').DataTable({
             columns: [
                 { data: 'Id', title: 'ID', visible: false },
+                {
+                    data: 'Estatus', title: 'Estado', render: function (data) {
+                        return data ? '<svg width="12" height="12"><circle cx="6" cy="6" r="6" fill="#28a745" /></svg>' : '<svg width="12" height="12"><circle cx="6" cy="6" r="6" fill="#dc3545" /></svg>';
+                    }
+                },
                 { data: 'NombreUsuario', title: 'Usuario' },
                 { data: 'Nombre', title: 'Nombre' },
                 { data: 'Correo', title: 'Correo' },

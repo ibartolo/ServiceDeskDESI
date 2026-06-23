@@ -18,30 +18,52 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                Log.Information("=== INICIO ObtenerAreas ===");
+                Log.Information("Usuario recibido: '{Usuario}'", usuario ?? "NULL");
+                Log.Information("Usuario es null o vacío: {IsNullOrEmpty}", string.IsNullOrWhiteSpace(usuario));
+
+                if (string.IsNullOrWhiteSpace(usuario))
+                {
+                    Log.Warning("Usuario es null o vacío, devolviendo lista vacía sin lanzar excepción");
+                    modelResponse.IsSuccess = true;
+                    modelResponse.Response = new List<Area>();
+                    modelResponse.Message = "No hay usuario autenticado";
+                    return modelResponse;
+                }
+
+                Log.Information("Consultando áreas para usuario: {Usuario}", usuario);
 
                 var areas = GetObjects("ObtenerAreas", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, Area>((reader) =>
                     {
                         var area = LlenarEntidad<Area>(reader);
+                        Log.Debug("Área encontrada: Id={Id}, Nombre={Nombre}", area.Id, area.Nombre);
                         return area;
                     }));
 
+                var count = areas != null ? ((IEnumerable<Area>)areas).Count() : 0;
+                Log.Information("Se encontraron {Count} áreas para el usuario {Usuario}", count, usuario);
+
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = areas;
-                modelResponse.Message = "Áreas obtenidas correctamente";
+                modelResponse.Message = count > 0 ? "Áreas obtenidas correctamente" : "No se encontraron áreas para el usuario";
             }
             catch (ArgumentException ex)
             {
+                Log.Error(ex, "Error de validación al obtener áreas para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error al obtener áreas para usuario {Usuario}", usuario);
+                Log.Error(ex, "Error CRÍTICO al obtener áreas para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener las áreas";
+            }
+            finally
+            {
+                Log.Information("=== FIN ObtenerAreas ===");
             }
 
             return modelResponse;
