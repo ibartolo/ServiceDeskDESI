@@ -150,17 +150,26 @@ namespace ServiceDeskDESIWebApi.App_Start
         {
             context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
 
+            Log.Information("=== INICIO GrantResourceOwnerCredentials ===");
+            Log.Information("Username: {Username}", context.UserName);
+
             var user = new DAL.DbWrapper().AutenticarUsuario(context.UserName, context.Password);
 
             if (!(user != null && (user.IsSuccess && user.Response != null)))
             {
+                Log.Warning("Autenticación fallida para usuario: {Username}", context.UserName);
                 context.SetError("invalid_grant", "The user name or password is incorrect.");
                 return;
             }
 
+            Log.Information("Usuario autenticado correctamente: {Username}", context.UserName);
+
             var identity = new ClaimsIdentity(context.Options.AuthenticationType);
-            identity.AddClaim(new Claim(ClaimTypes.Name, context.UserName)); // ← Usar ClaimTypes.Name
+            identity.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
             identity.AddClaim(new Claim("role", "user"));
+
+            Log.Information("Claims agregados: ClaimTypes.Name = {Name}", context.UserName);
+            Log.Information("=== FIN GrantResourceOwnerCredentials ===");
 
             context.Validated(identity);
         }

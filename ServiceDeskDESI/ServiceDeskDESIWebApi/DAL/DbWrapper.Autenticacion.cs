@@ -272,7 +272,16 @@ namespace ServiceDeskDESIWebApi.DAL
                     return modelResponse;
                 }
 
+                if (resultadoLong == -2)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El correo electrónico ya está registrado en esta empresa.";
+                    return modelResponse;
+                }
+
                 usuario.Id = resultadoLong;
+
+                EnviarCorreoNuevoUsuario(usuario, Cryptography.Decrypt(usuario.Contrasena));
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = usuario;
@@ -923,6 +932,7 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
         public ModelResponse ObtenerUsuarioPorCorreo(string correo)
         {
             var modelResponse = new ModelResponse();
@@ -1019,6 +1029,52 @@ namespace ServiceDeskDESIWebApi.DAL
             {
                 Log.Error(ex, "FALLO al enviar correo de bienvenida a: {Email}. La empresa quedó registrada sin credenciales enviadas.",
                     empresa.CorreoContacto);
+                return false;
+            }
+        }
+
+        private bool EnviarCorreoNuevoUsuario(Usuario usuario, string contrasenaTemporal)
+        {
+            try
+            {
+                Log.Debug("Preparando plantilla de correo para nuevo usuario: {Email}", usuario.Correo);
+
+                // Obtener URL base del Web.config
+                string baseUri = System.Configuration.ConfigurationManager.AppSettings["BaseUri"];
+                string urlLogin = $"{baseUri}Home/Autentication";
+
+                // Leer template
+                string templatePath = System.Web.Hosting.HostingEnvironment.MapPath("~/Template/Template_NuevoUsuario.html");
+
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    Log.Error("No se encontró la plantilla de correo en: {TemplatePath}", templatePath);
+                    return false;
+                }
+
+                string templateHtml = System.IO.File.ReadAllText(templatePath);
+
+                // Reemplazar variables en el template
+                templateHtml = templateHtml.Replace("{{NombreCompleto}}", $"{usuario.Nombre} {usuario.Apellido}");
+                templateHtml = templateHtml.Replace("{{Correo}}", usuario.Correo);
+                //templateHtml = templateHtml.Replace("{{Celular}}", usuario.Celular ?? "No especificado");
+                //templateHtml = templateHtml.Replace("{{NombreEmpresa}}", usuario.Empresa?.NombreComercial ?? "Empresa");
+                templateHtml = templateHtml.Replace("{{NombreUsuario}}", usuario.NombreUsuario);
+                templateHtml = templateHtml.Replace("{{ContrasenaTemporal}}", contrasenaTemporal);
+                templateHtml = templateHtml.Replace("{{UrlLogin}}", urlLogin);
+
+                Log.Debug("Plantilla procesada, enviando correo a: {Email}", usuario.Correo);
+
+                // Enviar correo
+                var para = new List<string> { usuario.Correo };
+                EmailHelper.EnvioEmaiil(para, "Bienvenido a Service Desk DESI - Tus credenciales de acceso", templateHtml, false);
+
+                Log.Information("Correo de nuevo usuario enviado exitosamente a: {Email}", usuario.Correo);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "FALLO al enviar correo de nuevo usuario a: {Email}", usuario.Correo);
                 return false;
             }
         }
