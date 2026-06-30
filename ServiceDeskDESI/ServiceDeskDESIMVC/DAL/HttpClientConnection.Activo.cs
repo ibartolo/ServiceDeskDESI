@@ -12,9 +12,9 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task  <ModelResponse> ObtenerTodosLosActivos (long empresaId)
+        public async Task  <ModelResponse> ObtenerTodosLosActivos ()
         {
-            var result = await RequestAsync<object>($"api/Activos/List{empresaId}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Activos/List", HttpMethod.Get, null,
                  new Func<string, string>((responseString) =>
                  {
                      return responseString;

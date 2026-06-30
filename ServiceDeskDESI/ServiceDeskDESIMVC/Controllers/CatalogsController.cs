@@ -121,7 +121,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 modeloList = JsonConvert.DeserializeObject<List<Modelo>>(modeloResponse.Response.ToString());
             }
 
-            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas(0);
+            var marcaResponse = await httpClientConnection.ObtenerMarcas();
             var marcasList = new List<Marca>();
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
@@ -179,7 +179,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
             // Cargar marcas 
             //ING AQUI ME MARCABA ERROR EN OBTENERTODOSLASMARCAS Y LE PUSE 0
-            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas(0);
+            var marcaResponse = await httpClientConnection.ObtenerMarcas();
             var marcasList = new List<Marca>();
 
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
@@ -225,7 +225,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var marca = new Marca();
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerMarcaPorId(id,tokenCookie.EmpresaID);
+                var response = await httpClientConnection.ObtenerMarcaPorId(id);
                 if (response.IsSuccess && response.Response != null)
                 {
                        marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
@@ -582,28 +582,28 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<string> ConsultarTodosLasMarcas()
         {
-            var response = await httpClientConnection.ObtenerTodosLasMarcas(tokenCookie.EmpresaID);
+            var response = await httpClientConnection.ObtenerMarcas();
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodasMarcasPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerMarcaPorId(id, tokenCookie.EmpresaID);
+            var response = await httpClientConnection.ObtenerMarcaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarMarca(Marca m)
         {
-            var response = await httpClientConnection.GuardarOActualizarMarca(m, tokenCookie.EmpresaID);
+            var response = await httpClientConnection.GuardarOActualizarMarca(m);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarMarcas(Marca m)
         {
-            var response = await httpClientConnection.EliminarMarcas(m, tokenCookie.EmpresaID);
+            var response = await httpClientConnection.EliminarMarca(m);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ConsultarTodosLosActivo()
         {
-            var response = await httpClientConnection.ObtenerTodosLosActivos(tokenCookie.EmpresaID);
+            var response = await httpClientConnection.ObtenerTodosLosActivos();
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodosLosActivosPorId(long id)
