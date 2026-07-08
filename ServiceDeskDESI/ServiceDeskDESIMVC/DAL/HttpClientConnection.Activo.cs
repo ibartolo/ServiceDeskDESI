@@ -12,52 +12,54 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task  <ModelResponse> ObtenerTodosLosActivos (long empresaId)
+        public async Task<ModelResponse> ObtenerTodosLosActivos()
         {
-            var result = await RequestAsync<object>($"api/Activos/List{empresaId}", HttpMethod.Get, null,
-                 new Func<string, string>((responseString) =>
-                 {
-                     return responseString;
-                 }),
-                 token.Token.access_token);
-            var modelresponse =JsonConvert.DeserializeObject <ModelResponse>(result.ToString());
-            return modelresponse;
-        }
-        public async Task<ModelResponse> GuardarActualizarActivos(Activo a,long empresaId)
-        {
-            MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/Activos/{empresaId}", HttpMethod.Post, a,
-                 new Func<string, string>((responseString) =>
-                 {
-                     return responseString;
-                 }),
-                 token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelresponse;
-        }
-        public async Task<ModelResponse> ObtenerActivoPorId(long id, long empresaId)
-        {
-            var result = await RequestAsync<object>($"api/Activos/{id}/{empresaId}", HttpMethod.Get, null,
-                 new Func<string, string>((responseString) =>
-                 {
-                     return responseString;
-                 }),
-                 token.Token.access_token);
-            var modelreponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelreponse;
-        }
-        public async Task<ModelResponse> EliminarActivos(Activo a,long empresaId)
-        {
-            MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/Activos/{empresaId}", HttpMethod.Delete, a,
+            var result = await RequestAsync<object>($"api/Activo/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
-                }),
-                 token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelresponse;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
         }
 
+        public async Task<ModelResponse> ObtenerActivoPorId(long id)
+        {
+            var result = await RequestAsync<object>($"api/Activo/{id}", HttpMethod.Get, null,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> GuardarOActualizarActivo(Activo activo)
+        {
+            MappingColumSecurity(activo);
+            var result = await RequestAsync<object>($"api/Activo/Guardar", HttpMethod.Post, activo,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> EliminarActivo(Activo activo)
+        {
+            MappingColumSecurity(activo);
+            var result = await RequestAsync<object>($"api/Activo/Eliminar", HttpMethod.Delete, activo,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
     }
 }
