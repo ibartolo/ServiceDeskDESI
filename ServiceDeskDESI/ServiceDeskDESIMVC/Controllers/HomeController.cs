@@ -38,8 +38,17 @@ namespace ServiceDeskDESIMVC.Controllers
         {
             return View();
         }
+        public async Task<ActionResult> MenusUser()
+        {
+            var paginasResponse = await httpClientConnection.ObtenerPaginasPorUsuario();
+            var paginas = new List<Pagina>();
+            if (paginasResponse.IsSuccess && paginasResponse.Response != null)
+            {
+                paginas = JsonConvert.DeserializeObject<List<Pagina>>(paginasResponse.Response.ToString());
+            }
+            return PartialView(paginas);
+        }
         #endregion
-
 
         #region Data Access
         [HttpPost]

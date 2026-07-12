@@ -39,7 +39,6 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             return modelResponse;
         }
-
         public ModelResponse GuardarOActualizarEmpresas(Empresa e, long empresaId)
         {
             var modelResponse = new ModelResponse();
@@ -105,7 +104,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
-
         public ModelResponse GuardarNuevaEmpresa(Empresa e)
         {
             var modelResponse = new ModelResponse();
@@ -288,6 +286,185 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+        #region Nueva empresa
+        public ModelResponse GuardarRolParaNuevaEmpresa(Rol rol)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                // Validaciones
+                if (string.IsNullOrWhiteSpace(rol.Nombre)) { throw new ArgumentException("El nombre del rol es requerido."); }
+                if (rol.Nombre.Length > 50) { throw new ArgumentException("El nombre no puede exceder los 50 caracteres."); }
+                if (rol.Descripcion != null && rol.Descripcion.Length > 250) { throw new ArgumentException("La descripción no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(rol.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+
+                var parametrosObj = new
+                {
+                    rol.Nombre,
+                    rol.Descripcion,
+                    rol.CreadoPor,
+                    rol.FechaCreacion
+                };
+
+                var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
+                var rolId = ExecuteScalar("GuardarRolParaNuevaEmpresa", CommandType.StoredProcedure, parametros);
+                rol.Id = Convert.ToInt64(rolId);
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = rol;
+                modelResponse.Message = "Rol creado exitosamente para la nueva empresa.";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al crear rol para nueva empresa");
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al crear el rol para la empresa.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse AsignarRolUsuarioParaNuevaEmpresa(long usuarioId, long rolId, string creadoPor)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
+                if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
+                if (string.IsNullOrWhiteSpace(creadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+
+                var resultado = ExecuteScalar("AsignarRolUsuarioParaNuevaEmpresa", CommandType.StoredProcedure, new SqlParameter[]
+                {
+            new SqlParameter("@UsuarioId", usuarioId),
+            new SqlParameter("@RolId", rolId),
+            new SqlParameter("@CreadoPor", creadoPor),
+            new SqlParameter("@FechaCreacion", DateTime.Now)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario o el rol no existen.";
+                    return modelResponse;
+                }
+
+                if (resultadoLong == -1)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario ya tiene asignado este rol.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Rol asignado al usuario exitosamente.";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al asignar rol {RolId} al usuario {UsuarioId} para nueva empresa", rolId, usuarioId);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al asignar el rol al usuario.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse InsertarUsuarioPaginaParaNuevaEmpresa(long usuarioId, long paginaId, string creadoPor)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
+                if (paginaId <= 0) { throw new ArgumentException("El ID de la página es requerido."); }
+                if (string.IsNullOrWhiteSpace(creadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+
+                var resultado = ExecuteScalar("InsertarUsuarioPaginaParaNuevaEmpresa", CommandType.StoredProcedure, new SqlParameter[]
+                {
+            new SqlParameter("@UsuarioId", usuarioId),
+            new SqlParameter("@PaginaId", paginaId),
+            new SqlParameter("@CreadoPor", creadoPor),
+            new SqlParameter("@FechaCreacion", DateTime.Now)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario o la página no existen.";
+                    return modelResponse;
+                }
+
+                if (resultadoLong == -1)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario ya tiene asignada esta página.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Página asignada al usuario exitosamente.";
+            }
+            catch (ArgumentException ex)
+            {
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al asignar página {PaginaId} al usuario {UsuarioId} para nueva empresa", paginaId, usuarioId);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al asignar la página al usuario.";
+            }
+
+            return modelResponse;
+        }
+
+
+        public ModelResponse ObtenerPaginas()
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var paginas = GetObjects("ObtenerPaginas", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                    new Func<IDataReader, Pagina>((reader) =>
+                    {
+                        var pagina = LlenarEntidad<Pagina>(reader);
+                        return pagina;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = paginas;
+                modelResponse.Message = "Páginas obtenidas correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener páginas");
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener las páginas.";
+            }
+
+            return modelResponse;
+        }
+        #endregion
 
     }
 }

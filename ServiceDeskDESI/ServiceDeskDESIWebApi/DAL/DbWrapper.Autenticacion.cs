@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using Serilog;
+using System.Transactions;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
@@ -377,6 +378,12 @@ namespace ServiceDeskDESIWebApi.DAL
         {
             var modelResponse = new ModelResponse();
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            Empresa empresaGuardada = null;
+            Sucursal sucursalGuardada = null;
+            Area areaGuardada = null;
+            Usuario usuarioAdmin = null;
+            long rolAdminId = 0;
+            long usuarioAdminId = 0;
 
             try
             {
@@ -385,7 +392,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     empresa?.NombreComercial, empresa?.RazonSocial, empresa?.RFC, empresa?.CorreoContacto, empresa?.Responsable);
 
                 // =========================================
-                // VALIDACIONES DE EMPRESA
+                // VALIDACIONES DE EMPRESA (antes de la transacción)
                 // =========================================
                 Log.Debug("Iniciando validaciones de campos requeridos...");
 
@@ -405,153 +412,251 @@ namespace ServiceDeskDESIWebApi.DAL
                 Log.Information("Validaciones completadas exitosamente para RFC: {RFC}", empresa.RFC);
 
                 // =========================================
-                // PASO 1: GUARDAR EMPRESA
+                // INICIO DE TRANSACCIÓN
                 // =========================================
-                Log.Information("PASO 1/5 - Iniciando guardado de empresa en BD...");
-
-                empresa.FechaVigenciaInicio = DateTime.Now;
-                empresa.FechaVigenciaFin = DateTime.Now.AddDays(30);
-                empresa.EsPeriodoPrueba = true;
-                empresa.CreadoPor = "system.register";
-                empresa.FechaCreacion = DateTime.Now;
-                empresa.Estatus = true;
-
-                var empresaResponse = GuardarNuevaEmpresa(empresa);
-
-                if (!empresaResponse.IsSuccess || empresaResponse.Response == null)
+                using (var scope = new System.Transactions.TransactionScope(
+                    System.Transactions.TransactionScopeOption.Required,
+                    new System.Transactions.TransactionOptions
+                    {
+                        IsolationLevel = System.Transactions.IsolationLevel.ReadCommitted,
+                        Timeout = TimeSpan.FromMinutes(5)
+                    }))
                 {
-                    Log.Error("❌ PASO 1/5 - FALLÓ el guardado de empresa. RFC: {RFC}, Error: {Error}", empresa.RFC, empresaResponse.Message);
-                    throw new Exception(empresaResponse.Message ?? "Error al guardar la empresa");
+                    Log.Information("Iniciando transacción para registro de empresa...");
+
+                    // =========================================
+                    // PASO 1: GUARDAR EMPRESA
+                    // =========================================
+                    Log.Information("PASO 1/7 - Iniciando guardado de empresa en BD...");
+
+                    empresa.FechaVigenciaInicio = DateTime.Now;
+                    empresa.FechaVigenciaFin = DateTime.Now.AddDays(30);
+                    empresa.EsPeriodoPrueba = true;
+                    empresa.CreadoPor = "system.register";
+                    empresa.FechaCreacion = DateTime.Now;
+                    empresa.Estatus = true;
+
+                    var empresaResponse = GuardarNuevaEmpresa(empresa);
+
+                    if (!empresaResponse.IsSuccess || empresaResponse.Response == null)
+                    {
+                        Log.Error("❌ PASO 1/7 - FALLÓ el guardado de empresa. RFC: {RFC}, Error: {Error}", empresa.RFC, empresaResponse.Message);
+                        throw new Exception(empresaResponse.Message ?? "Error al guardar la empresa");
+                    }
+
+                    empresaGuardada = (Empresa)empresaResponse.Response;
+                    Log.Information("✅ PASO 1/7 - Empresa guardada exitosamente. Id: {EmpresaId}, Nombre: {NombreEmpresa}",
+                        empresaGuardada.Id, empresaGuardada.NombreComercial);
+
+                    var usernameAdmin = $"admin_{empresaGuardada.Id}";
+                    Log.Debug("Username administrador generado: {Username}", usernameAdmin);
+
+                    // =========================================
+                    // PASO 2: GUARDAR SUCURSAL
+                    // =========================================
+                    Log.Information("PASO 2/7 - Creando sucursal para la empresa...");
+
+                    var sucursal = new Sucursal()
+                    {
+                        Nombre = empresaGuardada.NombreComercial,
+                        Descripcion = $"Sucursal principal de {empresaGuardada.NombreComercial}",
+                        Calle = empresaGuardada.Direccion,
+                        Ciudad = empresaGuardada.Ciudad,
+                        Colonia = null,
+                        CodigoPostal = empresaGuardada.CodigoPostal,
+                        CreadoPor = usernameAdmin,
+                        FechaCreacion = DateTime.Now,
+                        Estatus = true
+                    };
+
+                    var sucursalResponse = GuardarNuevaSucursalParaEmpresa(sucursal);
+
+                    if (!sucursalResponse.IsSuccess || sucursalResponse.Response == null)
+                    {
+                        Log.Error("❌ PASO 2/7 - FALLÓ la creación de sucursal. EmpresaId: {EmpresaId}, Error: {Error}",
+                            empresaGuardada.Id, sucursalResponse.Message);
+                        throw new Exception(sucursalResponse.Message ?? "Error al guardar la sucursal");
+                    }
+
+                    sucursalGuardada = (Sucursal)sucursalResponse.Response;
+                    Log.Information("✅ PASO 2/7 - Sucursal creada exitosamente. Id: {SucursalId}, Nombre: {SucursalNombre}",
+                        sucursalGuardada.Id, sucursalGuardada.Nombre);
+
+                    // =========================================
+                    // PASO 3: GUARDAR ÁREA (TI)
+                    // =========================================
+                    Log.Information("PASO 3/7 - Creando área 'TI' para la empresa...");
+
+                    var area = new Area()
+                    {
+                        Nombre = "TI",
+                        Descripcion = "Área de Tecnologías de la Información",
+                        Correo = empresaGuardada.CorreoContacto,
+                        CreadoPor = usernameAdmin,
+                        FechaCreacion = DateTime.Now,
+                        Estatus = true
+                    };
+
+                    var areaResponse = GuardarNuevaAreaParaEmpresa(area);
+
+                    if (!areaResponse.IsSuccess || areaResponse.Response == null)
+                    {
+                        Log.Error("❌ PASO 3/7 - FALLÓ la creación del área. EmpresaId: {EmpresaId}, Error: {Error}",
+                            empresaGuardada.Id, areaResponse.Message);
+                        throw new Exception(areaResponse.Message ?? "Error al guardar el área");
+                    }
+
+                    areaGuardada = (Area)areaResponse.Response;
+                    Log.Information("✅ PASO 3/7 - Área 'TI' creada exitosamente. Id: {AreaId}, Nombre: {AreaNombre}",
+                        areaGuardada.Id, areaGuardada.Nombre);
+
+                    // =========================================
+                    // PASO 4: GUARDAR USUARIO ADMINISTRADOR
+                    // =========================================
+                    Log.Information("PASO 4/7 - Creando usuario administrador para la empresa...");
+
+                    usuarioAdmin = new Usuario()
+                    {
+                        NombreUsuario = usernameAdmin,
+                        Contrasena = Cryptography.Encrypt("Admin123!"),
+                        ImagenPerfil = null,
+                        Correo = empresaGuardada.CorreoContacto,
+                        Nombre = "Administrador",
+                        Apellido = "Sistema",
+                        Celular = empresaGuardada.Telefono,
+                        Sucursal = sucursalGuardada,
+                        Firma = null,
+                        RFC = empresaGuardada.RFC,
+                        Area = areaGuardada,
+                        Empresa = empresaGuardada,
+                        CreadoPor = usernameAdmin,
+                        FechaCreacion = DateTime.Now,
+                        Estatus = true
+                    };
+
+                    var usuarioResponse = GuardarOActualizarUsuario(usuarioAdmin);
+
+                    if (!usuarioResponse.IsSuccess)
+                    {
+                        Log.Error("❌ PASO 4/7 - FALLÓ la creación del usuario administrador. EmpresaId: {EmpresaId}, Username: {Username}, Error: {Error}",
+                            empresaGuardada.Id, usernameAdmin, usuarioResponse.Message);
+                        throw new Exception(usuarioResponse.Message ?? "Error al guardar el usuario administrador");
+                    }
+
+                    usuarioAdmin = (Usuario)usuarioResponse.Response;
+                    usuarioAdminId = usuarioAdmin.Id;
+                    Log.Information("✅ PASO 4/7 - Usuario administrador creado exitosamente. Id: {UsuarioId}, Username: {Username}, Correo: {Correo}",
+                        usuarioAdminId, usernameAdmin, empresaGuardada.CorreoContacto);
+
+                    // =========================================
+                    // PASO 5: CREAR ROLES BASE
+                    // =========================================
+                    Log.Information("PASO 5/7 - Creando roles base para la empresa...");
+
+                    var rolesBase = new List<Rol>
+            {
+                new Rol { Nombre = "Administrador", Descripcion = "Control total del sistema", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
+                new Rol { Nombre = "Supervisor", Descripcion = "Gestión de tickets y usuarios", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
+                new Rol { Nombre = "Agente", Descripcion = "Atención de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
+                new Rol { Nombre = "Usuario", Descripcion = "Creación de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true }
+            };
+
+                    foreach (var rol in rolesBase)
+                    {
+                        var rolResponse = GuardarRolParaNuevaEmpresa(rol);
+                        if (!rolResponse.IsSuccess)
+                        {
+                            Log.Error("❌ PASO 5/7 - FALLÓ la creación del rol {NombreRol}. Error: {Error}", rol.Nombre, rolResponse.Message);
+                            throw new Exception($"Error al crear el rol '{rol.Nombre}': {rolResponse.Message}");
+                        }
+
+                        if (rol.Nombre == "Administrador")
+                        {
+                            rolAdminId = ((Rol)rolResponse.Response).Id;
+                        }
+                    }
+
+                    Log.Information("✅ PASO 5/7 - Roles base creados exitosamente para empresa {EmpresaId}", empresaGuardada.Id);
+
+                    // =========================================
+                    // PASO 6: ASIGNAR ROL "ADMINISTRADOR" AL USUARIO
+                    // =========================================
+                    Log.Information("PASO 6/7 - Asignando rol 'Administrador' al usuario...");
+
+                    var asignarRolResponse = AsignarRolUsuarioParaNuevaEmpresa(usuarioAdminId, rolAdminId, usernameAdmin);
+
+                    if (!asignarRolResponse.IsSuccess)
+                    {
+                        Log.Error("❌ PASO 6/7 - FALLÓ la asignación del rol 'Administrador' al usuario {Username}", usernameAdmin);
+                        throw new Exception($"Error al asignar el rol 'Administrador' al usuario: {asignarRolResponse.Message}");
+                    }
+
+                    Log.Information("✅ PASO 6/7 - Rol 'Administrador' asignado al usuario {Username}", usernameAdmin);
+
+                    // =========================================
+                    // PASO 7: ASIGNAR PÁGINAS AL USUARIO ADMINISTRADOR
+                    // =========================================
+                    Log.Information("PASO 7/7 - Asignando páginas al usuario administrador...");
+
+                    var paginasResponse = ObtenerPaginas();
+                    if (paginasResponse.IsSuccess && paginasResponse.Response != null)
+                    {
+                        var paginas = (List<Pagina>)paginasResponse.Response;
+                        int paginasAsignadas = 0;
+
+                        foreach (var pagina in paginas)
+                        {
+                            var insertResponse = InsertarUsuarioPaginaParaNuevaEmpresa(usuarioAdminId, pagina.Id, usernameAdmin);
+                            if (insertResponse.IsSuccess)
+                            {
+                                paginasAsignadas++;
+                            }
+                            else
+                            {
+                                Log.Warning("⚠️ No se pudo asignar la página {PaginaId} al usuario {UsuarioId}: {Error}",
+                                    pagina.Id, usuarioAdminId, insertResponse.Message);
+                            }
+                        }
+
+                        Log.Information("✅ PASO 7/7 - {Count} páginas asignadas al usuario administrador", paginasAsignadas);
+                    }
+                    else
+                    {
+                        Log.Warning("⚠️ No se encontraron páginas para asignar al usuario administrador");
+                    }
+
+                    // =========================================
+                    // COMPLETAR TRANSACCIÓN
+                    // =========================================
+                    scope.Complete();
+                    Log.Information("✅ Transacción completada exitosamente.");
                 }
 
-
-                var empresaGuardada = (Empresa)empresaResponse.Response;
-                Log.Information("✅ PASO 1/5 - Empresa guardada exitosamente. Id: {EmpresaId}, Nombre: {NombreEmpresa}",
-                    empresaGuardada.Id, empresaGuardada.NombreComercial);
-
-                var usernameAdmin = $"admin_{empresaGuardada.Id}";
-                Log.Debug("Username administrador generado: {Username}", usernameAdmin);
-
                 // =========================================
-                // PASO 2: GUARDAR SUCURSAL
+                // FIN DE LA TRANSACCIÓN - ENVIAR CORREO
                 // =========================================
-                Log.Information("PASO 2/5 - Creando sucursal para la empresa...");
+                Log.Information("Enviando correo de bienvenida a: {Correo}...", empresaGuardada.CorreoContacto);
 
-                var sucursal = new Sucursal()
-                {
-                    Nombre = empresaGuardada.NombreComercial,
-                    Descripcion = $"Sucursal principal de {empresaGuardada.NombreComercial}",
-                    Calle = empresaGuardada.Direccion,
-                    Ciudad = empresaGuardada.Ciudad,
-                    Colonia = null,
-                    CodigoPostal = empresaGuardada.CodigoPostal,
-                    CreadoPor = usernameAdmin,
-                    FechaCreacion = DateTime.Now,
-                    Estatus = true
-                };
-
-                var sucursalResponse = GuardarNuevaSucursalParaEmpresa(sucursal);
-
-                if (!sucursalResponse.IsSuccess || sucursalResponse.Response == null)
-                {
-                    Log.Error("❌ PASO 2/5 - FALLÓ la creación de sucursal. EmpresaId: {EmpresaId}, Error: {Error}",
-                        empresaGuardada.Id, sucursalResponse.Message);
-                    throw new Exception(sucursalResponse.Message ?? "Error al guardar la sucursal");
-                }
-
-                var sucursalGuardada = (Sucursal)sucursalResponse.Response;
-                Log.Information("✅ PASO 2/5 - Sucursal creada exitosamente. Id: {SucursalId}, Nombre: {SucursalNombre}",
-                    sucursalGuardada.Id, sucursalGuardada.Nombre);
-
-                // =========================================
-                // PASO 3: GUARDAR ÁREA (TI)
-                // =========================================
-                Log.Information("PASO 3/5 - Creando área 'TI' para la empresa...");
-
-                var area = new Area()
-                {
-                    Nombre = "TI",
-                    Descripcion = "Área de Tecnologías de la Información",
-                    Correo = empresaGuardada.CorreoContacto,
-                    CreadoPor = usernameAdmin,
-                    FechaCreacion = DateTime.Now,
-                    Estatus = true
-                };
-
-                var areaResponse = GuardarNuevaAreaParaEmpresa(area);
-
-                if (!areaResponse.IsSuccess || areaResponse.Response == null)
-                {
-                    Log.Error("❌ PASO 3/5 - FALLÓ la creación del área. EmpresaId: {EmpresaId}, Error: {Error}",
-                        empresaGuardada.Id, areaResponse.Message);
-                    throw new Exception(areaResponse.Message ?? "Error al guardar el área");
-                }
-
-                var areaGuardada = (Area)areaResponse.Response;
-                Log.Information("✅ PASO 3/5 - Área 'TI' creada exitosamente. Id: {AreaId}, Nombre: {AreaNombre}",
-                    areaGuardada.Id, areaGuardada.Nombre);
-
-                // =========================================
-                // PASO 4: GUARDAR USUARIO ADMINISTRADOR
-                // =========================================
-                Log.Information("PASO 4/5 - Creando usuario administrador para la empresa...");
-
-                var usuarioAdmin = new Usuario()
-                {
-                    NombreUsuario = usernameAdmin,
-                    Contrasena = Cryptography.Encrypt("Admin123!"),
-                    ImagenPerfil = null,
-                    Correo = empresaGuardada.CorreoContacto,
-                    Nombre = "Administrador",
-                    Apellido = "Sistema",
-                    Celular = empresaGuardada.Telefono,
-                    Sucursal = sucursalGuardada,
-                    Firma = null,
-                    RFC = empresaGuardada.RFC,
-                    Area = areaGuardada,
-                    Empresa = empresaGuardada,
-                    CreadoPor = usernameAdmin,
-                    FechaCreacion = DateTime.Now,
-                    Estatus = true
-                };
-
-                var usuarioResponse = GuardarOActualizarUsuario(usuarioAdmin);
-
-                if (!usuarioResponse.IsSuccess)
-                {
-                    Log.Error("❌ PASO 4/5 - FALLÓ la creación del usuario administrador. EmpresaId: {EmpresaId}, Username: {Username}, Error: {Error}",
-                        empresaGuardada.Id, usernameAdmin, usuarioResponse.Message);
-                    throw new Exception(usuarioResponse.Message ?? "Error al guardar el usuario administrador");
-                }
-
-                Log.Information("✅ PASO 4/5 - Usuario administrador creado exitosamente. Username: {Username}, Correo: {Correo}",
-                    usernameAdmin, empresaGuardada.CorreoContacto);
-
-                // =========================================
-                // PASO 5: ENVÍO DE CORREO DE BIENVENIDA
-                // =========================================
-                Log.Information("PASO 5/5 - Enviando correo de bienvenida a: {Correo}...", empresaGuardada.CorreoContacto);
-
-                var emailSent = EnviarCorreoBienvenida(empresaGuardada, usernameAdmin, "Admin123!");
+                var emailSent = EnviarCorreoBienvenida(empresaGuardada, usuarioAdmin.NombreUsuario, "Admin123!");
 
                 if (emailSent)
                 {
-                    Log.Information("✅ PASO 5/5 - Correo de bienvenida enviado exitosamente a: {Correo}", empresaGuardada.CorreoContacto);
+                    Log.Information("✅ Correo de bienvenida enviado exitosamente a: {Correo}", empresaGuardada.CorreoContacto);
                 }
                 else
                 {
-                    Log.Warning("⚠️ PASO 5/5 - El correo de bienvenida NO pudo ser enviado a: {Correo}. La empresa y usuario fueron creados correctamente, pero el usuario no recibirá sus credenciales por correo.",
+                    Log.Warning("⚠️ El correo de bienvenida NO pudo ser enviado a: {Correo}. La empresa y usuario fueron creados correctamente, pero el usuario no recibirá sus credenciales por correo.",
                         empresaGuardada.CorreoContacto);
                 }
 
                 stopwatch.Stop();
                 Log.Information("=== REGISTRO DE EMPRESA COMPLETADO EXITOSAMENTE ===");
                 Log.Information("Resumen final - EmpresaId: {EmpresaId}, SucursalId: {SucursalId}, AreaId: {AreaId}, Username: {Username}, Duración total: {Duration}ms",
-                    empresaGuardada.Id, sucursalGuardada.Id, areaGuardada.Id, usernameAdmin, stopwatch.ElapsedMilliseconds);
+                    empresaGuardada.Id, sucursalGuardada.Id, areaGuardada.Id, usuarioAdmin.NombreUsuario, stopwatch.ElapsedMilliseconds);
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = empresaGuardada;
-                modelResponse.Message = "Empresa registrada correctamente con sucursal, área y usuario administrador. Te llegará un correo con tus datos para poder autenticarte.";
+                modelResponse.Message = "Empresa registrada correctamente con sucursal, área, usuario administrador, roles base y permisos.";
             }
             catch (ArgumentException ex)
             {
@@ -569,7 +674,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     new { empresa?.NombreComercial, empresa?.RFC, empresa?.CorreoContacto }, stopwatch.ElapsedMilliseconds);
 
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
+                modelResponse.Message = "Ocurrió un error al registrar la empresa. Por favor, intente nuevamente.";
             }
 
             return modelResponse;
