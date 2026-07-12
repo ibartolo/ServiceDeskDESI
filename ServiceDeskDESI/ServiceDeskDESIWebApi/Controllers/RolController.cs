@@ -1,4 +1,6 @@
-﻿using ServiceDeskDESIEntities.Seguridad;
+﻿using ServiceDeskDESIEntities.Autenticacion;
+using ServiceDeskDESIEntities.Catalogos;
+using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,18 +10,19 @@ using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [RoutePrefix("api/Rol")]
     public class RolController : BaseController
     {
         /// <summary>
-        /// Obtiene todos los roles activos
+        /// Obtiene todos los roles de la empresa del usuario autenticado
         /// </summary>
         /// <returns>Lista de roles</returns>
-        [HttpGet, Route("Lista")]
+        [HttpGet, Route("List")]
         public ModelResponse ObtenerRoles()
         {
-            var result = dbWrapper.ObtenerRoles();
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerRoles(usuario);
             return result;
         }
 
@@ -31,33 +34,107 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpGet, Route("{id:long}")]
         public ModelResponse ObtenerRolPorId(long id)
         {
-            var result = dbWrapper.ObtenerRolPorId(id);
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerRolPorId(id, usuario);
             return result;
         }
 
         /// <summary>
-        /// Guarda o actualiza un rol
+        /// Guarda o actualiza un rol (solo administradores)
         /// </summary>
         /// <param name="rol">Objeto rol con los datos</param>
         /// <returns>Rol guardado con su ID actualizado</returns>
-        [HttpPost, Route("")]
+        [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarRol(Rol rol)
         {
-            var result = dbWrapper.GuardarOActualizarRol(rol);
+            var usuarioAdmin = User.Identity.Name;
+            var empresaId = ObtenerEmpresaId(); // Método auxiliar para obtener EmpresaId del token
+            var result = dbWrapper.GuardarOActualizarRol(rol, usuarioAdmin, empresaId);
             return result;
         }
 
         /// <summary>
-        /// Elimina lógicamente un rol
+        /// Elimina lógicamente un rol (solo administradores)
         /// </summary>
-        /// <param name="rol">Rol a eliminar (debe incluir Id, ModificadoPor y FechaModificacion)</param>
+        /// <param name="rol">Rol a eliminar (debe incluir Id)</param>
         /// <returns>Resultado de la operación</returns>
-        [HttpDelete, Route("")]
+        [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarRol(Rol rol)
         {
+            var usuarioAdmin = User.Identity.Name;
+            var empresaId = ObtenerEmpresaId();
             rol.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarRol(rol.Id, rol.ModificadoPor, rol.FechaModificacion.Value);
+            var result = dbWrapper.EliminarRol(rol.Id, usuarioAdmin, rol.FechaModificacion.Value, empresaId);
             return result;
         }
+
+        /// <summary>
+        /// Asigna un rol a un usuario (solo administradores)
+        /// </summary>
+        /// <param name="request">Objeto con UsuarioId y RolId</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpPost, Route("Asignar")]
+        public ModelResponse AsignarRolUsuario([FromBody] AsignarRolRequest request)
+        {
+            var usuarioAdmin = User.Identity.Name;
+            var empresaId = ObtenerEmpresaId();
+            var result = dbWrapper.AsignarRolUsuario(request.UsuarioId, request.RolId, usuarioAdmin, empresaId);
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene los roles de un usuario específico
+        /// </summary>
+        /// <param name="usuarioId">ID del usuario</param>
+        /// <returns>Lista de roles del usuario</returns>
+        [HttpGet, Route("Usuario/{usuarioId:long}")]
+        public ModelResponse ObtenerRolesPorUsuario(long usuarioId)
+        {
+            var usuarioAutenticado = User.Identity.Name;
+            var result = dbWrapper.ObtenerRolesPorUsuario(usuarioId, usuarioAutenticado);
+            return result;
+        }
+
+        /// <summary>
+        /// Elimina un rol de un usuario (solo administradores)
+        /// </summary>
+        /// <param name="request">Objeto con UsuarioRolId</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpDelete, Route("EliminarUsuarioRol")]
+        public ModelResponse EliminarRolUsuario([FromBody] EliminarRolUsuarioRequest request)
+        {
+            var usuarioAdmin = User.Identity.Name;
+            var empresaId = ObtenerEmpresaId();
+            var result = dbWrapper.EliminarRolUsuario(request.UsuarioRolId, usuarioAdmin, empresaId);
+            return result;
+        }
+
+        #region Métodos auxiliares
+        private long ObtenerEmpresaId()
+        {
+            // Obtener el EmpresaId del usuario autenticado desde el token o base de datos
+            var usuario = User.Identity.Name;
+            var userResponse = dbWrapper.ObtenerUsuarioPorNombreUsuario(usuario);
+            if (userResponse.IsSuccess && userResponse.Response != null)
+            {
+                var usuarioObj = (Usuario)userResponse.Response;
+                return usuarioObj.Empresa.Id;
+            }
+            return 0;
+        }
+        #endregion
     }
+
+    #region Request classes
+    public class AsignarRolRequest
+    {
+        public long UsuarioId { get; set; }
+        public long RolId { get; set; }
+    }
+
+    public class EliminarRolUsuarioRequest
+    {
+        public long UsuarioRolId { get; set; }
+    }
+    #endregion
 }
