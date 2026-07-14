@@ -12,13 +12,14 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerMarcas()
+        public async Task<ModelResponse> ObtenerTodosLasMarcas()
         {
             var result = await RequestAsync<object>($"api/Marca/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
@@ -30,6 +31,7 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
@@ -42,6 +44,7 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
@@ -54,6 +57,7 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }

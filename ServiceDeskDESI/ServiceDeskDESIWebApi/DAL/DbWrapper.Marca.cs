@@ -11,25 +11,13 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerMarcas(string usuario)
+        public ModelResponse ObtenerTodosLasMarcas(string usuario)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
-                Log.Information("=== INICIO ObtenerMarcas ===");
-                Log.Information("Usuario recibido: '{Usuario}'", usuario ?? "NULL");
-
-                if (string.IsNullOrWhiteSpace(usuario))
-                {
-                    Log.Warning("Usuario es null o vacío, devolviendo lista vacía sin lanzar excepción");
-                    modelResponse.IsSuccess = true;
-                    modelResponse.Response = new List<Marca>();
-                    modelResponse.Message = "No hay usuario autenticado";
-                    return modelResponse;
-                }
-
-                Log.Information("Consultando marcas para usuario: {Usuario}", usuario);
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var marcas = GetObjects("ObtenerMarca", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
@@ -40,12 +28,9 @@ namespace ServiceDeskDESIWebApi.DAL
                         return marca;
                     }));
 
-                var count = marcas != null ? ((IEnumerable<Marca>)marcas).Count() : 0;
-                Log.Information("Se encontraron {Count} marcas para el usuario {Usuario}", count, usuario);
-
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = marcas;
-                modelResponse.Message = count > 0 ? "Marcas obtenidas correctamente" : "No se encontraron marcas para el usuario";
+                modelResponse.Message = "Marcas obtenidas correctamente";
             }
             catch (ArgumentException ex)
             {
@@ -55,13 +40,9 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error CRÍTICO al obtener marcas para usuario {Usuario}", usuario);
+                Log.Error(ex, "Error al obtener marcas para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener las marcas";
-            }
-            finally
-            {
-                Log.Information("=== FIN ObtenerMarcas ===");
             }
 
             return modelResponse;
@@ -78,8 +59,8 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 var marca = GetObject("ObtenerMarcaPorId", CommandType.StoredProcedure,
                     new[] {
-                        new SqlParameter("@Id", id),
-                        new SqlParameter("@Usuario", usuario)
+                new SqlParameter("@Id", id),
+                new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Marca>((reader) =>
                     {
@@ -182,10 +163,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 var result = ExecuteScalar("EliminarMarca", CommandType.StoredProcedure, new SqlParameter[]
                 {
-                    new SqlParameter("@Id", id),
-                    new SqlParameter("@ModificadoPor", modificadoPor),
-                    new SqlParameter("@FechaModificacion", fechaModificacion),
-                    new SqlParameter("@Usuario", usuario)
+            new SqlParameter("@Id", id),
+            new SqlParameter("@ModificadoPor", modificadoPor),
+            new SqlParameter("@FechaModificacion", fechaModificacion),
+            new SqlParameter("@Usuario", usuario)
                 });
 
                 if (Convert.ToInt64(result) == 0)

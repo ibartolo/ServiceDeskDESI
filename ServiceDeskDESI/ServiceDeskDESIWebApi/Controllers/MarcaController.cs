@@ -18,23 +18,10 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de marcas</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerMarcas()
+        public ModelResponse ObtenerTodosLasMarcas()
         {
-            var identity = (ClaimsIdentity)User.Identity;
-            if (identity != null)
-            {
-                var claims = identity.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
-                Log.Information("Claims en el token: {@Claims}", claims);
-            }
-            else
-            {
-                Log.Warning("User.Identity es null");
-            }
-
             var usuario = User.Identity.Name;
-            Log.Information("User.Identity.Name: {Name}", usuario ?? "NULL");
-
-            var result = dbWrapper.ObtenerMarcas(usuario);
+            var result = dbWrapper.ObtenerTodosLasMarcas(usuario);
             return result;
         }
 
@@ -67,7 +54,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <summary>
         /// Elimina lógicamente una marca
         /// </summary>
-        /// <param name="marca">Marca a eliminar (debe incluir Id, ModificadoPor)</param>
+        /// <param name="marca">Marca a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarMarca(Marca marca)
