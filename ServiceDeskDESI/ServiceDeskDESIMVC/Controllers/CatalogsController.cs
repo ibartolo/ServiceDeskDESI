@@ -80,6 +80,24 @@ namespace ServiceDeskDESIMVC.Controllers
             }
             return View(tipoactivo);
         }
+
+        public async Task<ActionResult> Role (long id = 0)
+        {
+            var rol = new Rol();
+            if (id > 0)
+            {
+                var response = await httpClientConnection.ObtenerRolPorId(id);
+                if (response.IsSuccess && response.Response != null)
+                {
+                    rol = JsonConvert.DeserializeObject<Rol>(response.Response.ToString());
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+            return View(rol);
+        }
         public async Task<ActionResult> Branch(long id = 0)
         {
             var sucursal = new Sucursal();
@@ -345,6 +363,27 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await httpClientConnection.EliminarArea(a);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        //public async Task<string> ConsultarTodosLosRoles()
+        //{
+        //    var response = await httpClientConnection.ObtenerTodosLosRoles();
+        //    return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        //}
+        //public async Task<string> ConsultarRolPorId(long id)
+        //{
+        //    var response = await httpClientConnection.ObtenerRolPorId(id);
+        //    return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        //}
+
+        //public async Task<string> GuardarOActualizarRol(Rol r)
+        //{
+        //    var response = await httpClientConnection.GuardarOActualizarRol(r);
+        //    return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        //}
+        //public async Task<string> EliminarRol(Rol r)
+        //{
+        //    var response = await httpClientConnection.EliminarRol(r);
+        ////    return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        //}
         public async Task<string> GuardarPerfil()
         {
             var modelResponse = new ModelResponse();
@@ -617,6 +656,28 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> EliminarActivos(Activo a)
         {
             var response = await httpClientConnection.EliminarActivo(a);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ConsultarTodosLosRoles()
+        {
+            var response = await httpClientConnection.ObtenerTodosLosRoles();
+            return JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> ConsultarTodosLosRolesPorId(long id)
+        {
+            var response = await httpClientConnection.ObtenerRolPorId(id);
+            return JsonConvert.SerializeObject(response);
+        }
+        public async Task<string> GuardarOActualizarRol(Rol r)
+        {
+            var response = await httpClientConnection.GuardarOActualizarRol(r);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> EliminarRol(Rol r)
+        {
+            var response = await httpClientConnection.EliminarRol(r);
             return JsonConvert.SerializeObject(response);
         }
         #endregion

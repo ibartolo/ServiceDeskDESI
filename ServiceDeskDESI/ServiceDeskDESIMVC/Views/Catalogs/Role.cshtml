@@ -1,0 +1,252 @@
+﻿@model ServiceDeskDESIEntities.Seguridad.Rol
+    @{
+        ViewBag.Title = "Role";
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+    <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+    <div class="form-section">
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+         }
+        <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Roles</h3>
+        <form enctype="multipart/form-data" id="frmRol" name="frmRol" method="post">
+            @Html.HiddenFor(x => x.Id)
+            @Html.HiddenFor(x => x.CreadoPor)
+            @Html.HiddenFor(x => x.FechaCreacion)
+            @Html.HiddenFor(x => x.ModificadoPor)
+            @Html.HiddenFor(x => x.FechaModificacion)
+            @Html.HiddenFor(x => x.Estatus)
+
+            <div class="row">
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Nombre</label>
+                        @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Tipo Activo" })
+                    </div>
+                </div>
+                <div class="cold-md-4">
+                    <div class="mb-3">
+                        <label>Descripcion</label>
+                        @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion Tipo Activo" })
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarRol()" />
+                        <a href="/Catalogs/Role" class="btn btn-warning">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 table-responsive">
+                    <div class="mb-3">
+                        <table id="tblRol"></table>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+<script>
+    $(function () {
+        $("#frmRol").validate({
+            rules: {
+                "Nombre": {
+                    required: true,
+                    maxlength: 250
+                },
+                "Descripcion": {
+                    required: true,
+                    maxlength: 250
+                }
+            },
+            messages: {
+                "Nombre": {
+                    required: "El Nombre es requerido",
+                    maxlength: "El Nombre no puede superar los 250 caracteristicas "
+                },
+                "Descripcion": {
+                    required: "Descripcion es requerido",
+                    maxlength: "Descripcion no puede superar los 250 caracteristicas "
+                }
+            },
+            errorElement: "span",
+            errorClass: "text-danger",
+            highligth: function (element) {
+                $(element).addClass("is-invalid").removeClass("is-valid");
+            },
+            unhighlight: function (element) {
+                $(element).removeClass("is-invalid").addClass("is-valid");
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element);
+            } 
+
+        });
+    });
+
+    $(document).ready(function () {
+        var tabla = new DataTable('#tblRol', {
+            columns: [
+                { data: 'Id', title: 'ID', visible: false },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Descripcion', title: 'Descripcion' },
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        return '<div class="d-flex gap-3">' +
+                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarRol(' + data + ')"><i class="fas fa-edit"></i></button>' +
+                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarRol(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
+                            '</div>';
+                    }
+
+                },
+                { data: 'Estatus', title: 'Estatus', visible: false }
+            ]
+        });
+        ConsultarTodosRoles();
+    });
+
+    function GuardarActualizarRol() {
+        if ($("#frmRol").valid()) {
+            Swal.fire({
+                title: 'Guardando...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            var rol = {
+                Id: $("#Id").val() || 0,
+                Nombre: $("#Nombre").val(),
+                Descripcion: $("#Descripcion").val(),
+                CreadoPor: $("#CreadoPor").val(),
+                FechaCreacion: new Date().toISOString(),
+                ModificadoPor: $("#ModificadoPor").val() || null,
+                FechaModificacion: null,
+                Estatus: true
+            };
+            PostMVC('/Catalogs/GuardarOActualizarRol', rol, function (response) {
+                Swal.close();
+
+                if (response.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    }).then(() => {
+                        window.location.href = '/Catalogs/Role';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
+        }
+    }
+    function ConsultarTodosRoles() {
+        GetMVC("/Catalogs/ConsultarTodosLosRoles", function (r) {
+            var result = typeof r == 'string' ? JSON.parse(r) : r;
+
+            if (result.IsSuccess) {
+                MapingPropertiesDataTable("tblRol", result.Response);
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: result.Message,
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+
+    function EditarRol(id) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.location.href = '/Catalogs/Role/' + id;
+    }
+
+    function EliminarRol(event, id) {
+        event.preventDefault();
+        event.stopPropagation();
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Esta acción eliminará lógicamente el registro',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                var rol = {
+                    Id: id,
+                    ModificadoPor: $("#ModificadoPor").val() || "system",
+                    FechaModificacion: new Date().toISOString()
+                };
+                PostMVC('/Catalogs/EliminarRole', rol, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: response.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            ConsultarTodosRoles();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+
+        return false;
+    }
+</script>
+
