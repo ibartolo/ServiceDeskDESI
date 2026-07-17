@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,13 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Area")]
     public class AreaController : BaseController
     {
+        private readonly AreaService _areaService;
+
+        public AreaController()
+        {
+            _areaService = new AreaService();
+        }
+
         /// <summary>
         /// Obtiene todas las áreas de la empresa del usuario autenticado
         /// </summary>
@@ -22,21 +30,8 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpGet, Route("List")]
         public ModelResponse ObtenerAreas()
         {
-            var identity = (ClaimsIdentity)User.Identity;
-            if (identity != null)
-            {
-                var claims = identity.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
-                Log.Information("Claims en el token: {@Claims}", claims);
-            }
-            else
-            {
-                Log.Warning("User.Identity es null");
-            }
-
             var usuario = User.Identity.Name;
-            Log.Information("User.Identity.Name: {Name}", usuario ?? "NULL");
-
-            var result = dbWrapper.ObtenerAreas(usuario);
+            var result = _areaService.ObtenerAreas(usuario);
             return result;
         }
 
@@ -49,7 +44,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerAreaPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerAreaPorId(id, usuario);
+            var result = _areaService.ObtenerAreaPorId(id, usuario);
             return result;
         }
 
@@ -62,7 +57,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarOActualizarArea(Area area)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.GuardarOActualizarArea(area, usuario);
+            var result = _areaService.GuardarOActualizarArea(area, usuario);
             return result;
         }
 
@@ -76,7 +71,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             var usuario = User.Identity.Name;
             area.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarArea(area.Id, area.ModificadoPor, area.FechaModificacion.Value, usuario);
+            var result = _areaService.EliminarArea(area.Id, area.ModificadoPor, area.FechaModificacion.Value, usuario);
             return result;
         }
     }

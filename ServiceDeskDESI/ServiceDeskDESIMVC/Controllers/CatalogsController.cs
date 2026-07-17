@@ -3,12 +3,15 @@ using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIMVC.Helpers;
+using ServiceDeskDESIMVC.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Controllers;
+using System.Web.Management;
 using System.Web.Mvc;
 using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
 
@@ -18,28 +21,38 @@ namespace ServiceDeskDESIMVC.Controllers
     public class CatalogsController : BaseController
     {
         TokenCookie token;
+        private readonly AreaService _areaService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
+            _areaService = new AreaService(httpClientConnection);
         }
+
         #region Views
         public async Task<ActionResult> WorkArea(long id = 0)
         {
-            var area = new Area();
+            // 1. Obtener permisos
+            var permisos = await _areaService.ObtenerPermisosParaArea();
 
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
+            // 3. Obtener el área si tiene ID
+            var area = new Area();
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerAreaPorId(id);
-
-                if (response.IsSuccess && response.Response != null)
+                var areaResponse = await _areaService.ObtenerAreaPorId(id);
+                if (areaResponse != null)
                 {
-                    area = JsonConvert.DeserializeObject<Area>(response.Response.ToString());
-                }
-                else
-                {
-                    ViewBag.ErrorMessage = response.Message;
+                    area = areaResponse;
                 }
             }
+
+            // 4. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
 
             return View(area);
         }
@@ -345,22 +358,22 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Data Access
         public async Task<string> ConsutlarTodasAreas()
         {
-            var response = await httpClientConnection.ObtenerAreas();
+            var response = await _areaService.ConsultarTodasAreas();
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarAreaPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerAreaPorId(id);
+            var response = await _areaService.ObtenerAreaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarArea(Area a)
         {
-            var response = await httpClientConnection.GuardarOActualizarArea(a);
+            var response = await _areaService.GuardarOActualizarArea(a);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarArea(Area a)
         {
-            var response = await httpClientConnection.EliminarArea(a);
+            var response = await _areaService.EliminarArea(a);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         //public async Task<string> ConsultarTodosLosRoles()

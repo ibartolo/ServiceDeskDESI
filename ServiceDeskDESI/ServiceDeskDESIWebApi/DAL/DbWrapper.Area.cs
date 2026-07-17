@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
@@ -18,52 +17,31 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                Log.Information("=== INICIO ObtenerAreas ===");
-                Log.Information("Usuario recibido: '{Usuario}'", usuario ?? "NULL");
-                Log.Information("Usuario es null o vacío: {IsNullOrEmpty}", string.IsNullOrWhiteSpace(usuario));
-
                 if (string.IsNullOrWhiteSpace(usuario))
                 {
-                    Log.Warning("Usuario es null o vacío, devolviendo lista vacía sin lanzar excepción");
                     modelResponse.IsSuccess = true;
                     modelResponse.Response = new List<Area>();
                     modelResponse.Message = "No hay usuario autenticado";
                     return modelResponse;
                 }
 
-                Log.Information("Consultando áreas para usuario: {Usuario}", usuario);
-
                 var areas = GetObjects("ObtenerAreas", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, Area>((reader) =>
                     {
                         var area = LlenarEntidad<Area>(reader);
-                        Log.Debug("Área encontrada: Id={Id}, Nombre={Nombre}", area.Id, area.Nombre);
                         return area;
                     }));
 
-                var count = areas != null ? ((IEnumerable<Area>)areas).Count() : 0;
-                Log.Information("Se encontraron {Count} áreas para el usuario {Usuario}", count, usuario);
-
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = areas;
-                modelResponse.Message = count > 0 ? "Áreas obtenidas correctamente" : "No se encontraron áreas para el usuario";
-            }
-            catch (ArgumentException ex)
-            {
-                Log.Error(ex, "Error de validación al obtener áreas para usuario {Usuario}", usuario);
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
+                modelResponse.Message = "Áreas obtenidas correctamente";
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error CRÍTICO al obtener áreas para usuario {Usuario}", usuario);
+                Log.Error(ex, "Error al obtener áreas para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener las áreas";
-            }
-            finally
-            {
-                Log.Information("=== FIN ObtenerAreas ===");
             }
 
             return modelResponse;
@@ -75,13 +53,24 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (id <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El ID del área es requerido.";
+                    return modelResponse;
+                }
+
+                if (string.IsNullOrWhiteSpace(usuario))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre de usuario es requerido.";
+                    return modelResponse;
+                }
 
                 var area = GetObject("ObtenerAreaPorId", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@Id", id),
-                new SqlParameter("@Usuario", usuario)
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Area>((reader) =>
                     {
@@ -100,11 +89,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = area;
                 modelResponse.Message = "Área obtenida correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener área {Id} para usuario {Usuario}", id, usuario);
@@ -115,19 +99,47 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarArea(Area a, string usuario)
+        public ModelResponse GuardarOActualizarArea(Area a)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(a.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
-                if (a.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (a.Descripcion != null && a.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
-                if (a.Correo != null && a.Correo.Length > 100) { throw new ArgumentException("El correo no puede exceder los 100 caracteres."); }
-                if (string.IsNullOrWhiteSpace(a.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                // Solo validaciones de datos nulos (reglas de base de datos)
+                if (string.IsNullOrWhiteSpace(a.Nombre))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre del área es requerido.";
+                    return modelResponse;
+                }
+
+                if (a.Nombre.Length > 250)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre no puede exceder los 250 caracteres.";
+                    return modelResponse;
+                }
+
+                if (a.Descripcion != null && a.Descripcion.Length > 500)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "La descripción no puede exceder los 500 caracteres.";
+                    return modelResponse;
+                }
+
+                if (a.Correo != null && a.Correo.Length > 100)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El correo no puede exceder los 100 caracteres.";
+                    return modelResponse;
+                }
+
+                if (string.IsNullOrWhiteSpace(a.CreadoPor))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario creador es requerido.";
+                    return modelResponse;
+                }
 
                 var parametrosObj = new
                 {
@@ -140,7 +152,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     a.ModificadoPor,
                     a.FechaModificacion,
                     a.Estatus,
-                    Usuario = usuario
+                    Usuario = a.CreadoPor
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
@@ -159,14 +171,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = a;
                 modelResponse.Message = "Área guardada correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error al guardar área para usuario {Usuario}", usuario);
+                Log.Error(ex, "Error al guardar área");
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar el área";
             }
@@ -180,16 +187,33 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (id <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El ID del área es requerido.";
+                    return modelResponse;
+                }
+
+                if (string.IsNullOrWhiteSpace(modificadoPor))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario modificador es requerido.";
+                    return modelResponse;
+                }
+
+                if (string.IsNullOrWhiteSpace(usuario))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre de usuario es requerido.";
+                    return modelResponse;
+                }
 
                 var result = ExecuteScalar("EliminarArea", CommandType.StoredProcedure, new SqlParameter[]
                 {
-            new SqlParameter("@Id", id),
-            new SqlParameter("@ModificadoPor", modificadoPor),
-            new SqlParameter("@FechaModificacion", fechaModificacion),
-            new SqlParameter("@Usuario", usuario)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion),
+                    new SqlParameter("@Usuario", usuario)
                 });
 
                 if (Convert.ToInt64(result) == 0)
@@ -201,11 +225,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Área eliminada correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
@@ -223,12 +242,40 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(area.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
-                if (area.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (area.Descripcion != null && area.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
-                if (area.Correo != null && area.Correo.Length > 100) { throw new ArgumentException("El correo no puede exceder los 100 caracteres."); }
-                if (string.IsNullOrWhiteSpace(area.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+                if (string.IsNullOrWhiteSpace(area.Nombre))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre del área es requerido.";
+                    return modelResponse;
+                }
+
+                if (area.Nombre.Length > 250)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre no puede exceder los 250 caracteres.";
+                    return modelResponse;
+                }
+
+                if (area.Descripcion != null && area.Descripcion.Length > 500)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "La descripción no puede exceder los 500 caracteres.";
+                    return modelResponse;
+                }
+
+                if (area.Correo != null && area.Correo.Length > 100)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El correo no puede exceder los 100 caracteres.";
+                    return modelResponse;
+                }
+
+                if (string.IsNullOrWhiteSpace(area.CreadoPor))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario creador es requerido.";
+                    return modelResponse;
+                }
 
                 var parametrosObj = new
                 {
@@ -246,11 +293,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = area;
                 modelResponse.Message = "Área creada exitosamente para la nueva empresa.";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {

@@ -134,5 +134,47 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+        public ModelResponse ObtenerPaginaPorNombre(string nombre)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(nombre))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre de la página es requerido.";
+                    return modelResponse;
+                }
+
+                var pagina = GetObject("ObtenerPaginaPorNombre", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Nombre", nombre) },
+                    new Func<IDataReader, Pagina>((reader) =>
+                    {
+                        var p = LlenarEntidad<Pagina>(reader);
+                        return p;
+                    }));
+
+                if (pagina == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró la página especificada.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = pagina;
+                modelResponse.Message = "Página obtenida correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener página por nombre {Nombre}", nombre);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener la página";
+            }
+
+            return modelResponse;
+        }
     }
 }
