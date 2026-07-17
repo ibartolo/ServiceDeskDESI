@@ -155,6 +155,7 @@
     <Compile Include="DAL\HttpClientConnection.Empresa.cs" />
     <Compile Include="DAL\HttpClientConnection.Marca.cs" />
     <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
+    <Compile Include="DAL\HttpClientConnection.Rol.cs" />
     <Compile Include="DAL\HttpClientConnection.Sucursal.cs" />
     <Compile Include="DAL\HttpClientConnection.Ticket.cs" />
     <Compile Include="DAL\HttpClientConnection.TipoActivo.cs" />
@@ -191,6 +192,7 @@
     <Content Include="Views\Home\NewCompany.cshtml" />
     <Content Include="Views\User\Users.cshtml" />
     <Content Include="Views\Home\MenusUser.cshtml" />
+    <Content Include="Views\Catalogs\Role.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
