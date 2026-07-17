@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
@@ -25,6 +24,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     new Func<IDataReader, Marca>((reader) =>
                     {
                         var marca = LlenarEntidad<Marca>(reader);
+                        Log.Debug("Marca encontrada: Id={Id}, Nombre={Nombre}", marca.Id, marca.Nombre);
                         return marca;
                     }));
 
@@ -34,6 +34,7 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             catch (ArgumentException ex)
             {
+                Log.Error(ex, "Error de validación al obtener marcas para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
             }
