@@ -143,6 +143,7 @@
     <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PermissionsController.cs" />
+    <Compile Include="Controllers\SecurityController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
@@ -196,7 +197,7 @@
     <Content Include="Views\User\Users.cshtml" />
     <Content Include="Views\Home\MenusUser.cshtml" />
     <Content Include="Views\Home\AccesoDenegado.cshtml" />
-    <Content Include="Views\Catalogs\Role.cshtml" />
+    <Content Include="Views\Security\Role.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

@@ -21,7 +21,12 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre de usuario es requerido.";
+                    return modelResponse;
+                }
 
                 var roles = GetObjects("ObtenerRoles", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
@@ -34,11 +39,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = roles;
                 modelResponse.Message = "Roles obtenidos correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
@@ -56,13 +56,24 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (id <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El ID del rol es requerido.";
+                    return modelResponse;
+                }
+
+                if (string.IsNullOrWhiteSpace(usuario))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre de usuario es requerido.";
+                    return modelResponse;
+                }
 
                 var rol = GetObject("ObtenerRolPorId", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@Id", id),
-                new SqlParameter("@Usuario", usuario)
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Rol>((reader) =>
                     {
@@ -81,11 +92,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = rol;
                 modelResponse.Message = "Rol obtenido correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener rol {Id} para usuario {Usuario}", id, usuario);
@@ -96,32 +102,59 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarRol(Rol r, string usuarioAdmin, long empresaId)
+        public ModelResponse GuardarOActualizarRol(Rol rol, string usuarioAdmin)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
                 // Validaciones
-                if (string.IsNullOrWhiteSpace(r.Nombre)) { throw new ArgumentException("El nombre del rol es requerido."); }
-                if (r.Nombre.Length > 50) { throw new ArgumentException("El nombre no puede exceder los 50 caracteres."); }
-                if (r.Descripcion != null && r.Descripcion.Length > 250) { throw new ArgumentException("La descripción no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(r.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuarioAdmin)) { throw new ArgumentException("El usuario administrador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                if (string.IsNullOrWhiteSpace(rol.Nombre))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre del rol es requerido.";
+                    return modelResponse;
+                }
+
+                if (rol.Nombre.Length > 50)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El nombre no puede exceder los 50 caracteres.";
+                    return modelResponse;
+                }
+
+                if (rol.Descripcion != null && rol.Descripcion.Length > 250)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "La descripción no puede exceder los 250 caracteres.";
+                    return modelResponse;
+                }
+
+                if (string.IsNullOrWhiteSpace(rol.CreadoPor))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario creador es requerido.";
+                    return modelResponse;
+                }
+
+                if (string.IsNullOrWhiteSpace(usuarioAdmin))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario administrador es requerido.";
+                    return modelResponse;
+                }
 
                 var parametrosObj = new
                 {
-                    r.Id,
-                    r.Nombre,
-                    r.Descripcion,
-                    r.CreadoPor,
-                    r.FechaCreacion,
-                    r.ModificadoPor,
-                    r.FechaModificacion,
-                    r.Estatus,
-                    UsuarioAdmin = usuarioAdmin,
-                    EmpresaId = empresaId
+                    rol.Id,
+                    rol.Nombre,
+                    rol.Descripcion,
+                    rol.CreadoPor,
+                    rol.FechaCreacion,
+                    rol.ModificadoPor,
+                    rol.FechaModificacion,
+                    rol.Estatus,
+                    Usuario = usuarioAdmin
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
@@ -142,16 +175,11 @@ namespace ServiceDeskDESIWebApi.DAL
                     return modelResponse;
                 }
 
-                r.Id = resultadoLong;
+                rol.Id = resultadoLong;
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = r;
+                modelResponse.Response = rol;
                 modelResponse.Message = "Rol guardado correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
@@ -163,23 +191,32 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse EliminarRol(long id, string usuarioAdmin, DateTime fechaModificacion, long empresaId)
+        public ModelResponse EliminarRol(long id, string usuarioAdmin, DateTime fechaModificacion)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuarioAdmin)) { throw new ArgumentException("El usuario administrador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                if (id <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El ID del rol es requerido.";
+                    return modelResponse;
+                }
+
+                if (string.IsNullOrWhiteSpace(usuarioAdmin))
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "El usuario administrador es requerido.";
+                    return modelResponse;
+                }
 
                 var resultado = ExecuteScalar("EliminarRol", CommandType.StoredProcedure, new SqlParameter[]
                 {
-            new SqlParameter("@Id", id),
-            new SqlParameter("@ModificadoPor", usuarioAdmin),
-            new SqlParameter("@FechaModificacion", fechaModificacion),
-            new SqlParameter("@UsuarioAdmin", usuarioAdmin),
-            new SqlParameter("@EmpresaId", empresaId)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", usuarioAdmin),
+                    new SqlParameter("@FechaModificacion", fechaModificacion),
+                    new SqlParameter("@Usuario", usuarioAdmin)
                 });
 
                 if (Convert.ToInt64(resultado) == 0)
@@ -191,11 +228,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Rol eliminado correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
