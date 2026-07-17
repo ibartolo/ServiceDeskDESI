@@ -56,6 +56,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Seguridad\ModelResponse.cs" />
     <Compile Include="Seguridad\Pagina.cs" />
+    <Compile Include="Seguridad\PermisosViewModel.cs" />
     <Compile Include="Seguridad\RestablecerContraseniaRequest.cs" />
     <Compile Include="Seguridad\Rol.cs" />
     <Compile Include="Seguridad\Token.cs" />

@@ -48,6 +48,11 @@ namespace ServiceDeskDESIMVC.Controllers
             }
             return PartialView(paginas);
         }
+
+        public ActionResult AccesoDenegado()
+        {
+            return View();
+        }
         #endregion
 
         #region Data Access
