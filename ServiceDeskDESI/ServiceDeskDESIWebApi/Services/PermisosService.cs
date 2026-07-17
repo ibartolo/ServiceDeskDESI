@@ -20,70 +20,145 @@ namespace ServiceDeskDESIWebApi.Services
 
         public ModelResponse ObtenerPermisosPorUsuario(string usuario)
         {
-            var response = new ModelResponse();
-
             try
             {
-                // Validar que el usuario no esté vacío
-                if (string.IsNullOrWhiteSpace(usuario))
-                {
-                    response.IsSuccess = false;
-                    response.Message = "El nombre de usuario es requerido.";
-                    return response;
-                }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                // Obtener permisos directamente por nombre de usuario
-                var permisosResponse = _dbWrapper.ObtenerPermisosPorUsuario(usuario);
-                return permisosResponse;
+                return _dbWrapper.ObtenerPermisosPorUsuario(usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ObtenerPermisosPorUsuario para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error en PermisosService.ObtenerPermisosPorUsuario para usuario {Usuario}", usuario);
-                response.IsSuccess = false;
-                response.Message = "Ocurrió un error al obtener los permisos.";
-                return response;
+                Log.Error(ex, "Error en ObtenerPermisosPorUsuario para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los permisos." };
             }
         }
 
         public ModelResponse ValidarPermisoUsuario(string usuario, string nombrePagina, string accion)
         {
-            var response = new ModelResponse();
-
             try
             {
-                // Validar que el usuario exista
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(nombrePagina)) { throw new ArgumentException("El nombre de la página es requerido."); }
+                if (string.IsNullOrWhiteSpace(accion)) { throw new ArgumentException("La acción es requerida."); }
+
                 var usuarioResponse = _dbWrapper.ObtenerUsuarioPorNombreUsuario(usuario);
                 if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
                 {
-                    response.IsSuccess = false;
-                    response.Message = "Usuario no encontrado.";
-                    return response;
+                    throw new ArgumentException("Usuario no encontrado.");
                 }
 
                 var usuarioObj = (Usuario)usuarioResponse.Response;
 
-                // Obtener página por nombre
                 var paginaResponse = _dbWrapper.ObtenerPaginaPorNombre(nombrePagina);
                 if (!paginaResponse.IsSuccess || paginaResponse.Response == null)
                 {
-                    response.IsSuccess = false;
-                    response.Message = "Página no encontrada.";
-                    return response;
+                    throw new ArgumentException("Página no encontrada.");
                 }
 
                 var pagina = (Pagina)paginaResponse.Response;
 
-                // Validar permiso
-                var permisoResult = _dbWrapper.ValidarPermisoUsuario(usuarioObj.Id, pagina.Id, accion);
-                return permisoResult;
+                return _dbWrapper.ValidarPermisoUsuario(usuarioObj.Id, pagina.Id, accion);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ValidarPermisoUsuario para usuario {Usuario}, página {NombrePagina}, acción {Accion}",
+                    usuario, nombrePagina, accion);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error en PermisosService.ValidarPermisoUsuario para usuario {Usuario}, página {NombrePagina}, acción {Accion}",
+                Log.Error(ex, "Error en ValidarPermisoUsuario para usuario {Usuario}, página {NombrePagina}, acción {Accion}",
                     usuario, nombrePagina, accion);
-                response.IsSuccess = false;
-                response.Message = "Error al validar permiso.";
-                return response;
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al validar el permiso." };
+            }
+        }
+
+        public ModelResponse ObtenerPaginas()
+        {
+            try
+            {
+                return _dbWrapper.ObtenerPaginas();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en ObtenerPaginas");
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener las páginas." };
+            }
+        }
+
+        public ModelResponse ObtenerPermisosPorRol(long rolId, string usuario)
+        {
+            try
+            {
+                if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                return _dbWrapper.ObtenerPermisosPorRol(rolId, usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ObtenerPermisosPorRol para rol {RolId} y usuario {Usuario}", rolId, usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en ObtenerPermisosPorRol para rol {RolId} y usuario {Usuario}", rolId, usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los permisos del rol." };
+            }
+        }
+
+        public ModelResponse GuardarPermisosRol(long rolId, long paginaId, bool puedeLeer, bool puedeCrear,
+            bool puedeEditar, bool puedeEliminar, bool puedeExportar, string modificadoPor, string usuario)
+        {
+            try
+            {
+                if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
+                if (paginaId <= 0) { throw new ArgumentException("El ID de la página es requerido."); }
+                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                // Validar que el usuario sea administrador
+                var usuarioResponse = _dbWrapper.ObtenerUsuarioPorNombreUsuario(usuario);
+                if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
+                {
+                    throw new ArgumentException("Usuario no encontrado.");
+                }
+
+                var usuarioObj = (Usuario)usuarioResponse.Response;
+
+                var rolesResponse = _dbWrapper.ObtenerRolesPorUsuario(usuarioObj.Id, usuario);
+                if (!rolesResponse.IsSuccess || rolesResponse.Response == null)
+                {
+                    throw new ArgumentException("No tiene permisos de administrador.");
+                }
+
+                var roles = (IEnumerable<dynamic>)rolesResponse.Response;
+                var esAdmin = roles.Any(r => r.Nombre == "Administrador");
+
+                if (!esAdmin)
+                {
+                    throw new ArgumentException("No tiene permisos de administrador para modificar permisos.");
+                }
+
+                return _dbWrapper.GuardarPermisosRol(rolId, paginaId, puedeLeer, puedeCrear, puedeEditar,
+                    puedeEliminar, puedeExportar, modificadoPor, usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en GuardarPermisosRol para rol {RolId}, página {PaginaId}, usuario {Usuario}",
+                    rolId, paginaId, usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en GuardarPermisosRol para rol {RolId}, página {PaginaId}, usuario {Usuario}",
+                    rolId, paginaId, usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar los permisos." };
             }
         }
     }

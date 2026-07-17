@@ -1,6 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,13 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Rol")]
     public class RolController : BaseController
     {
+        private readonly RolService _rolService;
+
+        public RolController()
+        {
+            _rolService = new RolService();
+        }
+
         /// <summary>
         /// Obtiene todos los roles de la empresa del usuario autenticado
         /// </summary>
@@ -22,7 +30,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerRoles()
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerRoles(usuario);
+            var result = _rolService.ObtenerRoles(usuario);
             return result;
         }
 
@@ -35,7 +43,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerRolPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerRolPorId(id, usuario);
+            var result = _rolService.ObtenerRolPorId(id, usuario);
             return result;
         }
 
@@ -48,8 +56,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarOActualizarRol(Rol rol)
         {
             var usuarioAdmin = User.Identity.Name;
-            var empresaId = ObtenerEmpresaId(); // Método auxiliar para obtener EmpresaId del token
-            var result = dbWrapper.GuardarOActualizarRol(rol, usuarioAdmin, empresaId);
+            var result = _rolService.GuardarOActualizarRol(rol, usuarioAdmin);
             return result;
         }
 
@@ -62,9 +69,8 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse EliminarRol(Rol rol)
         {
             var usuarioAdmin = User.Identity.Name;
-            var empresaId = ObtenerEmpresaId();
             rol.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarRol(rol.Id, usuarioAdmin, rol.FechaModificacion.Value, empresaId);
+            var result = _rolService.EliminarRol(rol.Id, usuarioAdmin, rol.FechaModificacion.Value);
             return result;
         }
 

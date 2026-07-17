@@ -1,0 +1,620 @@
+﻿﻿@{
+    ViewBag.Title = "Permisos por Rol";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    var roles = ViewBag.Roles as List<ServiceDeskDESIEntities.Seguridad.Rol>;
+    var paginas = ViewBag.Paginas as List<ServiceDeskDESIEntities.Seguridad.Pagina>;
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<style>
+    .chooser-container {
+        display: flex;
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .chooser-column {
+        flex: 1;
+        border: 1px solid #e3e6f0;
+        border-radius: 8px;
+        padding: 15px;
+        min-height: 400px;
+        max-height: 550px;
+        overflow-y: auto;
+        background: #f8f9fc;
+    }
+
+        .chooser-column h5 {
+            font-weight: 600;
+            color: #4e73df;
+            border-bottom: 2px solid #4e73df;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+    .chooser-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        background: white;
+        border-radius: 6px;
+        border: 1px solid #e3e6f0;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .chooser-item:hover {
+            border-color: #4e73df;
+            box-shadow: 0 2px 8px rgba(78, 115, 223, 0.15);
+        }
+
+        .chooser-item .item-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .chooser-item .permisos-checkboxes {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+            .chooser-item .permisos-checkboxes label {
+                margin-bottom: 0;
+                font-weight: 400;
+                cursor: pointer;
+            }
+
+            .chooser-item .permisos-checkboxes input[type="checkbox"] {
+                margin-right: 3px;
+                cursor: pointer;
+            }
+
+    .btn-move {
+        background: #4e73df;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .btn-move:hover {
+            background: #2e59d9;
+            transform: scale(1.05);
+        }
+
+    .btn-move-danger {
+        background: #e74a3b;
+    }
+
+        .btn-move-danger:hover {
+            background: #c0392b;
+        }
+
+    .badge-paginas {
+        background: #4e73df;
+        color: white;
+        border-radius: 20px;
+        padding: 2px 12px;
+        font-size: 0.75rem;
+    }
+
+    .empty-message {
+        color: #858796;
+        text-align: center;
+        padding: 40px 0;
+        font-style: italic;
+    }
+
+    .chooser-item .item-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+        .chooser-item .item-info .item-nombre {
+            font-weight: 500;
+            color: #5a5c69;
+        }
+
+        .chooser-item .item-info .item-direccion {
+            font-size: 0.75rem;
+            color: #858796;
+        }
+
+    .chooser-item.asignada {
+        border-left: 3px solid #4e73df;
+    }
+
+    .chooser-item.disponible {
+        border-left: 3px solid #858796;
+    }
+
+    .text-muted-small {
+        font-size: 0.8rem;
+        color: #858796;
+    }
+</style>
+
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-lock me-2"></i>Asignación de Permisos por Rol</h3>
+
+    <!-- 1. Selección de Rol -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label>Seleccionar Rol:</label>
+                <select id="ddlRol" class="form-control">
+                    <option value="">-- Seleccione un rol --</option>
+                    @if (roles != null)
+                    {
+                        foreach (var rol in roles)
+                        {
+                            <option value="@rol.Id">@rol.Nombre</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3 text-end" style="padding-top: 20px;">
+                <button type="button" class="btn btn-success" id="btnGuardarPermisos" style="display:none;">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Chooser de Páginas -->
+    <div id="chooserContainer" style="display:none;">
+        <div class="chooser-container">
+            <!-- Columna Izquierda: Páginas Disponibles -->
+            <div class="chooser-column">
+                <h5><i class="fas fa-list me-2"></i>Páginas Disponibles</h5>
+                <div id="paginasDisponibles">
+                    <div class="empty-message">Seleccione un rol para cargar las páginas</div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Páginas Asignadas -->
+            <div class="chooser-column">
+                <h5><i class="fas fa-check-circle me-2"></i>Páginas Asignadas</h5>
+                <div id="paginasAsignadas">
+                    <div class="empty-message">No hay páginas asignadas a este rol</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Tabla de Roles (Resumen) -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h5 class="section-title"><i class="fas fa-table me-2"></i>Resumen de Roles</h5>
+            <div class="table-responsive">
+                <table id="tblRoles" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Páginas Asignadas</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var tablaRoles;
+    var rolSeleccionadoId = null;
+    var todasLasPaginas = [];
+    var permisosCache = {};
+
+    $(document).ready(function () {
+        InicializarTablaRoles();
+        CargarRoles();
+
+        // Obtener todas las páginas desde ViewBag.Paginas
+        @if (paginas != null)
+        {
+            <text>
+                todasLasPaginas = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(paginas));
+            </text>
+        }
+        else
+        {
+            <text>
+                todasLasPaginas = [];
+            </text>
+        }
+
+        $("#ddlRol").change(function () {
+            var rolId = $(this).val();
+            if (rolId) {
+                rolSeleccionadoId = parseInt(rolId);
+                CargarPermisos(rolSeleccionadoId);
+                $("#chooserContainer").show();
+                $("#btnGuardarPermisos").show();
+            } else {
+                $("#chooserContainer").hide();
+                $("#btnGuardarPermisos").hide();
+                rolSeleccionadoId = null;
+                $("#paginasDisponibles").html('<div class="empty-message">Seleccione un rol para cargar las páginas</div>');
+                $("#paginasAsignadas").html('<div class="empty-message">No hay páginas asignadas a este rol</div>');
+            }
+        });
+
+        $("#btnGuardarPermisos").click(function () {
+            GuardarPermisos();
+        });
+
+        // Event delegation para los botones dinámicos
+        $(document).on('click', '.btn-move', function () {
+            var paginaId = $(this).closest('.chooser-item').data('id');
+            if (paginaId) {
+                AsignarPagina(paginaId);
+            }
+        });
+
+        $(document).on('click', '.btn-move-danger', function () {
+            var paginaId = $(this).closest('.chooser-item').data('id');
+            if (paginaId) {
+                QuitarPagina(paginaId);
+            }
+        });
+
+        // Cambios en checkboxes - guardar en cache automáticamente
+        $(document).on('change', '.permiso-check', function () {
+            if (!rolSeleccionadoId) return;
+
+            var paginaId = parseInt($(this).data('paginaid'));
+            var accion = $(this).data('accion');
+            var valor = $(this).is(':checked');
+
+            // Buscar el permiso en cache y actualizar
+            if (permisosCache[rolSeleccionadoId]) {
+                var permiso = permisosCache[rolSeleccionadoId].find(p => p.PaginaId === paginaId);
+                if (permiso) {
+                    switch (accion) {
+                        case 'Leer': permiso.PuedeLeer = valor; break;
+                        case 'Crear': permiso.PuedeCrear = valor; break;
+                        case 'Editar': permiso.PuedeEditar = valor; break;
+                        case 'Eliminar': permiso.PuedeEliminar = valor; break;
+                        case 'Exportar': permiso.PuedeExportar = valor; break;
+                    }
+                }
+            }
+        });
+    });
+
+    function InicializarTablaRoles() {
+        tablaRoles = $('#tblRoles').DataTable({
+            columns: [
+                { data: 'Id', title: 'ID', visible: false },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Descripcion', title: 'Descripción' },
+                {
+                    data: 'Id', title: 'Páginas Asignadas', render: function () {
+                        return '<span class="badge-paginas">0</span>';
+                    }
+                },
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        return '<button class="btn btn-sm btn-outline-primary" onclick="SeleccionarRol(' + data + ')"><i class="fas fa-edit"></i> Editar</button>';
+                    }
+                }
+            ],
+            language: {
+                url: "/Content/datatables/i18n/es-ES.json"
+            }
+        });
+    }
+
+    function CargarRoles() {
+        GetMVC("/Security/ConsultarTodosLosRoles", function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+            if (result.IsSuccess && result.Response) {
+                var roles = result.Response;
+                tablaRoles.clear();
+                roles.forEach(function (rol) {
+                    tablaRoles.row.add({
+                        Id: rol.Id,
+                        Nombre: rol.Nombre,
+                        Descripcion: rol.Descripcion
+                    });
+                });
+                tablaRoles.draw();
+            }
+        });
+    }
+
+    function CargarPermisos(rolId) {
+        GetMVC("/Security/ObtenerPermisosPorRol?rolId=" + rolId, function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+            // Inicializar cache si no existe
+            if (!permisosCache[rolId]) {
+                permisosCache[rolId] = [];
+            }
+
+            if (result.IsSuccess && result.Response) {
+                var permisos = result.Response;
+                permisosCache[rolId] = permisos;
+
+                // Crear diccionario de permisos por paginaId
+                var permisosDict = {};
+                permisos.forEach(function (p) {
+                    permisosDict[p.PaginaId] = p;
+                });
+
+                // Separar páginas disponibles y asignadas
+                var disponibles = [];
+                var asignadas = [];
+
+                todasLasPaginas.forEach(function (pagina) {
+                    if (permisosDict[pagina.Id]) {
+                        asignadas.push({
+                            Id: pagina.Id,
+                            Nombre: pagina.Nombre,
+                            Direccion: pagina.Direccion,
+                            Permiso: permisosDict[pagina.Id]
+                        });
+                    } else {
+                        disponibles.push({
+                            Id: pagina.Id,
+                            Nombre: pagina.Nombre,
+                            Direccion: pagina.Direccion
+                        });
+                    }
+                });
+
+                RenderizarChooser(disponibles, asignadas);
+                ActualizarBadges();
+            } else {
+                // Si no hay permisos, mostrar todas las páginas como disponibles
+                var disponibles = todasLasPaginas.map(function (p) {
+                    return { Id: p.Id, Nombre: p.Nombre, Direccion: p.Direccion };
+                });
+                permisosCache[rolId] = [];
+                RenderizarChooser(disponibles, []);
+                ActualizarBadges();
+            }
+        });
+    }
+
+    function RenderizarChooser(disponibles, asignadas) {
+        // Renderizar disponibles (solo nombre de la página)
+        var htmlDisponibles = '';
+        if (disponibles.length === 0) {
+            htmlDisponibles = '<div class="empty-message">No hay páginas disponibles</div>';
+        } else {
+            disponibles.forEach(function (pagina) {
+                htmlDisponibles += `
+                    <div class="chooser-item disponible" data-id="${pagina.Id}">
+                        <div class="item-info">
+                            <span class="item-nombre">${pagina.Nombre}</span>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn-move" data-id="${pagina.Id}" title="Asignar página">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        $('#paginasDisponibles').html(htmlDisponibles);
+
+        // Renderizar asignadas (nombre + checkboxes)
+        var htmlAsignadas = '';
+        if (asignadas.length === 0) {
+            htmlAsignadas = '<div class="empty-message">No hay páginas asignadas a este rol</div>';
+        } else {
+            asignadas.forEach(function (item) {
+                var p = item.Permiso;
+                htmlAsignadas += `
+                    <div class="chooser-item asignada" data-id="${item.Id}">
+                        <div class="item-info">
+                            <span class="item-nombre">${item.Nombre}</span>
+                            <span class="text-muted-small">${item.Direccion || ''}</span>
+                        </div>
+                        <div class="item-actions">
+                            <div class="permisos-checkboxes">
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Leer" ${p.PuedeLeer ? 'checked' : ''}> Leer</label>
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Crear" ${p.PuedeCrear ? 'checked' : ''}> Crear</label>
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Editar" ${p.PuedeEditar ? 'checked' : ''}> Editar</label>
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Eliminar" ${p.PuedeEliminar ? 'checked' : ''}> Eliminar</label>
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Exportar" ${p.PuedeExportar ? 'checked' : ''}> Exportar</label>
+                            </div>
+                            <button class="btn-move btn-move-danger" data-id="${item.Id}" title="Quitar página">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        $('#paginasAsignadas').html(htmlAsignadas);
+    }
+
+    function AsignarPagina(paginaId) {
+        if (!rolSeleccionadoId) return;
+
+        // Verificar que la página no esté ya asignada
+        if (permisosCache[rolSeleccionadoId]) {
+            var existe = permisosCache[rolSeleccionadoId].some(p => p.PaginaId === paginaId);
+            if (existe) return;
+        }
+
+        // Crear permiso por defecto (solo lectura)
+        var nuevoPermiso = {
+            PaginaId: paginaId,
+            PuedeLeer: true,
+            PuedeCrear: false,
+            PuedeEditar: false,
+            PuedeEliminar: false,
+            PuedeExportar: false
+        };
+
+        if (!permisosCache[rolSeleccionadoId]) {
+            permisosCache[rolSeleccionadoId] = [];
+        }
+        permisosCache[rolSeleccionadoId].push(nuevoPermiso);
+
+        // Re-renderizar
+        CargarPermisos(rolSeleccionadoId);
+    }
+
+    function QuitarPagina(paginaId) {
+        if (!rolSeleccionadoId) return;
+
+        // Eliminar el permiso del cache
+        if (permisosCache[rolSeleccionadoId]) {
+            permisosCache[rolSeleccionadoId] = permisosCache[rolSeleccionadoId].filter(p => p.PaginaId !== paginaId);
+        }
+
+        // Re-renderizar
+        CargarPermisos(rolSeleccionadoId);
+    }
+
+    function SeleccionarRol(rolId) {
+        $("#ddlRol").val(rolId).trigger('change');
+    }
+
+    function ActualizarBadges() {
+        tablaRoles.rows().every(function (rowIdx, tableLoop, rowLoop) {
+            var data = this.data();
+            var rolId = data.Id;
+
+            var count = 0;
+            if (permisosCache[rolId]) {
+                count = permisosCache[rolId].length;
+            }
+
+            var cell = this.node().querySelector('.badge-paginas');
+            if (cell) {
+                cell.textContent = count;
+            }
+        });
+    }
+
+    function GuardarPermisos() {
+        if (!rolSeleccionadoId) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe seleccionar un rol',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+
+        var permisos = permisosCache[rolSeleccionadoId] || [];
+        if (permisos.length === 0) {
+            Swal.fire({
+                title: 'Advertencia',
+                text: 'No hay permisos asignados para guardar',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
+        // Validar que si tiene permisos de creación/edición/eliminación/exportación también tenga lectura
+        var error = false;
+        permisos.forEach(function (p) {
+            if ((p.PuedeCrear || p.PuedeEditar || p.PuedeEliminar || p.PuedeExportar) && !p.PuedeLeer) {
+                error = true;
+            }
+        });
+
+        if (error) {
+            Swal.fire({
+                title: 'Advertencia',
+                text: 'No se puede asignar permisos de creación, edición, eliminación o exportación sin permisos de lectura',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Guardando...',
+            text: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        var total = permisos.length;
+        var completados = 0;
+        var errores = [];
+
+        permisos.forEach(function (permiso) {
+            var request = {
+                RolId: rolSeleccionadoId,
+                PaginaId: permiso.PaginaId,
+                PuedeLeer: permiso.PuedeLeer || false,
+                PuedeCrear: permiso.PuedeCrear || false,
+                PuedeEditar: permiso.PuedeEditar || false,
+                PuedeEliminar: permiso.PuedeEliminar || false,
+                PuedeExportar: permiso.PuedeExportar || false
+            };
+
+            PostMVC('/Security/GuardarPermisosRol', request, function (response) {
+                completados++;
+
+                if (!response.IsSuccess) {
+                    errores.push(response.Message);
+                }
+
+                if (completados === total) {
+                    Swal.close();
+
+                    if (errores.length > 0) {
+                        Swal.fire({
+                            title: 'Errores al guardar',
+                            text: 'Algunos permisos no se pudieron guardar: ' + errores.join(', '),
+                            icon: 'warning',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: 'Permisos guardados correctamente',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        CargarRoles();
+                    }
+                }
+            });
+        });
+    }
+</script>
