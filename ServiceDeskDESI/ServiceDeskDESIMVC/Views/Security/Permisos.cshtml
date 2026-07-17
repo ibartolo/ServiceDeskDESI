@@ -1,0 +1,309 @@
+﻿﻿@{
+    ViewBag.Title = "Permisos por Rol";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    var roles = ViewBag.Roles as List<ServiceDeskDESIEntities.Seguridad.Rol>;
+    var paginas = ViewBag.Paginas as List<ServiceDeskDESIEntities.Seguridad.Pagina>;
+    var puedeLeer = ViewBag.PuedeLeer ?? false;
+    var puedeCrear = ViewBag.PuedeCrear ?? false;
+    var puedeEditar = ViewBag.PuedeEditar ?? false;
+    var puedeEliminar = ViewBag.PuedeEliminar ?? false;
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-lock me-2"></i>Asignación de Permisos por Rol</h3>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label>Seleccionar Rol:</label>
+                <select id="ddlRol" class="form-control">
+                    <option value="">-- Seleccione un rol --</option>
+                    @if (roles != null)
+                    {
+                        foreach (var rol in roles)
+                        {
+                            <option value="@rol.Id">@rol.Nombre</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="mb-3 text-end">
+                <button type="button" class="btn btn-success" id="btnGuardarPermisos" style="display:none;">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 table-responsive">
+            <div class="mb-3">
+                <table id="tblPermisos" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Página</th>
+                            <th>Dirección</th>
+                            <th style="text-align:center;">Leer</th>
+                            <th style="text-align:center;">Crear</th>
+                            <th style="text-align:center;">Editar</th>
+                            <th style="text-align:center;">Eliminar</th>
+                            <th style="text-align:center;">Exportar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var tablaPermisos;
+    var rolSeleccionado = null;
+    var permisosCache = null;
+
+    $(document).ready(function () {
+        InicializarDataTable();
+
+        $("#ddlRol").change(function () {
+            var rolId = $(this).val();
+            if (rolId) {
+                CargarPermisos(rolId);
+                $("#btnGuardarPermisos").show();
+            } else {
+                tablaPermisos.clear().draw();
+                $("#btnGuardarPermisos").hide();
+                rolSeleccionado = null;
+                permisosCache = null;
+            }
+        });
+
+        $("#btnGuardarPermisos").click(function () {
+            GuardarPermisos();
+        });
+    });
+
+    function InicializarDataTable() {
+        tablaPermisos = $('#tblPermisos').DataTable({
+            columns: [
+                { data: 'Id', title: 'ID', visible: false },
+                { data: 'Nombre', title: 'Página' },
+                { data: 'Direccion', title: 'Dirección', defaultContent: '---' },
+                {
+                    data: 'Id', title: 'Leer', render: function (data, type, row) {
+                        return '<input type="checkbox" class="permiso-check" data-paginaid="' + data + '" data-accion="Leer" ' + (row.PuedeLeer ? 'checked' : '') + ' />';
+                    }
+                },
+                {
+                    data: 'Id', title: 'Crear', render: function (data, type, row) {
+                        return '<input type="checkbox" class="permiso-check" data-paginaid="' + data + '" data-accion="Crear" ' + (row.PuedeCrear ? 'checked' : '') + ' />';
+                    }
+                },
+                {
+                    data: 'Id', title: 'Editar', render: function (data, type, row) {
+                        return '<input type="checkbox" class="permiso-check" data-paginaid="' + data + '" data-accion="Editar" ' + (row.PuedeEditar ? 'checked' : '') + ' />';
+                    }
+                },
+                {
+                    data: 'Id', title: 'Eliminar', render: function (data, type, row) {
+                        return '<input type="checkbox" class="permiso-check" data-paginaid="' + data + '" data-accion="Eliminar" ' + (row.PuedeEliminar ? 'checked' : '') + ' />';
+                    }
+                },
+                {
+                    data: 'Id', title: 'Exportar', render: function (data, type, row) {
+                        return '<input type="checkbox" class="permiso-check" data-paginaid="' + data + '" data-accion="Exportar" ' + (row.PuedeExportar ? 'checked' : '') + ' />';
+                    }
+                }
+            ],
+            language: {
+                url: "/Content/datatables/i18n/es-ES.json"
+            }
+        });
+    }
+
+    function CargarPermisos(rolId) {
+        GetMVC("/Security/ObtenerPermisosPorRol?rolId=" + rolId, function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+            if (result.IsSuccess && result.Response) {
+                var permisos = result.Response;
+                permisosCache = permisos;
+                rolSeleccionado = rolId;
+
+                // Crear un diccionario de permisos por paginaId
+                var permisosDict = {};
+                permisos.forEach(function (p) {
+                    permisosDict[p.PaginaId] = p;
+                });
+
+                // Obtener todas las páginas (para mostrar las que no tienen permisos)
+                GetMVC("/Security/ObtenerPaginas", function (paginasResponse) {
+                    var paginasResult = typeof paginasResponse === 'string' ? JSON.parse(paginasResponse) : paginasResponse;
+
+                    if (paginasResult.IsSuccess && paginasResult.Response) {
+                        var paginas = paginasResult.Response;
+                        var data = [];
+
+                        paginas.forEach(function (pagina) {
+                            var permiso = permisosDict[pagina.Id] || {};
+                            data.push({
+                                Id: pagina.Id,
+                                Nombre: pagina.Nombre,
+                                Direccion: pagina.Direccion,
+                                PuedeLeer: permiso.PuedeLeer || false,
+                                PuedeCrear: permiso.PuedeCrear || false,
+                                PuedeEditar: permiso.PuedeEditar || false,
+                                PuedeEliminar: permiso.PuedeEliminar || false,
+                                PuedeExportar: permiso.PuedeExportar || false
+                            });
+                        });
+
+                        tablaPermisos.clear();
+                        tablaPermisos.rows.add(data);
+                        tablaPermisos.draw();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: result.Message || 'No se pudieron cargar los permisos',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+
+    function GuardarPermisos() {
+        if (!rolSeleccionado) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe seleccionar un rol',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+
+        // Obtener todos los checkboxes y construir la lista de permisos
+        var permisos = [];
+        var checkboxes = document.querySelectorAll('.permiso-check');
+
+        checkboxes.forEach(function (cb) {
+            var paginaId = parseInt(cb.dataset.paginaid);
+            var accion = cb.dataset.accion;
+            var valor = cb.checked;
+
+            // Buscar si ya existe el permiso en la lista
+            var permisoExistente = permisos.find(p => p.PaginaId === paginaId);
+            if (!permisoExistente) {
+                permisoExistente = {
+                    PaginaId: paginaId,
+                    PuedeLeer: false,
+                    PuedeCrear: false,
+                    PuedeEditar: false,
+                    PuedeEliminar: false,
+                    PuedeExportar: false
+                };
+                permisos.push(permisoExistente);
+            }
+
+            // Asignar el valor según la acción
+            switch (accion) {
+                case 'Leer': permisoExistente.PuedeLeer = valor; break;
+                case 'Crear': permisoExistente.PuedeCrear = valor; break;
+                case 'Editar': permisoExistente.PuedeEditar = valor; break;
+                case 'Eliminar': permisoExistente.PuedeEliminar = valor; break;
+                case 'Exportar': permisoExistente.PuedeExportar = valor; break;
+            }
+        });
+
+        // Validar que al menos tenga permiso de lectura si se marca algún otro permiso
+        var hayPermisosSinLeer = permisos.some(p => (p.PuedeCrear || p.PuedeEditar || p.PuedeEliminar || p.PuedeExportar) && !p.PuedeLeer);
+        if (hayPermisosSinLeer) {
+            Swal.fire({
+                title: 'Advertencia',
+                text: 'No se puede asignar permisos de creación, edición, eliminación o exportación sin permisos de lectura',
+                icon: 'warning',
+                confirmButtonText: 'Entendido',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Guardando...',
+            text: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Guardar cada permiso individualmente
+        var total = permisos.length;
+        var completados = 0;
+        var errores = [];
+
+        permisos.forEach(function (permiso) {
+            var request = {
+                RolId: parseInt(rolSeleccionado),
+                PaginaId: permiso.PaginaId,
+                PuedeLeer: permiso.PuedeLeer,
+                PuedeCrear: permiso.PuedeCrear,
+                PuedeEditar: permiso.PuedeEditar,
+                PuedeEliminar: permiso.PuedeEliminar,
+                PuedeExportar: permiso.PuedeExportar
+            };
+
+            PostMVC('/Security/GuardarPermisosRol', request, function (response) {
+                completados++;
+
+                if (!response.IsSuccess) {
+                    errores.push(response.Message);
+                }
+
+                if (completados === total) {
+                    Swal.close();
+
+                    if (errores.length > 0) {
+                        Swal.fire({
+                            title: 'Errores al guardar',
+                            text: 'Algunos permisos no se pudieron guardar: ' + errores.join(', '),
+                            icon: 'warning',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: 'Permisos guardados correctamente',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        });
+                    }
+                }
+            });
+        });
+    }
+</script>

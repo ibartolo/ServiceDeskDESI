@@ -243,5 +243,93 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+
+
+        // =========================================
+        // DbWrapper.Permisos.cs - ObtenerPermisosPorRol y GuardarPermisosRol
+        // =========================================
+
+        public ModelResponse ObtenerPermisosPorRol(long rolId, string usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var permisos = GetObjects("ObtenerPermisosPorRol", CommandType.StoredProcedure,
+                    new[] {
+                new SqlParameter("@RolId", rolId),
+                new SqlParameter("@Usuario", usuario)
+                    },
+                    new Func<IDataReader, dynamic>((reader) =>
+                    {
+                        return new
+                        {
+                            Id = MapearPorpiedades<long>(reader["Id"]),
+                            RolId = MapearPorpiedades<long>(reader["RolId"]),
+                            PaginaId = MapearPorpiedades<long>(reader["PaginaId"]),
+                            PaginaNombre = MapearPorpiedades<string>(reader["PaginaNombre"]),
+                            Direccion = MapearPorpiedades<string>(reader["Direccion"]),
+                            PuedeLeer = Convert.ToInt32(reader["PuedeLeer"]) == 1,
+                            PuedeCrear = Convert.ToInt32(reader["PuedeCrear"]) == 1,
+                            PuedeEditar = Convert.ToInt32(reader["PuedeEditar"]) == 1,
+                            PuedeEliminar = Convert.ToInt32(reader["PuedeEliminar"]) == 1,
+                            PuedeExportar = Convert.ToInt32(reader["PuedeExportar"]) == 1,
+                            CreadoPor = MapearPorpiedades<string>(reader["CreadoPor"]),
+                            FechaCreacion = MapearPorpiedades<DateTime>(reader["FechaCreacion"]),
+                            ModificadoPor = MapearPorpiedades<string>(reader["ModificadoPor"]),
+                            FechaModificacion = MapearPorpiedades<DateTime?>(reader["FechaModificacion"]),
+                            Estatus = MapearPorpiedades<bool>(reader["Estatus"])
+                        };
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = permisos;
+                modelResponse.Message = "Permisos obtenidos correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener permisos para rol {RolId} y usuario {Usuario}", rolId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener los permisos.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse GuardarPermisosRol(long rolId, long paginaId, bool puedeLeer, bool puedeCrear,
+            bool puedeEditar, bool puedeEliminar, bool puedeExportar, string modificadoPor, string usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("GuardarPermisosRol", CommandType.StoredProcedure, new SqlParameter[]
+                {
+            new SqlParameter("@RolId", rolId),
+            new SqlParameter("@PaginaId", paginaId),
+            new SqlParameter("@PuedeLeer", puedeLeer),
+            new SqlParameter("@PuedeCrear", puedeCrear),
+            new SqlParameter("@PuedeEditar", puedeEditar),
+            new SqlParameter("@PuedeEliminar", puedeEliminar),
+            new SqlParameter("@PuedeExportar", puedeExportar),
+            new SqlParameter("@ModificadoPor", modificadoPor),
+            new SqlParameter("@Usuario", usuario)
+                });
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = Convert.ToInt64(resultado);
+                modelResponse.Message = "Permisos guardados correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al guardar permisos para rol {RolId}, página {PaginaId}, usuario {Usuario}",
+                    rolId, paginaId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al guardar los permisos.";
+            }
+
+            return modelResponse;
+        }
     }
 }

@@ -44,11 +44,69 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = _permisosService.ValidarPermisoUsuario(usuario, request.NombrePagina, request.Accion);
             return result;
         }
+
+        /// <summary>
+        /// Obtiene todas las páginas del sistema
+        /// </summary>
+        /// <returns>Lista de páginas</returns>
+        [HttpGet, Route("Paginas")]
+        public ModelResponse ObtenerPaginas()
+        {
+            var result = _permisosService.ObtenerPaginas();
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene los permisos de un rol específico
+        /// </summary>
+        /// <param name="rolId">ID del rol</param>
+        /// <returns>Permisos del rol</returns>
+        [HttpGet, Route("Rol/{rolId:long}")]
+        public ModelResponse ObtenerPermisosPorRol(long rolId)
+        {
+            var usuario = User.Identity.Name;
+            var result = _permisosService.ObtenerPermisosPorRol(rolId, usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Guarda los permisos de un rol sobre una página
+        /// </summary>
+        /// <param name="request">Objeto con los datos del permiso</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpPost, Route("Guardar")]
+        public ModelResponse GuardarPermisosRol([FromBody] GuardarPermisosRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _permisosService.GuardarPermisosRol(
+                request.RolId,
+                request.PaginaId,
+                request.PuedeLeer,
+                request.PuedeCrear,
+                request.PuedeEditar,
+                request.PuedeEliminar,
+                request.PuedeExportar,
+                usuario,
+                usuario
+            );
+            return result;
+        }
     }
 
     public class ValidarPermisoRequest
     {
         public string NombrePagina { get; set; }
-        public string Accion { get; set; } // Leer, Crear, Editar, Eliminar, Exportar
+        public string Accion { get; set; }
+    }
+
+    public class GuardarPermisosRequest
+    {
+        public long RolId { get; set; }
+        public long PaginaId { get; set; }
+        public bool PuedeLeer { get; set; }
+        public bool PuedeCrear { get; set; }
+        public bool PuedeEditar { get; set; }
+        public bool PuedeEliminar { get; set; }
+        public bool PuedeExportar { get; set; }
     }
 }
