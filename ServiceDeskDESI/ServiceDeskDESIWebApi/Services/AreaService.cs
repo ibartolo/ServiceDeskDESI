@@ -21,18 +21,19 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
-                // La validación de permisos y existencia del usuario se maneja en el DbWrapper
-                // Si el usuario no existe o no tiene permisos, simplemente no devuelve datos
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
                 return _dbWrapper.ObtenerAreas(usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ObtenerAreas para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AreaService.ObtenerAreas para usuario {Usuario}", usuario);
-                return new ModelResponse
-                {
-                    IsSuccess = false,
-                    Message = "Ocurrió un error al obtener las áreas."
-                };
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener las áreas." };
             }
         }
 
@@ -40,16 +41,20 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
                 return _dbWrapper.ObtenerAreaPorId(id, usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ObtenerAreaPorId para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AreaService.ObtenerAreaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse
-                {
-                    IsSuccess = false,
-                    Message = "Ocurrió un error al obtener el área."
-                };
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el área." };
             }
         }
 
@@ -57,65 +62,24 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
-                // Validar reglas de negocio (no dependen de la existencia del usuario)
-                if (string.IsNullOrWhiteSpace(area.Nombre))
-                {
-                    return new ModelResponse
-                    {
-                        IsSuccess = false,
-                        Message = "El nombre del área es requerido."
-                    };
-                }
-
-                if (area.Nombre.Length > 250)
-                {
-                    return new ModelResponse
-                    {
-                        IsSuccess = false,
-                        Message = "El nombre no puede exceder los 250 caracteres."
-                    };
-                }
-
-                if (area.Descripcion != null && area.Descripcion.Length > 500)
-                {
-                    return new ModelResponse
-                    {
-                        IsSuccess = false,
-                        Message = "La descripción no puede exceder los 500 caracteres."
-                    };
-                }
-
-                if (area.Correo != null && area.Correo.Length > 100)
-                {
-                    return new ModelResponse
-                    {
-                        IsSuccess = false,
-                        Message = "El correo no puede exceder los 100 caracteres."
-                    };
-                }
-
-                if (string.IsNullOrWhiteSpace(area.CreadoPor))
-                {
-                    return new ModelResponse
-                    {
-                        IsSuccess = false,
-                        Message = "El usuario creador es requerido."
-                    };
-                }
-
-                // Asignar usuario para validación en DbWrapper
-                area.CreadoPor = usuario;
+                if (string.IsNullOrWhiteSpace(area.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
+                if (area.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
+                if (area.Descripcion != null && area.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
+                if (area.Correo != null && area.Correo.Length > 100) { throw new ArgumentException("El correo no puede exceder los 100 caracteres."); }
+                if (string.IsNullOrWhiteSpace(area.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 return _dbWrapper.GuardarOActualizarArea(area);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en GuardarOActualizarArea para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AreaService.GuardarOActualizarArea para usuario {Usuario}", usuario);
-                return new ModelResponse
-                {
-                    IsSuccess = false,
-                    Message = "Ocurrió un error al guardar el área."
-                };
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar el área." };
             }
         }
 
@@ -123,35 +87,21 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
-                // Validar reglas de negocio
-                if (id <= 0)
-                {
-                    return new ModelResponse
-                    {
-                        IsSuccess = false,
-                        Message = "El ID del área es requerido."
-                    };
-                }
-
-                if (string.IsNullOrWhiteSpace(modificadoPor))
-                {
-                    return new ModelResponse
-                    {
-                        IsSuccess = false,
-                        Message = "El usuario modificador es requerido."
-                    };
-                }
+                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
+                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 return _dbWrapper.EliminarArea(id, modificadoPor, fechaModificacion, usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en EliminarArea para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AreaService.EliminarArea para usuario {Usuario}", usuario);
-                return new ModelResponse
-                {
-                    IsSuccess = false,
-                    Message = "Ocurrió un error al eliminar el área."
-                };
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al eliminar el área." };
             }
         }
     }
