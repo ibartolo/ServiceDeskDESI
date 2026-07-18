@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIMVC.Helpers;
+using ServiceDeskDESIMVC.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,6 +18,15 @@ namespace ServiceDeskDESIMVC.Controllers
 {
     public class UserController : BaseController
     {
+        private readonly AreaService _areaService;
+        private readonly RolService _rolService;
+
+        public UserController()
+        {
+            _areaService = new AreaService(httpClientConnection);
+            _rolService = new RolService(httpClientConnection);
+        }
+
         public async Task<ActionResult> MyProfile()
         {
             // Obtener el ID del usuario desde la sesión
@@ -40,17 +50,23 @@ namespace ServiceDeskDESIMVC.Controllers
 
             // Cargar listas para los dropdowns
             //var sucursalesResponse = await httpClientConnection.ObtenerSucursales();
-            var sucursalesResponse = await ObtenerSucursales();
+            var sucursalesResponse = await httpClientConnection.ObtenerSucursales();
             if (sucursalesResponse.IsSuccess && sucursalesResponse.Response != null)
             {
                 ViewBag.Sucursales = sucursalesResponse.Response;
             }
 
             //var areasResponse = await httpClientConnection.ObtenerAreas();
-            var areasResponse = await ObtenerAreas();
+            var areasResponse = await _areaService.ConsultarTodasAreas();
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
                 ViewBag.Areas = areasResponse.Response;
+            }
+
+            var rolesResponse = await _rolService.ObtenerTodosLosRoles();
+            if (rolesResponse.IsSuccess && rolesResponse.Response != null)
+            {
+                ViewBag.Roles = rolesResponse.Response;
             }
 
             return View(usuario);
@@ -150,59 +166,6 @@ namespace ServiceDeskDESIMVC.Controllers
             }
         }
 
-        public async Task<ModelResponse> ObtenerSucursales()
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                // Lista temporal de sucursales
-                var sucursales = new List<Sucursal>
-        {
-            new Sucursal { Id = 1, Nombre = "Matriz", Descripcion = "Oficina principal", Calle = "Av. Reforma #123", Ciudad = "Ciudad de México", Colonia = "Centro", CodigoPostal = "06000", Estatus = true },
-            new Sucursal { Id = 2, Nombre = "Poza Rica", Descripcion = "Sucursal Veracruz", Calle = "Av. Reforma #123", Ciudad = "Poza Rica", Colonia = "Centro", CodigoPostal = "93210", Estatus = true }
-        };
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = sucursales;
-                modelResponse.Message = "Sucursales obtenidas correctamente";
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
-            }
-
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse> ObtenerAreas()
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                // Lista temporal de áreas
-                var areas = new List<Area>
-        {
-            new Area { Id = 1, Nombre = "Sistemas", Descripcion = "Área de tecnología", Correo = "sistemas@empresa.com", Estatus = true },
-            new Area { Id = 2, Nombre = "Recursos Humanos", Descripcion = "Gestión de personal", Correo = "rh@empresa.com", Estatus = true }
-        };
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = areas;
-                modelResponse.Message = "Áreas obtenidas correctamente";
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
-            }
-
-            return modelResponse;
-        }
 
         #region Catelogo de usuarios
         public async Task<ActionResult> Users(long id = 0)
@@ -224,6 +187,16 @@ namespace ServiceDeskDESIMVC.Controllers
                 areasList = JsonConvert.DeserializeObject<List<Area>>(areasResponse.Response.ToString());
             }
 
+            // Cargar roles
+            var rolesResponse = await _rolService.ObtenerTodosLosRoles();
+            var rolesList = new List<Rol>();
+            long rolSeleccionadoId = 0;
+
+            if (rolesResponse.IsSuccess && rolesResponse.Response != null)
+            {
+                rolesList = JsonConvert.DeserializeObject<List<Rol>>(rolesResponse.Response.ToString());
+            }
+
             if (id > 0)
             {
                 var response = await httpClientConnection.ObtenerUsuarioPorId(id);
@@ -236,6 +209,17 @@ namespace ServiceDeskDESIMVC.Controllers
                     if (!string.IsNullOrEmpty(usuario.Contrasena))
                     {
                         usuario.Contrasena = Cryptography.Decrypt(usuario.Contrasena);
+                    }
+
+                    // Obtener el rol del usuario en modo edición
+                    var rolesUsuarioResponse = await _rolService.ObtenerRolesPorUsuario(usuario.Id);
+                    if (rolesUsuarioResponse.IsSuccess && rolesUsuarioResponse.Response != null)
+                    {
+                        var rolesUsuario = JsonConvert.DeserializeObject<List<Rol>>(rolesUsuarioResponse.Response.ToString());
+                        if (rolesUsuario.Any())
+                        {
+                            rolSeleccionadoId = rolesUsuario.First().Id;
+                        }
                     }
                 }
                 else
@@ -286,6 +270,21 @@ namespace ServiceDeskDESIMVC.Controllers
                 ViewBag.Areas = MappingPropertiToDropDownList(areasList, "Id", "Nombre");
             }
 
+            // Asignar Roles con el valor seleccionado
+            // Asignar Roles con el valor seleccionado (modo edición)
+            var selectListRoles = new List<SelectListItem>();
+            foreach (var r in rolesList)
+            {
+                var item = new SelectListItem
+                {
+                    Value = r.Id.ToString(),
+                    Text = r.Nombre,
+                    Selected = (id > 0 && r.Id == rolSeleccionadoId)
+                };
+                selectListRoles.Add(item);
+            }
+            ViewBag.Roles = selectListRoles;
+
             ViewBag.EmpresaId = tokenCookie.EmpresaID;
 
             return View(usuario);
@@ -307,7 +306,37 @@ namespace ServiceDeskDESIMVC.Controllers
                 usuario.Contrasena = Cryptography.Encrypt(usuario.Contrasena);
             }
 
+            // Asignar empresa
+            usuario.Empresa = new Empresa { Id = tokenCookie.EmpresaID };
+
+            // Guardar usuario
             var response = await httpClientConnection.GuardarOActualizarUsuarioAdmin(usuario);
+
+            // Si el usuario se guardó correctamente y tiene un rol seleccionado
+            if (response.IsSuccess && response.Response != null)
+            {
+                var usuarioGuardado = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
+
+                // Obtener el rol seleccionado del formulario (se envía como campo oculto o desde el DDL)
+                var rolId = HttpContext.Request.Form["RolId"];
+                if (!string.IsNullOrEmpty(rolId))
+                {
+                    // Eliminar roles existentes del usuario
+                    var rolesUsuarioResponse = await _rolService.ObtenerRolesPorUsuario(usuarioGuardado.Id);
+                    if (rolesUsuarioResponse.IsSuccess && rolesUsuarioResponse.Response != null)
+                    {
+                        var rolesUsuario = JsonConvert.DeserializeObject<List<Rol>>(rolesUsuarioResponse.Response.ToString());
+                        foreach (var rol in rolesUsuario)
+                        {
+                            await _rolService.EliminarRolUsuario(rol.Id);
+                        }
+                    }
+
+                    // Asignar el nuevo rol
+                    await _rolService.AsignarRolUsuario(usuarioGuardado.Id, Convert.ToInt64(rolId));
+                }
+            }
+
             return JsonConvert.SerializeObject(response);
         }
 

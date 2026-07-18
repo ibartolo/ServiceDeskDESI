@@ -131,7 +131,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var usuarioObj = (Usuario)usuarioResponse.Response;
 
-                var rolesResponse = _dbWrapper.ObtenerRolesPorUsuario(usuarioObj.Id, usuario);
+                var rolesResponse = _dbWrapper.ObtenerRolesPorUsuario(usuario);
                 if (!rolesResponse.IsSuccess || rolesResponse.Response == null)
                 {
                     throw new ArgumentException("No tiene permisos de administrador.");

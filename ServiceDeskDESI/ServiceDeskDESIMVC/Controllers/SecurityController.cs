@@ -18,10 +18,12 @@ namespace ServiceDeskDESIMVC.Controllers
     public class SecurityController : BaseController
     {
         private readonly PermisosService _permisosService;
+        private readonly RolService _rolService;
 
         public SecurityController()
         {
             _permisosService = new PermisosService(httpClientConnection);
+            _rolService = new RolService(httpClientConnection);
         }
 
         #region Views
@@ -31,7 +33,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var rol = new Rol();
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerRolPorId(id);
+                var response = await _rolService.ObtenerRolPorId(id);
                 if (response.IsSuccess && response.Response != null)
                 {
                     rol = JsonConvert.DeserializeObject<Rol>(response.Response.ToString());
@@ -47,7 +49,7 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<ActionResult> Permisos()
         {
             // Obtener todos los roles
-            var rolesResponse = await httpClientConnection.ObtenerTodosLosRoles();
+            var rolesResponse = await _rolService.ObtenerTodosLosRoles();
             var roles = new List<Rol>();
             if (rolesResponse.IsSuccess && rolesResponse.Response != null)
             {
@@ -83,25 +85,25 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<string> ConsultarTodosLosRoles()
         {
-            var response = await httpClientConnection.ObtenerTodosLosRoles();
+            var response = await _rolService.ObtenerTodosLosRoles();
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ConsultarTodosLosRolesPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerRolPorId(id);
+            var response = await _rolService.ObtenerRolPorId(id);
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> GuardarOActualizarRol(Rol r)
         {
-            var response = await httpClientConnection.GuardarOActualizarRol(r);
+            var response = await _rolService.GuardarOActualizarRol(r);
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> EliminarRol(Rol r)
         {
-            var response = await httpClientConnection.EliminarRol(r);
+            var response = await _rolService.EliminarRol(r);
             return JsonConvert.SerializeObject(response);
         }
 

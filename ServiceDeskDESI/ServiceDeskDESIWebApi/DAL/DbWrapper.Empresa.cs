@@ -436,34 +436,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
-
-
-        public ModelResponse ObtenerPaginas()
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var paginas = GetObjects("ObtenerPaginas", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
-                    new Func<IDataReader, Pagina>((reader) =>
-                    {
-                        var pagina = LlenarEntidad<Pagina>(reader);
-                        return pagina;
-                    }));
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = paginas;
-                modelResponse.Message = "Páginas obtenidas correctamente.";
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error al obtener páginas");
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener las páginas.";
-            }
-
-            return modelResponse;
-        }
         #endregion
 
     }
