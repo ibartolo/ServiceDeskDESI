@@ -161,5 +161,41 @@ namespace ServiceDeskDESIWebApi.Services
                 return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar los permisos." };
             }
         }
+
+        public ModelResponse GuardarPermisosRolMasivo(long rolId, List<PermisoRequest> permisos, string usuario)
+        {
+            try
+            {
+                // Validaciones
+                if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (permisos == null) { throw new ArgumentException("La lista de permisos es requerida."); }
+
+
+                // Validar cada permiso individualmente
+                foreach (var permiso in permisos)
+                {
+                    if (permiso.PaginaId <= 0) { throw new ArgumentException("El ID de la página es requerido."); }
+
+                    // Validar que si tiene permisos de creación/edición/eliminación/exportación también tenga lectura
+                    if ((permiso.PuedeCrear || permiso.PuedeEditar || permiso.PuedeEliminar || permiso.PuedeExportar) && !permiso.PuedeLeer)
+                    {
+                        throw new ArgumentException($"No se puede asignar permisos de creación, edición, eliminación o exportación sin permisos de lectura para la página {permiso.PaginaId}.");
+                    }
+                }
+
+                return _dbWrapper.GuardarPermisosRolMasivo(rolId, permisos, usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en GuardarPermisosRolMasivo para rol {RolId} y usuario {Usuario}", rolId, usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en GuardarPermisosRolMasivo para rol {RolId} y usuario {Usuario}", rolId, usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar los permisos." };
+            }
+        }
     }
 }

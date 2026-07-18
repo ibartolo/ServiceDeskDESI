@@ -231,7 +231,10 @@
     var tablaRoles;
     var rolSeleccionadoId = null;
     var todasLasPaginas = [];
-    var permisosCache = {};
+    var paginasByRol = {
+        disponibles: [],
+        asignadas: []
+    };
 
     $(document).ready(function () {
         InicializarTablaRoles();
@@ -262,8 +265,10 @@
                 $("#chooserContainer").hide();
                 $("#btnGuardarPermisos").hide();
                 rolSeleccionadoId = null;
-                $("#paginasDisponibles").html('<div class="empty-message">Seleccione un rol para cargar las páginas</div>');
-                $("#paginasAsignadas").html('<div class="empty-message">No hay páginas asignadas a este rol</div>');
+                paginasByRol.disponibles = [];
+                paginasByRol.asignadas = [];
+                RenderizarChooser();
+                ActualizarBadges();
             }
         });
 
@@ -273,14 +278,14 @@
 
         // Event delegation para los botones dinámicos
         $(document).on('click', '.btn-move', function () {
-            var paginaId = $(this).closest('.chooser-item').data('id');
+            var paginaId = $(this).data('id');
             if (paginaId) {
                 AsignarPagina(paginaId);
             }
         });
 
         $(document).on('click', '.btn-move-danger', function () {
-            var paginaId = $(this).closest('.chooser-item').data('id');
+            var paginaId = $(this).data('id');
             if (paginaId) {
                 QuitarPagina(paginaId);
             }
@@ -294,17 +299,15 @@
             var accion = $(this).data('accion');
             var valor = $(this).is(':checked');
 
-            // Buscar el permiso en cache y actualizar
-            if (permisosCache[rolSeleccionadoId]) {
-                var permiso = permisosCache[rolSeleccionadoId].find(p => p.PaginaId === paginaId);
-                if (permiso) {
-                    switch (accion) {
-                        case 'Leer': permiso.PuedeLeer = valor; break;
-                        case 'Crear': permiso.PuedeCrear = valor; break;
-                        case 'Editar': permiso.PuedeEditar = valor; break;
-                        case 'Eliminar': permiso.PuedeEliminar = valor; break;
-                        case 'Exportar': permiso.PuedeExportar = valor; break;
-                    }
+            // Buscar la página asignada y actualizar su permiso
+            var asignada = paginasByRol.asignadas.find(p => p.Id === paginaId);
+            if (asignada) {
+                switch (accion) {
+                    case 'Leer': asignada.PuedeLeer = valor; break;
+                    case 'Crear': asignada.PuedeCrear = valor; break;
+                    case 'Editar': asignada.PuedeEditar = valor; break;
+                    case 'Eliminar': asignada.PuedeEliminar = valor; break;
+                    case 'Exportar': asignada.PuedeExportar = valor; break;
                 }
             }
         });
@@ -348,6 +351,7 @@
                     });
                 });
                 tablaRoles.draw();
+                ActualizarBadges();
             }
         });
     }
@@ -356,14 +360,12 @@
         GetMVC("/Security/ObtenerPermisosPorRol?rolId=" + rolId, function (response) {
             var result = typeof response === 'string' ? JSON.parse(response) : response;
 
-            // Inicializar cache si no existe
-            if (!permisosCache[rolId]) {
-                permisosCache[rolId] = [];
-            }
+            // Inicializar estructuras
+            paginasByRol.disponibles = [];
+            paginasByRol.asignadas = [];
 
             if (result.IsSuccess && result.Response) {
                 var permisos = result.Response;
-                permisosCache[rolId] = permisos;
 
                 // Crear diccionario de permisos por paginaId
                 var permisosDict = {};
@@ -372,47 +374,49 @@
                 });
 
                 // Separar páginas disponibles y asignadas
-                var disponibles = [];
-                var asignadas = [];
-
                 todasLasPaginas.forEach(function (pagina) {
                     if (permisosDict[pagina.Id]) {
-                        asignadas.push({
+                        paginasByRol.asignadas.push({
                             Id: pagina.Id,
                             Nombre: pagina.Nombre,
                             Direccion: pagina.Direccion,
-                            Permiso: permisosDict[pagina.Id]
+                            PuedeLeer: permisosDict[pagina.Id].PuedeLeer || false,
+                            PuedeCrear: permisosDict[pagina.Id].PuedeCrear || false,
+                            PuedeEditar: permisosDict[pagina.Id].PuedeEditar || false,
+                            PuedeEliminar: permisosDict[pagina.Id].PuedeEliminar || false,
+                            PuedeExportar: permisosDict[pagina.Id].PuedeExportar || false
                         });
                     } else {
-                        disponibles.push({
+                        paginasByRol.disponibles.push({
                             Id: pagina.Id,
                             Nombre: pagina.Nombre,
                             Direccion: pagina.Direccion
                         });
                     }
                 });
-
-                RenderizarChooser(disponibles, asignadas);
-                ActualizarBadges();
             } else {
-                // Si no hay permisos, mostrar todas las páginas como disponibles
-                var disponibles = todasLasPaginas.map(function (p) {
-                    return { Id: p.Id, Nombre: p.Nombre, Direccion: p.Direccion };
+                // Si no hay permisos, todas las páginas están disponibles
+                todasLasPaginas.forEach(function (pagina) {
+                    paginasByRol.disponibles.push({
+                        Id: pagina.Id,
+                        Nombre: pagina.Nombre,
+                        Direccion: pagina.Direccion
+                    });
                 });
-                permisosCache[rolId] = [];
-                RenderizarChooser(disponibles, []);
-                ActualizarBadges();
             }
+
+            RenderizarChooser();
+            ActualizarBadges();
         });
     }
 
-    function RenderizarChooser(disponibles, asignadas) {
-        // Renderizar disponibles (solo nombre de la página)
+    function RenderizarChooser() {
+        // Renderizar disponibles
         var htmlDisponibles = '';
-        if (disponibles.length === 0) {
+        if (paginasByRol.disponibles.length === 0) {
             htmlDisponibles = '<div class="empty-message">No hay páginas disponibles</div>';
         } else {
-            disponibles.forEach(function (pagina) {
+            paginasByRol.disponibles.forEach(function (pagina) {
                 htmlDisponibles += `
                     <div class="chooser-item disponible" data-id="${pagina.Id}">
                         <div class="item-info">
@@ -429,13 +433,12 @@
         }
         $('#paginasDisponibles').html(htmlDisponibles);
 
-        // Renderizar asignadas (nombre + checkboxes)
+        // Renderizar asignadas
         var htmlAsignadas = '';
-        if (asignadas.length === 0) {
+        if (paginasByRol.asignadas.length === 0) {
             htmlAsignadas = '<div class="empty-message">No hay páginas asignadas a este rol</div>';
         } else {
-            asignadas.forEach(function (item) {
-                var p = item.Permiso;
+            paginasByRol.asignadas.forEach(function (item) {
                 htmlAsignadas += `
                     <div class="chooser-item asignada" data-id="${item.Id}">
                         <div class="item-info">
@@ -444,11 +447,11 @@
                         </div>
                         <div class="item-actions">
                             <div class="permisos-checkboxes">
-                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Leer" ${p.PuedeLeer ? 'checked' : ''}> Leer</label>
-                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Crear" ${p.PuedeCrear ? 'checked' : ''}> Crear</label>
-                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Editar" ${p.PuedeEditar ? 'checked' : ''}> Editar</label>
-                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Eliminar" ${p.PuedeEliminar ? 'checked' : ''}> Eliminar</label>
-                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Exportar" ${p.PuedeExportar ? 'checked' : ''}> Exportar</label>
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Leer" ${item.PuedeLeer ? 'checked' : ''}> Leer</label>
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Crear" ${item.PuedeCrear ? 'checked' : ''}> Crear</label>
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Editar" ${item.PuedeEditar ? 'checked' : ''}> Editar</label>
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Eliminar" ${item.PuedeEliminar ? 'checked' : ''}> Eliminar</label>
+                                <label><input type="checkbox" class="permiso-check" data-paginaid="${item.Id}" data-accion="Exportar" ${item.PuedeExportar ? 'checked' : ''}> Exportar</label>
                             </div>
                             <button class="btn-move btn-move-danger" data-id="${item.Id}" title="Quitar página">
                                 <i class="fas fa-times"></i>
@@ -465,40 +468,47 @@
         if (!rolSeleccionadoId) return;
 
         // Verificar que la página no esté ya asignada
-        if (permisosCache[rolSeleccionadoId]) {
-            var existe = permisosCache[rolSeleccionadoId].some(p => p.PaginaId === paginaId);
-            if (existe) return;
-        }
+        var existe = paginasByRol.asignadas.some(p => p.Id === paginaId);
+        if (existe) return;
 
-        // Crear permiso por defecto (solo lectura)
-        var nuevoPermiso = {
-            PaginaId: paginaId,
+        // Buscar la página en disponibles
+        var index = paginasByRol.disponibles.findIndex(p => p.Id === paginaId);
+        if (index === -1) return;
+
+        // Mover de disponibles a asignadas con permisos por defecto
+        var pagina = paginasByRol.disponibles.splice(index, 1)[0];
+        paginasByRol.asignadas.push({
+            Id: pagina.Id,
+            Nombre: pagina.Nombre,
+            Direccion: pagina.Direccion,
             PuedeLeer: true,
             PuedeCrear: false,
             PuedeEditar: false,
             PuedeEliminar: false,
             PuedeExportar: false
-        };
+        });
 
-        if (!permisosCache[rolSeleccionadoId]) {
-            permisosCache[rolSeleccionadoId] = [];
-        }
-        permisosCache[rolSeleccionadoId].push(nuevoPermiso);
-
-        // Re-renderizar
-        CargarPermisos(rolSeleccionadoId);
+        RenderizarChooser();
+        ActualizarBadges();
     }
 
     function QuitarPagina(paginaId) {
         if (!rolSeleccionadoId) return;
 
-        // Eliminar el permiso del cache
-        if (permisosCache[rolSeleccionadoId]) {
-            permisosCache[rolSeleccionadoId] = permisosCache[rolSeleccionadoId].filter(p => p.PaginaId !== paginaId);
-        }
+        // Buscar la página en asignadas
+        var index = paginasByRol.asignadas.findIndex(p => p.Id === paginaId);
+        if (index === -1) return;
 
-        // Re-renderizar
-        CargarPermisos(rolSeleccionadoId);
+        // Mover de asignadas a disponibles
+        var pagina = paginasByRol.asignadas.splice(index, 1)[0];
+        paginasByRol.disponibles.push({
+            Id: pagina.Id,
+            Nombre: pagina.Nombre,
+            Direccion: pagina.Direccion
+        });
+
+        RenderizarChooser();
+        ActualizarBadges();
     }
 
     function SeleccionarRol(rolId) {
@@ -506,13 +516,19 @@
     }
 
     function ActualizarBadges() {
+        // Actualizar el contador de páginas en la tabla de roles
         tablaRoles.rows().every(function (rowIdx, tableLoop, rowLoop) {
             var data = this.data();
             var rolId = data.Id;
 
             var count = 0;
-            if (permisosCache[rolId]) {
-                count = permisosCache[rolId].length;
+            // Si el rol seleccionado es el que está en la tabla, usar el conteo actual
+            if (rolId === rolSeleccionadoId) {
+                count = paginasByRol.asignadas.length;
+            } else {
+                // Para otros roles, necesitaríamos tener sus permisos en cache
+                // Por ahora, usamos 0 si no hay datos
+                count = 0;
             }
 
             var cell = this.node().querySelector('.badge-paginas');
@@ -533,8 +549,7 @@
             return;
         }
 
-        var permisos = permisosCache[rolSeleccionadoId] || [];
-        if (permisos.length === 0) {
+        if (paginasByRol.asignadas.length === 0) {
             Swal.fire({
                 title: 'Advertencia',
                 text: 'No hay permisos asignados para guardar',
@@ -544,77 +559,70 @@
             return;
         }
 
-        // Validar que si tiene permisos de creación/edición/eliminación/exportación también tenga lectura
-        var error = false;
-        permisos.forEach(function (p) {
-            if ((p.PuedeCrear || p.PuedeEditar || p.PuedeEliminar || p.PuedeExportar) && !p.PuedeLeer) {
-                error = true;
-            }
-        });
-
-        if (error) {
-            Swal.fire({
-                title: 'Advertencia',
-                text: 'No se puede asignar permisos de creación, edición, eliminación o exportación sin permisos de lectura',
-                icon: 'warning',
-                confirmButtonText: 'Entendido'
-            });
-            return;
-        }
-
-        Swal.fire({
-            title: 'Guardando...',
-            text: 'Por favor espere',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        var total = permisos.length;
-        var completados = 0;
-        var errores = [];
-
-        permisos.forEach(function (permiso) {
-            var request = {
-                RolId: rolSeleccionadoId,
-                PaginaId: permiso.PaginaId,
-                PuedeLeer: permiso.PuedeLeer || false,
-                PuedeCrear: permiso.PuedeCrear || false,
-                PuedeEditar: permiso.PuedeEditar || false,
-                PuedeEliminar: permiso.PuedeEliminar || false,
-                PuedeExportar: permiso.PuedeExportar || false
+        // Construir la lista de permisos
+        var permisos = paginasByRol.asignadas.map(function (item) {
+            return {
+                PaginaId: item.Id,
+                PuedeLeer: item.PuedeLeer || false,
+                PuedeCrear: item.PuedeCrear || false,
+                PuedeEditar: item.PuedeEditar || false,
+                PuedeEliminar: item.PuedeEliminar || false,
+                PuedeExportar: item.PuedeExportar || false
             };
+        });
 
-            PostMVC('/Security/GuardarPermisosRol', request, function (response) {
-                completados++;
+        // Construir el request
+        var request = {
+            RolId: rolSeleccionadoId,
+            Permisos: permisos
+        };
 
-                if (!response.IsSuccess) {
-                    errores.push(response.Message);
-                }
+        // Mostrar confirmación antes de guardar
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Se guardarán los permisos asignados para este rol',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, guardar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#4e73df',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Guardando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
-                if (completados === total) {
+                // Una sola llamada al nuevo endpoint masivo
+                PostMVC('/Security/GuardarPermisosRolMasivo', request, function (response) {
                     Swal.close();
 
-                    if (errores.length > 0) {
-                        Swal.fire({
-                            title: 'Errores al guardar',
-                            text: 'Algunos permisos no se pudieron guardar: ' + errores.join(', '),
-                            icon: 'warning',
-                            confirmButtonText: 'Aceptar'
-                        });
-                    } else {
+                    if (response.IsSuccess) {
                         Swal.fire({
                             title: '¡Éxito!',
-                            text: 'Permisos guardados correctamente',
+                            text: response.Message,
                             icon: 'success',
                             timer: 1500,
                             showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
                         });
-                        CargarRoles();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar'
+                        });
                     }
-                }
-            });
+                });
+            }
         });
     }
 </script>

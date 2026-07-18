@@ -62,5 +62,10 @@ namespace ServiceDeskDESIMVC.Services
             }
             return false;
         }
+
+        public async Task<ModelResponse> GuardarPermisosRolMasivo(GuardarPermisosMasivoRequest request)
+        {
+            return await _httpClient.GuardarPermisosRolMasivo(request);
+        }
     }
 }
