@@ -331,5 +331,76 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+
+        public ModelResponse GuardarPermisosRolMasivo(long rolId, List<PermisoRequest> permisos, string usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                using (var scope = new System.Transactions.TransactionScope(
+                    System.Transactions.TransactionScopeOption.Required,
+                    new System.Transactions.TransactionOptions
+                    {
+                        IsolationLevel = System.Transactions.IsolationLevel.ReadCommitted,
+                        Timeout = TimeSpan.FromMinutes(2)
+                    }))
+                {
+                    // 1. Eliminar permisos existentes
+                    var resultadoEliminar = ExecuteScalar("EliminarPermisosRol", CommandType.StoredProcedure, new SqlParameter[]
+                    {
+                new SqlParameter("@RolId", rolId),
+                new SqlParameter("@Usuario", usuario)
+                    });
+
+                    if (Convert.ToInt32(resultadoEliminar) < 0)
+                    {
+                        modelResponse.IsSuccess = false;
+                        modelResponse.Message = "No tiene permisos para modificar este rol.";
+                        return modelResponse;
+                    }
+
+                    // 2. Insertar nuevos permisos
+                    if (permisos != null && permisos.Any())
+                    {
+                        foreach (var permiso in permisos)
+                        {
+                            var resultado = ExecuteScalar("GuardarPermisosRol", CommandType.StoredProcedure, new SqlParameter[]
+                            {
+                        new SqlParameter("@RolId", rolId),
+                        new SqlParameter("@PaginaId", permiso.PaginaId),
+                        new SqlParameter("@PuedeLeer", permiso.PuedeLeer),
+                        new SqlParameter("@PuedeCrear", permiso.PuedeCrear),
+                        new SqlParameter("@PuedeEditar", permiso.PuedeEditar),
+                        new SqlParameter("@PuedeEliminar", permiso.PuedeEliminar),
+                        new SqlParameter("@PuedeExportar", permiso.PuedeExportar),
+                        new SqlParameter("@ModificadoPor", usuario),
+                        new SqlParameter("@Usuario", usuario)
+                            });
+
+                            if (Convert.ToInt64(resultado) == 0)
+                            {
+                                throw new Exception($"Error al guardar permiso para página {permiso.PaginaId}");
+                            }
+                        }
+                    }
+
+                    // 3. Confirmar transacción
+                    scope.Complete();
+
+                    modelResponse.IsSuccess = true;
+                    modelResponse.Message = "Permisos guardados correctamente.";
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al guardar permisos masivos para rol {RolId} y usuario {Usuario}", rolId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al guardar los permisos.";
+            }
+
+            return modelResponse;
+        }
     }
 }

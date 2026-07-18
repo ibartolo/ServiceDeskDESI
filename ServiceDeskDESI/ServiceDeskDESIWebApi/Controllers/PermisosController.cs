@@ -91,22 +91,18 @@ namespace ServiceDeskDESIWebApi.Controllers
             );
             return result;
         }
-    }
 
-    public class ValidarPermisoRequest
-    {
-        public string NombrePagina { get; set; }
-        public string Accion { get; set; }
-    }
-
-    public class GuardarPermisosRequest
-    {
-        public long RolId { get; set; }
-        public long PaginaId { get; set; }
-        public bool PuedeLeer { get; set; }
-        public bool PuedeCrear { get; set; }
-        public bool PuedeEditar { get; set; }
-        public bool PuedeEliminar { get; set; }
-        public bool PuedeExportar { get; set; }
+        /// <summary>
+        /// Guarda todos los permisos de un rol de forma masiva
+        /// </summary>
+        /// <param name="request">Objeto con RolId y lista de permisos</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpPost, Route("GuardarMasivo")]
+        public ModelResponse GuardarPermisosRolMasivo([FromBody] GuardarPermisosMasivoRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _permisosService.GuardarPermisosRolMasivo(request.RolId, request.Permisos, usuario);
+            return result;
+        }
     }
 }

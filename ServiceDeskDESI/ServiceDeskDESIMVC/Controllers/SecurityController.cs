@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Http;
 using System.Web.Mvc;
 using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
 
@@ -113,6 +114,12 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> GuardarPermisosRol(GuardarPermisosRequest request)
         {
             var response = await _permisosService.GuardarPermisosRol(request);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> GuardarPermisosRolMasivo([FromBody] GuardarPermisosMasivoRequest request)
+        {
+            var response = await _permisosService.GuardarPermisosRolMasivo(request);
             return JsonConvert.SerializeObject(response);
         }
 
