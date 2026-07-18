@@ -46,6 +46,7 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
+
         public async Task<ModelResponse> EliminarRol(Rol rol)
         {
             MappingColumSecurity(rol);
@@ -58,6 +59,48 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
+        public async Task<ModelResponse> AsignarRolUsuario(long usuarioId, long rolId)
+        {
+            var request = new
+            {
+                UsuarioId = usuarioId,
+                RolId = rolId
+            };
+
+            var result = await RequestAsync<object>($"api/Rol/Asignar", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> ObtenerRolesPorUsuario(long usuarioId)
+        {
+            var result = await RequestAsync<object>($"api/Rol/Usuario/{usuarioId}", HttpMethod.Get, null,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> EliminarRolUsuario(long usuarioRolId)
+        {
+            var request = new
+            {
+                UsuarioRolId = usuarioRolId
+            };
+
+            var result = await RequestAsync<object>($"api/Rol/EliminarUsuarioRol", HttpMethod.Delete, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
     }
-    
 }

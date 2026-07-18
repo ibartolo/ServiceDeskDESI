@@ -249,6 +249,7 @@
     <Compile Include="Helpers\EmailHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AreaService.cs" />
+    <Compile Include="Services\PaginaService.cs" />
     <Compile Include="Services\PermisosService.cs" />
     <Compile Include="Services\RolService.cs" />
   </ItemGroup>

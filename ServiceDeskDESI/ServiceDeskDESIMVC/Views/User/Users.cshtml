@@ -84,16 +84,22 @@
 
         <!-- FILA 4: Sucursal y Área -->
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="mb-3">
                     <label>Sucursal:</label>
                     @Html.DropDownListFor(x => x.Sucursal.Id, (IEnumerable<SelectListItem>)ViewBag.Sucursales, "Seleccione una sucursal", new { @class = "form-control", id = "ddlSucursal" })
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="mb-3">
                     <label>Área:</label>
                     @Html.DropDownListFor(x => x.Area.Id, (IEnumerable<SelectListItem>)ViewBag.Areas, "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Rol:</label>
+                    @Html.DropDownList("RolId", (IEnumerable<SelectListItem>)ViewBag.Roles, "Seleccione un rol", new { @class = "form-control", id = "ddlRol" })
                 </div>
             </div>
         </div>

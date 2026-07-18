@@ -84,7 +84,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             var usuarioAdmin = User.Identity.Name;
             var empresaId = ObtenerEmpresaId();
-            var result = dbWrapper.AsignarRolUsuario(request.UsuarioId, request.RolId, usuarioAdmin, empresaId);
+            var result = _rolService.AsignarRolUsuario(request.UsuarioId, request.RolId, usuarioAdmin, empresaId);
             return result;
         }
 
@@ -97,7 +97,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerRolesPorUsuario(long usuarioId)
         {
             var usuarioAutenticado = User.Identity.Name;
-            var result = dbWrapper.ObtenerRolesPorUsuario(usuarioId, usuarioAutenticado);
+            var result = _rolService.ObtenerRolesPorUsuario(usuarioId, usuarioAutenticado);
             return result;
         }
 
@@ -111,7 +111,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             var usuarioAdmin = User.Identity.Name;
             var empresaId = ObtenerEmpresaId();
-            var result = dbWrapper.EliminarRolUsuario(request.UsuarioRolId, usuarioAdmin, empresaId);
+            var result = _rolService.EliminarRolUsuario(request.UsuarioRolId, usuarioAdmin, empresaId);
             return result;
         }
 
