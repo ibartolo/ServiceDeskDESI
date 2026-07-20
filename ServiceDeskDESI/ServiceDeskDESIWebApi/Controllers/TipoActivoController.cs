@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,12 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/TipoActivo")]
     public class TipoActivoController : BaseController
     {
+        private readonly TipoActivoService _tipoActivoService;
+
+        public TipoActivoController()
+        {
+            _tipoActivoService = new TipoActivoService();
+        }
         /// <summary>
         /// Obtiene todos los tipos de activo de la empresa del usuario autenticado
         /// </summary>
@@ -47,7 +54,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarOActualizarTipoActivo(TipoActivo tipoActivo)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.GuardarOActualizarTipoActivo(tipoActivo, usuario);
+            var result = _tipoActivoService.GuardarOActualizarTipoActivo(tipoActivo, usuario);
             return result;
         }
 
@@ -61,7 +68,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             var usuario = User.Identity.Name;
             tipoActivo.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarTipoActivo(tipoActivo.Id, tipoActivo.ModificadoPor, tipoActivo.FechaModificacion.Value, usuario);
+            var result = _tipoActivoService.EliminarTipoActivo(tipoActivo.Id, tipoActivo.ModificadoPor, tipoActivo.FechaModificacion.Value, usuario);
             return result;
         }
     }

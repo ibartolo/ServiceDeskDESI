@@ -1,4 +1,6 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using Serilog;
+using ServiceDeskDESIEntities.Autenticacion;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
@@ -16,7 +18,7 @@ namespace ServiceDeskDESIWebApi.DAL
             var modelResponse = new ModelResponse();
             try
             {
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                //if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
 
                 var companias = GetObjects("ObtenerCompanias", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@EmpresaId", empresaId) },
@@ -30,13 +32,14 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Message = "Companias obtenidas correctamente";
 
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
+            //catch (ArgumentException ex)
+            //{
+            //    modelResponse.IsSuccess = false;
+            //    modelResponse.Message = ex.Message;
+            //}
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener Compania para empresa {EmpresaId}", empresaId);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener las áreas";
             }
@@ -50,13 +53,13 @@ namespace ServiceDeskDESIWebApi.DAL
             try
             {
                 // validaciones
-                if (string.IsNullOrWhiteSpace(c.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
-                if (c.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (c.Acronimo != null && c.Acronimo.Length > 500) { throw new ArgumentException("El Acronimo no puede exceder los 500 caracteres."); }
-                if (c.RFC != null && c.RFC.Length > 100) { throw new ArgumentException("El RFC no puede exceder los 100 caracteres."); }
-                if (c.Direccion != null && c.Direccion.Length > 100) { throw new ArgumentException("La Direccion no puede exceder los 100 caracteres."); }
-                if (string.IsNullOrWhiteSpace(c.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                //if (string.IsNullOrWhiteSpace(c.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
+                //if (c.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
+                //if (c.Acronimo != null && c.Acronimo.Length > 500) { throw new ArgumentException("El Acronimo no puede exceder los 500 caracteres."); }
+                //if (c.RFC != null && c.RFC.Length > 100) { throw new ArgumentException("El RFC no puede exceder los 100 caracteres."); }
+                //if (c.Direccion != null && c.Direccion.Length > 100) { throw new ArgumentException("La Direccion no puede exceder los 100 caracteres."); }
+                //if (string.IsNullOrWhiteSpace(c.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
+                //if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
                 var parametrosObj = new
                 {
                     c.Id,
@@ -72,7 +75,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     EmpresaId = empresaId
 
                 };
-               var parametros = ObtenerParametrosSQL(c).ToArray();
+               var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
                 var companiaId = ExecuteScalar("GuardarOActualizarCompania", CommandType.StoredProcedure, parametros);
                 if (Convert.ToInt64(companiaId)== 0)
                 {
@@ -86,13 +89,14 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = c;
                 modelResponse.Message = "Compania Guardado correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
+            //catch (ArgumentException ex)
+            //{
+            //    modelResponse.IsSuccess = false;
+            //    modelResponse.Message = ex.Message;
+            //}
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al guardar Copania");
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar el Compania";
             }
@@ -103,8 +107,8 @@ namespace ServiceDeskDESIWebApi.DAL
             var modelResponse = new ModelResponse();
            try
            {
-                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                //if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
+                //if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
                 var result = GetObject("ObtenerCompaniaPorId", CommandType.StoredProcedure,
                       new[] {
                 new SqlParameter("@Id", id),
@@ -126,13 +130,14 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Compania obtenido correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
+            //catch (ArgumentException ex)
+            //{
+            //    modelResponse.IsSuccess = false;
+            //    modelResponse.Message = ex.Message;
+            //}
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener área {Id} para empresaId {empresaId}", id, empresaId);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener Compania";
             }
@@ -146,9 +151,9 @@ namespace ServiceDeskDESIWebApi.DAL
             var modelResponse = new ModelResponse();
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID de la Compania es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                //if (id <= 0) { throw new ArgumentException("El ID de la Compania es requerido."); }
+                //if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
+                //if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
 
               var result=ExecuteScalar  ("EliminarCompania", CommandType.StoredProcedure, new SqlParameter[]
                 
@@ -169,13 +174,14 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Compania eliminada correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
+            //catch (ArgumentException ex)
+            //{
+            //    modelResponse.IsSuccess = false;
+            //    modelResponse.Message = ex.Message;
+            //}
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al eliminar área {Id} para empresaid {EmpresaId}", id, empresaId);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al eliminar la Compània";
             }

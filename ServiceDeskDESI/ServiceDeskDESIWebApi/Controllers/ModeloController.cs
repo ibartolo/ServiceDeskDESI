@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,11 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Modelo")]
     public class ModeloController : BaseController
     {
+        private readonly ModeloService _modeloService;
+        public ModeloController()
+        {
+            _modeloService = new ModeloService();
+        }
         /// <summary>
         /// Obtiene todos los modelos de la empresa del usuario autenticado
         /// </summary>
@@ -21,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerTodosLosModelos()
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerTodosLosModelos(usuario);
+            var result = _modeloService.ObtenerModelos(usuario);
             return result;
         }
 
@@ -34,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerModeloPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerModeloPorId(id, usuario);
+            var result = _modeloService.ObtenerModeloPorId(id, usuario);
             return result;
         }
 
@@ -47,7 +53,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerModelosPorMarca(long marcaId)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerModelosPorMarca(marcaId, usuario);
+            var result = _modeloService.ObtenerModelosPorMarcaId(marcaId, usuario);
             return result;
         }
 
@@ -60,7 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarOActualizarModelo(Modelo modelo)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.GuardarOActualizarModelo(modelo, usuario);
+            var result = _modeloService.GuardarOActualizarModelo(modelo, usuario);
             return result;
         }
 
@@ -74,7 +80,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             var usuario = User.Identity.Name;
             modelo.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarModelo(modelo.Id, modelo.ModificadoPor, modelo.FechaModificacion.Value, usuario);
+            var result = _modeloService.EliminarModelo(modelo.Id, modelo.ModificadoPor, modelo.FechaModificacion.Value, usuario);
             return result;
         }
     }
