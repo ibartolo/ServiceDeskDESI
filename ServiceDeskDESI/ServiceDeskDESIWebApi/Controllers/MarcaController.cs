@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,11 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Marca")]
     public class MarcaController : BaseController
     {
+        private readonly MarcaService _marcaService;
+        public MarcaController()
+        {
+            _marcaService = new MarcaService();
+        }
         /// <summary>
         /// Obtiene todas las marcas de la empresa del usuario autenticado
         /// </summary>
@@ -21,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerTodosLasMarcas()
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerTodosLasMarcas(usuario);
+            var result = _marcaService.ObtenerMarcas(usuario);
             return result;
         }
 
@@ -34,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerMarcaPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerMarcaPorId(id, usuario);
+            var result = _marcaService.ObtenerMarcaPorId(id, usuario);
             return result;
         }
 
@@ -47,7 +53,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarOActualizarMarca(Marca marca)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.GuardarOActualizarMarca(marca, usuario);
+            var result = _marcaService.GuardarOActualizarMarca(marca, usuario);
             return result;
         }
 
@@ -61,7 +67,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             var usuario = User.Identity.Name;
             marca.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarMarca(marca.Id, marca.ModificadoPor, marca.FechaModificacion.Value, usuario);
+            var result = _marcaService.EliminarMarca(marca.Id, marca.ModificadoPor, marca.FechaModificacion.Value, usuario);
             return result;
         }
     }
