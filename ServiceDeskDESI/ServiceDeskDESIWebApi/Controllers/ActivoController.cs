@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,13 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Activo")]
     public class ActivoController : BaseController
     {
+        private readonly ActivoService _activoService;
+
+        public ActivoController()
+        {
+            _activoService = new ActivoService();
+        }
+
         /// <summary>
         /// Obtiene todos los activos de la empresa del usuario autenticado
         /// </summary>
@@ -21,7 +29,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerTodosLosActivos()
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerTodosLosActivos(usuario);
+            var result = _activoService.ObtenerTodosLosActivos(usuario);
             return result;
         }
 
@@ -34,7 +42,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerActivoPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerActivoPorId(id, usuario);
+            var result = _activoService.ObtenerActivoPorId(id, usuario);
             return result;
         }
 
@@ -47,7 +55,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarOActualizarActivo(Activo activo)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.GuardarOActualizarActivo(activo, usuario);
+            var result = _activoService.GuardarOActualizarActivo(activo, usuario);
             return result;
         }
 
@@ -61,7 +69,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             var usuario = User.Identity.Name;
             activo.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarActivo(activo.Id, activo.ModificadoPor, activo.FechaModificacion.Value, usuario);
+            var result = _activoService.EliminarActivo(activo.Id, activo.ModificadoPor, activo.FechaModificacion.Value, usuario);
             return result;
         }
     }
