@@ -248,6 +248,7 @@
     <Compile Include="Helpers\Cryptography.cs" />
     <Compile Include="Helpers\EmailHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ActivoServices.cs" />
     <Compile Include="Services\AreaService.cs" />
     <Compile Include="Services\CompaniaService.cs" />
     <Compile Include="Services\MarcaService.cs" />
