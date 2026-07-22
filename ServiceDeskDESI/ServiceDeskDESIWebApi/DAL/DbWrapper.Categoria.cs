@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
@@ -18,8 +16,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var categorias = GetObjects("ObtenerCategorias", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, Categoria>((reader) =>
@@ -48,11 +44,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = categorias;
                 modelResponse.Message = "Categorías obtenidas correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener categorías para usuario {Usuario}", usuario);
@@ -69,13 +60,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (areaId <= 0) { throw new ArgumentException("El ID del área es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var categorias = GetObjects("ObtenerCategoriasPorArea", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@AreaId", areaId),
-                new SqlParameter("@Usuario", usuario)
+                        new SqlParameter("@AreaId", areaId),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Categoria>((reader) =>
                     {
@@ -103,11 +91,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = categorias;
                 modelResponse.Message = "Categorías por área obtenidas correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener categorías por área {AreaId} para usuario {Usuario}", areaId, usuario);
@@ -124,13 +107,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID de la categoría es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var categoria = GetObject("ObtenerCategoriaPorId", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@Id", id),
-                new SqlParameter("@Usuario", usuario)
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Categoria>((reader) =>
                     {
@@ -165,11 +145,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = categoria;
                 modelResponse.Message = "Categoría obtenida correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener categoría {Id} para usuario {Usuario}", id, usuario);
@@ -186,13 +161,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (categoriaPadreId <= 0) { throw new ArgumentException("El ID de la categoría padre es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var categorias = GetObjects("ObtenerCategoriasPorPadre", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@CategoriaPadreId", categoriaPadreId),
-                new SqlParameter("@Usuario", usuario)
+                        new SqlParameter("@CategoriaPadreId", categoriaPadreId),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Categoria>((reader) =>
                     {
@@ -211,11 +183,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = categorias;
                 modelResponse.Message = "Subcategorías obtenidas correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener subcategorías para categoría padre {CategoriaPadreId} para usuario {Usuario}", categoriaPadreId, usuario);
@@ -232,15 +199,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(c.Nombre)) { throw new ArgumentException("El nombre de la categoría es requerido."); }
-                if (c.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (c.Descripcion != null && c.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
-                if (c.Area == null || c.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (c.CategoriaPadre != null && c.CategoriaPadre.Id == c.Id) { throw new ArgumentException("La categoría no puede ser padre de sí misma."); }
-                if (string.IsNullOrWhiteSpace(c.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var parametrosObj = new
                 {
                     c.Id,
@@ -273,11 +231,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = c;
                 modelResponse.Message = "Categoría guardada correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al guardar categoría para usuario {Usuario}", usuario);
@@ -294,16 +247,12 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID de la categoría es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var result = ExecuteScalar("EliminarCategoria", CommandType.StoredProcedure, new SqlParameter[]
                 {
-            new SqlParameter("@Id", id),
-            new SqlParameter("@ModificadoPor", modificadoPor),
-            new SqlParameter("@FechaModificacion", fechaModificacion),
-            new SqlParameter("@Usuario", usuario)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion),
+                    new SqlParameter("@Usuario", usuario)
                 });
 
                 if (Convert.ToInt64(result) == 0)
@@ -315,11 +264,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Categoría eliminada correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {

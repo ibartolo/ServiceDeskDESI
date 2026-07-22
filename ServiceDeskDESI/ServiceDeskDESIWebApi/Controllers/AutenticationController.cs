@@ -1,7 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Seguridad;
-using ServiceDeskDESIWebApi.DAL;
-using ServiceDeskDESIWebApi.Helpers;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +14,11 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Autentication")]
     public class AutenticationController : BaseController
     {
-        private readonly DbWrapper dbWrapper;
+        private readonly AutenticacionService _autenticacionService;
 
         public AutenticationController()
         {
-            dbWrapper = new DbWrapper();
+            _autenticacionService = new AutenticacionService();
         }
 
         /// <summary>
@@ -30,7 +29,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerUsuarios()
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerUsuarios(usuario);
+            var result = _autenticacionService.ObtenerUsuarios(usuario);
             return result;
         }
 
@@ -43,7 +42,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerUsuarioPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerUsuarioPorId(id, usuario);
+            var result = _autenticacionService.ObtenerUsuarioPorId(id, usuario);
             return result;
         }
 
@@ -55,7 +54,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpPost, Route("User")]
         public ModelResponse GuardarOActualizarUsuario(Usuario u)
         {
-            var result = dbWrapper.GuardarOActualizarUsuario(u);
+            var result = _autenticacionService.GuardarOActualizarUsuario(u);
             return result;
         }
 
@@ -68,7 +67,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpPost, Route("User/Empresa")]
         public ModelResponse GuardarUsuarioEmpresa(Usuario u)
         {
-            var result = dbWrapper.GuardarOActualizarUsuario(u);
+            var result = _autenticacionService.GuardarOActualizarUsuario(u);
             return result;
         }
 
@@ -81,7 +80,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ActualizarPerfilUsuario(Usuario usuario)
         {
             var usuarioAutenticado = User.Identity.Name;
-            var result = dbWrapper.ActualizarPerfilUsuario(usuario, usuarioAutenticado);
+            var result = _autenticacionService.ActualizarPerfilUsuario(usuario, usuarioAutenticado);
             return result;
         }
 
@@ -94,10 +93,9 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse EliminarUsuario(Usuario u)
         {
             u.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarUsuario(u.Id, u.ModificadoPor, u.FechaModificacion.Value);
+            var result = _autenticacionService.EliminarUsuario(u.Id, u.ModificadoPor, u.FechaModificacion.Value);
             return result;
         }
-        
 
         /// <summary>
         /// Autentica un usuario en el sistema
@@ -107,86 +105,20 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpPost, Route("autenticar")]
         public ModelResponse AutenticarUsuario(Usuario u)
         {
-            var result = dbWrapper.AutenticarUsuario(u.NombreUsuario, u.Contrasena);
+            var result = _autenticacionService.AutenticarUsuario(u.NombreUsuario, u.Contrasena);
             return result;
         }
 
         /// <summary>
         /// Método que se va a encargar de mandar un correo para restaurar la contraseña
         /// </summary>
-        /// <param name="u"></param>
-        /// <returns></returns>
+        /// <param name="u">Objeto usuario con Correo</param>
+        /// <returns>Resultado de la operación</returns>
         [HttpPost, Route("ValidarRecetearContrasenia")]
         public ModelResponse ValidarRecetearContrasenia(Usuario u)
         {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                //// Obtener empresaId del usuario desde la sesión o del objeto
-                //// Por ahora se asume que el usuario tiene empresa, si no, se debe obtener de otra manera
-                //long empresaId = u.Empresa?.Id ?? 0;
-
-                //if (empresaId == 0)
-                //{
-                //    modelResponse.IsSuccess = false;
-                //    modelResponse.Message = "No se pudo identificar la empresa del usuario";
-                //    return modelResponse;
-                //}
-
-                var userResponse = dbWrapper.ObtenerUsuarioPorCorreo(u.Correo);
-
-                if (userResponse == null || !userResponse.IsSuccess || userResponse.Response == null)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "La información proporcionada no es correcta";
-                    return modelResponse;
-                }
-
-                var usuario = (Usuario)userResponse.Response;
-
-                // Generar token único para recuperación
-                string token = Guid.NewGuid().ToString();
-                int vigenciaMinutos = 10;
-                DateTime fechaExpiracion = DateTime.Now.AddMinutes(vigenciaMinutos);
-
-                // Guardar token en base de datos
-                var tokenResponse = dbWrapper.InsertarTokenRecuperacion(usuario.Id, token, fechaExpiracion, "system");
-
-                if (!tokenResponse.IsSuccess)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Error al generar la solicitud de recuperación";
-                    return modelResponse;
-                }
-
-                // Obtener URL base del Web.config
-                string baseUri = System.Configuration.ConfigurationManager.AppSettings["BaseUri"];
-                string urlRecuperacion = $"{baseUri}Home/RecoverPassword/{token}";
-
-                // Leer template
-                string templatePath = System.Web.Hosting.HostingEnvironment.MapPath("~/Template/Template_RecuperarEmail.html");
-                string templateHtml = System.IO.File.ReadAllText(templatePath);
-
-                // Reemplazar variables en el template
-                templateHtml = templateHtml.Replace("{{Nombre}}", usuario.Nombre);
-                templateHtml = templateHtml.Replace("{{Apellido}}", usuario.Apellido);
-                templateHtml = templateHtml.Replace("{{UrlRecuperacion}}", urlRecuperacion);
-
-                // Enviar correo
-                var para = new List<string> { usuario.Correo };
-                EmailHelper.EnvioEmaiil(para, "Recuperación de contraseña - Service Desk DESI", templateHtml, false);
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Message = "Se ha enviado un correo para restablecer la contraseña";
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al procesar la solicitud";
-            }
-
-            return modelResponse;
+            var result = _autenticacionService.ValidarRecetearContrasenia(u.Correo);
+            return result;
         }
 
         /// <summary>
@@ -197,7 +129,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpGet, Route("validarToken/{token}")]
         public ModelResponse ValidarTokenRecuperacion(string token)
         {
-            var result = dbWrapper.ObtenerTokenRecuperacion(token);
+            var result = _autenticacionService.ObtenerTokenRecuperacion(token);
             return result;
         }
 
@@ -209,54 +141,8 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpPost, Route("restablecerContrasenia")]
         public ModelResponse RestablecerContrasenia(RestablecerContraseniaRequest request)
         {
-            var usuarioAutenticado = User.Identity.Name;
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                // Validar token
-                var tokenResponse = dbWrapper.ObtenerTokenRecuperacion(request.Token);
-
-                if (!tokenResponse.IsSuccess || tokenResponse.Response == null)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "El enlace de recuperación no es válido o ha expirado";
-                    return modelResponse;
-                }
-
-                dynamic tokenInfo = tokenResponse.Response;
-
-                // Actualizar contraseña del usuario
-                var usuario = new Usuario
-                {
-                    Id = tokenInfo.UsuarioId,
-                    Contrasena = request.NuevaContrasena,
-                    ModificadoPor = tokenInfo.NombreUsuario,
-                    FechaModificacion = DateTime.Now
-                };
-
-                var updateResponse = dbWrapper.ActualizarContrasena(usuario, usuarioAutenticado);
-
-                if (!updateResponse.IsSuccess)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = updateResponse.Message;
-                    return modelResponse;
-                }
-
-                // Marcar token como usado
-                dbWrapper.ActualizarTokenUsado(tokenInfo.Id, tokenInfo.NombreUsuario);
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Message = "Contraseña actualizada correctamente";
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al procesar la solicitud";
-            }
-
-            return modelResponse;
+            var result = _autenticacionService.RestablecerContrasenia(request.Token, request.NuevaContrasena);
+            return result;
         }
 
         /// <summary>
@@ -268,8 +154,14 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarOActualizarUsuarioAdmin(Usuario usuario)
         {
             var usuarioAdmin = User.Identity.Name;
-            var result = dbWrapper.GuardarOActualizarUsuarioAdmin(usuario, usuarioAdmin);
+            var result = _autenticacionService.GuardarOActualizarUsuarioAdmin(usuario, usuarioAdmin);
             return result;
         }
+    }
+
+    public class RestablecerContraseniaRequest
+    {
+        public string Token { get; set; }
+        public string NuevaContrasena { get; set; }
     }
 }

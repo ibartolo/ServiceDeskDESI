@@ -1,15 +1,12 @@
 ﻿using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
-using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
 using Serilog;
-using System.Transactions;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
@@ -21,8 +18,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var usuarios = GetObjects("ObtenerUsuarios", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, Usuario>((reader) =>
@@ -54,11 +49,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = usuarios;
                 modelResponse.Message = "Usuarios obtenidos correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener usuarios para usuario {Usuario}", usuario);
@@ -75,13 +65,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var u = GetObject("ObtenerUsuarioPorId", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@Id", id),
-                new SqlParameter("@Usuario", usuario)
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
@@ -119,14 +106,112 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = u;
                 modelResponse.Message = "Usuario obtenido correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener usuario {Id} para usuario {Usuario}", id, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener el usuario";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ObtenerUsuarioPorNombreUsuario(string nombreUsuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var u = GetObject("ObtenerUsuarioPorNombreUsuario", CommandType.StoredProcedure,
+                    new[] {
+                        new SqlParameter("@NombreUsuario", nombreUsuario)
+                    },
+                    new Func<IDataReader, Usuario>((reader) =>
+                    {
+                        var user = LlenarEntidad<Usuario>(reader);
+
+                        user.Sucursal = new Sucursal()
+                        {
+                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
+                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
+                        };
+
+                        user.Area = new Area()
+                        {
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
+                        };
+
+                        user.Empresa = new Empresa()
+                        {
+                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
+                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
+                        };
+
+                        return user;
+                    }));
+
+                if (u == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró el usuario especificado.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = u;
+                modelResponse.Message = "Usuario obtenido correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener usuario por nombre {NombreUsuario} para usuario {Usuario}", nombreUsuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener el usuario";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ObtenerUsuarioPorCorreo(string correo)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var usuario = GetObject("ObtenerUsuarioPorCorreo", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Correo", correo) },
+                    new Func<IDataReader, Usuario>((reader) =>
+                    {
+                        var u = LlenarEntidad<Usuario>(reader);
+
+                        u.Sucursal = new Sucursal()
+                        {
+                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
+                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
+                        };
+
+                        u.Area = new Area()
+                        {
+                            Id = MapearPorpiedades<long>(reader["AreaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
+                        };
+
+                        u.Empresa = new Empresa()
+                        {
+                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
+                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
+                        };
+
+                        return u;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = usuario;
+                modelResponse.Message = "Usuario obtenido correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener usuario por correo {Correo}", correo);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener el usuario";
             }
@@ -140,23 +225,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(u.NombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-                if (u.NombreUsuario.Length > 25) { throw new ArgumentException("El nombre de usuario no puede exceder los 25 caracteres."); }
-                if (string.IsNullOrWhiteSpace(u.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
-                if (u.Contrasena.Length > 250) { throw new ArgumentException("La contraseña no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(u.Correo)) { throw new ArgumentException("El correo es requerido."); }
-                if (u.Correo.Length > 250) { throw new ArgumentException("El correo no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(u.Nombre)) { throw new ArgumentException("El nombre es requerido."); }
-                if (u.Nombre.Length > 150) { throw new ArgumentException("El nombre no puede exceder los 150 caracteres."); }
-                if (string.IsNullOrWhiteSpace(u.Apellido)) { throw new ArgumentException("El apellido es requerido."); }
-                if (u.Apellido.Length > 250) { throw new ArgumentException("El apellido no puede exceder los 250 caracteres."); }
-                if (u.Sucursal == null || u.Sucursal.Id <= 0) { throw new ArgumentException("La sucursal es requerida."); }
-                if (u.Area == null || u.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (u.Empresa == null || u.Empresa.Id <= 0) { throw new ArgumentException("La empresa es requerida."); }
-                if (string.IsNullOrWhiteSpace(u.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-
-                // Crear objeto anónimo con los nombres de parámetros correctos
                 var parametrosObj = new
                 {
                     u.Id,
@@ -176,7 +244,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     u.Firma,
                     u.RFC,
                     AreaId = u.Area.Id,
-                    EmpresaId = u.Empresa.Id,
+                    EmpresaId = u.Empresa.Id
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
@@ -195,13 +263,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = u;
                 modelResponse.Message = "Usuario guardado correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al guardar usuario");
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar el usuario";
             }
@@ -215,23 +279,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(usuario.NombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-                if (usuario.NombreUsuario.Length > 25) { throw new ArgumentException("El nombre de usuario no puede exceder los 25 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
-                if (usuario.Contrasena.Length > 250) { throw new ArgumentException("La contraseña no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.Correo)) { throw new ArgumentException("El correo es requerido."); }
-                if (usuario.Correo.Length > 250) { throw new ArgumentException("El correo no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.Nombre)) { throw new ArgumentException("El nombre es requerido."); }
-                if (usuario.Nombre.Length > 150) { throw new ArgumentException("El nombre no puede exceder los 150 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.Apellido)) { throw new ArgumentException("El apellido es requerido."); }
-                if (usuario.Apellido.Length > 250) { throw new ArgumentException("El apellido no puede exceder los 250 caracteres."); }
-                if (usuario.Sucursal == null || usuario.Sucursal.Id <= 0) { throw new ArgumentException("La sucursal es requerida."); }
-                if (usuario.Area == null || usuario.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (usuario.Empresa == null || usuario.Empresa.Id <= 0) { throw new ArgumentException("La empresa es requerida."); }
-                if (string.IsNullOrWhiteSpace(usuario.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuarioAdmin)) { throw new ArgumentException("El usuario administrador es requerido."); }
-
                 var parametrosObj = new
                 {
                     usuario.Id,
@@ -282,16 +329,9 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 usuario.Id = resultadoLong;
 
-                EnviarCorreoNuevoUsuario(usuario, Cryptography.Decrypt(usuario.Contrasena));
-
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = usuario;
                 modelResponse.Message = "Usuario guardado correctamente.";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
@@ -309,22 +349,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                // Validaciones
-                if (usuario.Id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario.NombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-                if (usuario.NombreUsuario.Length > 25) { throw new ArgumentException("El nombre de usuario no puede exceder los 25 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.Correo)) { throw new ArgumentException("El correo es requerido."); }
-                if (usuario.Correo.Length > 250) { throw new ArgumentException("El correo no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.Nombre)) { throw new ArgumentException("El nombre es requerido."); }
-                if (usuario.Nombre.Length > 150) { throw new ArgumentException("El nombre no puede exceder los 150 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.Apellido)) { throw new ArgumentException("El apellido es requerido."); }
-                if (usuario.Apellido.Length > 250) { throw new ArgumentException("El apellido no puede exceder los 250 caracteres."); }
-                if (usuario.Sucursal == null || usuario.Sucursal.Id <= 0) { throw new ArgumentException("La sucursal es requerida."); }
-                if (usuario.Area == null || usuario.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (usuario.Empresa == null || usuario.Empresa.Id <= 0) { throw new ArgumentException("La empresa es requerida."); }
-                if (string.IsNullOrWhiteSpace(usuario.ModificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuarioAutenticado)) { throw new ArgumentException("El usuario autenticado es requerido."); }
-
                 var parametrosObj = new
                 {
                     usuario.Id,
@@ -359,322 +383,11 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = usuario;
                 modelResponse.Message = "Perfil actualizado correctamente.";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al actualizar perfil del usuario {UsuarioId} por {UsuarioAutenticado}", usuario.Id, usuarioAutenticado);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al actualizar el perfil.";
-            }
-
-            return modelResponse;
-        }
-
-        public ModelResponse GuardarNuevaEmpresaConDatosIniciales(Empresa empresa)
-        {
-            var modelResponse = new ModelResponse();
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Empresa empresaGuardada = null;
-            Sucursal sucursalGuardada = null;
-            Area areaGuardada = null;
-            Usuario usuarioAdmin = null;
-            long rolAdminId = 0;
-            long usuarioAdminId = 0;
-
-            try
-            {
-                Log.Information("=== INICIO REGISTRO DE NUEVA EMPRESA ===");
-                Log.Information("Datos recibidos - NombreComercial: {NombreComercial}, RazonSocial: {RazonSocial}, RFC: {RFC}, Correo: {CorreoContacto}, Responsable: {Responsable}",
-                    empresa?.NombreComercial, empresa?.RazonSocial, empresa?.RFC, empresa?.CorreoContacto, empresa?.Responsable);
-
-                // =========================================
-                // VALIDACIONES DE EMPRESA (antes de la transacción)
-                // =========================================
-                Log.Debug("Iniciando validaciones de campos requeridos...");
-
-                if (string.IsNullOrWhiteSpace(empresa.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
-                if (empresa.NombreComercial.Length > 250) { throw new ArgumentException("El nombre comercial no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(empresa.RazonSocial)) { throw new ArgumentException("La razón social es requerida."); }
-                if (empresa.RazonSocial.Length > 250) { throw new ArgumentException("La razón social no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(empresa.RFC)) { throw new ArgumentException("El RFC es requerido."); }
-                if (empresa.RFC.Length > 50) { throw new ArgumentException("El RFC no puede exceder los 50 caracteres."); }
-                if (string.IsNullOrWhiteSpace(empresa.Responsable)) { throw new ArgumentException("El responsable es requerido."); }
-                if (empresa.Responsable.Length > 250) { throw new ArgumentException("El responsable no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(empresa.Direccion)) { throw new ArgumentException("La dirección es requerida."); }
-                if (empresa.Direccion.Length > 500) { throw new ArgumentException("La dirección no puede exceder los 500 caracteres."); }
-                if (string.IsNullOrWhiteSpace(empresa.CorreoContacto)) { throw new ArgumentException("El correo de contacto es requerido."); }
-                if (empresa.CorreoContacto.Length > 250) { throw new ArgumentException("El correo de contacto no puede exceder los 250 caracteres."); }
-
-                Log.Information("Validaciones completadas exitosamente para RFC: {RFC}", empresa.RFC);
-
-                // =========================================
-                // INICIO DE TRANSACCIÓN
-                // =========================================
-                using (var scope = new System.Transactions.TransactionScope(
-                    System.Transactions.TransactionScopeOption.Required,
-                    new System.Transactions.TransactionOptions
-                    {
-                        IsolationLevel = System.Transactions.IsolationLevel.ReadCommitted,
-                        Timeout = TimeSpan.FromMinutes(5)
-                    }))
-                {
-                    Log.Information("Iniciando transacción para registro de empresa...");
-
-                    // =========================================
-                    // PASO 1: GUARDAR EMPRESA
-                    // =========================================
-                    Log.Information("PASO 1/7 - Iniciando guardado de empresa en BD...");
-
-                    empresa.FechaVigenciaInicio = DateTime.Now;
-                    empresa.FechaVigenciaFin = DateTime.Now.AddDays(30);
-                    empresa.EsPeriodoPrueba = true;
-                    empresa.CreadoPor = "system.register";
-                    empresa.FechaCreacion = DateTime.Now;
-                    empresa.Estatus = true;
-
-                    var empresaResponse = GuardarNuevaEmpresa(empresa);
-
-                    if (!empresaResponse.IsSuccess || empresaResponse.Response == null)
-                    {
-                        Log.Error("❌ PASO 1/7 - FALLÓ el guardado de empresa. RFC: {RFC}, Error: {Error}", empresa.RFC, empresaResponse.Message);
-                        throw new Exception(empresaResponse.Message ?? "Error al guardar la empresa");
-                    }
-
-                    empresaGuardada = (Empresa)empresaResponse.Response;
-                    Log.Information("✅ PASO 1/7 - Empresa guardada exitosamente. Id: {EmpresaId}, Nombre: {NombreEmpresa}",
-                        empresaGuardada.Id, empresaGuardada.NombreComercial);
-
-                    var usernameAdmin = $"admin_{empresaGuardada.Id}";
-                    Log.Debug("Username administrador generado: {Username}", usernameAdmin);
-
-                    // =========================================
-                    // PASO 2: GUARDAR SUCURSAL
-                    // =========================================
-                    Log.Information("PASO 2/7 - Creando sucursal para la empresa...");
-
-                    var sucursal = new Sucursal()
-                    {
-                        Nombre = empresaGuardada.NombreComercial,
-                        Descripcion = $"Sucursal principal de {empresaGuardada.NombreComercial}",
-                        Calle = empresaGuardada.Direccion,
-                        Ciudad = empresaGuardada.Ciudad,
-                        Colonia = null,
-                        CodigoPostal = empresaGuardada.CodigoPostal,
-                        CreadoPor = usernameAdmin,
-                        FechaCreacion = DateTime.Now,
-                        Estatus = true
-                    };
-
-                    var sucursalResponse = GuardarNuevaSucursalParaEmpresa(sucursal);
-
-                    if (!sucursalResponse.IsSuccess || sucursalResponse.Response == null)
-                    {
-                        Log.Error("❌ PASO 2/7 - FALLÓ la creación de sucursal. EmpresaId: {EmpresaId}, Error: {Error}",
-                            empresaGuardada.Id, sucursalResponse.Message);
-                        throw new Exception(sucursalResponse.Message ?? "Error al guardar la sucursal");
-                    }
-
-                    sucursalGuardada = (Sucursal)sucursalResponse.Response;
-                    Log.Information("✅ PASO 2/7 - Sucursal creada exitosamente. Id: {SucursalId}, Nombre: {SucursalNombre}",
-                        sucursalGuardada.Id, sucursalGuardada.Nombre);
-
-                    // =========================================
-                    // PASO 3: GUARDAR ÁREA (TI)
-                    // =========================================
-                    Log.Information("PASO 3/7 - Creando área 'TI' para la empresa...");
-
-                    var area = new Area()
-                    {
-                        Nombre = "TI",
-                        Descripcion = "Área de Tecnologías de la Información",
-                        Correo = empresaGuardada.CorreoContacto,
-                        CreadoPor = usernameAdmin,
-                        FechaCreacion = DateTime.Now,
-                        Estatus = true
-                    };
-
-                    var areaResponse = GuardarNuevaAreaParaEmpresa(area);
-
-                    if (!areaResponse.IsSuccess || areaResponse.Response == null)
-                    {
-                        Log.Error("❌ PASO 3/7 - FALLÓ la creación del área. EmpresaId: {EmpresaId}, Error: {Error}",
-                            empresaGuardada.Id, areaResponse.Message);
-                        throw new Exception(areaResponse.Message ?? "Error al guardar el área");
-                    }
-
-                    areaGuardada = (Area)areaResponse.Response;
-                    Log.Information("✅ PASO 3/7 - Área 'TI' creada exitosamente. Id: {AreaId}, Nombre: {AreaNombre}",
-                        areaGuardada.Id, areaGuardada.Nombre);
-
-                    // =========================================
-                    // PASO 4: GUARDAR USUARIO ADMINISTRADOR
-                    // =========================================
-                    Log.Information("PASO 4/7 - Creando usuario administrador para la empresa...");
-
-                    usuarioAdmin = new Usuario()
-                    {
-                        NombreUsuario = usernameAdmin,
-                        Contrasena = Cryptography.Encrypt("Admin123!"),
-                        ImagenPerfil = null,
-                        Correo = empresaGuardada.CorreoContacto,
-                        Nombre = "Administrador",
-                        Apellido = "Sistema",
-                        Celular = empresaGuardada.Telefono,
-                        Sucursal = sucursalGuardada,
-                        Firma = null,
-                        RFC = empresaGuardada.RFC,
-                        Area = areaGuardada,
-                        Empresa = empresaGuardada,
-                        CreadoPor = usernameAdmin,
-                        FechaCreacion = DateTime.Now,
-                        Estatus = true
-                    };
-
-                    var usuarioResponse = GuardarOActualizarUsuario(usuarioAdmin);
-
-                    if (!usuarioResponse.IsSuccess)
-                    {
-                        Log.Error("❌ PASO 4/7 - FALLÓ la creación del usuario administrador. EmpresaId: {EmpresaId}, Username: {Username}, Error: {Error}",
-                            empresaGuardada.Id, usernameAdmin, usuarioResponse.Message);
-                        throw new Exception(usuarioResponse.Message ?? "Error al guardar el usuario administrador");
-                    }
-
-                    usuarioAdmin = (Usuario)usuarioResponse.Response;
-                    usuarioAdminId = usuarioAdmin.Id;
-                    Log.Information("✅ PASO 4/7 - Usuario administrador creado exitosamente. Id: {UsuarioId}, Username: {Username}, Correo: {Correo}",
-                        usuarioAdminId, usernameAdmin, empresaGuardada.CorreoContacto);
-
-                    // =========================================
-                    // PASO 5: CREAR ROLES BASE
-                    // =========================================
-                    Log.Information("PASO 5/7 - Creando roles base para la empresa...");
-
-                    var rolesBase = new List<Rol>
-            {
-                new Rol { Nombre = "Administrador", Descripcion = "Control total del sistema", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                new Rol { Nombre = "Supervisor", Descripcion = "Gestión de tickets y usuarios", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                new Rol { Nombre = "Agente", Descripcion = "Atención de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                new Rol { Nombre = "Usuario", Descripcion = "Creación de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true }
-            };
-
-                    foreach (var rol in rolesBase)
-                    {
-                        var rolResponse = GuardarRolParaNuevaEmpresa(rol);
-                        if (!rolResponse.IsSuccess)
-                        {
-                            Log.Error("❌ PASO 5/7 - FALLÓ la creación del rol {NombreRol}. Error: {Error}", rol.Nombre, rolResponse.Message);
-                            throw new Exception($"Error al crear el rol '{rol.Nombre}': {rolResponse.Message}");
-                        }
-
-                        if (rol.Nombre == "Administrador")
-                        {
-                            rolAdminId = ((Rol)rolResponse.Response).Id;
-                        }
-                    }
-
-                    Log.Information("✅ PASO 5/7 - Roles base creados exitosamente para empresa {EmpresaId}", empresaGuardada.Id);
-
-                    // =========================================
-                    // PASO 6: ASIGNAR ROL "ADMINISTRADOR" AL USUARIO
-                    // =========================================
-                    Log.Information("PASO 6/7 - Asignando rol 'Administrador' al usuario...");
-
-                    var asignarRolResponse = AsignarRolUsuarioParaNuevaEmpresa(usuarioAdminId, rolAdminId, usernameAdmin);
-
-                    if (!asignarRolResponse.IsSuccess)
-                    {
-                        Log.Error("❌ PASO 6/7 - FALLÓ la asignación del rol 'Administrador' al usuario {Username}", usernameAdmin);
-                        throw new Exception($"Error al asignar el rol 'Administrador' al usuario: {asignarRolResponse.Message}");
-                    }
-
-                    Log.Information("✅ PASO 6/7 - Rol 'Administrador' asignado al usuario {Username}", usernameAdmin);
-
-                    // =========================================
-                    // PASO 7: ASIGNAR PÁGINAS AL USUARIO ADMINISTRADOR
-                    // =========================================
-                    Log.Information("PASO 7/7 - Asignando páginas al usuario administrador...");
-
-                    var paginasResponse = ObtenerPaginas();
-                    if (paginasResponse.IsSuccess && paginasResponse.Response != null)
-                    {
-                        var paginas = (List<Pagina>)paginasResponse.Response;
-                        int paginasAsignadas = 0;
-
-                        foreach (var pagina in paginas)
-                        {
-                            var insertResponse = InsertarUsuarioPaginaParaNuevaEmpresa(usuarioAdminId, pagina.Id, usernameAdmin);
-                            if (insertResponse.IsSuccess)
-                            {
-                                paginasAsignadas++;
-                            }
-                            else
-                            {
-                                Log.Warning("⚠️ No se pudo asignar la página {PaginaId} al usuario {UsuarioId}: {Error}",
-                                    pagina.Id, usuarioAdminId, insertResponse.Message);
-                            }
-                        }
-
-                        Log.Information("✅ PASO 7/7 - {Count} páginas asignadas al usuario administrador", paginasAsignadas);
-                    }
-                    else
-                    {
-                        Log.Warning("⚠️ No se encontraron páginas para asignar al usuario administrador");
-                    }
-
-                    // =========================================
-                    // COMPLETAR TRANSACCIÓN
-                    // =========================================
-                    scope.Complete();
-                    Log.Information("✅ Transacción completada exitosamente.");
-                }
-
-                // =========================================
-                // FIN DE LA TRANSACCIÓN - ENVIAR CORREO
-                // =========================================
-                Log.Information("Enviando correo de bienvenida a: {Correo}...", empresaGuardada.CorreoContacto);
-
-                var emailSent = EnviarCorreoBienvenida(empresaGuardada, usuarioAdmin.NombreUsuario, "Admin123!");
-
-                if (emailSent)
-                {
-                    Log.Information("✅ Correo de bienvenida enviado exitosamente a: {Correo}", empresaGuardada.CorreoContacto);
-                }
-                else
-                {
-                    Log.Warning("⚠️ El correo de bienvenida NO pudo ser enviado a: {Correo}. La empresa y usuario fueron creados correctamente, pero el usuario no recibirá sus credenciales por correo.",
-                        empresaGuardada.CorreoContacto);
-                }
-
-                stopwatch.Stop();
-                Log.Information("=== REGISTRO DE EMPRESA COMPLETADO EXITOSAMENTE ===");
-                Log.Information("Resumen final - EmpresaId: {EmpresaId}, SucursalId: {SucursalId}, AreaId: {AreaId}, Username: {Username}, Duración total: {Duration}ms",
-                    empresaGuardada.Id, sucursalGuardada.Id, areaGuardada.Id, usuarioAdmin.NombreUsuario, stopwatch.ElapsedMilliseconds);
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = empresaGuardada;
-                modelResponse.Message = "Empresa registrada correctamente con sucursal, área, usuario administrador, roles base y permisos.";
-            }
-            catch (ArgumentException ex)
-            {
-                stopwatch.Stop();
-                Log.Warning(ex, "⚠️ VALIDACIÓN FALLIDA - Error de validación al registrar empresa. Datos: {@Empresa}, Duración: {Duration}ms",
-                    new { empresa?.NombreComercial, empresa?.RFC, empresa?.CorreoContacto }, stopwatch.ElapsedMilliseconds);
-
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
-            catch (Exception ex)
-            {
-                stopwatch.Stop();
-                Log.Error(ex, "❌ ERROR CRÍTICO - Fallo en el registro de empresa. Datos: {@Empresa}, Duración: {Duration}ms",
-                    new { empresa?.NombreComercial, empresa?.RFC, empresa?.CorreoContacto }, stopwatch.ElapsedMilliseconds);
-
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al registrar la empresa. Por favor, intente nuevamente.";
             }
 
             return modelResponse;
@@ -686,9 +399,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-
                 ExecuteNonQuery("EliminarUsuario", CommandType.StoredProcedure, new SqlParameter[]
                 {
                     new SqlParameter("@Id", id),
@@ -699,13 +409,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Usuario eliminado correctamente.";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al eliminar usuario {Id}", id);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al eliminar el usuario.";
             }
@@ -719,13 +425,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (string.IsNullOrWhiteSpace(nombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-                if (string.IsNullOrWhiteSpace(contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
-
                 var usuario = GetObject("AutenticarUsuario", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@NombreUsuario", nombreUsuario),
-                new SqlParameter("@Contrasena", contrasena)
+                        new SqlParameter("@NombreUsuario", nombreUsuario),
+                        new SqlParameter("@Contrasena", contrasena)
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
@@ -782,84 +485,11 @@ namespace ServiceDeskDESIWebApi.DAL
                     modelResponse.Message = "Usuario o contraseña incorrectos.";
                 }
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al autenticar usuario");
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al autenticar el usuario.";
-            }
-
-            return modelResponse;
-        }
-
-        public ModelResponse ObtenerUsuarioPorNombreUsuario(string nombreUsuario)
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                if (string.IsNullOrWhiteSpace(nombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
-                var usuario = GetObject("ObtenerUsuarioPorNombreUsuario", CommandType.StoredProcedure,
-                    new[] {
-                new SqlParameter("@NombreUsuario", nombreUsuario),
-                    },
-                    new Func<IDataReader, Usuario>((reader) =>
-                    {
-                        var u = LlenarEntidad<Usuario>(reader);
-
-                        u.Sucursal = new Sucursal()
-                        {
-                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
-                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["SucursalDescripcion"]),
-                            Calle = MapearPorpiedades<string>(reader["Calle"]),
-                            Ciudad = MapearPorpiedades<string>(reader["Ciudad"]),
-                            Colonia = MapearPorpiedades<string>(reader["Colonia"]),
-                            CodigoPostal = MapearPorpiedades<string>(reader["CodigoPostal"])
-                        };
-
-                        u.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["AreaDescripcion"]),
-                            Correo = MapearPorpiedades<string>(reader["AreaCorreo"])
-                        };
-
-                        u.Empresa = new Empresa()
-                        {
-                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
-                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
-                        };
-
-                        return u;
-                    }));
-
-                if (usuario == null)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se encontró el usuario especificado.";
-                    return modelResponse;
-                }
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = usuario;
-                modelResponse.Message = "Usuario obtenido correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener el usuario";
             }
 
             return modelResponse;
@@ -871,11 +501,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
-                if (string.IsNullOrWhiteSpace(token)) { throw new ArgumentException("El token es requerido."); }
-                if (fechaExpiracion <= DateTime.Now) { throw new ArgumentException("La fecha de expiración debe ser mayor a la fecha actual."); }
-                if (string.IsNullOrWhiteSpace(creadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-
                 var tokenId = ExecuteScalar("InsertarTokenRecuperacion", CommandType.StoredProcedure, new SqlParameter[]
                 {
                     new SqlParameter("@UsuarioId", usuarioId),
@@ -889,13 +514,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = Convert.ToInt64(tokenId);
                 modelResponse.Message = "Token guardado correctamente.";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al insertar token de recuperación para usuario {UsuarioId}", usuarioId);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar el token.";
             }
@@ -909,12 +530,8 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (string.IsNullOrWhiteSpace(token)) { throw new ArgumentException("El token es requerido."); }
-
                 var result = GetObject("ObtenerTokenRecuperacion", CommandType.StoredProcedure,
-                    new[] {
-                        new SqlParameter("@Token", token)
-                    },
+                    new[] { new SqlParameter("@Token", token) },
                     new Func<IDataReader, dynamic>((reader) =>
                     {
                         return new
@@ -941,13 +558,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = result;
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener token de recuperación");
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener el token.";
             }
@@ -961,9 +574,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del token es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-
                 ExecuteNonQuery("ActualizarTokenUsado", CommandType.StoredProcedure, new SqlParameter[]
                 {
                     new SqlParameter("@Id", id),
@@ -974,13 +584,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Token actualizado correctamente.";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al actualizar token usado {Id}", id);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al actualizar el token.";
             }
@@ -994,20 +600,13 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                // Validaciones
-                if (usuario.Id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
-                if (usuario.Contrasena.Length < 6) { throw new ArgumentException("La contraseña debe tener al menos 6 caracteres."); }
-                if (usuario.Contrasena.Length > 250) { throw new ArgumentException("La contraseña no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.ModificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-
                 var result = ExecuteScalar("ActualizarContrasena", CommandType.StoredProcedure, new SqlParameter[]
                 {
                     new SqlParameter("@Id", usuario.Id),
                     new SqlParameter("@Contrasena", usuario.Contrasena),
                     new SqlParameter("@ModificadoPor", usuario.ModificadoPor),
                     new SqlParameter("@FechaModificacion", usuario.FechaModificacion ?? DateTime.Now),
-                    new SqlParameter("@Usuario", usuarioAutenticado),
+                    new SqlParameter("@Usuario", usuarioAutenticado)
                 });
 
                 long idActualizado = Convert.ToInt64(result);
@@ -1024,164 +623,14 @@ namespace ServiceDeskDESIWebApi.DAL
                     modelResponse.Message = "No se pudo actualizar la contraseña. El usuario no existe o está inactivo.";
                 }
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al actualizar contraseña para usuario {Id}", usuario.Id);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al actualizar la contraseña.";
             }
 
             return modelResponse;
-        }
-
-        public ModelResponse ObtenerUsuarioPorCorreo(string correo)
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                if (string.IsNullOrWhiteSpace(correo)) { throw new ArgumentException("El correo es requerido."); }
-
-                var usuario = GetObject("ObtenerUsuarioPorCorreo", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Correo", correo) },
-                    new Func<IDataReader, Usuario>((reader) =>
-                    {
-                        var u = LlenarEntidad<Usuario>(reader);
-
-                        u.Sucursal = new Sucursal()
-                        {
-                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
-                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
-                        };
-
-                        u.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        u.Empresa = new Empresa()
-                        {
-                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
-                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
-                        };
-
-                        return u;
-                    }));
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = usuario;
-                modelResponse.Message = "Usuario obtenido correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener el usuario";
-            }
-
-            return modelResponse;
-        }
-
-        private bool EnviarCorreoBienvenida(Empresa empresa, string usuario, string contrasenaTemporal)
-        {
-            try
-            {
-                Log.Debug("Preparando plantilla de correo para: {Email}", empresa.CorreoContacto);
-
-                // Obtener URL base del Web.config
-                string baseUri = System.Configuration.ConfigurationManager.AppSettings["BaseUri"];
-                string urlLogin = $"{baseUri}Home/Autentication";
-
-                // Leer template
-                string templatePath = System.Web.Hosting.HostingEnvironment.MapPath("~/Template/Template_AltaEmpresa.html");
-
-                if (!System.IO.File.Exists(templatePath))
-                {
-                    Log.Error("No se encontró la plantilla de correo en: {TemplatePath}", templatePath);
-                    return false;
-                }
-
-                string templateHtml = System.IO.File.ReadAllText(templatePath);
-
-                // Reemplazar variables en el template
-                templateHtml = templateHtml.Replace("{{NombreCompleto}}", empresa.Responsable);
-                templateHtml = templateHtml.Replace("{{NombreEmpresa}}", empresa.NombreComercial);
-                templateHtml = templateHtml.Replace("{{RFC}}", empresa.RFC);
-                templateHtml = templateHtml.Replace("{{CorreoContacto}}", empresa.CorreoContacto);
-                templateHtml = templateHtml.Replace("{{Usuario}}", usuario);
-                templateHtml = templateHtml.Replace("{{ContrasenaTemporal}}", contrasenaTemporal);
-                templateHtml = templateHtml.Replace("{{UrlLogin}}", urlLogin);
-
-                Log.Debug("Plantilla procesada, enviando correo a: {Email}", empresa.CorreoContacto);
-
-                // Enviar correo
-                var para = new List<string> { empresa.CorreoContacto };
-                EmailHelper.EnvioEmaiil(para, "Bienvenido a Service Desk DESI - Tus credenciales de acceso", templateHtml, false);
-
-                Log.Information("Correo enviado exitosamente a: {Email}", empresa.CorreoContacto);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "FALLO al enviar correo de bienvenida a: {Email}. La empresa quedó registrada sin credenciales enviadas.",
-                    empresa.CorreoContacto);
-                return false;
-            }
-        }
-
-        private bool EnviarCorreoNuevoUsuario(Usuario usuario, string contrasenaTemporal)
-        {
-            try
-            {
-                Log.Debug("Preparando plantilla de correo para nuevo usuario: {Email}", usuario.Correo);
-
-                // Obtener URL base del Web.config
-                string baseUri = System.Configuration.ConfigurationManager.AppSettings["BaseUri"];
-                string urlLogin = $"{baseUri}Home/Autentication";
-
-                // Leer template
-                string templatePath = System.Web.Hosting.HostingEnvironment.MapPath("~/Template/Template_NuevoUsuario.html");
-
-                if (!System.IO.File.Exists(templatePath))
-                {
-                    Log.Error("No se encontró la plantilla de correo en: {TemplatePath}", templatePath);
-                    return false;
-                }
-
-                string templateHtml = System.IO.File.ReadAllText(templatePath);
-
-                // Reemplazar variables en el template
-                templateHtml = templateHtml.Replace("{{NombreCompleto}}", $"{usuario.Nombre} {usuario.Apellido}");
-                templateHtml = templateHtml.Replace("{{Correo}}", usuario.Correo);
-                //templateHtml = templateHtml.Replace("{{Celular}}", usuario.Celular ?? "No especificado");
-                //templateHtml = templateHtml.Replace("{{NombreEmpresa}}", usuario.Empresa?.NombreComercial ?? "Empresa");
-                templateHtml = templateHtml.Replace("{{NombreUsuario}}", usuario.NombreUsuario);
-                templateHtml = templateHtml.Replace("{{ContrasenaTemporal}}", contrasenaTemporal);
-                templateHtml = templateHtml.Replace("{{UrlLogin}}", urlLogin);
-
-                Log.Debug("Plantilla procesada, enviando correo a: {Email}", usuario.Correo);
-
-                // Enviar correo
-                var para = new List<string> { usuario.Correo };
-                EmailHelper.EnvioEmaiil(para, "Bienvenido a Service Desk DESI - Tus credenciales de acceso", templateHtml, false);
-
-                Log.Information("Correo de nuevo usuario enviado exitosamente a: {Email}", usuario.Correo);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "FALLO al enviar correo de nuevo usuario a: {Email}", usuario.Correo);
-                return false;
-            }
         }
     }
 }

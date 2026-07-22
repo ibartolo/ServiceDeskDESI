@@ -24,9 +24,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerEmpresasPorId(long id, long empresaId)
+        public async Task<ModelResponse> ObtenerEmpresaPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Empresas/{id}/{empresaId}", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Empresas/{id}", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -50,9 +50,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarEmpresa(Empresa empresa,long empresaId)
+        public async Task<ModelResponse> GuardarOActualizarEmpresa(Empresa empresa)
         {
-            var result = await RequestAsync<object>($"api/Empresas/{empresaId}", HttpMethod.Post, empresa,
+            var result = await RequestAsync<object>($"api/Empresas/Guardar", HttpMethod.Post, empresa,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -74,9 +74,21 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> EliminarEmpresa(Empresa empresa,long empresaId)
+        public async Task<ModelResponse> GuardarNuevaEmpresaCompleta(Empresa empresa)
         {
-            var result = await RequestAsync<object>($"api/Empresas/{empresaId}", HttpMethod.Delete, empresa,
+            var result = await RequestAsync<object>($"api/Empresas/NuevaCompleta", HttpMethod.Post, empresa,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }));
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> EliminarEmpresa(Empresa empresa)
+        {
+            var result = await RequestAsync<object>($"api/Empresas/Eliminar", HttpMethod.Delete, empresa,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
