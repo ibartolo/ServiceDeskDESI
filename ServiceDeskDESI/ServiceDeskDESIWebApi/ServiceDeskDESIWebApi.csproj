@@ -259,6 +259,7 @@
     <Compile Include="Services\PaginaService.cs" />
     <Compile Include="Services\PermisosService.cs" />
     <Compile Include="Services\RolService.cs" />
+    <Compile Include="Services\SucursalService.cs" />
     <Compile Include="Services\TipoActivoService.cs" />
   </ItemGroup>
   <ItemGroup>

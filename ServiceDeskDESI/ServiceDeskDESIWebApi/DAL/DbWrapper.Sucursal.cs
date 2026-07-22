@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
@@ -18,8 +16,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var sucursales = GetObjects("ObtenerSucursales", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, Sucursal>((reader) =>
@@ -31,11 +27,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = sucursales;
                 modelResponse.Message = "Sucursales obtenidas correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
@@ -53,13 +44,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID de la sucursal es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var sucursal = GetObject("ObtenerSucursalPorId", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@Id", id),
-                new SqlParameter("@Usuario", usuario)
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Sucursal>((reader) =>
                     {
@@ -78,11 +66,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = sucursal;
                 modelResponse.Message = "Sucursal obtenida correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener sucursal {Id} para usuario {Usuario}", id, usuario);
@@ -99,17 +82,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(s.Nombre)) { throw new ArgumentException("El nombre de la sucursal es requerido."); }
-                if (s.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (s.Descripcion != null && s.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
-                if (s.Calle != null && s.Calle.Length > 100) { throw new ArgumentException("La calle no puede exceder los 100 caracteres."); }
-                if (s.Ciudad != null && s.Ciudad.Length > 100) { throw new ArgumentException("La ciudad no puede exceder los 100 caracteres."); }
-                if (s.Colonia != null && s.Colonia.Length > 100) { throw new ArgumentException("La colonia no puede exceder los 100 caracteres."); }
-                if (s.CodigoPostal != null && s.CodigoPostal.Length > 10) { throw new ArgumentException("El código postal no puede exceder los 10 caracteres."); }
-                if (string.IsNullOrWhiteSpace(s.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var parametrosObj = new
                 {
                     s.Id,
@@ -143,11 +115,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = s;
                 modelResponse.Message = "Sucursal guardada correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al guardar sucursal para usuario {Usuario}", usuario);
@@ -164,16 +131,12 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID de la sucursal es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var result = ExecuteScalar("EliminarSucursal", CommandType.StoredProcedure, new SqlParameter[]
                 {
-            new SqlParameter("@Id", id),
-            new SqlParameter("@ModificadoPor", modificadoPor),
-            new SqlParameter("@FechaModificacion", fechaModificacion),
-            new SqlParameter("@Usuario", usuario)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion),
+                    new SqlParameter("@Usuario", usuario)
                 });
 
                 if (Convert.ToInt64(result) == 0)
@@ -185,11 +148,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Sucursal eliminada correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
@@ -207,16 +165,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(sucursal.Nombre)) { throw new ArgumentException("El nombre de la sucursal es requerido."); }
-                if (sucursal.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (sucursal.Descripcion != null && sucursal.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
-                if (sucursal.Calle != null && sucursal.Calle.Length > 100) { throw new ArgumentException("La calle no puede exceder los 100 caracteres."); }
-                if (sucursal.Ciudad != null && sucursal.Ciudad.Length > 100) { throw new ArgumentException("La ciudad no puede exceder los 100 caracteres."); }
-                if (sucursal.Colonia != null && sucursal.Colonia.Length > 100) { throw new ArgumentException("La colonia no puede exceder los 100 caracteres."); }
-                if (sucursal.CodigoPostal != null && sucursal.CodigoPostal.Length > 10) { throw new ArgumentException("El código postal no puede exceder los 10 caracteres."); }
-                if (string.IsNullOrWhiteSpace(sucursal.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-
                 var parametrosObj = new
                 {
                     sucursal.Nombre,
@@ -237,11 +185,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = sucursal;
                 modelResponse.Message = "Sucursal creada exitosamente para la nueva empresa.";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al crear sucursal para nueva empresa");
@@ -251,6 +194,5 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
-
     }
 }

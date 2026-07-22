@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
@@ -18,8 +16,6 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                //if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var tipoActivos = GetObjects("ObtenerTipoActivo", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, TipoActivo>((reader) =>
@@ -32,11 +28,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = tipoActivos;
                 modelResponse.Message = "Tipos de activo obtenidos correctamente";
             }
-            //catch (ArgumentException ex)
-            //{
-            //    modelResponse.IsSuccess = false;
-            //    modelResponse.Message = ex.Message;
-            //}
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener tipos de activo para usuario {Usuario}", usuario);
@@ -53,13 +44,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                //if (id <= 0) { throw new ArgumentException("El ID del tipo de activo es requerido."); }
-                //if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var tipoActivo = GetObject("ObtenerTipoActivoPorId", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@Id", id),
-                new SqlParameter("@Usuario", usuario)
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, TipoActivo>((reader) =>
                     {
@@ -78,11 +66,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = tipoActivo;
                 modelResponse.Message = "Tipo de activo obtenido correctamente";
             }
-            //catch (ArgumentException ex)
-            //{
-            //    modelResponse.IsSuccess = false;
-            //    modelResponse.Message = ex.Message;
-            //}
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener tipo de activo {Id} para usuario {Usuario}", id, usuario);
@@ -93,19 +76,12 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarTipoActivo(TipoActivo ta)
+        public ModelResponse GuardarOActualizarTipoActivo(TipoActivo ta, string usuario)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
-                // Validaciones
-                //if (string.IsNullOrWhiteSpace(ta.Nombre)) { throw new ArgumentException("El nombre del tipo de activo es requerido."); }
-                //if (ta.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                //if (ta.Descripcion != null && ta.Descripcion.Length > 250) { throw new ArgumentException("La descripción no puede exceder los 250 caracteres."); }
-                //if (string.IsNullOrWhiteSpace(ta.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                //if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var parametrosObj = new
                 {
                     ta.Id,
@@ -116,7 +92,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     ta.ModificadoPor,
                     ta.FechaModificacion,
                     ta.Estatus,
-                    Usuario = ta.CreadoPor
+                    Usuario = usuario
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
@@ -135,24 +111,12 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = ta;
                 modelResponse.Message = "Tipo de activo guardado correctamente";
             }
-            //catch (ArgumentException ex)
-            //{
-            //    modelResponse.IsSuccess = false;
-            //    modelResponse.Message = ex.Message;
-            //}
-            //catch (Exception ex)
-            //{
-            //    Log.Error(ex, "Error al guardar tipo de activo para usuario {Usuario}", usuario);
-            //    modelResponse.IsSuccess = false;
-            //    modelResponse.Message = "Ocurrió un error al guardar el tipo de activo";
-            //}
             catch (Exception ex)
             {
-                Log.Error(ex, "Error al guardar área");
+                Log.Error(ex, "Error al guardar tipo de activo");
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al guardar el área";
+                modelResponse.Message = "Ocurrió un error al guardar el tipo de activo";
             }
-
 
             return modelResponse;
         }
@@ -163,16 +127,12 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                //if (id <= 0) { throw new ArgumentException("El ID del tipo de activo es requerido."); }
-                //if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-                //if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-
                 var result = ExecuteScalar("EliminarTipoActivo", CommandType.StoredProcedure, new SqlParameter[]
                 {
-            new SqlParameter("@Id", id),
-            new SqlParameter("@ModificadoPor", modificadoPor),
-            new SqlParameter("@FechaModificacion", fechaModificacion),
-            new SqlParameter("@Usuario", usuario)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion),
+                    new SqlParameter("@Usuario", usuario)
                 });
 
                 if (Convert.ToInt64(result) == 0)
@@ -185,11 +145,6 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Tipo de activo eliminado correctamente";
             }
-            //catch (ArgumentException ex)
-            //{
-            //    modelResponse.IsSuccess = false;
-            //    modelResponse.Message = ex.Message;
-            //}
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al eliminar tipo de activo {Id} para usuario {Usuario}", id, usuario);
