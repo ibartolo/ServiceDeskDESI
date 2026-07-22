@@ -1,6 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,13 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Catalogs")]
     public class CatalogsController : BaseController
     {
+        private readonly CategoriaService _categoriaService;
+
+        public CatalogsController()
+        {
+            _categoriaService = new CategoriaService();
+        }
+
         /// <summary>
         /// Obtiene todas las categorías con jerarquía (ordenadas: padres primero, luego hijas)
         /// </summary>
@@ -22,7 +30,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerCategorias()
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerCategorias(usuario);
+            var result = _categoriaService.ObtenerCategorias(usuario);
             return result;
         }
 
@@ -35,7 +43,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerCategoriasPorArea(long areaId)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerCategoriasPorArea(areaId, usuario);
+            var result = _categoriaService.ObtenerCategoriasPorArea(areaId, usuario);
             return result;
         }
 
@@ -48,7 +56,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerCategoriaPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerCategoriaPorId(id, usuario);
+            var result = _categoriaService.ObtenerCategoriaPorId(id, usuario);
             return result;
         }
 
@@ -61,7 +69,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerCategoriasPorPadre(long categoriaPadreId)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerCategoriasPorPadre(categoriaPadreId, usuario);
+            var result = _categoriaService.ObtenerCategoriasPorPadre(categoriaPadreId, usuario);
             return result;
         }
 
@@ -74,7 +82,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarOActualizarCategoria(Categoria categoria)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.GuardarOActualizarCategoria(categoria, usuario);
+            var result = _categoriaService.GuardarOActualizarCategoria(categoria, usuario);
             return result;
         }
 
@@ -88,7 +96,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             var usuario = User.Identity.Name;
             categoria.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarCategoria(categoria.Id, categoria.ModificadoPor, categoria.FechaModificacion.Value, usuario);
+            var result = _categoriaService.EliminarCategoria(categoria.Id, categoria.ModificadoPor, categoria.FechaModificacion.Value, usuario);
             return result;
         }
     }

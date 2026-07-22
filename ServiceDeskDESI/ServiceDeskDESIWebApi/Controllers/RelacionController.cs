@@ -32,10 +32,5 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.GuardarOActualizarRelacion(r);
             return result;
         }
-        public ModelResponse EliminarRelaciones (UsuarioPagina r,long empresaId)
-        {
-            var result = dbWrapper.EliminarEmpresa(r.Id, r.ModificadoPor, r.FechaModificacion.Value,empresaId);
-            return result;
-        }
     }
 }

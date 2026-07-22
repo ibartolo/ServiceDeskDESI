@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,43 +14,66 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Empresas")]
     public class EmpresaController : BaseController
     {
+        private readonly EmpresaService _empresaService;
+
+        public EmpresaController()
+        {
+            _empresaService = new EmpresaService();
+        }
+
         [AllowAnonymous]
         [HttpGet, Route("List")]
         public ModelResponse ObtenerEmpresas()
         {
-            var result = dbWrapper.ObtenerTodasLasEmpresas();
+            var result = _empresaService.ObtenerTodasLasEmpresas();
             return result;
         }
-        [HttpGet, Route("{id:long}/{empresaId:long}")]
-        public ModelResponse ObtenerEmpresasPorId(long id,long empresaId)
+
+        [HttpGet, Route("{id:long}")]
+        public ModelResponse ObtenerEmpresasPorId(long id)
         {
-            var result = dbWrapper.ObtenerEmpresasPorId(id,empresaId);
+            var usuario = User.Identity.Name;
+            var result = _empresaService.ObtenerEmpresaPorId(id, usuario);
             return result;
         }
+
         [HttpPost, Route("RFC")]
         public ModelResponse ObtenerEmpresasPorRFC(Empresa empresa)
         {
-            var result = dbWrapper.ObtenerEmpresaPorRFC(empresa.RFC);
+            var result = _empresaService.ObtenerEmpresaPorRFC(empresa.RFC);
             return result;
         }
-        [HttpPost, Route("Guardar/{empresaId:long}")]
-        public ModelResponse GuardarOActualizarEmpresas(Empresa e,long empresaId)
+
+        [HttpPost, Route("Guardar")]
+        public ModelResponse GuardarOActualizarEmpresa(Empresa e)
         {
-            var result = dbWrapper.GuardarOActualizarEmpresas(e,empresaId);
+            var usuario = User.Identity.Name;
+            var result = _empresaService.GuardarOActualizarEmpresa(e, usuario);
             return result;
         }
+
         [AllowAnonymous]
         [HttpPost, Route("Nueva")]
-        public ModelResponse GuardarNuevaEmpresas(Empresa e)
+        public ModelResponse GuardarNuevaEmpresa(Empresa e)
         {
-            var result = dbWrapper.GuardarNuevaEmpresaConDatosIniciales(e);
+            var result = _empresaService.GuardarNuevaEmpresa(e);
             return result;
         }
-        [HttpDelete, Route("Eliminar/{empresaId:long}")]
-        public ModelResponse EliminarEmpresas(Empresa e, long empresaId)
+
+        [AllowAnonymous]
+        [HttpPost, Route("NuevaCompleta")]
+        public ModelResponse GuardarNuevaEmpresaCompleta(Empresa e)
         {
+            var result = _empresaService.GuardarNuevaEmpresaConDatosIniciales(e);
+            return result;
+        }
+
+        [HttpDelete, Route("Eliminar")]
+        public ModelResponse EliminarEmpresa(Empresa e)
+        {
+            var usuario = User.Identity.Name;
             e.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarEmpresa(e.Id, e.ModificadoPor, e.FechaModificacion.Value,empresaId);
+            var result = _empresaService.EliminarEmpresa(e.Id, e.ModificadoPor, e.FechaModificacion.Value, usuario);
             return result;
         }
     }
