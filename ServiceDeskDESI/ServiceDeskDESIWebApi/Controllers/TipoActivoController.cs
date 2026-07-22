@@ -28,7 +28,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerTodosLosTipoActivos()
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerTodosLosTipoActivos(usuario);
+            var result = _tipoActivoService.ObtenerTodosLosTipoActivos(usuario);
             return result;
         }
 
@@ -41,7 +41,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerTipoActivoPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerTipoActivoPorId(id, usuario);
+            var result = _tipoActivoService.ObtenerTipoActivoPorId(id, usuario);
             return result;
         }
 

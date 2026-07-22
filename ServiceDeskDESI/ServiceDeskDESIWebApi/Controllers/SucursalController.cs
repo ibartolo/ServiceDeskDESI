@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,13 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Sucursales")]
     public class SucursalController : BaseController
     {
+        private readonly SucursalService _sucursalService;
+
+        public SucursalController()
+        {
+            _sucursalService = new SucursalService();
+        }
+
         /// <summary>
         /// Obtiene todas las sucursales de la empresa del usuario autenticado
         /// </summary>
@@ -21,7 +29,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerSucursales()
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerSucursales(usuario);
+            var result = _sucursalService.ObtenerSucursales(usuario);
             return result;
         }
 
@@ -34,7 +42,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse ObtenerSucursalPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerSucursalPorId(id, usuario);
+            var result = _sucursalService.ObtenerSucursalPorId(id, usuario);
             return result;
         }
 
@@ -47,7 +55,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         public ModelResponse GuardarActualizarSucursal(Sucursal sucursal)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.GuardarOActualizarSucursal(sucursal, usuario);
+            var result = _sucursalService.GuardarOActualizarSucursal(sucursal, usuario);
             return result;
         }
 
@@ -61,7 +69,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             var usuario = User.Identity.Name;
             sucursal.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarSucursal(sucursal.Id, sucursal.ModificadoPor, sucursal.FechaModificacion.Value, usuario);
+            var result = _sucursalService.EliminarSucursal(sucursal.Id, sucursal.ModificadoPor, sucursal.FechaModificacion.Value, usuario);
             return result;
         }
     }

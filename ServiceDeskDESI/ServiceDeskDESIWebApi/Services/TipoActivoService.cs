@@ -1,14 +1,8 @@
-﻿//using Microsoft.Analytics.Interfaces;
-//using Microsoft.Analytics.Types.Sql;
-using Serilog;
+﻿using Serilog;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -26,6 +20,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
                 return _dbWrapper.ObtenerTodosLosTipoActivos(usuario);
             }
             catch (ArgumentException ex)
@@ -46,6 +41,7 @@ namespace ServiceDeskDESIWebApi.Services
             {
                 if (id <= 0) { throw new ArgumentException("El ID del tipo de activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
                 return _dbWrapper.ObtenerTipoActivoPorId(id, usuario);
             }
             catch (ArgumentException ex)
@@ -59,18 +55,18 @@ namespace ServiceDeskDESIWebApi.Services
                 return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el tipo de activo." };
             }
         }
-       
+
         public ModelResponse GuardarOActualizarTipoActivo(TipoActivo tipoActivo, string usuario)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(tipoActivo.Nombre)) { throw new ArgumentException("El nombre de TipoActivo es requerido."); }
+                if (string.IsNullOrWhiteSpace(tipoActivo.Nombre)) { throw new ArgumentException("El nombre del tipo de activo es requerido."); }
                 if (tipoActivo.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (tipoActivo.Descripcion != null && tipoActivo.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
-                if (string.IsNullOrWhiteSpace(tipoActivo.CreadoPor)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (tipoActivo.Descripcion != null && tipoActivo.Descripcion.Length > 250) { throw new ArgumentException("La descripción no puede exceder los 250 caracteres."); }
+                if (string.IsNullOrWhiteSpace(tipoActivo.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
-                
-                return _dbWrapper.GuardarOActualizarTipoActivo(tipoActivo);
+
+                return _dbWrapper.GuardarOActualizarTipoActivo(tipoActivo, usuario);
             }
             catch (ArgumentException ex)
             {
@@ -80,7 +76,7 @@ namespace ServiceDeskDESIWebApi.Services
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TipoActivoService.GuardarOActualizarTipoActivo para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar o actualizar el tipo de activo." };
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar el tipo de activo." };
             }
         }
 
@@ -89,8 +85,9 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 if (id <= 0) { throw new ArgumentException("El ID del tipo de activo es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El nombre de usuario que modifica es requerido."); }
+                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
                 return _dbWrapper.EliminarTipoActivo(id, modificadoPor, fechaModificacion, usuario);
             }
             catch (ArgumentException ex)
