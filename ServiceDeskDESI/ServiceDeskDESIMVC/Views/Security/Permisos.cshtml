@@ -1,4 +1,4 @@
-﻿﻿@{
+﻿﻿﻿@{
     ViewBag.Title = "Permisos por Rol";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -152,6 +152,10 @@
         font-size: 0.8rem;
         color: #858796;
     }
+
+    .filtro-container {
+        margin-bottom: 15px;
+    }
 </style>
 
 <div class="form-section">
@@ -185,6 +189,19 @@
 
     <!-- 2. Chooser de Páginas -->
     <div id="chooserContainer" style="display:none;">
+        <!-- Input de búsqueda para filtrar páginas -->
+        <div class="row filtro-container">
+            <div class="col-md-12">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="filtroPaginas" placeholder="Buscar página por nombre...">
+                    <button class="btn btn-outline-secondary" type="button" id="btnLimpiarFiltro">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="chooser-container">
             <!-- Columna Izquierda: Páginas Disponibles -->
             <div class="chooser-column">
@@ -254,6 +271,7 @@
             </text>
         }
 
+        // Evento: cambio de rol
         $("#ddlRol").change(function () {
             var rolId = $(this).val();
             if (rolId) {
@@ -269,9 +287,11 @@
                 paginasByRol.asignadas = [];
                 RenderizarChooser();
                 ActualizarBadges();
+                $('#filtroPaginas').val('');
             }
         });
 
+        // Evento: guardar permisos
         $("#btnGuardarPermisos").click(function () {
             GuardarPermisos();
         });
@@ -311,6 +331,17 @@
                 }
             }
         });
+
+        // Filtro de búsqueda para páginas
+        $('#filtroPaginas').on('keyup', function () {
+            var filtro = $(this).val().toLowerCase();
+            AplicarFiltro(filtro);
+        });
+
+        $('#btnLimpiarFiltro').click(function () {
+            $('#filtroPaginas').val('');
+            AplicarFiltro('');
+        });
     });
 
     function InicializarTablaRoles() {
@@ -320,7 +351,7 @@
                 { data: 'Nombre', title: 'Nombre' },
                 { data: 'Descripcion', title: 'Descripción' },
                 {
-                    data: 'Id', title: 'Páginas Asignadas', render: function () {
+                    data: 'Id', title: 'Páginas Asignadas', visible: false, render: function () {
                         return '<span class="badge-paginas">0</span>';
                     }
                 },
@@ -534,6 +565,28 @@
             var cell = this.node().querySelector('.badge-paginas');
             if (cell) {
                 cell.textContent = count;
+            }
+        });
+    }
+
+    function AplicarFiltro(filtro) {
+        // Filtrar páginas disponibles
+        $('.chooser-item.disponible').each(function () {
+            var nombre = $(this).find('.item-nombre').text().toLowerCase();
+            if (filtro === '' || nombre.includes(filtro)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+
+        // Filtrar páginas asignadas
+        $('.chooser-item.asignada').each(function () {
+            var nombre = $(this).find('.item-nombre').text().toLowerCase();
+            if (filtro === '' || nombre.includes(filtro)) {
+                $(this).show();
+            } else {
+                $(this).hide();
             }
         });
     }
