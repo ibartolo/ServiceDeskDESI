@@ -22,10 +22,12 @@ namespace ServiceDeskDESIMVC.Controllers
     {
         TokenCookie token;
         private readonly AreaService _areaService;
+        private readonly CompaniaService _companiaService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
             _areaService = new AreaService(httpClientConnection);
+            _companiaService = new CompaniaService(httpClientConnection);
         }
 
         #region Views
@@ -59,11 +61,21 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<ActionResult> Company(long id = 0)
         {
+            // 1. Obtener permisos
+            var permisos = await _companiaService.ObtenerPermisosParaCompania();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
             var compania = new Compania();
+
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerCompaniaPorId(id,tokenCookie.EmpresaID);
-                if (response.IsSuccess && response.Response !=null)
+                var response = await _companiaService.ObtenerCompaniaPorId(id);
+                if (response.IsSuccess && response.Response != null)
                 {
                     compania = JsonConvert.DeserializeObject<Compania>(response.Response.ToString());
                 }
@@ -72,7 +84,9 @@ namespace ServiceDeskDESIMVC.Controllers
                     ViewBag.ErrorMessage = response.Message;
                 }
             }
-                return View(compania);
+
+            ViewBag.Permisos = permisos;
+            return View(compania);
         }
 
         public  async Task<ActionResult> TypeActive(long id = 0)
@@ -340,6 +354,8 @@ namespace ServiceDeskDESIMVC.Controllers
         #endregion
 
         #region Data Access
+
+        #region Area
         public async Task<string> ConsutlarTodasAreas()
         {
             var response = await _areaService.ConsultarTodasAreas();
@@ -360,27 +376,9 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _areaService.EliminarArea(a);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
-        //public async Task<string> ConsultarTodosLosRoles()
-        //{
-        //    var response = await httpClientConnection.ObtenerTodosLosRoles();
-        //    return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        //}
-        //public async Task<string> ConsultarRolPorId(long id)
-        //{
-        //    var response = await httpClientConnection.ObtenerRolPorId(id);
-        //    return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        //}
+        #endregion
 
-        //public async Task<string> GuardarOActualizarRol(Rol r)
-        //{
-        //    var response = await httpClientConnection.GuardarOActualizarRol(r);
-        //    return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        //}
-        //public async Task<string> EliminarRol(Rol r)
-        //{
-        //    var response = await httpClientConnection.EliminarRol(r);
-        ////    return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        //}
+        #region Mi Perfil
         public async Task<string> GuardarPerfil()
         {
             var modelResponse = new ModelResponse();
@@ -480,6 +478,9 @@ namespace ServiceDeskDESIMVC.Controllers
                 return JsonConvert.SerializeObject(modelResponse);
             }
         }
+        #endregion
+
+        #region Categoria
         public async Task<string> GuardarOActualizarCategoria(Categoria categoria)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -514,41 +515,32 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await httpClientConnection.ObtenerCategorias();
             return JsonConvert.SerializeObject(response);
         }
+        #endregion
 
+        #region Compañia
         public async Task<string> ConsultarTodasLasCompanias()
         {
-            var response = await httpClientConnection.ObtenerTodasCompanias(tokenCookie.EmpresaID);
+            var response = await _companiaService.ConsultarTodasCompanias();
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarCompaniasPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerCompaniaPorId(id,tokenCookie.EmpresaID);
+            var response = await _companiaService.ObtenerCompaniaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
-        public async Task<string>GuardarOActualizarCompanias(Compania c)
+        public async Task<string> GuardarOActualizarCompanias(Compania c)
         {
-            var response = await httpClientConnection.GuardarActualizarCompania(c, tokenCookie.EmpresaID);
+            var response = await _companiaService.GuardarOActualizarCompania(c);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
-        public async Task<string>EliminarCompanias(Compania c)
+        public async Task<string> EliminarCompanias(Compania c)
         {
-            var response = await httpClientConnection.EliminarCompania(c, tokenCookie.EmpresaID);
+            var response = await _companiaService.EliminarCompania(c);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        }
-
-        public async Task<string> ConsultarModelosPorMarca(long marcaId)
-        {
-            var response = await httpClientConnection.ObtenerTodosLosModelos();
-            var listModels = JsonConvert.DeserializeObject<List<Modelo>>(response.Response.ToString());
-            var modelosPorMarca = listModels.Where(m => m.Marca.Id == marcaId).ToList();
-            mr.Response = modelosPorMarca;
-            mr.IsSuccess = true;
-
-            return JsonConvert.SerializeObject(mr);
         }
         #endregion
 
-        #region Catalogos
+        #region Sucursal
         public async Task<string> ConsultarTodasLasSucursales()
         {
             var response = await httpClientConnection.ObtenerTodasLasSucursales();
@@ -569,28 +561,32 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await httpClientConnection.EliminarSucursal(s);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        #endregion
 
+        #region Tipo Activo
         public async Task<string> ConsultarTodosLosTipoActivos()
         {
             var response = await httpClientConnection.ObtenerTodosLosTipoActivos();
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        }        
+        }
         public async Task<string> ConsultarTodosLosTipoActivoPorId(long id)
         {
             var response = await httpClientConnection.ObtenerTipoActivoPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        }     
-        public async Task<string>GuardarOActualizarTipoActivo(TipoActivo t)
+        }
+        public async Task<string> GuardarOActualizarTipoActivo(TipoActivo t)
         {
             var response = await httpClientConnection.GuardarOActualizarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
-        }       
-        public async Task<string>EliminarTipoActivo(TipoActivo t)
+        }
+        public async Task<string> EliminarTipoActivo(TipoActivo t)
         {
             var response = await httpClientConnection.EliminarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
-        
+        #endregion
+
+        #region Modelo
         public async Task<string> ConsultarTodosLosModelos()
         {
             var response = await httpClientConnection.ObtenerTodosLosModelos();
@@ -607,12 +603,24 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await httpClientConnection.GuardarOActualizarModelo(m);
             return JsonConvert.SerializeObject(response);
         }
-        public async Task<string> EliminarModelos (Modelo m)
+        public async Task<string> EliminarModelos(Modelo m)
         {
             var response = await httpClientConnection.EliminarModelo(m);
             return JsonConvert.SerializeObject(response);
         }
+        public async Task<string> ConsultarModelosPorMarca(long marcaId)
+        {
+            var response = await httpClientConnection.ObtenerTodosLosModelos();
+            var listModels = JsonConvert.DeserializeObject<List<Modelo>>(response.Response.ToString());
+            var modelosPorMarca = listModels.Where(m => m.Marca.Id == marcaId).ToList();
+            mr.Response = modelosPorMarca;
+            mr.IsSuccess = true;
 
+            return JsonConvert.SerializeObject(mr);
+        }
+        #endregion
+
+        #region Marca
         public async Task<string> ConsultarTodosLasMarcas()
         {
             var response = await httpClientConnection.ObtenerTodosLasMarcas();
@@ -633,7 +641,10 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await httpClientConnection.EliminarMarca(m);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        
+        #endregion
 
+        #region Activo
         public async Task<string> ConsultarTodosLosActivo()
         {
             var response = await httpClientConnection.ObtenerTodosLosActivos();
@@ -656,5 +667,9 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
         #endregion
+
+        #endregion
+
+
     }
 }

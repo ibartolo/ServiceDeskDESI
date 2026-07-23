@@ -28,28 +28,6 @@ namespace ServiceDeskDESIMVC.Services
             return null;
         }
 
-        public async Task<object> ObtenerPermisosParaArea()
-        {
-            var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
-            if (permisosResponse.IsSuccess && permisosResponse.Response != null)
-            {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Áreas");
-            }
-            return null;
-        }
-
-        public async Task<bool> TienePermisoLectura()
-        {
-            var permisos = await ObtenerPermisosParaArea();
-            if (permisos != null)
-            {
-                var permiso = (PermisosViewModel)permisos;
-                return permiso.PuedeLeer;
-            }
-            return false;
-        }
-
         public async Task<ModelResponse> GuardarOActualizarArea(Area area)
         {
             return await _httpClient.GuardarOActualizarArea(area);
@@ -63,6 +41,17 @@ namespace ServiceDeskDESIMVC.Services
         public async Task<ModelResponse> ConsultarTodasAreas()
         {
             return await _httpClient.ObtenerAreas();
+        }
+
+        public async Task<object> ObtenerPermisosParaArea()
+        {
+            var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
+            if (permisosResponse.IsSuccess && permisosResponse.Response != null)
+            {
+                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
+                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Áreas");
+            }
+            return null;
         }
     }
 }
