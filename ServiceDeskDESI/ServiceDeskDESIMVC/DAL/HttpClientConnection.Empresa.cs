@@ -64,7 +64,7 @@ namespace ServiceDeskDESIMVC.DAL
 
         public async Task<ModelResponse> GuardarNuevaEmpresa(Empresa empresa)
         {
-            var result = await RequestAsync<object>($"api/Empresas/Nueva", HttpMethod.Post, empresa,
+            var result = await RequestAsync<object>($"api/Empresas/NuevaCompleta", HttpMethod.Post, empresa,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

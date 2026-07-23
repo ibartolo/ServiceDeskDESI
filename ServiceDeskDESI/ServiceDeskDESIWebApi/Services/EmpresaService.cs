@@ -247,7 +247,7 @@ namespace ServiceDeskDESIWebApi.Services
                     // =========================================
                     // PASO 1: GUARDAR EMPRESA
                     // =========================================
-                    Log.Information("PASO 1/7 - Iniciando guardado de empresa en BD...");
+                    Log.Information("PASO 1/8 - Iniciando guardado de empresa en BD...");
 
                     empresa.FechaVigenciaInicio = DateTime.Now;
                     empresa.FechaVigenciaFin = DateTime.Now.AddDays(30);
@@ -260,12 +260,12 @@ namespace ServiceDeskDESIWebApi.Services
 
                     if (!empresaResponse.IsSuccess || empresaResponse.Response == null)
                     {
-                        Log.Error("❌ PASO 1/7 - FALLÓ el guardado de empresa. RFC: {RFC}, Error: {Error}", empresa.RFC, empresaResponse.Message);
+                        Log.Error("❌ PASO 1/8 - FALLÓ el guardado de empresa. RFC: {RFC}, Error: {Error}", empresa.RFC, empresaResponse.Message);
                         throw new Exception(empresaResponse.Message ?? "Error al guardar la empresa");
                     }
 
                     empresaGuardada = (Empresa)empresaResponse.Response;
-                    Log.Information("✅ PASO 1/7 - Empresa guardada exitosamente. Id: {EmpresaId}, Nombre: {NombreEmpresa}",
+                    Log.Information("✅ PASO 1/8 - Empresa guardada exitosamente. Id: {EmpresaId}, Nombre: {NombreEmpresa}",
                         empresaGuardada.Id, empresaGuardada.NombreComercial);
 
                     var usernameAdmin = $"admin_{empresaGuardada.Id}";
@@ -274,7 +274,7 @@ namespace ServiceDeskDESIWebApi.Services
                     // =========================================
                     // PASO 2: GUARDAR SUCURSAL
                     // =========================================
-                    Log.Information("PASO 2/7 - Creando sucursal para la empresa...");
+                    Log.Information("PASO 2/8 - Creando sucursal para la empresa...");
 
                     var sucursal = new Sucursal()
                     {
@@ -293,19 +293,19 @@ namespace ServiceDeskDESIWebApi.Services
 
                     if (!sucursalResponse.IsSuccess || sucursalResponse.Response == null)
                     {
-                        Log.Error("❌ PASO 2/7 - FALLÓ la creación de sucursal. EmpresaId: {EmpresaId}, Error: {Error}",
+                        Log.Error("❌ PASO 2/8 - FALLÓ la creación de sucursal. EmpresaId: {EmpresaId}, Error: {Error}",
                             empresaGuardada.Id, sucursalResponse.Message);
                         throw new Exception(sucursalResponse.Message ?? "Error al guardar la sucursal");
                     }
 
                     sucursalGuardada = (Sucursal)sucursalResponse.Response;
-                    Log.Information("✅ PASO 2/7 - Sucursal creada exitosamente. Id: {SucursalId}, Nombre: {SucursalNombre}",
+                    Log.Information("✅ PASO 2/8 - Sucursal creada exitosamente. Id: {SucursalId}, Nombre: {SucursalNombre}",
                         sucursalGuardada.Id, sucursalGuardada.Nombre);
 
                     // =========================================
                     // PASO 3: GUARDAR ÁREA (TI)
                     // =========================================
-                    Log.Information("PASO 3/7 - Creando área 'TI' para la empresa...");
+                    Log.Information("PASO 3/8 - Creando área 'TI' para la empresa...");
 
                     var area = new Area()
                     {
@@ -321,19 +321,19 @@ namespace ServiceDeskDESIWebApi.Services
 
                     if (!areaResponse.IsSuccess || areaResponse.Response == null)
                     {
-                        Log.Error("❌ PASO 3/7 - FALLÓ la creación del área. EmpresaId: {EmpresaId}, Error: {Error}",
+                        Log.Error("❌ PASO 3/8 - FALLÓ la creación del área. EmpresaId: {EmpresaId}, Error: {Error}",
                             empresaGuardada.Id, areaResponse.Message);
                         throw new Exception(areaResponse.Message ?? "Error al guardar el área");
                     }
 
                     areaGuardada = (Area)areaResponse.Response;
-                    Log.Information("✅ PASO 3/7 - Área 'TI' creada exitosamente. Id: {AreaId}, Nombre: {AreaNombre}",
+                    Log.Information("✅ PASO 3/8 - Área 'TI' creada exitosamente. Id: {AreaId}, Nombre: {AreaNombre}",
                         areaGuardada.Id, areaGuardada.Nombre);
 
                     // =========================================
                     // PASO 4: GUARDAR USUARIO ADMINISTRADOR
                     // =========================================
-                    Log.Information("PASO 4/7 - Creando usuario administrador para la empresa...");
+                    Log.Information("PASO 4/8 - Creando usuario administrador para la empresa...");
 
                     usuarioAdmin = new Usuario()
                     {
@@ -358,35 +358,35 @@ namespace ServiceDeskDESIWebApi.Services
 
                     if (!usuarioResponse.IsSuccess)
                     {
-                        Log.Error("❌ PASO 4/7 - FALLÓ la creación del usuario administrador. EmpresaId: {EmpresaId}, Username: {Username}, Error: {Error}",
+                        Log.Error("❌ PASO 4/8 - FALLÓ la creación del usuario administrador. EmpresaId: {EmpresaId}, Username: {Username}, Error: {Error}",
                             empresaGuardada.Id, usernameAdmin, usuarioResponse.Message);
                         throw new Exception(usuarioResponse.Message ?? "Error al guardar el usuario administrador");
                     }
 
                     usuarioAdmin = (Usuario)usuarioResponse.Response;
                     usuarioAdminId = usuarioAdmin.Id;
-                    Log.Information("✅ PASO 4/7 - Usuario administrador creado exitosamente. Id: {UsuarioId}, Username: {Username}, Correo: {Correo}",
+                    Log.Information("✅ PASO 4/8 - Usuario administrador creado exitosamente. Id: {UsuarioId}, Username: {Username}, Correo: {Correo}",
                         usuarioAdminId, usernameAdmin, empresaGuardada.CorreoContacto);
 
                     // =========================================
                     // PASO 5: CREAR ROLES BASE
                     // =========================================
-                    Log.Information("PASO 5/7 - Creando roles base para la empresa...");
+                    Log.Information("PASO 5/8 - Creando roles base para la empresa...");
 
                     var rolesBase = new List<Rol>
-                    {
-                        new Rol { Nombre = "Administrador", Descripcion = "Control total del sistema", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                        new Rol { Nombre = "Supervisor", Descripcion = "Gestión de tickets y usuarios", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                        new Rol { Nombre = "Agente", Descripcion = "Atención de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                        new Rol { Nombre = "Usuario", Descripcion = "Creación de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true }
-                    };
+            {
+                new Rol { Nombre = "Administrador", Descripcion = "Control total del sistema", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
+                new Rol { Nombre = "Supervisor", Descripcion = "Gestión de tickets y usuarios", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
+                new Rol { Nombre = "Agente", Descripcion = "Atención de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
+                new Rol { Nombre = "Usuario", Descripcion = "Creación de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true }
+            };
 
                     foreach (var rol in rolesBase)
                     {
                         var rolResponse = _dbWrapper.GuardarRolParaNuevaEmpresa(rol);
                         if (!rolResponse.IsSuccess)
                         {
-                            Log.Error("❌ PASO 5/7 - FALLÓ la creación del rol {NombreRol}. Error: {Error}", rol.Nombre, rolResponse.Message);
+                            Log.Error("❌ PASO 5/8 - FALLÓ la creación del rol {NombreRol}. Error: {Error}", rol.Nombre, rolResponse.Message);
                             throw new Exception($"Error al crear el rol '{rol.Nombre}': {rolResponse.Message}");
                         }
 
@@ -396,27 +396,27 @@ namespace ServiceDeskDESIWebApi.Services
                         }
                     }
 
-                    Log.Information("✅ PASO 5/7 - Roles base creados exitosamente para empresa {EmpresaId}", empresaGuardada.Id);
+                    Log.Information("✅ PASO 5/8 - Roles base creados exitosamente para empresa {EmpresaId}", empresaGuardada.Id);
 
                     // =========================================
                     // PASO 6: ASIGNAR ROL "ADMINISTRADOR" AL USUARIO
                     // =========================================
-                    Log.Information("PASO 6/7 - Asignando rol 'Administrador' al usuario...");
+                    Log.Information("PASO 6/8 - Asignando rol 'Administrador' al usuario...");
 
                     var asignarRolResponse = _dbWrapper.AsignarRolUsuarioParaNuevaEmpresa(usuarioAdminId, rolAdminId, usernameAdmin);
 
                     if (!asignarRolResponse.IsSuccess)
                     {
-                        Log.Error("❌ PASO 6/7 - FALLÓ la asignación del rol 'Administrador' al usuario {Username}", usernameAdmin);
+                        Log.Error("❌ PASO 6/8 - FALLÓ la asignación del rol 'Administrador' al usuario {Username}", usernameAdmin);
                         throw new Exception($"Error al asignar el rol 'Administrador' al usuario: {asignarRolResponse.Message}");
                     }
 
-                    Log.Information("✅ PASO 6/7 - Rol 'Administrador' asignado al usuario {Username}", usernameAdmin);
+                    Log.Information("✅ PASO 6/8 - Rol 'Administrador' asignado al usuario {Username}", usernameAdmin);
 
                     // =========================================
-                    // PASO 7: ASIGNAR PÁGINAS AL USUARIO ADMINISTRADOR
+                    // PASO 7: ASIGNAR PÁGINAS AL ROL ADMINISTRADOR EN RolPaginaAccion
                     // =========================================
-                    Log.Information("PASO 7/7 - Asignando páginas al usuario administrador...");
+                    Log.Information("PASO 7/8 - Asignando todas las páginas al rol Administrador...");
 
                     var paginasResponse = _dbWrapper.ObtenerPaginas();
                     if (paginasResponse.IsSuccess && paginasResponse.Response != null)
@@ -426,10 +426,55 @@ namespace ServiceDeskDESIWebApi.Services
 
                         foreach (var pagina in paginas)
                         {
+                            // Insertar en RolPaginaAccion para el rol Administrador
+                            // Todos los permisos en true para el administrador
+                            var insertRolPaginaResponse = _dbWrapper.InsertarRolPaginaAccion(
+                                rolAdminId,
+                                pagina.Id,
+                                true,  // PuedeLeer
+                                true,  // PuedeCrear
+                                true,  // PuedeEditar
+                                true,  // PuedeEliminar
+                                true,  // PuedeExportar
+                                usernameAdmin,
+                                usernameAdmin
+                            );
+
+                            if (insertRolPaginaResponse.IsSuccess)
+                            {
+                                paginasAsignadas++;
+                            }
+                            else
+                            {
+                                Log.Warning("⚠️ No se pudo asignar la página {PaginaId} al rol {RolId}: {Error}",
+                                    pagina.Id, rolAdminId, insertRolPaginaResponse.Message);
+                            }
+                        }
+
+                        Log.Information("✅ PASO 7/8 - {Count} páginas asignadas al rol Administrador", paginasAsignadas);
+                    }
+                    else
+                    {
+                        Log.Warning("⚠️ No se encontraron páginas para asignar al rol Administrador");
+                    }
+
+                    // =========================================
+                    // PASO 8: ASIGNAR PÁGINAS AL USUARIO ADMINISTRADOR (UsuarioPagina)
+                    // =========================================
+                    Log.Information("PASO 8/8 - Asignando páginas al usuario administrador...");
+
+                    var paginasResponseUser = _dbWrapper.ObtenerPaginas();
+                    if (paginasResponseUser.IsSuccess && paginasResponseUser.Response != null)
+                    {
+                        var paginas = (List<Pagina>)paginasResponseUser.Response;
+                        int paginasAsignadasUser = 0;
+
+                        foreach (var pagina in paginas)
+                        {
                             var insertResponse = _dbWrapper.InsertarUsuarioPaginaParaNuevaEmpresa(usuarioAdminId, pagina.Id, usernameAdmin);
                             if (insertResponse.IsSuccess)
                             {
-                                paginasAsignadas++;
+                                paginasAsignadasUser++;
                             }
                             else
                             {
@@ -438,7 +483,7 @@ namespace ServiceDeskDESIWebApi.Services
                             }
                         }
 
-                        Log.Information("✅ PASO 7/7 - {Count} páginas asignadas al usuario administrador", paginasAsignadas);
+                        Log.Information("✅ PASO 8/8 - {Count} páginas asignadas al usuario administrador", paginasAsignadasUser);
                     }
                     else
                     {
