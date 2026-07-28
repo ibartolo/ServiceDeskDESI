@@ -202,6 +202,7 @@
     <Content Include="Views\Home\AccesoDenegado.cshtml" />
     <Content Include="Views\Security\Role.cshtml" />
     <Content Include="Views\Security\Permisos.cshtml" />
+    <Content Include="Views\Home\Configuration.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

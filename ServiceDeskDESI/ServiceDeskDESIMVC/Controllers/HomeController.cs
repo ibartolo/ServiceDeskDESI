@@ -53,6 +53,13 @@ namespace ServiceDeskDESIMVC.Controllers
         {
             return View();
         }
+
+        public ActionResult Configuration () { 
+
+            return View();
+        }
+
+
         #endregion
 
         #region Data Access
