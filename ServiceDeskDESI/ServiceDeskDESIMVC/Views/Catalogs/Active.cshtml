@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Active";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
 }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
@@ -28,7 +29,9 @@
             </button>
         </div>
     }
+
     <h3 class="section-title"><i class="fas fa-laptop me-2"></i>Catálogo de Activos</h3>
+
     <form enctype="multipart/form-data" id="frmActivo" name="frmActivo" method="post">
         @Html.HiddenFor(x => x.Id)
         @Html.HiddenFor(x => x.CreadoPor)
@@ -111,7 +114,10 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarActivo()" />
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarActivo()" />
+                    }
                     <a href="/Catalogs/Active" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -143,6 +149,9 @@
 </div>
 
 <script>
+    // Pasar permisos a JavaScript para controlar los botones en el DataTable
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+
     var tablaActivo;
     var tipoActivoSelect = @(Model.TipoActivo?.Id ?? 0);
     var marcaSelect = @(Model.Marca?.Id ?? 0);
@@ -276,10 +285,20 @@
                 { data: 'TipoActivo.Nombre', title: 'Tipo', defaultContent: '---' },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarActivo(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarActivo(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
+                        var html = '<div class="d-flex gap-3">';
+
+                        // Botón Editar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarActivo(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+
+                        // Botón Eliminar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarActivo(' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+
+                        html += '</div>';
+                        return html;
                     }
                 }
             ],
