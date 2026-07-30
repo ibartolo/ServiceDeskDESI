@@ -49,12 +49,21 @@ namespace ServiceDeskDESIWebApi.DAL
             {
                 var modelo = GetObject("ObtenerModeloPorId", CommandType.StoredProcedure,
                     new[] {
-                    new SqlParameter("@Id", id),
-                    new SqlParameter("@Usuario", usuario)
+                new SqlParameter("@Id", id),
+                new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Modelo>((reader) =>
                     {
                         var m = LlenarEntidad<Modelo>(reader);
+
+                        // Mapear la marca que viene del JOIN
+                        m.Marca = new Marca()
+                        {
+                            Id = MapearPorpiedades<long>(reader["MarcaId"]),
+                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
+                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
+                        };
+
                         return m;
                     }));
 

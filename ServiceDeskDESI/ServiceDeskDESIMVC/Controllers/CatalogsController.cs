@@ -23,11 +23,23 @@ namespace ServiceDeskDESIMVC.Controllers
         TokenCookie token;
         private readonly AreaService _areaService;
         private readonly CompaniaService _companiaService;
+        private readonly TipoActivoService _tipoActivoService;
+        private readonly SucursalService _sucursalService;
+        private readonly ActivoService _activoService;
+        private readonly ModeloService _modeloService;
+        private readonly MarcaService _marcaService;
+        private readonly CategoriaService _categoriaService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
             _areaService = new AreaService(httpClientConnection);
             _companiaService = new CompaniaService(httpClientConnection);
+            _tipoActivoService = new TipoActivoService(httpClientConnection);
+            _sucursalService = new SucursalService(httpClientConnection);
+            _activoService = new ActivoService(httpClientConnection);
+            _modeloService = new ModeloService(httpClientConnection);
+            _marcaService = new MarcaService(httpClientConnection);
+            _categoriaService = new CategoriaService(httpClientConnection);
         }
 
         #region Views
@@ -58,7 +70,6 @@ namespace ServiceDeskDESIMVC.Controllers
 
             return View(area);
         }
-
         public async Task<ActionResult> Company(long id = 0)
         {
             // 1. Obtener permisos
@@ -88,61 +99,91 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Permisos = permisos;
             return View(compania);
         }
-
-        public  async Task<ActionResult> TypeActive(long id = 0)
+        public async Task<ActionResult> TypeActive(long id = 0)
         {
-            var tipoactivo = new TipoActivo();
+            // 1. Obtener permisos para la página "Tipo Activo"
+            var permisos = await _tipoActivoService.ObtenerPermisosParaTipoActivo();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
+            var tipoActivo = new TipoActivo();
+
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerTipoActivoPorId(id);
-                if (response.IsSuccess && response.Response !=null)
+                var response = await _tipoActivoService.ObtenerTipoActivoPorId(id);
+                if (response.IsSuccess && response.Response != null)
                 {
-                    tipoactivo = JsonConvert.DeserializeObject<TipoActivo>(response.Response.ToString());
-
+                    tipoActivo = JsonConvert.DeserializeObject<TipoActivo>(response.Response.ToString());
                 }
                 else
                 {
                     ViewBag.ErrorMessage = response.Message;
                 }
             }
-            return View(tipoactivo);
+
+            // 3. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
+
+            return View(tipoActivo);
         }
-
-
         public async Task<ActionResult> Branch(long id = 0)
         {
+            // 1. Obtener permisos para la página "Sucursales"
+            var permisos = await _sucursalService.ObtenerPermisosParaSucursal();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
             var sucursal = new Sucursal();
+
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerSucursalPorId(id);
-                if (response.IsSuccess && response.Response !=null)
+                var response = await _sucursalService.ObtenerSucursalPorId(id);
+                if (response.IsSuccess && response.Response != null)
                 {
                     sucursal = JsonConvert.DeserializeObject<Sucursal>(response.Response.ToString());
                 }
-                else 
+                else
                 {
                     ViewBag.ErrorMessage = response.Message;
-                }                
+                }
             }
+
+            // 3. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
+
             return View(sucursal);
         }
-
-        public async Task<ActionResult>Active(long id = 0)
+        public async Task<ActionResult> Active(long id = 0)
         {
-            // ING AQUI TAMBIEN LE PUSE 0 POR QUE ME MARCABA ERROR 
+            // 1. Obtener permisos para la página "Activos"
+            var permisos = await _activoService.ObtenerPermisosParaActivo();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
             var activo = new Activo();
-            // cargar tipo activo, modelo, marca
-            var tipoactivoResponse = await httpClientConnection.ObtenerTodosLosTipoActivos();
+
+            // Cargar tipo activo, modelo, marca
+            var tipoactivoResponse = await _tipoActivoService.ConsultarTodosLosTipoActivos();
             var tipoactivoList = new List<TipoActivo>();
             if (tipoactivoResponse.IsSuccess && tipoactivoResponse.Response != null)
             {
                 ViewBag.TipoActivoss = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<TipoActivo>>(tipoactivoResponse.Response.ToString()), "Id", "Nombre");
                 tipoactivoList = JsonConvert.DeserializeObject<List<TipoActivo>>(tipoactivoResponse.Response.ToString());
             }
-            
 
-
-            var modeloResponse = await httpClientConnection.ObtenerTodosLosModelos();
+            var modeloResponse = await _modeloService.ConsultarTodosLosModelos();
             var modeloList = new List<Modelo>();
             if (modeloResponse.IsSuccess && modeloResponse.Response != null)
             {
@@ -150,17 +191,17 @@ namespace ServiceDeskDESIMVC.Controllers
                 modeloList = JsonConvert.DeserializeObject<List<Modelo>>(modeloResponse.Response.ToString());
             }
 
-            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
+            var marcaResponse = await _marcaService.ConsultarTodosLasMarcas();
             var marcasList = new List<Marca>();
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
                 ViewBag.Marcass = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString()), "Id", "Nombre");
                 marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
             }
+
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerActivoPorId(id);
-
+                var response = await _activoService.ObtenerActivoPorId(id);
                 if (response.IsSuccess && response.Response != null)
                 {
                     activo = JsonConvert.DeserializeObject<Activo>(response.Response.ToString());
@@ -170,6 +211,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     ViewBag.ErrorMessage = response.Message;
                 }
             }
+
             // Después de obtener el objeto activo, setea el valor seleccionado
             var selectListTipo = MappingPropertiToDropDownList(tipoactivoList, "Id", "Nombre");
             if (activo.TipoActivo != null && activo.TipoActivo.Id > 0)
@@ -185,11 +227,10 @@ namespace ServiceDeskDESIMVC.Controllers
             }
             ViewBag.TipoActivoss = selectListTipo;
 
-            var selectLista = MappingPropertiToDropDownList(modeloList, "Id", "Nombre");
+            var selectListModelo = MappingPropertiToDropDownList(modeloList, "Id", "Nombre");
             if (activo.Modelo != null && activo.Modelo.Id > 0)
             {
-                //seleccionar item correspondiente
-                foreach (var item in selectLista)
+                foreach (var item in selectListModelo)
                 {
                     if (item.Value == activo.Modelo.Id.ToString())
                     {
@@ -198,25 +239,43 @@ namespace ServiceDeskDESIMVC.Controllers
                     }
                 }
             }
-            ViewBag.Modelos = selectLista;
+            ViewBag.Modelos = selectListModelo;
 
-            return View(activo);        
+            var selectListMarca = MappingPropertiToDropDownList(marcasList, "Id", "Nombre");
+            if (activo.Marca != null && activo.Marca.Id > 0)
+            {
+                foreach (var item in selectListMarca)
+                {
+                    if (item.Value == activo.Marca.Id.ToString())
+                    {
+                        item.Selected = true;
+                        break;
+                    }
+                }
+            }
+            ViewBag.Marcass = selectListMarca;
+
+            // 3. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
+
+            return View(activo);
         }
         public async Task<ActionResult> Model(long id = 0)
         {
-            var modelo = new Modelo();
-            var marcaResponse = await httpClientConnection.ObtenerTodosLasMarcas();
-            var marcasList = new List<Marca>();
+            // 1. Obtener permisos para la página "Modelos"
+            var permisos = await _modeloService.ObtenerPermisosParaModelo();
 
-            if (marcaResponse.IsSuccess && marcaResponse.Response != null)
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
             {
-                ViewBag.Marcas = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString()), "Id", "Nombre");
-                marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
+                return RedirectToAction("AccesoDenegado", "Home");
             }
+
+            var modelo = new Modelo();
 
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerModeloPorId(id);
+                var response = await _modeloService.ObtenerModeloPorId(id);
                 if (response.IsSuccess && response.Response != null)
                 {
                     modelo = JsonConvert.DeserializeObject<Modelo>(response.Response.ToString());
@@ -227,43 +286,66 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
             }
 
-            // Asignar el DropDownList con el valor seleccionado si existe
-            var selectList = MappingPropertiToDropDownList(marcasList, "Id", "Nombre");
-            if (modelo.Marca != null && modelo.Marca.Id > 0)
+            // Cargar marcas
+            var marcaResponse = await _marcaService.ConsultarTodosLasMarcas();
+            var marcasList = new List<Marca>();
+
+            if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
-                // Seleccionar el item correspondiente
-                foreach (var item in selectList)
+                marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
+                // Asignar el DropDownList con el valor seleccionado si existe
+                var selectList = MappingPropertiToDropDownList(marcasList, "Id", "Nombre");
+                if (modelo.Marca != null && modelo.Marca.Id > 0)
                 {
-                    if (item.Value == modelo.Marca.Id.ToString())
+                    foreach (var item in selectList)
                     {
-                        item.Selected = true;
-                        break;
+                        if (item.Value == modelo.Marca.Id.ToString())
+                        {
+                            item.Selected = true;
+                            break;
+                        }
                     }
                 }
+
+                ViewBag.Marcas = selectList;
             }
 
-            ViewBag.Marcas = selectList;
+            // 3. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
 
             return View(modelo);
         }
         public async Task<ActionResult> Mark(long id = 0)
         {
+            // 1. Obtener permisos para la página "Marcas"
+            var permisos = await _marcaService.ObtenerPermisosParaMarca();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
             var marca = new Marca();
+
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerMarcaPorId(id);
+                var response = await _marcaService.ObtenerMarcaPorId(id);
                 if (response.IsSuccess && response.Response != null)
                 {
-                       marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
+                    marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
                 }
                 else
                 {
                     ViewBag.ErrorMessage = response.Message;
                 }
             }
+
+            // 3. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
+
             return View(marca);
         }
-
         public async Task<ActionResult> MyProfile()
         {
             // Obtener el ID del usuario desde la sesión
@@ -310,12 +392,20 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<ActionResult> Category(long id = 0)
         {
+            // 1. Obtener permisos para la página "Categorías"
+            var permisos = await _categoriaService.ObtenerPermisosParaCategoria();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
             var categoria = new Categoria();
 
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerCategoriaPorId(id);
-
+                var response = await _categoriaService.ObtenerCategoriaPorId(id);
                 if (response.IsSuccess && response.Response != null)
                 {
                     categoria = JsonConvert.DeserializeObject<Categoria>(response.Response.ToString());
@@ -327,7 +417,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             // Cargar áreas para el dropdown
-            var areasResponse = await httpClientConnection.ObtenerAreas();
+            var areasResponse = await _areaService.ConsultarTodasAreas();
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
                 ViewBag.Areas = areasResponse.Response;
@@ -339,14 +429,19 @@ namespace ServiceDeskDESIMVC.Controllers
                 var areaId = categoria.Area?.Id ?? 0;
                 if (areaId > 0)
                 {
-                    var categoriasResponse = await httpClientConnection.ObtenerCategoriasPorArea(areaId);
+                    var categoriasResponse = await _categoriaService.ConsultarTodasCategorias();
                     if (categoriasResponse.IsSuccess && categoriasResponse.Response != null)
                     {
-                        var categorias = JsonConvert.DeserializeObject<List<Categoria>>(categoriasResponse.Response.ToString());
-                        ViewBag.CategoriasPadre = categorias.Where(x => x.CategoriaPadre == null).ToList();
+                        var todasCategorias = JsonConvert.DeserializeObject<List<Categoria>>(categoriasResponse.Response.ToString());
+                        ViewBag.CategoriasPadre = todasCategorias
+                            .Where(x => x.CategoriaPadre == null && x.Area.Id == areaId)
+                            .ToList();
                     }
                 }
             }
+
+            // 3. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
 
             return View(categoria);
         }
@@ -497,7 +592,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
             categoria.Estatus = true;
 
-            var response = await httpClientConnection.GuardarOActualizarCategoria(categoria);
+            var response = await _categoriaService.GuardarOActualizarCategoria(categoria);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarCategoria(Categoria categoria)
@@ -507,12 +602,12 @@ namespace ServiceDeskDESIMVC.Controllers
             categoria.ModificadoPor = tokenCookie?.UserName ?? "system";
             categoria.FechaModificacion = DateTime.Now;
 
-            var response = await httpClientConnection.EliminarCategoria(categoria);
+            var response = await _categoriaService.EliminarCategoria(categoria);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodasCategorias()
         {
-            var response = await httpClientConnection.ObtenerCategorias();
+            var response = await _categoriaService.ConsultarTodasCategorias();
             return JsonConvert.SerializeObject(response);
         }
         #endregion
@@ -543,22 +638,22 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Sucursal
         public async Task<string> ConsultarTodasLasSucursales()
         {
-            var response = await httpClientConnection.ObtenerTodasLasSucursales();
+            var response = await _sucursalService.ConsultarTodasSucursales();
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodasLasSucursalesPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerSucursalPorId(id);
+            var response = await _sucursalService.ObtenerSucursalPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarActualizarSucursales(Sucursal s)
         {
-            var response = await httpClientConnection.GuardarActualizarSucursal(s);
+            var response = await _sucursalService.GuardarOActualizarSucursal(s);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarSucurales(Sucursal s)
         {
-            var response = await httpClientConnection.EliminarSucursal(s);
+            var response = await _sucursalService.EliminarSucursal(s);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         #endregion
@@ -566,22 +661,22 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Tipo Activo
         public async Task<string> ConsultarTodosLosTipoActivos()
         {
-            var response = await httpClientConnection.ObtenerTodosLosTipoActivos();
+            var response = await _tipoActivoService.ConsultarTodosLosTipoActivos();
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodosLosTipoActivoPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerTipoActivoPorId(id);
+            var response = await _tipoActivoService.ObtenerTipoActivoPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarTipoActivo(TipoActivo t)
         {
-            var response = await httpClientConnection.GuardarOActualizarTipoActivo(t);
+            var response = await _tipoActivoService.GuardarOActualizarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarTipoActivo(TipoActivo t)
         {
-            var response = await httpClientConnection.EliminarTipoActivo(t);
+            var response = await _tipoActivoService.EliminarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         #endregion
@@ -589,23 +684,23 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Modelo
         public async Task<string> ConsultarTodosLosModelos()
         {
-            var response = await httpClientConnection.ObtenerTodosLosModelos();
+            var response = await _modeloService.ConsultarTodosLosModelos();
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodosModelosPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerModeloPorId(id);
+            var response = await _modeloService.ObtenerModeloPorId(id);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarModelos(Modelo m)
         {
             m.Estatus = true;
-            var response = await httpClientConnection.GuardarOActualizarModelo(m);
+            var response = await _modeloService.GuardarOActualizarModelo(m);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarModelos(Modelo m)
         {
-            var response = await httpClientConnection.EliminarModelo(m);
+            var response = await _modeloService.EliminarModelo(m);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarModelosPorMarca(long marcaId)
@@ -623,22 +718,22 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Marca
         public async Task<string> ConsultarTodosLasMarcas()
         {
-            var response = await httpClientConnection.ObtenerTodosLasMarcas();
+            var response = await _marcaService.ConsultarTodosLasMarcas();
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodasMarcasPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerMarcaPorId(id);
+            var response = await _marcaService.ObtenerMarcaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarMarca(Marca m)
         {
-            var response = await httpClientConnection.GuardarOActualizarMarca(m);
+            var response = await _marcaService.GuardarOActualizarMarca(m);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         public async Task<string> EliminarMarcas(Marca m)
         {
-            var response = await httpClientConnection.EliminarMarca(m);
+            var response = await _marcaService.EliminarMarca(m);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         
@@ -647,23 +742,23 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Activo
         public async Task<string> ConsultarTodosLosActivo()
         {
-            var response = await httpClientConnection.ObtenerTodosLosActivos();
+            var response = await _activoService.ConsultarTodosLosActivos();
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> ConsultarTodosLosActivosPorId(long id)
         {
-            var response = await httpClientConnection.ObtenerActivoPorId(id);
+            var response = await _activoService.ObtenerActivoPorId(id);
             return JsonConvert.SerializeObject(response);
         }
         public async Task<string> GuardarOActualizarActivos(Activo a)
         {
-            var response = await httpClientConnection.GuardarOActualizarActivo(a);
+            var response = await _activoService.GuardarOActualizarActivo(a);
             return JsonConvert.SerializeObject(response);
 
         }
         public async Task<string> EliminarActivos(Activo a)
         {
-            var response = await httpClientConnection.EliminarActivo(a);
+            var response = await _activoService.EliminarActivo(a);
             return JsonConvert.SerializeObject(response);
         }
         #endregion

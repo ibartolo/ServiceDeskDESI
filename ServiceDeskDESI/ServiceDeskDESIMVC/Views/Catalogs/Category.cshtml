@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Categorías";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
 }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
@@ -17,7 +18,9 @@
             </button>
         </div>
     }
+
     <h3 class="section-title"><i class="fas fa-folder-tree me-2"></i>Categorías</h3>
+
     <form id="frmCategoria" name="frmCategoria" method="post">
         @Html.HiddenFor(x => x.Id)
         @Html.HiddenFor(x => x.CreadoPor)
@@ -31,24 +34,25 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Área:</label>
-                    @Html.DropDownListFor(x => x.Area.Id, new SelectList(ViewBag.Areas, "Id", "Nombre"), new { @class = "form-control", id = "ddlArea" })
+                    @Html.DropDownListFor(x => x.Area.Id, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Categoría Padre:</label>
                     <select id="ddlCategoriaPadre" class="form-control">
-                        <option value="">Sin categoria padre</option>
+                        <option value="">Sin categoría padre</option>
+                        @if (ViewBag.CategoriasPadre != null)
+                        {
+                            foreach (var item in (List<ServiceDeskDESIEntities.Catalogos.Categoria>)ViewBag.CategoriasPadre)
+                            {
+                                <option value="@item.Id" @(Model.CategoriaPadre != null && Model.CategoriaPadre.Id == item.Id ? "selected" : "")>@item.Nombre</option>
+                            }
+                        }
                     </select>
                     @Html.HiddenFor(x => x.CategoriaPadre.Id)
                 </div>
             </div>
-            <!--<div class="col-md-4">
-                <div class="mb-3">
-                    <label>Orden:</label>
-                    @Html.TextBoxFor(x => x.Orden, new { @class = "form-control", placeholder = "Orden", type = "number" })
-                </div>
-            </div>-->
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Nombre:</label>
@@ -69,7 +73,10 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarCategoria()" />
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarCategoria()" />
+                    }
                     <a href="/Catalogs/Category" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -87,12 +94,16 @@
 </div>
 
 <script>
+    // Pasar permisos a JavaScript para controlar los botones en el DataTable
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+
     var tablaCategoria;
 
     $(document).ready(function () {
-        // Cargar todas las categorías para el dropdown de categorías padres
-        CargarCategoriasPadre();
-        ConsultarCategorias();
+        // Cargar categorías padres al cambiar el área
+        $("#ddlArea").change(function () {
+            CargarCategoriasPadre();
+        });
 
         // Inicializar DataTable
         tablaCategoria = $('#tblCategoria').DataTable({
@@ -105,10 +116,20 @@
                 { data: 'Orden', title: 'Orden', visible: false },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarCategoria(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarCategoria(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
+                        var html = '<div class="d-flex gap-3">';
+
+                        // Botón Editar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarCategoria(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+
+                        // Botón Eliminar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarCategoria(' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+
+                        html += '</div>';
+                        return html;
                     }
                 }
             ],
@@ -117,10 +138,8 @@
             }
         });
 
-        // Cargar categorías padres al cambiar el área
-        $("#ddlArea").change(function () {
-            CargarCategoriasPadre();
-        });
+        ConsultarCategorias();
+        CargarCategoriasPadre();
     });
 
     $(function () {
@@ -133,11 +152,6 @@
                 "Nombre": {
                     required: true,
                     maxlength: 250
-                },
-                "Orden": {
-                    required: true,
-                    number: true,
-                    min: 0
                 }
             },
             messages: {
@@ -148,11 +162,6 @@
                 "Nombre": {
                     required: "El campo 'Nombre' es requerido.",
                     maxlength: "El nombre no puede superar los 250 caracteres."
-                },
-                "Orden": {
-                    required: "El campo 'Orden' es requerido.",
-                    number: "Ingrese un número válido.",
-                    min: "El orden no puede ser negativo."
                 }
             },
             errorElement: "span",
@@ -181,16 +190,16 @@
                     ddl.append('<option value="">Sin categoría padre</option>');
 
                     // Filtrar por área y solo categorías principales (sin padre)
-                    //var categoriasFiltradas = todasCategorias.filter(function (c) {
-                    //    return c.Area.Id === parseInt(areaId) && c.CategoriaPadre === null;
-                    //});
+                    var categoriasFiltradas = todasCategorias.filter(function (c) {
+                        return c.Area.Id === parseInt(areaId) && c.CategoriaPadre === null;
+                    });
 
                     // Ordenar por Orden
-                    todasCategorias.sort(function (a, b) {
+                    categoriasFiltradas.sort(function (a, b) {
                         return a.Orden - b.Orden;
                     });
 
-                    todasCategorias.forEach(function (c) {
+                    categoriasFiltradas.forEach(function (c) {
                         ddl.append('<option value="' + c.Id + '">' + c.Nombre + '</option>');
                     });
 
