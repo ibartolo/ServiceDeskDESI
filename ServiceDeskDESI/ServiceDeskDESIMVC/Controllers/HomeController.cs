@@ -4,6 +4,7 @@ using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIMVC.DAL;
 using ServiceDeskDESIMVC.Helpers;
+using ServiceDeskDESIMVC.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,15 @@ namespace ServiceDeskDESIMVC.Controllers
 {
     public class HomeController : BaseController
     {
+        private readonly AutenticacionService _autenticacionService;
+        private readonly EmpresaService _empresaService;
+
+        public HomeController()
+        {
+            _autenticacionService = new AutenticacionService(httpClientConnection);
+            _empresaService = new EmpresaService(httpClientConnection);
+        }
+
         #region Views
         [NoAutenticated]
         public ActionResult Autentication()
@@ -74,7 +84,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
                 if (token != null)
                 {
-                    var response = await httpClientConnection.AutenticarUsuario(new Usuario()
+                    var response = await _autenticacionService.AutenticarUsuario(new Usuario()
                     {
                         NombreUsuario = user,
                         Contrasena = Cryptography.Encrypt(pass)
@@ -139,19 +149,19 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<string> ValidarToken(string id)
         { 
-            var response = await httpClientConnection.ValidarTokenRecuperacion(id);
+            var response = await _autenticacionService.ValidarTokenRecuperacion(id);
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> RestablecerContrasenia(string token, string nuevaContrasena)
         {
-            var response = await httpClientConnection.RestablecerContrasenia(token, Cryptography.Encrypt(nuevaContrasena));
+            var response = await _autenticacionService.RestablecerContrasenia(token, Cryptography.Encrypt(nuevaContrasena));
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ValidarRecetearContrasenia(Usuario usuario)
         {
-            var response = await httpClientConnection.ValidarRecetearContrasenia(usuario);
+            var response = await _autenticacionService.ValidarRecetearContrasenia(usuario);
             return JsonConvert.SerializeObject(response);
         }
         [HttpPost]
@@ -206,7 +216,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
                 // Obtener todas las empresas
                 //  ING AQUI TAMBIEN LE PUESE 0 
-                var empresasResponse = await httpClientConnection.ObtenerTodasLasEmpresas();
+                var empresasResponse = await _empresaService.ObtenerTodasLasEmpresas();
 
                 if (!empresasResponse.IsSuccess)
                 {
@@ -262,7 +272,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 empresa.Estatus = true;
 
                 // Guardar la empresa
-                var response = await httpClientConnection.GuardarNuevaEmpresa(empresa);
+                var response = await _empresaService.GuardarNuevaEmpresa(empresa);
 
                 if (response.IsSuccess && response.Response != null)
                 {

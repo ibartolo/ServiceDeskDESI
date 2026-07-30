@@ -1,6 +1,7 @@
-﻿﻿﻿@{
+﻿﻿﻿﻿@{
     ViewBag.Title = "Permisos por Rol";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
 }
 
 @{
@@ -245,6 +246,9 @@
 </div>
 
 <script>
+    // Pasar permisos a JavaScript
+    var permisosGlobal = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(permisos));
+
     var tablaRoles;
     var rolSeleccionadoId = null;
     var todasLasPaginas = [];
@@ -278,10 +282,10 @@
                 rolSeleccionadoId = parseInt(rolId);
                 CargarPermisos(rolSeleccionadoId);
                 $("#chooserContainer").show();
-                $("#btnGuardarPermisos").show();
+                $("#btnGuardarPermisos").show();  // Mostrar siempre al seleccionar un rol
             } else {
                 $("#chooserContainer").hide();
-                $("#btnGuardarPermisos").hide();
+                $("#btnGuardarPermisos").hide();  // Ocultar al no tener rol seleccionado
                 rolSeleccionadoId = null;
                 paginasByRol.disponibles = [];
                 paginasByRol.asignadas = [];
@@ -351,7 +355,7 @@
                 { data: 'Nombre', title: 'Nombre' },
                 { data: 'Descripcion', title: 'Descripción' },
                 {
-                    data: 'Id', title: 'Páginas Asignadas', visible: false, render: function () {
+                    data: 'Id', title: 'Páginas Asignadas', render: function () {
                         return '<span class="badge-paginas">0</span>';
                     }
                 },

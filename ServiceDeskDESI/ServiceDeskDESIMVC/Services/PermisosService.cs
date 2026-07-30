@@ -42,6 +42,11 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.GuardarPermisosRol(request);
         }
 
+        public async Task<ModelResponse> GuardarPermisosRolMasivo(GuardarPermisosMasivoRequest request)
+        {
+            return await _httpClient.GuardarPermisosRolMasivo(request);
+        }
+
         public async Task<List<PermisosViewModel>> ObtenerPermisosParaPagina(string nombrePagina)
         {
             var response = await _httpClient.ObtenerPermisosPorUsuario();
@@ -63,9 +68,15 @@ namespace ServiceDeskDESIMVC.Services
             return false;
         }
 
-        public async Task<ModelResponse> GuardarPermisosRolMasivo(GuardarPermisosMasivoRequest request)
+        public async Task<object> ObtenerPermisosParaPermisos()
         {
-            return await _httpClient.GuardarPermisosRolMasivo(request);
+            var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
+            if (permisosResponse.IsSuccess && permisosResponse.Response != null)
+            {
+                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
+                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Permisos");
+            }
+            return null;
         }
     }
 }

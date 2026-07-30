@@ -20,11 +20,17 @@ namespace ServiceDeskDESIMVC.Controllers
     {
         private readonly AreaService _areaService;
         private readonly RolService _rolService;
+        private readonly UsuarioService _usuarioService;
+        private readonly SucursalService _sucursalService;
+        private readonly AutenticacionService _autenticacionService;
 
         public UserController()
         {
             _areaService = new AreaService(httpClientConnection);
             _rolService = new RolService(httpClientConnection);
+            _usuarioService = new UsuarioService(httpClientConnection);
+            _sucursalService = new SucursalService(httpClientConnection);
+            _autenticacionService = new AutenticacionService(httpClientConnection);
         }
 
         public async Task<ActionResult> MyProfile()
@@ -37,7 +43,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             var usuario = new Usuario();
-            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
+            var response = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
 
             if (response.IsSuccess && response.Response != null)
             {
@@ -49,8 +55,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             // Cargar listas para los dropdowns
-            //var sucursalesResponse = await httpClientConnection.ObtenerSucursales();
-            var sucursalesResponse = await httpClientConnection.ObtenerSucursales();
+            var sucursalesResponse = await _sucursalService.ConsultarTodasSucursales();
             if (sucursalesResponse.IsSuccess && sucursalesResponse.Response != null)
             {
                 ViewBag.Sucursales = sucursalesResponse.Response;
@@ -103,7 +108,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     usuario.ImagenPerfil = $"/{pathTemplate}{fileName}";
                 }
 
-                var response = await httpClientConnection.ActualizarPerfilUsuario(usuario);
+                var response = await _autenticacionService.ActualizarPerfilUsuario(usuario);
                 return JsonConvert.SerializeObject(response);
             }
             catch (Exception ex)
@@ -129,7 +134,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
 
                 // Validar contraseña actual
-                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
+                var usuarioResponse = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
 
                 if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
                 {
@@ -155,7 +160,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 //usuario.FechaModificacion = DateTime.Now;
                 //
                 //var response = await httpClientConnection.ActualizarContrasena(usuario);
-                var response = await httpClientConnection.GuardarOActualizarUsuario(usuario);
+                var response = await _usuarioService.GuardarOActualizarUsuario(usuario);
                 return JsonConvert.SerializeObject(response);
             }
             catch (Exception ex)
@@ -173,14 +178,14 @@ namespace ServiceDeskDESIMVC.Controllers
             var usuario = new Usuario();
 
             // Cargar listas para los dropdowns
-            var sucursalesResponse = await httpClientConnection.ObtenerSucursales();
+            var sucursalesResponse = await _sucursalService.ConsultarTodasSucursales();
             var sucursalesList = new List<Sucursal>();
             if (sucursalesResponse.IsSuccess && sucursalesResponse.Response != null)
             {
                 sucursalesList = JsonConvert.DeserializeObject<List<Sucursal>>(sucursalesResponse.Response.ToString());
             }
 
-            var areasResponse = await httpClientConnection.ObtenerAreas();
+            var areasResponse = await _areaService.ConsultarTodasAreas();
             var areasList = new List<Area>();
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
@@ -199,7 +204,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerUsuarioPorId(id);
+                var response = await _usuarioService.ObtenerUsuarioPorId(id);
 
                 if (response.IsSuccess && response.Response != null)
                 {
@@ -292,7 +297,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<string> ConsultarTodosLosUsuarios()
         {
-            var response = await httpClientConnection.ObtenerUsuarios();
+            var response = await _usuarioService.ConsultarTodosLosUsuarios();
             return JsonConvert.SerializeObject(response);
         }
 
@@ -310,7 +315,7 @@ namespace ServiceDeskDESIMVC.Controllers
             usuario.Empresa = new Empresa { Id = tokenCookie.EmpresaID };
 
             // Guardar usuario
-            var response = await httpClientConnection.GuardarOActualizarUsuarioAdmin(usuario);
+            var response = await _usuarioService.GuardarOActualizarUsuarioAdmin(usuario);
 
             // Si el usuario se guardó correctamente y tiene un rol seleccionado
             if (response.IsSuccess && response.Response != null)
@@ -347,7 +352,7 @@ namespace ServiceDeskDESIMVC.Controllers
             usuario.ModificadoPor = tokenCookie?.UserName ?? "system";
             usuario.FechaModificacion = DateTime.Now;
 
-            var response = await httpClientConnection.EliminarUsuario(usuario);
+            var response = await _usuarioService.EliminarUsuario(usuario);
             return JsonConvert.SerializeObject(response);
         }
         #endregion

@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIMVC.DAL;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ServiceDeskDESIMVC.Services
@@ -48,6 +49,17 @@ namespace ServiceDeskDESIMVC.Services
         public async Task<ModelResponse> EliminarRolUsuario(long usuarioRolId)
         {
             return await _httpClient.EliminarRolUsuario(usuarioRolId);
+        }
+
+        public async Task<object> ObtenerPermisosParaRol()
+        {
+            var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
+            if (permisosResponse.IsSuccess && permisosResponse.Response != null)
+            {
+                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
+                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Roles");
+            }
+            return null;
         }
     }
 }

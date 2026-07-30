@@ -29,6 +29,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly ModeloService _modeloService;
         private readonly MarcaService _marcaService;
         private readonly CategoriaService _categoriaService;
+        private readonly UsuarioService _usuarioService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
@@ -40,6 +41,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _modeloService = new ModeloService(httpClientConnection);
             _marcaService = new MarcaService(httpClientConnection);
             _categoriaService = new CategoriaService(httpClientConnection);
+            _usuarioService = new UsuarioService(httpClientConnection);
         }
 
         #region Views
@@ -356,7 +358,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             var usuario = new Usuario();
-            var response = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
+            var response = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
 
             if (response.IsSuccess && response.Response != null)
             {
@@ -368,13 +370,13 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             // Cargar listas para los dropdowns
-            var sucursalesResponse = await httpClientConnection.ObtenerSucursales();
+            var sucursalesResponse = await _sucursalService.ConsultarTodasSucursales();
             if (sucursalesResponse.IsSuccess && sucursalesResponse.Response != null)
             {
                 ViewBag.Sucursales = sucursalesResponse.Response;
             }
 
-            var areasResponse = await httpClientConnection.ObtenerAreas();
+            var areasResponse = await _areaService.ConsultarTodasAreas();
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
                 ViewBag.Areas = areasResponse.Response;
@@ -515,7 +517,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     usuario.ImagenPerfil = $"/Uploads/Perfiles/{fileName}";
                 }
 
-                var response = await httpClientConnection.GuardarOActualizarUsuario(usuario);
+                var response = await _usuarioService.GuardarOActualizarUsuarioAdmin(usuario);
                 return JsonConvert.SerializeObject(response);
             }
             catch (Exception ex)
@@ -540,7 +542,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
 
                 // Validar contraseña actual
-                var usuarioResponse = await httpClientConnection.ObtenerUsuarioPorId(tokenCookie.UserID);
+                var usuarioResponse = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
 
                 if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
                 {
@@ -563,7 +565,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 usuario.ModificadoPor = tokenCookie.UserName;
                 usuario.FechaModificacion = DateTime.Now;
 
-                var response = await httpClientConnection.ActualizarContrasena(usuario);
+                var response = await _usuarioService.ActualizarContrasena(usuario);
                 return JsonConvert.SerializeObject(response);
             }
             catch (Exception ex)
