@@ -30,7 +30,17 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<ActionResult> Role(long id = 0)
         {
+            // 1. Obtener permisos para la página "Roles"
+            var permisos = await _rolService.ObtenerPermisosParaRol();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
             var rol = new Rol();
+
             if (id > 0)
             {
                 var response = await _rolService.ObtenerRolPorId(id);
@@ -43,12 +53,25 @@ namespace ServiceDeskDESIMVC.Controllers
                     ViewBag.ErrorMessage = response.Message;
                 }
             }
+
+            // 3. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
+
             return View(rol);
         }
 
         public async Task<ActionResult> Permisos()
         {
-            // Obtener todos los roles
+            // 1. Obtener permisos para la página "Permisos"
+            var permisos = await _permisosService.ObtenerPermisosParaPermisos();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
+            // 3. Obtener todos los roles
             var rolesResponse = await _rolService.ObtenerTodosLosRoles();
             var roles = new List<Rol>();
             if (rolesResponse.IsSuccess && rolesResponse.Response != null)
@@ -57,7 +80,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
             ViewBag.Roles = roles;
 
-            // Obtener todas las páginas
+            // 4. Obtener todas las páginas
             var paginasResponse = await _permisosService.ObtenerPaginas();
             var paginas = new List<Pagina>();
             if (paginasResponse.IsSuccess && paginasResponse.Response != null)
@@ -66,15 +89,12 @@ namespace ServiceDeskDESIMVC.Controllers
             }
             ViewBag.Paginas = paginas;
 
-            // Obtener permisos del usuario para esta página
-            var permisosUser = await _permisosService.ObtenerPermisosParaPagina("Permisos");
-            var permiso = permisosUser.FirstOrDefault();
-
-            ViewBag.PuedeLeer = permiso?.PuedeLeer ?? false;
-            ViewBag.PuedeCrear = permiso?.PuedeCrear ?? false;
-            ViewBag.PuedeEditar = permiso?.PuedeEditar ?? false;
-            ViewBag.PuedeEliminar = permiso?.PuedeEliminar ?? false;
-            ViewBag.PuedeExportar = permiso?.PuedeExportar ?? false;
+            // 5. Pasar permisos del usuario para la vista (ya los tenemos en permisos)
+            ViewBag.PuedeLeer = ((PermisosViewModel)permisos).PuedeLeer;
+            ViewBag.PuedeCrear = ((PermisosViewModel)permisos).PuedeCrear;
+            ViewBag.PuedeEditar = ((PermisosViewModel)permisos).PuedeEditar;
+            ViewBag.PuedeEliminar = ((PermisosViewModel)permisos).PuedeEliminar;
+            ViewBag.PuedeExportar = ((PermisosViewModel)permisos).PuedeExportar;
 
             return View();
         }
