@@ -46,6 +46,7 @@
     <Compile Include="Catalogos\Activo.cs" />
     <Compile Include="Catalogos\Area.cs" />
     <Compile Include="Catalogos\Categoria.cs" />
+    <Compile Include="Catalogos\CategoriaResponsable.cs" />
     <Compile Include="Catalogos\Compania.cs" />
     <Compile Include="Catalogos\Empresa.cs" />
     <Compile Include="Catalogos\Marca.cs" />

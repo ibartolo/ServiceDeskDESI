@@ -16,10 +16,12 @@ namespace ServiceDeskDESIWebApi.Controllers
     public class CatalogsController : BaseController
     {
         private readonly CategoriaService _categoriaService;
+        private readonly CategoriaResponsableService _categoriaResponsableService;
 
         public CatalogsController()
         {
             _categoriaService = new CategoriaService();
+            _categoriaResponsableService = new CategoriaResponsableService();
         }
 
         /// <summary>
@@ -97,6 +99,64 @@ namespace ServiceDeskDESIWebApi.Controllers
             var usuario = User.Identity.Name;
             categoria.FechaModificacion = DateTime.Now;
             var result = _categoriaService.EliminarCategoria(categoria.Id, categoria.ModificadoPor, categoria.FechaModificacion.Value, usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene los responsables de una categoría
+        /// </summary>
+        /// <param name="categoriaId">ID de la categoría</param>
+        /// <returns>Lista de responsables</returns>
+        [HttpGet, Route("CategoriaResponsable/{categoriaId:long}")]
+        public ModelResponse ObtenerResponsablesPorCategoria(long categoriaId)
+        {
+            var usuario = User.Identity.Name;
+            var result = _categoriaResponsableService.ObtenerResponsablesPorCategoria(categoriaId, usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene las categorías asignadas a un responsable
+        /// </summary>
+        /// <param name="usuarioId">ID del usuario</param>
+        /// <returns>Lista de categorías</returns>
+        [HttpGet, Route("CategoriaResponsable/Usuario/{usuarioId:long}")]
+        public ModelResponse ObtenerCategoriasPorResponsable(long usuarioId)
+        {
+            var usuario = User.Identity.Name;
+            var result = _categoriaResponsableService.ObtenerCategoriasPorResponsable(usuarioId, usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Guarda o actualiza un responsable de categoría
+        /// </summary>
+        /// <param name="categoriaResponsable">Objeto CategoriaResponsable</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpPost, Route("CategoriaResponsable")]
+        public ModelResponse GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
+        {
+            var usuario = User.Identity.Name;
+            var result = _categoriaResponsableService.GuardarOActualizarCategoriaResponsable(categoriaResponsable, usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Elimina un responsable de categoría
+        /// </summary>
+        /// <param name="categoriaResponsable">Objeto CategoriaResponsable con Id</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpDelete, Route("CategoriaResponsable")]
+        public ModelResponse EliminarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
+        {
+            var usuario = User.Identity.Name;
+            categoriaResponsable.FechaModificacion = DateTime.Now;
+            var result = _categoriaResponsableService.EliminarCategoriaResponsable(
+                categoriaResponsable.Id,
+                categoriaResponsable.ModificadoPor,
+                categoriaResponsable.FechaModificacion.Value,
+                usuario
+            );
             return result;
         }
     }
