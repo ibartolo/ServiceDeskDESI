@@ -86,6 +86,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     rol.Id,
                     rol.Nombre,
                     rol.Descripcion,
+                    PuedeAtenderTickets = rol.PuedeAtenderTickets,
                     rol.CreadoPor,
                     rol.FechaCreacion,
                     rol.ModificadoPor,
@@ -206,34 +207,6 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerRolesPorUsuario(string usuario)
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var roles = GetObjects("ObtenerRolesPorUsuario", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Usuario", usuario) },
-                    new Func<IDataReader, Rol>((reader) =>
-                    {
-                        var rol = LlenarEntidad<Rol>(reader);
-                        return rol;
-                    }));
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = roles;
-                modelResponse.Message = "Roles obtenidos correctamente";
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error al obtener roles del usuario {Usuario}", usuario);
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener los roles del usuario";
-            }
-
-            return modelResponse;
-        }
-
         public ModelResponse EliminarRolUsuario(long usuarioRolId, string modificadoPor, long empresaId)
         {
             var modelResponse = new ModelResponse();
@@ -271,6 +244,34 @@ namespace ServiceDeskDESIWebApi.DAL
                 Log.Error(ex, "Error al eliminar rol del usuario {UsuarioRolId}", usuarioRolId);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al eliminar el rol del usuario";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ObtenerRolesPorUsuario(string usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var roles = GetObjects("ObtenerRolesPorUsuario", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Usuario", usuario) },
+                    new Func<IDataReader, Rol>((reader) =>
+                    {
+                        var rol = LlenarEntidad<Rol>(reader);
+                        return rol;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = roles;
+                modelResponse.Message = "Roles obtenidos correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener roles del usuario {Usuario}", usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener los roles del usuario";
             }
 
             return modelResponse;
