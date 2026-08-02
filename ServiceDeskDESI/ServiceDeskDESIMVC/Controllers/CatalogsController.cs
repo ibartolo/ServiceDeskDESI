@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIMVC.Helpers;
+using ServiceDeskDESIMVC.Models;
 using ServiceDeskDESIMVC.Services;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly MarcaService _marcaService;
         private readonly CategoriaService _categoriaService;
         private readonly UsuarioService _usuarioService;
+        private readonly CategoriaResponsableService _categoriaResponsableService;  
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
@@ -42,6 +44,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _marcaService = new MarcaService(httpClientConnection);
             _categoriaService = new CategoriaService(httpClientConnection);
             _usuarioService = new UsuarioService(httpClientConnection);
+            _categoriaResponsableService = new CategoriaResponsableService(httpClientConnection);
         }
 
         #region Views
@@ -448,6 +451,70 @@ namespace ServiceDeskDESIMVC.Controllers
             return View(categoria);
         }
 
+        public async Task<ActionResult> CategoriaResponsable(long categoriaId = 0)
+        {
+            // 1. Obtener permisos para la página "Categorías"
+            var permisos = await _categoriaService.ObtenerPermisosParaCategoria();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
+            var model = new CategoriaResponsableViewModel
+            {
+                CategoriaId = categoriaId,
+                Responsables = new List<CategoriaResponsable>()
+            };
+
+            // Obtener la categoría para mostrar información
+            if (categoriaId > 0)
+            {
+                var categoriaResponse = await _categoriaService.ObtenerCategoriaPorId(categoriaId);
+                if (categoriaResponse.IsSuccess && categoriaResponse.Response != null)
+                {
+                    model.Categoria = JsonConvert.DeserializeObject<Categoria>(categoriaResponse.Response.ToString());
+                }
+            }
+
+            // Cargar listas para dropdowns
+            // 1. Categorías disponibles (para asignar responsables)
+            var categoriasResponse = await _categoriaService.ConsultarTodasCategorias();
+            if (categoriasResponse.IsSuccess && categoriasResponse.Response != null)
+            {
+                var todasCategorias = JsonConvert.DeserializeObject<List<Categoria>>(categoriasResponse.Response.ToString());
+                // Filtrar solo categorías padre (sin padre)
+                var categoriasPadre = todasCategorias.Where(c => c.CategoriaPadre == null).ToList();
+                ViewBag.Categorias = categoriasPadre;
+            }
+
+            // 2. Usuarios que pueden atender tickets (con rol que tiene PuedeAtenderTickets = true)
+            var usuariosResponse = await _usuarioService.ConsultarTodosLosUsuarios();
+            if (usuariosResponse.IsSuccess && usuariosResponse.Response != null)
+            {
+                var usuarios = JsonConvert.DeserializeObject<List<Usuario>>(usuariosResponse.Response.ToString());
+                // Filtrar solo usuarios que pueden atender tickets (con rol PuedeAtenderTickets = true)
+                // Esto requiere que el usuario tenga la información del rol
+                // Por ahora asumimos que el servicio ya filtra
+                ViewBag.Usuarios = usuarios;
+            }
+
+            // Obtener responsables de la categoría si existe
+            if (categoriaId > 0)
+            {
+                var responsablesResponse = await _categoriaResponsableService.ObtenerResponsablesPorCategoria(categoriaId);
+                if (responsablesResponse.IsSuccess && responsablesResponse.Response != null)
+                {
+                    model.Responsables = JsonConvert.DeserializeObject<List<CategoriaResponsable>>(responsablesResponse.Response.ToString());
+                }
+            }
+
+            ViewBag.Permisos = permisos;
+
+            return View(model);
+        }
+
         #endregion
 
         #region Data Access
@@ -764,6 +831,49 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
         #endregion
+
+        public async Task<string> ConsultarResponsablesPorCategoria(long categoriaId)
+        {
+            var response = await _categoriaResponsableService.ObtenerResponsablesPorCategoria(categoriaId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ConsultarCategoriasPorResponsable(long usuarioId)
+        {
+            var response = await _categoriaResponsableService.ObtenerCategoriasPorResponsable(usuarioId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
+        {
+            var tokenCookie = SessionHelper.GetSessionUser();
+
+            if (categoriaResponsable.Id == 0)
+            {
+                categoriaResponsable.CreadoPor = tokenCookie?.UserName ?? "system";
+                categoriaResponsable.FechaCreacion = DateTime.Now;
+            }
+            else
+            {
+                categoriaResponsable.ModificadoPor = tokenCookie?.UserName ?? "system";
+                categoriaResponsable.FechaModificacion = DateTime.Now;
+            }
+            categoriaResponsable.Estatus = true;
+
+            var response = await _categoriaResponsableService.GuardarOActualizarCategoriaResponsable(categoriaResponsable);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> EliminarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
+        {
+            var tokenCookie = SessionHelper.GetSessionUser();
+
+            categoriaResponsable.ModificadoPor = tokenCookie?.UserName ?? "system";
+            categoriaResponsable.FechaModificacion = DateTime.Now;
+
+            var response = await _categoriaResponsableService.EliminarCategoriaResponsable(categoriaResponsable);
+            return JsonConvert.SerializeObject(response);
+        }
 
         #endregion
 

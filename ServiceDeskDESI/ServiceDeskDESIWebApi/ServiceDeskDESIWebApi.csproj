@@ -230,6 +230,7 @@
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
     <Compile Include="DAL\DbWrapper.Area.cs" />
     <Compile Include="DAL\DbWrapper.Categoria.cs" />
+    <Compile Include="DAL\DbWrapper.CategoriaResponsable.cs" />
     <Compile Include="DAL\DbWrapper.Compania.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Empresa.cs" />
@@ -251,6 +252,7 @@
     <Compile Include="Services\ActivoServices.cs" />
     <Compile Include="Services\AreaService.cs" />
     <Compile Include="Services\AutenticacionService.cs" />
+    <Compile Include="Services\CategoriaResponsableService.cs" />
     <Compile Include="Services\CategoriaService.cs" />
     <Compile Include="Services\CompaniaService.cs" />
     <Compile Include="Services\EmpresaService.cs" />
