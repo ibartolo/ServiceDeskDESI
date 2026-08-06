@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.ApplicationServices;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Management;
@@ -32,6 +33,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly CategoriaService _categoriaService;
         private readonly UsuarioService _usuarioService;
         private readonly CategoriaResponsableService _categoriaResponsableService;  
+        private readonly RolService _rolService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
@@ -45,6 +47,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _categoriaService = new CategoriaService(httpClientConnection);
             _usuarioService = new UsuarioService(httpClientConnection);
             _categoriaResponsableService = new CategoriaResponsableService(httpClientConnection);
+            _rolService = new RolService(httpClientConnection);
         }
 
         #region Views
@@ -872,6 +875,41 @@ namespace ServiceDeskDESIMVC.Controllers
             categoriaResponsable.FechaModificacion = DateTime.Now;
 
             var response = await _categoriaResponsableService.EliminarCategoriaResponsable(categoriaResponsable);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ConsultarUsuariosQuePuedenAtender()
+        {
+            var response = await _usuarioService.ConsultarTodosLosUsuarios();
+
+            if (response.IsSuccess && response.Response != null)
+            {
+                var usuarios = JsonConvert.DeserializeObject<List<Usuario>>(response.Response.ToString());
+
+                // Filtrar usuarios que pueden atender tickets
+                // Nota: Para esto necesitas que el objeto Usuario tenga la información del rol
+                // o necesitas obtener los roles de cada usuario
+                // Por ahora, filtramos por los usuarios que tengan roles que pueden atender
+                var usuariosFiltrados = new List<Usuario>();
+
+                foreach (var usuario in usuarios)
+                {
+                    // Obtener roles del usuario
+                    var rolesResponse = await _rolService.ObtenerRolesPorUsuario(usuario.Id);
+                    if (rolesResponse.IsSuccess && rolesResponse.Response != null)
+                    {
+                        var roles = JsonConvert.DeserializeObject<List<Rol>>(rolesResponse.Response.ToString());
+                        // Verificar si alguno de sus roles permite atender tickets
+                        if (roles.Any(r => r.PuedeAtenderTickets))
+                        {
+                            usuariosFiltrados.Add(usuario);
+                        }
+                    }
+                }
+
+                response.Response = usuariosFiltrados;
+            }
+
             return JsonConvert.SerializeObject(response);
         }
 
