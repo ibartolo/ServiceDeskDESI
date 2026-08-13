@@ -47,5 +47,15 @@ namespace ServiceDeskDESIMVC.Services
             }
             return null;
         }
+
+        public async Task<ModelResponse> ObtenerCategoriasPorArea(long areaId)
+        {
+            return await _httpClient.ObtenerCategoriasPorArea(areaId);
+        }
+
+        public async Task<ModelResponse> ObtenerCategoriasPorPadre(long categoriaPadreId)
+        {
+            return await _httpClient.ObtenerCategoriasPorPadre(categoriaPadreId);
+        }
     }
 }

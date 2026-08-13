@@ -14,7 +14,7 @@ namespace ServiceDeskDESIMVC.DAL
     {
         public async Task<ModelResponse> ObtenerTickets()
         {
-            var result = await RequestAsync<object>($"api/Ticket/Lista", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Ticket/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -40,7 +40,7 @@ namespace ServiceDeskDESIMVC.DAL
         {
             MappingColumSecurity(ticket);
 
-            var result = await RequestAsync<object>($"api/Ticket", HttpMethod.Post, ticket,
+            var result = await RequestAsync<object>($"api/Ticket/Guardar", HttpMethod.Post, ticket,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -52,7 +52,9 @@ namespace ServiceDeskDESIMVC.DAL
 
         public async Task<ModelResponse> EliminarTicket(Ticket ticket)
         {
-            var result = await RequestAsync<object>($"api/Ticket", HttpMethod.Delete, ticket,
+            MappingColumSecurity(ticket);
+
+            var result = await RequestAsync<object>($"api/Ticket/Eliminar", HttpMethod.Delete, ticket,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -97,5 +99,30 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
+
+        public async Task<ModelResponse> ObtenerTicketsPorEstatus(int ticketEstatusId)
+        {
+            var result = await RequestAsync<object>($"api/Ticket/Estatus/{ticketEstatusId}", HttpMethod.Get, null,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> ObtenerTicketEstatus()
+        {
+            var result = await RequestAsync<object>($"api/Ticket/Estatus/List", HttpMethod.Get, null,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
     }
 }

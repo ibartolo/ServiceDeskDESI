@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Tickets";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
@@ -28,6 +29,7 @@
         @Html.HiddenFor(x => x.ModificadoPor)
         @Html.HiddenFor(x => x.FechaModificacion)
         @Html.HiddenFor(x => x.Estatus)
+        @Html.HiddenFor(x => x.TicketEstatus.Id)
 
         <div class="row">
             <div class="col-md-4">
@@ -70,7 +72,13 @@
                     @Html.HiddenFor(x => x.Urgencia)
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Estatus:</label>
+                    @Html.DropDownListFor(x => x.TicketEstatus.Id, new SelectList(ViewBag.Estatus, "Id", "Nombre"), "Seleccione un estatus", new { @class = "form-control", id = "ddlEstatus" })
+                </div>
+            </div>
+            <div class="col-md-4">
                 <div class="mb-3">
                     <label>Título:</label>
                     @Html.TextBoxFor(x => x.Titulo, new { @class = "form-control", placeholder = "Título del ticket" })
@@ -90,7 +98,10 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarTicket()" />
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarTicket()" />
+                    }
                     <a href="/Ticket/Index" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -117,6 +128,7 @@
                                 <th>Categoría</th>
                                 <th>Subcategoría</th>
                                 <th>Urgencia</th>
+                                <th>Estatus</th>
                                 <th>Fecha Creación</th>
                                 <th>Acciones</th>
                             </tr>
@@ -131,6 +143,9 @@
 </div>
 
 <script>
+    // Pasar permisos a JavaScript
+    var permisosGlobal = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(permisos));
+
     var tablaTicket;
 
     $(function () {
@@ -264,6 +279,17 @@
                     }
                 },
                 {
+                    data: 'TicketEstatus.Nombre',
+                    title: 'Estatus',
+                    defaultContent: '---',
+                    render: function (data, type, row) {
+                        if (row.TicketEstatus && row.TicketEstatus.Color) {
+                            return '<span class="badge" style="background-color: ' + row.TicketEstatus.Color + '; color: white;">' + row.TicketEstatus.Nombre + '</span>';
+                        }
+                        return data || '---';
+                    }
+                },
+                {
                     data: 'FechaCreacion',
                     title: 'Fecha Creación',
                     render: function (data) {
@@ -276,52 +302,25 @@
                 },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarTicket(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarTicket(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
+                        var html = '<div class="d-flex gap-3">';
+
+                        // Botón Editar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarTicket(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+
+                        // Botón Eliminar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarTicket(' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+
+                        html += '</div>';
+                        return html;
                     }
                 }
             ],
             language: {
                 url: "/Content/datatables/i18n/es-ES.json"
-            }
-        });
-    }
-
-    function CargarCategoriasPorArea(areaId) {
-        GetMVC("/Ticket/ObtenerCategoriasPorArea/" + areaId, function (response) {
-            var result = typeof response === 'string' ? JSON.parse(response) : response;
-            if (result.IsSuccess && result.Response) {
-                var categorias = result.Response;
-                var ddl = $("#ddlCategoria");
-                ddl.empty();
-                ddl.append('<option value="">Seleccione una categoría</option>');
-
-                // Filtrar solo categorías principales (sin padre)
-                var principales = categorias.filter(function (c) {
-                    return c.CategoriaPadre === null;
-                });
-
-                principales.forEach(function (c) {
-                    ddl.append('<option value="' + c.Id + '">' + c.Nombre + '</option>');
-                });
-            }
-        });
-    }
-
-    function CargarSubcategorias(categoriaId) {
-        GetMVC("/Ticket/ObtenerSubcategoriasPorCategoria?categoriaId=" + categoriaId, function (response) {
-            var result = typeof response === 'string' ? JSON.parse(response) : response;
-            if (result.IsSuccess && result.Response) {
-                var subcategorias = result.Response;
-                var ddl = $("#ddlSubcategoria");
-                ddl.empty();
-                ddl.append('<option value="">Seleccione una subcategoría</option>');
-
-                subcategorias.forEach(function (s) {
-                    ddl.append('<option value="' + s.Id + '">' + s.Nombre + '</option>');
-                });
             }
         });
     }
@@ -424,6 +423,19 @@
                 return;
             }
 
+            // Validar estatus
+            if (!$("#ddlEstatus").val()) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Debe seleccionar un estatus',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+                return;
+            }
+
             Swal.fire({
                 title: 'Guardando...',
                 text: 'Por favor espere',
@@ -441,6 +453,7 @@
                 Urgencia: parseInt($("#ddlUrgencia").val()),
                 Titulo: $("#Titulo").val(),
                 Descripcion: $("#Descripcion").val(),
+                TicketEstatus: { Id: parseInt($("#ddlEstatus").val()) },
                 CreadoPor: $("#CreadoPor").val(),
                 FechaCreacion: $("#FechaCreacion").val(),
                 ModificadoPor: $("#ModificadoPor").val() || null,

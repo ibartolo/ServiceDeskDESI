@@ -15,5 +15,6 @@ namespace ServiceDeskDESIEntities.Tickets
         public int Urgencia { get; set; }
         public string Titulo { get; set; }
         public string Descripcion { get; set; }
+        public TicketEstatus TicketEstatus { get; set; }
     }
 }
