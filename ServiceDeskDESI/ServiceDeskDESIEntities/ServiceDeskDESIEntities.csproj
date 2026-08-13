@@ -51,6 +51,7 @@
     <Compile Include="Catalogos\Empresa.cs" />
     <Compile Include="Catalogos\Marca.cs" />
     <Compile Include="Catalogos\Modelo.cs" />
+    <Compile Include="Catalogos\TicketEstatus.cs" />
     <Compile Include="Catalogos\UsuarioPagina.cs" />
     <Compile Include="Catalogos\Sucursal.cs" />
     <Compile Include="Catalogos\TipoActivo.cs" />

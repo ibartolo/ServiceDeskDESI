@@ -184,6 +184,7 @@
     <Compile Include="Services\PermisosService.cs" />
     <Compile Include="Services\RolService.cs" />
     <Compile Include="Services\SucursalService.cs" />
+    <Compile Include="Services\TicketService.cs" />
     <Compile Include="Services\TipoActivoService.cs" />
     <Compile Include="Services\UsuarioService.cs" />
   </ItemGroup>
