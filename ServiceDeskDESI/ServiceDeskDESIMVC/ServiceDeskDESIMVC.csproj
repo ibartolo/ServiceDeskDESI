@@ -159,6 +159,8 @@
     <Compile Include="DAL\HttpClientConnection.Marca.cs" />
     <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
     <Compile Include="DAL\HttpClientConnection.Permisos.cs" />
+    <Compile Include="DAL\HttpClientConnection.Persona.cs" />
+    <Compile Include="DAL\HttpClientConnection.Puesto.cs" />
     <Compile Include="DAL\HttpClientConnection.Rol.cs" />
     <Compile Include="DAL\HttpClientConnection.Sucursal.cs" />
     <Compile Include="DAL\HttpClientConnection.Ticket.cs" />
@@ -185,6 +187,8 @@
     <Compile Include="Services\RolService.cs" />
     <Compile Include="Services\SucursalService.cs" />
     <Compile Include="Services\TicketService.cs" />
+    <Compile Include="Services\PuestoService.cs" />
+    <Compile Include="Services\PersonaService.cs" />
     <Compile Include="Services\TipoActivoService.cs" />
     <Compile Include="Services\UsuarioService.cs" />
   </ItemGroup>
@@ -217,6 +221,8 @@
     <Content Include="Views\Security\Permisos.cshtml" />
     <Content Include="Views\Home\Configuration.cshtml" />
     <Content Include="Views\Catalogs\CategoriaResponsable.cshtml" />
+    <Content Include="Views\Catalogs\Tipped.cshtml" />
+    <Content Include="Views\Catalogs\People.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

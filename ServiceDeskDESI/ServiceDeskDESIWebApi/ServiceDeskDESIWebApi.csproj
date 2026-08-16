@@ -219,10 +219,12 @@
     <Compile Include="Controllers\ModeloController.cs" />
     <Compile Include="Controllers\PaginaController.cs" />
     <Compile Include="Controllers\PermisosController.cs" />
+    <Compile Include="Controllers\PersonaController.cs" />
     <Compile Include="Controllers\RelacionController.cs" />
     <Compile Include="Controllers\RolController.cs" />
     <Compile Include="Controllers\SucursalController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
+    <Compile Include="Controllers\PuestoController.cs" />
     <Compile Include="Controllers\TipoActivoController.cs" />
     <Compile Include="Controllers\UsuarioPaginaController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
@@ -238,6 +240,8 @@
     <Compile Include="DAL\DbWrapper.Modelo.cs" />
     <Compile Include="DAL\DbWrapper.Paginas.cs" />
     <Compile Include="DAL\DbWrapper.Permisos.cs" />
+    <Compile Include="DAL\DbWrapper.Persona.cs" />
+    <Compile Include="DAL\DbWrapper.Puesto.cs" />
     <Compile Include="DAL\DbWrapper.Relacion.cs" />
     <Compile Include="DAL\DbWrapper.Sucursal.cs" />
     <Compile Include="DAL\DbWrapper.TipoActivo.cs" />
@@ -263,6 +267,8 @@
     <Compile Include="Services\RolService.cs" />
     <Compile Include="Services\SucursalService.cs" />
     <Compile Include="Services\TicketService.cs" />
+    <Compile Include="Services\PersonaService.cs" />
+    <Compile Include="Services\PuestoService.cs" />
     <Compile Include="Services\TipoActivoService.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -283,6 +289,10 @@
     <ProjectReference Include="..\ServiceDeskDESIEntities\ServiceDeskDESIEntities.csproj">
       <Project>{e6c9d446-02e1-45ac-858d-dd6cdd95a7e5}</Project>
       <Name>ServiceDeskDESIEntities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ServiceDeskDESIMVC\ServiceDeskDESIMVC.csproj">
+      <Project>{13F7A82B-20B7-4692-B2F5-B2E50AB47226}</Project>
+      <Name>ServiceDeskDESIMVC</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
