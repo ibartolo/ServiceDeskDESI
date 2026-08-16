@@ -34,6 +34,8 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly UsuarioService _usuarioService;
         private readonly CategoriaResponsableService _categoriaResponsableService;  
         private readonly RolService _rolService;
+        private readonly PuestoService _puestoService;
+        private readonly PersonaService _personaService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
@@ -48,6 +50,9 @@ namespace ServiceDeskDESIMVC.Controllers
             _usuarioService = new UsuarioService(httpClientConnection);
             _categoriaResponsableService = new CategoriaResponsableService(httpClientConnection);
             _rolService = new RolService(httpClientConnection);
+            _puestoService = new PuestoService(httpClientConnection);
+            _personaService = new PersonaService(httpClientConnection);
+
         }
 
         #region Views
@@ -107,6 +112,53 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Permisos = permisos;
             return View(compania);
         }
+        public async Task<ActionResult> Tipped (long id = 0)
+        {
+           var permisos = await _puestoService.ObtenerPermisosParaPuesto();
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+            var puesto = new Puesto();
+            if (id > 0)
+            {
+                var response = await _puestoService.ObtenerPuestoPorId(id);
+                if (response.IsSuccess && response.Response != null)
+                {
+                    puesto = JsonConvert.DeserializeObject<Puesto>(response.Response.ToString());
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+            ViewBag.Permisos = permisos;
+            return View(puesto);
+        }
+        public  async Task <ActionResult> People(long id = 0)
+        {
+            var permisos = await _personaService.ObtenerPermisosParaPersona();
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+            var persona = new Persona();
+            if (id > 0)
+            {
+                var response = await _personaService.ObtenerPersonaPorId(id);
+                if (response.IsSuccess && response.Response != null)
+                {
+                    persona = JsonConvert.DeserializeObject<Persona>(response.Response.ToString());
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = response.Message;
+                }
+            }
+            ViewBag.Permisos = permisos;
+            return View(persona);
+        }
+
         public async Task<ActionResult> TypeActive(long id = 0)
         {
             // 1. Obtener permisos para la página "Tipo Activo"
@@ -726,6 +778,56 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> EliminarSucurales(Sucursal s)
         {
             var response = await _sucursalService.EliminarSucursal(s);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        #endregion
+        #region Puesto
+        public async Task<string> ConsultarTodosLosPuestos()
+        {
+            var response = await _puestoService.ConsultarTodosLosPuestos();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ConsultarPuestoPorId(long id)
+        {
+            var response = await _puestoService.ObtenerPuestoPorId(id);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> GuardarOActualizarPuesto(Puesto p)
+        {
+            var response = await _puestoService.GuardarOActualizarPuesto(p);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> EliminarPuesto(Puesto p)
+        {
+            var response = await _puestoService.EliminarPuesto(p);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        #endregion
+        #region persona
+        public async Task<string> ConsultarTodasLasPersonas()
+        {
+            var response = await _personaService.ConsultarTodasLasPersonas();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ConsultarPersonaPorId(long id)
+        {
+            var response = await _personaService.ObtenerPersonaPorId(id);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> GuardarOActualizarPersona(Persona p)
+        {
+            var response = await _personaService.GuardarOActualizarPersona(p);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> EliminarPersona(Persona p)
+        {
+            var response = await _personaService.EliminarPersona(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         #endregion

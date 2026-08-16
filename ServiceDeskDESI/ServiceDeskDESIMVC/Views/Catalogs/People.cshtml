@@ -1,0 +1,314 @@
+﻿@model ServiceDeskDESIEntities.Catalogos.Persona
+@{
+    ViewBag.Title = "Persona";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    <h3 class="section-title"><i class="fas fa-users me-2"></i>Catálogo de Personas</h3>
+    <form enctype="multipart/form-data" id="frmPersona" name="frmPersona" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Apellido</label>
+                    @Html.TextBoxFor(x => x.Apellido, new { @class = "form-control", placeholder = "Apellido" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Correo</label>
+                    @Html.TextBoxFor(x => x.Correo, new { @class = "form-control", placeholder = "Correo electrónico" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Teléfono</label>
+                    @Html.TextBoxFor(x => x.Telefono, new { @class = "form-control", placeholder = "Teléfono" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Puesto</label>
+                    @Html.DropDownListFor(x => x.PuestoId, ViewBag.Puestos as SelectList, "Seleccione un puesto", new { @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarPersona()" />
+                    }
+                    <a href="/Catalogs/Persona" class="btn btn-warning">Cancelar</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                    <table id="tblPersona"></table>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+
+    $(function () {
+        $("#frmPersona").validate({
+            rules: {
+                "Nombre": {
+                    required: true,
+                    maxlength: 150
+                },
+                "Apellido": {
+                    required: true,
+                    maxlength: 250
+                },
+                "Correo": {
+                    email: true,
+                    maxlength: 250
+                },
+                "Telefono": {
+                    maxlength: 50
+                },
+                "PuestoId": {
+                    required: true,
+                    min: 1
+                }
+            },
+            messages: {
+                "Nombre": {
+                    required: "El campo 'Nombre' es requerido.",
+                    maxlength: "El nombre no puede superar los 150 caracteres."
+                },
+                "Apellido": {
+                    required: "El campo 'Apellido' es requerido.",
+                    maxlength: "El apellido no puede superar los 250 caracteres."
+                },
+                "Correo": {
+                    email: "Ingrese un correo electrónico válido.",
+                    maxlength: "El correo no puede superar los 250 caracteres."
+                },
+                "Telefono": {
+                    maxlength: "El teléfono no puede superar los 50 caracteres."
+                },
+                "PuestoId": {
+                    required: "El campo 'Puesto' es requerido.",
+                    min: "Seleccione un puesto válido."
+                }
+            },
+            errorElement: "span",
+            errorClass: "text-danger",
+            highlight: function (element) {
+                $(element).addClass("is-invalid").removeClass("is-valid");
+            },
+            unhighlight: function (element) {
+                $(element).removeClass("is-invalid").addClass("is-valid");
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element);
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        var tabla = new DataTable('#tblPersona', {
+            columns: [
+                { data: 'Id', title: 'ID', visible: false },
+                { data: 'Nombre', title: 'Nombre' },
+                { data: 'Apellido', title: 'Apellido' },
+                { data: 'Correo', title: 'Correo' },
+                { data: 'Telefono', title: 'Teléfono' },
+                { data: 'PuestoNombre', title: 'Puesto' },
+                {
+                    data: 'Id', title: 'Acciones', render: function (data) {
+                        var html = '<div class="d-flex gap-3">';
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarPersona(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarPersona(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+                        html += '</div>';
+                        return html;
+                    }
+                },
+                { data: 'Estatus', title: 'Estatus', visible: false }
+            ],
+            language: {
+                url: "/Content/datatables/i18n/es-ES.json"
+            }
+        });
+        ConsultarTodasPersonas();
+    });
+
+    function GuardarActualizarPersona() {
+        if ($("#frmPersona").valid()) {
+            Swal.fire({
+                title: 'Guardando...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            var persona = {
+                Id: $("#Id").val() || 0,
+                Nombre: $("#Nombre").val(),
+                Apellido: $("#Apellido").val(),
+                Correo: $("#Correo").val(),
+                Telefono: $("#Telefono").val(),
+                PuestoId: $("#PuestoId").val(),
+                CreadoPor: $("#CreadoPor").val(),
+                FechaCreacion: new Date().toISOString(),
+                ModificadoPor: $("#ModificadoPor").val() || null,
+                FechaModificacion: null,
+                Estatus: true
+            };
+            PostMVC('/Catalogs/GuardarOActualizarPersona', persona, function (response) {
+                Swal.close();
+
+                if (response.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    }).then(() => {
+                        window.location.href = '/Catalogs/Persona';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.Message,
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
+        }
+    }
+
+    function ConsultarTodasPersonas() {
+        GetMVC("/Catalogs/ConsultarTodasLasPersonas", function (r) {
+            var result = typeof r == 'string' ? JSON.parse(r) : r;
+
+            if (result.IsSuccess) {
+                MapingPropertiesDataTable("tblPersona", result.Response);
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: result.Message,
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+
+    function EditarPersona(id) {
+        window.location.href = '/Catalogs/Persona/' + id;
+    }
+
+    function EliminarPersona(event, id) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Esta acción eliminará lógicamente el registro',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                var persona = {
+                    Id: id,
+                    ModificadoPor: $("#ModificadoPor").val() || "system",
+                    FechaModificacion: new Date().toISOString()
+                };
+                PostMVC('/Catalogs/EliminarPersona', persona, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: response.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            ConsultarTodasPersonas();
+                            $("#frmPersona")[0].reset();
+                            $("#Id").val(0);
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+
+        return false;
+    }
+</script>
