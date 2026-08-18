@@ -291,7 +291,7 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarRolParaNuevaEmpresa(Rol rol)
+        public ModelResponse GuardarRolParaNuevaEmpresa(Rol rol, long empresaId)
         {
             var modelResponse = new ModelResponse();
 
@@ -303,7 +303,8 @@ namespace ServiceDeskDESIWebApi.DAL
                     rol.Descripcion,
                     rol.PuedeAtenderTickets,
                     rol.CreadoPor,
-                    rol.FechaCreacion
+                    rol.FechaCreacion,
+                    EmpresaId = empresaId
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
@@ -319,6 +320,33 @@ namespace ServiceDeskDESIWebApi.DAL
                 Log.Error(ex, "Error al crear rol para nueva empresa");
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al crear el rol para la empresa.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ObtenerPlantillaRoles()
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var roles = GetObjects("ObtenerPlantillaRoles", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                    new Func<IDataReader, Rol>((reader) =>
+                    {
+                        var r = LlenarEntidad<Rol>(reader);
+                        return r;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = roles;
+                modelResponse.Message = "Plantilla de roles obtenida correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener la plantilla de roles");
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener la plantilla de roles.";
             }
 
             return modelResponse;

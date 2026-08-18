@@ -252,6 +252,7 @@ namespace ServiceDeskDESIWebApi.Services
             Usuario usuarioAdmin = null;
             long rolAdminId = 0;
             long usuarioAdminId = 0;
+            string contrasenaTemporal = null;
 
             try
             {
@@ -334,7 +335,7 @@ namespace ServiceDeskDESIWebApi.Services
                         Estatus = true
                     };
 
-                    var sucursalResponse = _dbWrapper.GuardarNuevaSucursalParaEmpresa(sucursal);
+                    var sucursalResponse = _dbWrapper.GuardarNuevaSucursalParaEmpresa(sucursal, empresaGuardada.Id);
 
                     if (!sucursalResponse.IsSuccess || sucursalResponse.Response == null)
                     {
@@ -362,7 +363,7 @@ namespace ServiceDeskDESIWebApi.Services
                         Estatus = true
                     };
 
-                    var areaResponse = _dbWrapper.GuardarNuevaAreaParaEmpresa(area);
+                    var areaResponse = _dbWrapper.GuardarNuevaAreaParaEmpresa(area, empresaGuardada.Id);
 
                     if (!areaResponse.IsSuccess || areaResponse.Response == null)
                     {
@@ -380,10 +381,13 @@ namespace ServiceDeskDESIWebApi.Services
                     // =========================================
                     Log.Information("PASO 4/8 - Creando usuario administrador para la empresa...");
 
+                    contrasenaTemporal = Cryptography.GeneratePassword();
+                    Log.Information("Contraseña temporal generada para el administrador (se envía por correo).");
+
                     usuarioAdmin = new Usuario()
                     {
                         NombreUsuario = usernameAdmin,
-                        Contrasena = Cryptography.Encrypt("Admin123!"),
+                        Contrasena = Cryptography.HashPassword(contrasenaTemporal),
                         ImagenPerfil = null,
                         Correo = empresaGuardada.CorreoContacto,
                         Nombre = "Administrador",
@@ -418,17 +422,27 @@ namespace ServiceDeskDESIWebApi.Services
                     // =========================================
                     Log.Information("PASO 5/8 - Creando roles base para la empresa...");
 
-                    var rolesBase = new List<Rol>
-            {
-                new Rol { Nombre = "Administrador", Descripcion = "Control total del sistema", PuedeAtenderTickets = true, CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                new Rol { Nombre = "Supervisor", Descripcion = "Gestión de tickets y usuarios", PuedeAtenderTickets = true, CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                new Rol { Nombre = "Agente", Descripcion = "Atención de tickets", PuedeAtenderTickets = true, CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                new Rol { Nombre = "Usuario", Descripcion = "Creación de tickets", PuedeAtenderTickets = false, CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true }
-            };
+                    var plantillaResponse = _dbWrapper.ObtenerPlantillaRoles();
+                    if (!plantillaResponse.IsSuccess || plantillaResponse.Response == null)
+                    {
+                        throw new Exception("No se pudo obtener la plantilla de roles para el registro de la empresa.");
+                    }
+
+                    var rolesBase = ((IEnumerable<Rol>)plantillaResponse.Response)
+                        .Select(t => new Rol
+                        {
+                            Nombre = t.Nombre,
+                            Descripcion = t.Descripcion,
+                            PuedeAtenderTickets = t.PuedeAtenderTickets,
+                            CreadoPor = usernameAdmin,
+                            FechaCreacion = DateTime.Now,
+                            Estatus = true
+                        })
+                        .ToList();
 
                     foreach (var rol in rolesBase)
                     {
-                        var rolResponse = _dbWrapper.GuardarRolParaNuevaEmpresa(rol);
+                        var rolResponse = _dbWrapper.GuardarRolParaNuevaEmpresa(rol, empresaGuardada.Id);
                         if (!rolResponse.IsSuccess)
                         {
                             Log.Error("❌ PASO 5/8 - FALLÓ la creación del rol {NombreRol}. Error: {Error}", rol.Nombre, rolResponse.Message);
@@ -552,7 +566,7 @@ namespace ServiceDeskDESIWebApi.Services
                 // =========================================
                 Log.Information("Enviando correo de bienvenida a: {Correo}...", empresaGuardada.CorreoContacto);
 
-                var emailSent = EnviarCorreoBienvenida(empresaGuardada, usuarioAdmin.NombreUsuario, "Admin123!");
+                var emailSent = EnviarCorreoBienvenida(empresaGuardada, usuarioAdmin.NombreUsuario, contrasenaTemporal);
 
                 if (emailSent)
                 {

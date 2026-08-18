@@ -76,14 +76,14 @@ namespace ServiceDeskDESIMVC.Controllers
 
             try
             {
-                Token token = await httpClientConnection.GetToken(user, Cryptography.Encrypt(pass));
+                Token token = await httpClientConnection.GetToken(user, pass);
 
                 if (token != null)
                 {
                     var response = await _autenticacionService.AutenticarUsuario(new Usuario()
                     {
                         NombreUsuario = user,
-                        Contrasena = Cryptography.Encrypt(pass)
+                        Contrasena = pass
                     });
 
                     if (response.IsSuccess && response.Response != null)
@@ -150,7 +150,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<string> RestablecerContrasenia(string token, string nuevaContrasena)
         {
-            var response = await _autenticacionService.RestablecerContrasenia(token, Cryptography.Encrypt(nuevaContrasena));
+            var response = await _autenticacionService.RestablecerContrasenia(token, nuevaContrasena);
             return JsonConvert.SerializeObject(response);
         }
 

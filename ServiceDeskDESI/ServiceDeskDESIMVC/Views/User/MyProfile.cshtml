@@ -1,4 +1,4 @@
-﻿﻿@model ServiceDeskDESIEntities.Autenticacion.Usuario
+﻿@model ServiceDeskDESIEntities.Autenticacion.Usuario
 @{
     ViewBag.Title = "Mi Perfil";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -6,15 +6,6 @@
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
-
-<!-- Modal para cambio de contraseña -->
-<div class="modal fade" id="modalChangePass" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content" id="partialChangePass">
-            <!-- Aquí se cargará la vista parcial -->
-        </div>
-    </div>
-</div>
 
 <div class="form-section">
     @if (ViewBag.ErrorMessage != null)
@@ -127,16 +118,6 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <button type="button" class="btn btn-outline-info" onclick="AbrirModalCambioPass()">
-                        <i class="fas fa-key"></i> Cambiar contraseña
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="mb-3">
                     <input type="button" value="Guardar cambios" class="btn btn-success" onclick="GuardarPerfil()" />
                     <a href="/Home/Index" class="btn btn-warning">Cancelar</a>
                 </div>
@@ -147,11 +128,6 @@
 
 <script>
     var perfilTemp = '@Model.ImagenPerfil';
-    function AbrirModalCambioPass() {
-        $('#partialChangePass').empty().load('/User/PartialChangePass', function () {
-            $('#modalChangePass').modal('show');
-        });
-    }
 
     $(function () {
         $("#frmPerfil").validate({
@@ -285,131 +261,4 @@
             reader.readAsDataURL(file);
         }
     });
-
-
-
-    function actualizarRequisito(elemento, isValid) {
-        const $el = $(elemento);
-        if (isValid) {
-            $el.removeClass('invalid').addClass('valid');
-            $el.html('<i class="fas fa-check-circle"></i> ' + $el.text().substring(1));
-        } else {
-            $el.removeClass('valid').addClass('invalid');
-            $el.html('<i class="fas fa-circle"></i> ' + $el.text().substring(1));
-        }
-    }
-
-    function validarContrasena(contrasena) {
-        const tieneLongitud = contrasena.length >= 6;
-        const tieneMayuscula = /[A-Z]/.test(contrasena);
-        const tieneMinuscula = /[a-z]/.test(contrasena);
-        const tieneNumero = /[0-9]/.test(contrasena);
-        const tieneEspecial = /[!@@#$%^&*]/.test(contrasena);
-
-        actualizarRequisito('#reqLongitud', tieneLongitud);
-        actualizarRequisito('#reqMayuscula', tieneMayuscula);
-        actualizarRequisito('#reqMinuscula', tieneMinuscula);
-        actualizarRequisito('#reqNumero', tieneNumero);
-        actualizarRequisito('#reqEspecial', tieneEspecial);
-
-        return tieneLongitud && tieneMayuscula && tieneMinuscula && tieneNumero && tieneEspecial;
-    }
-
-    function GuardarNuevaContrasena() {
-        const contrasenaActual = $('#contrasenaActual').val();
-        const nuevaContrasena = $('#nuevaContrasena').val();
-        const confirmarContrasena = $('#confirmarContrasena').val();
-
-        if (!contrasenaActual) {
-            Swal.fire({
-                title: 'Error',
-                text: 'La contraseña actual es requerida',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-                background: 'white',
-                confirmButtonColor: '#4e73df'
-            });
-            return;
-        }
-
-        if (!nuevaContrasena) {
-            Swal.fire({
-                title: 'Error',
-                text: 'La nueva contraseña es requerida',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-                background: 'white',
-                confirmButtonColor: '#4e73df'
-            });
-            return;
-        }
-
-        if (!validarContrasena(nuevaContrasena)) {
-            Swal.fire({
-                title: 'Contraseña inválida',
-                text: 'La contraseña no cumple con los requisitos de seguridad',
-                icon: 'warning',
-                confirmButtonText: 'Entendido',
-                background: 'white',
-                confirmButtonColor: '#4e73df'
-            });
-            return;
-        }
-
-        if (nuevaContrasena !== confirmarContrasena) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Las contraseñas no coinciden',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-                background: 'white',
-                confirmButtonColor: '#4e73df'
-            });
-            return;
-        }
-
-        Swal.fire({
-            title: 'Actualizando...',
-            text: 'Por favor espere',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        var data = {
-            Id: $("#Id").val(),
-            ContrasenaActual: contrasenaActual,
-            NuevaContrasena: nuevaContrasena
-        };
-
-        PostMVC('/User/CambiarContrasena', data, function (response) {
-            Swal.close();
-
-            if (response.IsSuccess) {
-                Swal.fire({
-                    title: '¡Contraseña actualizada!',
-                    text: response.Message,
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                }).then(() => {
-                    $('#modalChangePass').modal('hide');
-                    $('#contrasenaActual').val('');
-                    $('#nuevaContrasena').val('');
-                    $('#confirmarContrasena').val('');
-                });
-            } else {
-                Swal.fire({
-                    title: 'Error',
-                    text: response.Message,
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-            }
-        });
-    }
 </script>

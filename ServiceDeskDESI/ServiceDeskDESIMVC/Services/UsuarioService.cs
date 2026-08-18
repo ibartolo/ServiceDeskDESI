@@ -42,11 +42,6 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.GuardarOActualizarUsuarioAdmin(usuario);
         }
 
-        public async Task<ModelResponse> ActualizarContrasena(Usuario usuario)
-        {
-            return await _httpClient.ActualizarContrasena(usuario);
-        }
-
         public async Task<ModelResponse> EliminarUsuario(Usuario usuario)
         {
             return await _httpClient.EliminarUsuario(usuario);

@@ -13,13 +13,13 @@
 |---|---|---|---|
 | Pendiente | Secretos en git: connection string + password SMTP en `Web.config` (W1) | CRÍTICO/URGENTE | 1 |
 | Hecho — `autorizacion-e2e` | Sin autorización real de extremo a extremo: `[AllowAnonymous]` de clase, claim `role="user"` hardcodeado, `AllowInsecureHttp`, `ValidateClientAuthentication` ciego, CORS `*`, sin `[Authorize(Roles)]`, permisos solo cosméticos (W2, W3, W5, M2) | CRÍTICO/URGENTE | 1 |
-| Pendiente | Contraseñas reversibles (Rijndael `P@@Sw0rd`) + default `Admin123!` + `Contrasena` devuelta en respuestas y renderizada en HTML (W4, D3, M4, E1) | CRÍTICO/URGENTE | 1 |
+| Hecho — PBKDF2, registro con contraseña aleatoria, hash en escrituras (admin/cambio/reset), sin `Contrasena` en respuestas ni HTML, cambio de contraseña unificado | Contraseñas reversibles (Rijndael `P@@Sw0rd`) + default `Admin123!` + `Contrasena` devuelta en respuestas y renderizada en HTML (W4, D3, M4, E1) | CRÍTICO/URGENTE | 1 |
 | Hecho — `tenant-isolation` (contención) | Fuga de datos entre tenants: SPs sin filtro, IDOR (`EliminarTicket`, `CambiarEstatusTicket`), endpoints anónimos, `@Usuario` spoofeable, directorio de empresas expuesto (D1, D2, D15, W6, M6, M11) | CRÍTICO/URGENTE | 1 |
 | Pendiente | Trial sin enforcement: `AutenticarUsuario` no valida vigencia (D5) | CRÍTICO/URGENTE | 1 |
 | Parcial — NRE/`RequestAsync` listo; `debug=false`/`customErrors` pendiente | Info disclosure: `debug=true`, `customErrors mode=Off`, NRE en cadena con stack trace (M7) | CRÍTICO/URGENTE | 1 |
 | Hecho — `sesion-expiracion` | Sesión/expiración no forzada: `UserController` sin `[Autenticated]`, `BaseController` muerto, `PermissionsController` roto por DI (M1, M3, M8) | CRÍTICO/URGENTE | 1 |
-| Pendiente | Tenant estructural: sin `EmpresaId` en tablas de dominio, `NombreUsuario` no único, tenant vía `CreadoPor` (string) (D1) | ALTO | 2 |
-| Parcial — transacción lista; template pendiente | Registro de empresa sin transacción (8+ SPs sueltos) + provisioning sin template (D4) | ALTO | 2 |
+| Parcial — esquema (`EmpresaId`+FK+unique+backfill) y registro listos; reescritura de `GuardarOActualizar*`/`Eliminar*`/`Obtener*` pendiente | Tenant estructural: sin `EmpresaId` en tablas de dominio, `NombreUsuario` no único, tenant vía `CreadoPor` (string) (D1) | ALTO | 2 |
+| Hecho — transacción (capa app) + `PlantillaRol` | Registro de empresa sin transacción (8+ SPs sueltos) + provisioning sin template (D4) | ALTO | 2 |
 | Hecho — `bugs-bd` | Bugs de BD que rompen flujos: rol sin `PuedeAtenderTickets`, typo `nvarchaR`, `@@IDENTITY`, JOIN muerto en `ObtenerEmpresas`, `Estatus` comentado (D6, D10, D11, D12, D13) | ALTO | 2 |
 | Parcial — `RolPaginaAccion` autoritativo; deprecar `UsuarioPagina` pendiente | Dos sistemas de permisos en conflicto: `RolPaginaAccion` vs `UsuarioPagina` (D7) | ALTO | 2 |
 | Parcial — E3+W10 listos; E2 (FKs→`*Id`) pendiente | Mapeo por reflection frágil + FKs como navegación vs `*Id` + `TicketEstatus.Id` int/long (W10, E2, E3) | ALTO | 2 |

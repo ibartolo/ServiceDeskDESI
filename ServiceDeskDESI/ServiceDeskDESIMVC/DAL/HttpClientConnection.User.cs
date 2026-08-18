@@ -75,19 +75,6 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ActualizarContrasena(Usuario usuario)
-        {
-            var result = await RequestAsync<object>($"api/Autentication/actualizar-contrasena", HttpMethod.Post, usuario,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
-        }
-
         public async Task<ModelResponse> ObtenerSucursales()
         {
             var result = await RequestAsync<object>($"api/Sucursales/List", HttpMethod.Get, null,

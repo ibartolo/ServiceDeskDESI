@@ -78,10 +78,6 @@ namespace ServiceDeskDESIMVC.Controllers
             return View(usuario);
         }
 
-        public async Task<ActionResult> PartialChangePass()
-        {
-            return PartialView();
-        }
         [Permiso("Mi Perfil", "Editar")]
         public async Task<string> ActualizarPerfilUsuario(Usuario usuario, HttpPostedFileBase file)
         {
@@ -121,60 +117,6 @@ namespace ServiceDeskDESIMVC.Controllers
             }
         }
 
-        [Permiso("Mi Perfil", "Editar")]
-        public async Task<string> CambiarContrasena([FromBody] CambioContrasenaRequest request)
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var tokenCookie = SessionHelper.GetSessionUser();
-                if (tokenCookie == null || tokenCookie.UserID == 0)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Sesión no válida";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Validar contraseña actual
-                var usuarioResponse = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
-
-                if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo obtener la información del usuario";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                var usuario = JsonConvert.DeserializeObject<Usuario>(usuarioResponse.Response.ToString());
-
-                if (usuario.Contrasena != Cryptography.Encrypt(request.ContrasenaActual))
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "La contraseña actual es incorrecta";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                usuario.Contrasena = Cryptography.Encrypt(request.NuevaContrasena);
-
-                // Actualizar contraseña
-                //usuario.Contrasena = request.NuevaContrasena;
-                //usuario.ModificadoPor = tokenCookie.UserName;
-                //usuario.FechaModificacion = DateTime.Now;
-                //
-                //var response = await httpClientConnection.ActualizarContrasena(usuario);
-                var response = await _usuarioService.GuardarOActualizarUsuario(usuario);
-                return JsonConvert.SerializeObject(response);
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al cambiar la contraseña";
-                return JsonConvert.SerializeObject(modelResponse);
-            }
-        }
-
-
         #region Catelogo de usuarios
         public async Task<ActionResult> Users(long id = 0)
         {
@@ -213,11 +155,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 {
                     usuario = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
 
-                    // Desencriptar la contraseña para mostrarla en el input
-                    if (!string.IsNullOrEmpty(usuario.Contrasena))
-                    {
-                        usuario.Contrasena = Cryptography.Decrypt(usuario.Contrasena);
-                    }
+                    // La contraseña no se expone (viene vacía del API); el campo solo acepta una nueva contraseña.
 
                     // Obtener el rol del usuario en modo edición
                     var rolesUsuarioResponse = await _rolService.ObtenerRolesPorUsuario(usuario.Id);
@@ -308,12 +246,6 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> GuardarOActualizarUsuarioAdmin(Usuario usuario)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
-
-            // Encriptar la contraseña antes de guardar
-            if (!string.IsNullOrEmpty(usuario.Contrasena))
-            {
-                usuario.Contrasena = Cryptography.Encrypt(usuario.Contrasena);
-            }
 
             // Asignar empresa
             usuario.Empresa = new Empresa { Id = tokenCookie.EmpresaID };

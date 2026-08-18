@@ -562,6 +562,31 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
+/****** Object:  Table [dbo].[PlantillaRol]    Script Date: 18/08/2026 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[PlantillaRol](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NOT NULL,
+	[Descripcion] [nvarchar](250) NULL,
+	[PuedeAtenderTickets] [bit] NOT NULL,
+	[Orden] [int] NOT NULL,
+ CONSTRAINT [PK_PlantillaRol] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+-- Seed de la plantilla de roles por defecto para nuevas empresas
+INSERT INTO [dbo].[PlantillaRol] ([Nombre], [Descripcion], [PuedeAtenderTickets], [Orden])
+VALUES
+(N'Administrador', N'Control total del sistema', 1, 1),
+(N'Supervisor', N'Gestión de tickets y usuarios', 1, 2),
+(N'Agente', N'Atención de tickets', 1, 3),
+(N'Usuario', N'Creación de tickets', 0, 4)
+GO
 ALTER TABLE [dbo].[Categoria] ADD  DEFAULT ((0)) FOR [Orden]
 GO
 ALTER TABLE [dbo].[Categoria] ADD  DEFAULT ((1)) FOR [Estatus]
@@ -717,6 +742,60 @@ ALTER TABLE [dbo].[Usuarios]  WITH CHECK ADD  CONSTRAINT [FK_Usuarios_Sucursal] 
 REFERENCES [dbo].[Sucursal] ([Id])
 GO
 ALTER TABLE [dbo].[Usuarios] CHECK CONSTRAINT [FK_Usuarios_Sucursal]
+GO
+-- =========================================
+-- D1: Tenant de primera clase — EmpresaId en tablas de dominio
+-- =========================================
+ALTER TABLE [dbo].[Activo] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Area] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Categoria] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[CategoriaResponsable] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Marca] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Modelo] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Persona] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Puesto] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Rol] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Sucursal] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Ticket] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[TipoActivo] ADD [EmpresaId] [bigint] NULL
+GO
+ALTER TABLE [dbo].[Activo]  WITH CHECK ADD  CONSTRAINT [FK_Activo_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[Area]  WITH CHECK ADD  CONSTRAINT [FK_Area_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[Categoria]  WITH CHECK ADD  CONSTRAINT [FK_Categoria_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[CategoriaResponsable]  WITH CHECK ADD  CONSTRAINT [FK_CategoriaResponsable_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[Marca]  WITH CHECK ADD  CONSTRAINT [FK_Marca_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[Modelo]  WITH CHECK ADD  CONSTRAINT [FK_Modelo_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[Persona]  WITH CHECK ADD  CONSTRAINT [FK_Persona_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[Puesto]  WITH CHECK ADD  CONSTRAINT [FK_Puesto_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[Rol]  WITH CHECK ADD  CONSTRAINT [FK_Rol_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[Sucursal]  WITH CHECK ADD  CONSTRAINT [FK_Sucursal_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[Ticket]  WITH CHECK ADD  CONSTRAINT [FK_Ticket_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+ALTER TABLE [dbo].[TipoActivo]  WITH CHECK ADD  CONSTRAINT [FK_TipoActivo_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
+GO
+-- NombreUsuario único global (evita colisión de tenant vía CreadoPor)
+CREATE UNIQUE NONCLUSTERED INDEX [UX_Usuarios_NombreUsuario] ON [dbo].[Usuarios] ([NombreUsuario] ASC)
 GO
 /****** Object:  StoredProcedure [dbo].[ActualizarContrasena]    Script Date: 17/08/2026 09:59:02 p. m. ******/
 SET ANSI_NULLS ON
@@ -1040,8 +1119,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[AutenticarUsuario]
 (
-    @NombreUsuario NVARCHAR(25),
-    @Contrasena NVARCHAR(250)
+    @NombreUsuario NVARCHAR(25)
 )
 AS
 BEGIN
@@ -1071,7 +1149,6 @@ BEGIN
     LEFT JOIN Area a ON u.AreaId = a.Id
     LEFT JOIN Empresa e ON u.EmpresaId = e.Id
     WHERE u.NombreUsuario = @NombreUsuario 
-        AND u.Contrasena = @Contrasena 
         AND u.Estatus = 1
 END
 GO
@@ -1885,14 +1962,15 @@ CREATE PROCEDURE [dbo].[GuardarNuevaAreaParaEmpresa]
     @Descripcion NVARCHAR(500) = NULL,
     @Correo NVARCHAR(100) = NULL,
     @CreadoPor NVARCHAR(25),
-    @FechaCreacion DATETIME
+    @FechaCreacion DATETIME,
+    @EmpresaId BIGINT
 )
 AS
 BEGIN
     INSERT INTO Area
-    (Nombre, Descripcion, Correo, CreadoPor, FechaCreacion, Estatus)
+    (Nombre, Descripcion, Correo, CreadoPor, FechaCreacion, Estatus, EmpresaId)
     VALUES
-    (@Nombre, @Descripcion, @Correo, @CreadoPor, @FechaCreacion, 1)
+    (@Nombre, @Descripcion, @Correo, @CreadoPor, @FechaCreacion, 1, @EmpresaId)
 
     SELECT SCOPE_IDENTITY()
 END
@@ -1950,14 +2028,15 @@ CREATE PROCEDURE [dbo].[GuardarNuevaSucursalParaEmpresa]
     @Colonia NVARCHAR(100) = NULL,
     @CodigoPostal NVARCHAR(10) = NULL,
     @CreadoPor NVARCHAR(25),
-    @FechaCreacion DATETIME
+    @FechaCreacion DATETIME,
+    @EmpresaId BIGINT
 )
 AS
 BEGIN
     INSERT INTO Sucursal
-    (Nombre, Descripcion, Calle, Ciudad, Colonia, CodigoPostal, CreadoPor, FechaCreacion, Estatus)
+    (Nombre, Descripcion, Calle, Ciudad, Colonia, CodigoPostal, CreadoPor, FechaCreacion, Estatus, EmpresaId)
     VALUES
-    (@Nombre, @Descripcion, @Calle, @Ciudad, @Colonia, @CodigoPostal, @CreadoPor, @FechaCreacion, 1)
+    (@Nombre, @Descripcion, @Calle, @Ciudad, @Colonia, @CodigoPostal, @CreadoPor, @FechaCreacion, 1, @EmpresaId)
 
     SELECT SCOPE_IDENTITY()
 END
@@ -1995,10 +2074,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Activo a
-            INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
             WHERE a.Id = @Id 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND a.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2009,10 +2086,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM TipoActivo ta
-            INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
             WHERE ta.Id = @TipoActivoID 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND ta.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2023,10 +2098,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Marca m
-            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
             WHERE m.Id = @MarcaID 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2037,10 +2110,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Modelo mo
-            INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
             WHERE mo.Id = @ModeloID 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND mo.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2082,10 +2153,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM TipoActivo ta
-            INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
             WHERE ta.Id = @TipoActivoID 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND ta.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2096,10 +2165,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Marca m
-            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
             WHERE m.Id = @MarcaID 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2110,10 +2177,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Modelo mo
-            INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
             WHERE mo.Id = @ModeloID 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND mo.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2122,10 +2187,10 @@ BEGIN
 
         INSERT INTO Activo
         (Nombre, Descripcion, TipoActivoID, Serial, MarcaID, ModeloID, Notas, FechaCompra, 
-         CreadoPor, FechaCreacion, Estatus)
+         CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
         (@Nombre, @Descripcion, @TipoActivoID, @Serial, @MarcaID, @ModeloID, @Notas, @FechaCompra,
-         @CreadoPor, @FechaCreacion, @Estatus)
+         @CreadoPor, @FechaCreacion, @Estatus, (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1))
 
         SELECT SCOPE_IDENTITY()
     END
@@ -2182,9 +2247,9 @@ BEGIN
     ELSE
     BEGIN
         INSERT INTO Area
-        (Nombre, Descripcion, Correo, CreadoPor, FechaCreacion, Estatus)
+        (Nombre, Descripcion, Correo, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Descripcion, @Correo, @CreadoPor, @FechaCreacion, @Estatus)
+        (@Nombre, @Descripcion, @Correo, @CreadoPor, @FechaCreacion, @Estatus, (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1))
 
         SELECT SCOPE_IDENTITY()
     END
@@ -2220,10 +2285,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Categoria c
-            INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
             WHERE c.Id = @Id 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND c.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2262,10 +2325,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Area a
-            INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
             WHERE a.Id = @AreaId 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND a.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2273,9 +2334,9 @@ BEGIN
         END
 
         INSERT INTO Categoria
-        (Nombre, Descripcion, CategoriaPadreId, AreaId, Orden, CreadoPor, FechaCreacion, Estatus)
+        (Nombre, Descripcion, CategoriaPadreId, AreaId, Orden, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Descripcion, @CategoriaPadreId, @AreaId, @Orden, @CreadoPor, @FechaCreacion, @Estatus)
+        (@Nombre, @Descripcion, @CategoriaPadreId, @AreaId, @Orden, @CreadoPor, @FechaCreacion, @Estatus, (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1))
 
         SELECT SCOPE_IDENTITY()
     END
@@ -3574,14 +3635,24 @@ CREATE PROCEDURE [dbo].[GuardarRolParaNuevaEmpresa]
     @Descripcion NVARCHAR(250) = NULL,
     @PuedeAtenderTickets BIT,
     @CreadoPor NVARCHAR(25),
-    @FechaCreacion DATETIME
+    @FechaCreacion DATETIME,
+    @EmpresaId BIGINT
 )
 AS
 BEGIN
-    INSERT INTO Rol (Nombre, Descripcion, PuedeAtenderTickets, CreadoPor, FechaCreacion, Estatus)
-    VALUES (@Nombre, @Descripcion, @PuedeAtenderTickets, @CreadoPor, @FechaCreacion, 1)
+    INSERT INTO Rol (Nombre, Descripcion, PuedeAtenderTickets, CreadoPor, FechaCreacion, Estatus, EmpresaId)
+    VALUES (@Nombre, @Descripcion, @PuedeAtenderTickets, @CreadoPor, @FechaCreacion, 1, @EmpresaId)
 
     SELECT SCOPE_IDENTITY()
+END
+GO
+-- Obtener la plantilla de roles por defecto (provisioning de nuevas empresas)
+CREATE PROCEDURE [dbo].[ObtenerPlantillaRoles]
+AS
+BEGIN
+    SELECT Id, Nombre, Descripcion, PuedeAtenderTickets, Orden
+    FROM PlantillaRol
+    ORDER BY Orden
 END
 GO
 /****** Object:  StoredProcedure [dbo].[InsertarRolPaginaAccion]    Script Date: 17/08/2026 09:59:02 p. m. ******/

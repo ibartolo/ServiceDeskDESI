@@ -442,13 +442,6 @@ namespace ServiceDeskDESIMVC.Controllers
             return View(usuario);
         }
 
-        public class CambioContrasenaRequest
-        {
-            public long Id { get; set; }
-            public string ContrasenaActual { get; set; }
-            public string NuevaContrasena { get; set; }
-        }
-
         public async Task<ActionResult> Category(long id = 0)
         {
             // 1. Obtener permisos para la página "Categorías"
@@ -648,55 +641,6 @@ namespace ServiceDeskDESIMVC.Controllers
             {
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar el perfil";
-                return JsonConvert.SerializeObject(modelResponse);
-            }
-        }
-        [Permiso("Mi Perfil", "Editar")]
-        public async Task<string> CambiarContrasena(CambioContrasenaRequest request)
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var tokenCookie = SessionHelper.GetSessionUser();
-                if (tokenCookie == null || tokenCookie.UserID == 0)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Sesión no válida";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Validar contraseña actual
-                var usuarioResponse = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
-
-                if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo obtener la información del usuario";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                var usuario = JsonConvert.DeserializeObject<Usuario>(usuarioResponse.Response.ToString());
-
-                if (usuario.Contrasena != request.ContrasenaActual)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "La contraseña actual es incorrecta";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Actualizar contraseña
-                usuario.Contrasena = request.NuevaContrasena;
-                usuario.ModificadoPor = tokenCookie.UserName;
-                usuario.FechaModificacion = DateTime.Now;
-
-                var response = await _usuarioService.ActualizarContrasena(usuario);
-                return JsonConvert.SerializeObject(response);
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al cambiar la contraseña";
                 return JsonConvert.SerializeObject(modelResponse);
             }
         }

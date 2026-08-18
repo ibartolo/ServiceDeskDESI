@@ -1,6 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -41,6 +42,8 @@ namespace ServiceDeskDESIWebApi.DAL
                             Id = MapearPorpiedades<long>(reader["EmpresaId"]),
                             NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
                         };
+
+                        u.Contrasena = null;
 
                         return u;
                     }));
@@ -91,6 +94,8 @@ namespace ServiceDeskDESIWebApi.DAL
                             Id = MapearPorpiedades<long>(reader["EmpresaId"]),
                             NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
                         };
+
+                        user.Contrasena = null;
 
                         return user;
                     }));
@@ -149,6 +154,8 @@ namespace ServiceDeskDESIWebApi.DAL
                             NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
                         };
 
+                        user.Contrasena = null;
+
                         return user;
                     }));
 
@@ -202,6 +209,8 @@ namespace ServiceDeskDESIWebApi.DAL
                             Id = MapearPorpiedades<long>(reader["EmpresaId"]),
                             NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
                         };
+
+                        u.Contrasena = null;
 
                         return u;
                     }));
@@ -428,8 +437,7 @@ namespace ServiceDeskDESIWebApi.DAL
             {
                 var usuario = GetObject("AutenticarUsuario", CommandType.StoredProcedure,
                     new[] {
-                        new SqlParameter("@NombreUsuario", nombreUsuario),
-                        new SqlParameter("@Contrasena", contrasena)
+                        new SqlParameter("@NombreUsuario", nombreUsuario)
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {
@@ -475,8 +483,9 @@ namespace ServiceDeskDESIWebApi.DAL
                         return u;
                     }));
 
-                if (usuario != null)
+                if (usuario != null && Cryptography.VerifyPassword(contrasena, usuario.Contrasena))
                 {
+                    usuario.Contrasena = null; // no exponer el hash/ciphertext en la respuesta
                     modelResponse.IsSuccess = true;
                     modelResponse.Response = usuario;
                 }

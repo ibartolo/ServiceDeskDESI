@@ -157,7 +157,7 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarNuevaAreaParaEmpresa(Area area)
+        public ModelResponse GuardarNuevaAreaParaEmpresa(Area area, long empresaId)
         {
             var modelResponse = new ModelResponse();
 
@@ -169,7 +169,8 @@ namespace ServiceDeskDESIWebApi.DAL
                     area.Descripcion,
                     area.Correo,
                     area.CreadoPor,
-                    area.FechaCreacion
+                    area.FechaCreacion,
+                    EmpresaId = empresaId
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();

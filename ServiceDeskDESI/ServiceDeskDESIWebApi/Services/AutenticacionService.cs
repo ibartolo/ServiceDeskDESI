@@ -153,6 +153,11 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(usuario.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuarioAdmin)) { throw new ArgumentException("El usuario administrador es requerido."); }
 
+                if (!string.IsNullOrWhiteSpace(usuario.Contrasena))
+                {
+                    usuario.Contrasena = Cryptography.HashPassword(usuario.Contrasena);
+                }
+
                 return _dbWrapper.GuardarOActualizarUsuarioAdmin(usuario, usuarioAdmin);
             }
             catch (ArgumentException ex)
@@ -306,31 +311,6 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ActualizarContrasena(Usuario usuario, string usuarioAutenticado)
-        {
-            try
-            {
-                if (usuario.Id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuario.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
-                if (usuario.Contrasena.Length < 6) { throw new ArgumentException("La contraseña debe tener al menos 6 caracteres."); }
-                if (usuario.Contrasena.Length > 250) { throw new ArgumentException("La contraseña no puede exceder los 250 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.ModificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-                if (string.IsNullOrWhiteSpace(usuarioAutenticado)) { throw new ArgumentException("El usuario autenticado es requerido."); }
-
-                return _dbWrapper.ActualizarContrasena(usuario, usuarioAutenticado);
-            }
-            catch (ArgumentException ex)
-            {
-                Log.Warning(ex, "Error de validación en ActualizarContrasena para usuario {Id}", usuario.Id);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error en AutenticacionService.ActualizarContrasena para usuario {Id}", usuario.Id);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al actualizar la contraseña." };
-            }
-        }
-
         public ModelResponse ValidarRecetearContrasenia(string correo)
         {
             var modelResponse = new ModelResponse();
@@ -427,7 +407,7 @@ namespace ServiceDeskDESIWebApi.Services
                 var usuario = new Usuario
                 {
                     Id = tokenInfo.UsuarioId,
-                    Contrasena = nuevaContrasena,
+                    Contrasena = Cryptography.HashPassword(nuevaContrasena),
                     ModificadoPor = tokenInfo.NombreUsuario,
                     FechaModificacion = DateTime.Now
                 };

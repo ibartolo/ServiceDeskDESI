@@ -159,7 +159,7 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarNuevaSucursalParaEmpresa(Sucursal sucursal)
+        public ModelResponse GuardarNuevaSucursalParaEmpresa(Sucursal sucursal, long empresaId)
         {
             var modelResponse = new ModelResponse();
 
@@ -174,7 +174,8 @@ namespace ServiceDeskDESIWebApi.DAL
                     sucursal.Colonia,
                     sucursal.CodigoPostal,
                     sucursal.CreadoPor,
-                    sucursal.FechaCreacion
+                    sucursal.FechaCreacion,
+                    EmpresaId = empresaId
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
