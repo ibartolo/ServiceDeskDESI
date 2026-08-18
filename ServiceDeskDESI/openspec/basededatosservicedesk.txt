@@ -1744,15 +1744,32 @@ CREATE PROCEDURE [dbo].[EliminarTicket]
 (
     @Id BIGINT,
     @ModificadoPor NVARCHAR(25),
-    @FechaModificacion DATETIME
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
 )
 AS
 BEGIN
+    -- Validar que el ticket exista y pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1
+        FROM Ticket t
+        INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+        WHERE t.Id = @Id
+            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
     UPDATE Ticket
     SET Estatus = 0,
         ModificadoPor = @ModificadoPor,
         FechaModificacion = @FechaModificacion
     WHERE Id = @Id
+
+    SELECT @Id
 END
 GO
 /****** Object:  StoredProcedure [dbo].[EliminarTipoActivo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -4079,6 +4096,45 @@ BEGIN
     WHERE RFC = @RFC AND Estatus = 1
 END
 GO
+
+-- Validar unicidad por correo de contacto (dedupe server-side en el registro; NO expuesto como endpoint)
+CREATE PROCEDURE [dbo].[ObtenerEmpresaPorCorreoContacto]
+(
+    @CorreoContacto NVARCHAR(250)
+)
+AS
+BEGIN
+    SELECT *
+    FROM Empresa
+    WHERE CorreoContacto = @CorreoContacto AND Estatus = 1
+END
+GO
+
+-- Validar unicidad por nombre comercial
+CREATE PROCEDURE [dbo].[ObtenerEmpresaPorNombreComercial]
+(
+    @NombreComercial NVARCHAR(250)
+)
+AS
+BEGIN
+    SELECT *
+    FROM Empresa
+    WHERE NombreComercial = @NombreComercial AND Estatus = 1
+END
+GO
+
+-- Validar unicidad por razón social
+CREATE PROCEDURE [dbo].[ObtenerEmpresaPorRazonSocial]
+(
+    @RazonSocial NVARCHAR(250)
+)
+AS
+BEGIN
+    SELECT *
+    FROM Empresa
+    WHERE RazonSocial = @RazonSocial AND Estatus = 1
+END
+GO
 /****** Object:  StoredProcedure [dbo].[ObtenerEmpresas]    Script Date: 17/08/2026 09:59:02 p. m. ******/
 SET ANSI_NULLS ON
 GO
@@ -4986,10 +5042,15 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 create procedure [dbo].[ObtenerUsuarioPagina] 
+(
+    @Usuario NVARCHAR(25)
+)
 as
 begin
-select * 
-from UsuarioPagina
+select up.* 
+from UsuarioPagina up
+inner join Usuarios u on up.UsuarioId = u.Id
+where u.EmpresaId = (select EmpresaId from Usuarios where NombreUsuario = @Usuario and Estatus = 1)
 end
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerUsuarioPaginaPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -4999,13 +5060,16 @@ SET QUOTED_IDENTIFIER ON
 GO
 create procedure [dbo].[ObtenerUsuarioPaginaPorId]
 (
-@Id bigint 
+@Id bigint,
+@Usuario NVARCHAR(25)
 )
 as
 begin 
-select *
-from UsuarioPagina
-where Id=@Id
+select up.*
+from UsuarioPagina up
+inner join Usuarios u on up.UsuarioId = u.Id
+where up.Id = @Id
+    and u.EmpresaId = (select EmpresaId from Usuarios where NombreUsuario = @Usuario and Estatus = 1)
 end 
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerUsuarioPorCorreo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -5065,7 +5129,8 @@ GO
 -- Obtener usuario por nombre usuario (con validación de empresa)
 CREATE PROCEDURE [dbo].[ObtenerUsuarioPorNombreUsuario]
 (
-    @NombreUsuario NVARCHAR(25)
+    @NombreUsuario NVARCHAR(25),
+    @Usuario NVARCHAR(25)
 )
 AS
 BEGIN
@@ -5079,6 +5144,7 @@ BEGIN
     LEFT JOIN Empresa e ON u.EmpresaId = e.Id
     WHERE u.NombreUsuario = @NombreUsuario
         AND u.Estatus = 1
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerUsuarios]    Script Date: 17/08/2026 09:59:02 p. m. ******/

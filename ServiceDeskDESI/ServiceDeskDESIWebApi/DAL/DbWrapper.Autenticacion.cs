@@ -116,7 +116,7 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerUsuarioPorNombreUsuario(string nombreUsuario)
+        public ModelResponse ObtenerUsuarioPorNombreUsuario(string nombreUsuario, string usuario)
         {
             var modelResponse = new ModelResponse();
 
@@ -124,7 +124,8 @@ namespace ServiceDeskDESIWebApi.DAL
             {
                 var u = GetObject("ObtenerUsuarioPorNombreUsuario", CommandType.StoredProcedure,
                     new[] {
-                        new SqlParameter("@NombreUsuario", nombreUsuario)
+                        new SqlParameter("@NombreUsuario", nombreUsuario),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Usuario>((reader) =>
                     {

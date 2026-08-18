@@ -19,23 +19,6 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerTodasLasEmpresas()
-        {
-            try
-            {
-                return _dbWrapper.ObtenerTodasLasEmpresas();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error en EmpresaService.ObtenerTodasLasEmpresas");
-                return new ModelResponse
-                {
-                    IsSuccess = false,
-                    Message = "Ocurrió un error al obtener las empresas."
-                };
-            }
-        }
-
         public ModelResponse ObtenerEmpresaPorId(long id, string usuario)
         {
             try
@@ -188,28 +171,22 @@ namespace ServiceDeskDESIWebApi.Services
                     throw new ArgumentException("Ya existe una empresa registrada con este RFC.");
                 }
 
-                var empresasResponse = ObtenerTodasLasEmpresas();
-                if (empresasResponse.IsSuccess && empresasResponse.Response != null)
+                var correoResponse = _dbWrapper.ObtenerEmpresaPorCorreoContacto(empresa.CorreoContacto);
+                if (correoResponse.IsSuccess && correoResponse.Response != null)
                 {
-                    var empresas = (IEnumerable<Empresa>)empresasResponse.Response;
+                    throw new ArgumentException("Ya existe una empresa registrada con este correo de contacto.");
+                }
 
-                    if (empresas.Any(e => !string.IsNullOrWhiteSpace(e.CorreoContacto) &&
-                                          e.CorreoContacto.Equals(empresa.CorreoContacto, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        throw new ArgumentException("Ya existe una empresa registrada con este correo de contacto.");
-                    }
+                var nombreResponse = _dbWrapper.ObtenerEmpresaPorNombreComercial(empresa.NombreComercial);
+                if (nombreResponse.IsSuccess && nombreResponse.Response != null)
+                {
+                    throw new ArgumentException("Ya existe una empresa registrada con este nombre comercial.");
+                }
 
-                    if (empresas.Any(e => !string.IsNullOrWhiteSpace(e.NombreComercial) &&
-                                          e.NombreComercial.Equals(empresa.NombreComercial, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        throw new ArgumentException("Ya existe una empresa registrada con este nombre comercial.");
-                    }
-
-                    if (empresas.Any(e => !string.IsNullOrWhiteSpace(e.RazonSocial) &&
-                                          e.RazonSocial.Equals(empresa.RazonSocial, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        throw new ArgumentException("Ya existe una empresa registrada con esta razón social.");
-                    }
+                var razonResponse = _dbWrapper.ObtenerEmpresaPorRazonSocial(empresa.RazonSocial);
+                if (razonResponse.IsSuccess && razonResponse.Response != null)
+                {
+                    throw new ArgumentException("Ya existe una empresa registrada con esta razón social.");
                 }
 
                 // 3. Campos de vigencia / periodo de prueba (espejo del flujo MVC pre-login)

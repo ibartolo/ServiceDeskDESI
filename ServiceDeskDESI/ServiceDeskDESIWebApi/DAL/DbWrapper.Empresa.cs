@@ -11,33 +11,6 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodasLasEmpresas()
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var empresa = GetObjects("ObtenerEmpresas", CommandType.StoredProcedure, null,
-                    new Func<IDataReader, Empresa>((reader) =>
-                    {
-                        var empresas = LlenarEntidad<Empresa>(reader);
-                        return empresas;
-                    }));
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = empresa;
-                modelResponse.Message = "Empresas obtenidas correctamente";
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error al obtener empresas");
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener las empresas";
-            }
-
-            return modelResponse;
-        }
-
         public ModelResponse ObtenerEmpresaPorId(long id, string usuario)
         {
             var modelResponse = new ModelResponse();
@@ -97,6 +70,87 @@ namespace ServiceDeskDESIWebApi.DAL
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al obtener empresa por RFC {RFC}", rfc);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener la empresa";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ObtenerEmpresaPorCorreoContacto(string correoContacto)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var result = GetObject("ObtenerEmpresaPorCorreoContacto", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@CorreoContacto", correoContacto) },
+                    new Func<IDataReader, Empresa>((reader) =>
+                    {
+                        var r = LlenarEntidad<Empresa>(reader);
+                        return r;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener empresa por correo de contacto {Correo}", correoContacto);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener la empresa";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ObtenerEmpresaPorNombreComercial(string nombreComercial)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var result = GetObject("ObtenerEmpresaPorNombreComercial", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@NombreComercial", nombreComercial) },
+                    new Func<IDataReader, Empresa>((reader) =>
+                    {
+                        var r = LlenarEntidad<Empresa>(reader);
+                        return r;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener empresa por nombre comercial {NombreComercial}", nombreComercial);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener la empresa";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ObtenerEmpresaPorRazonSocial(string razonSocial)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var result = GetObject("ObtenerEmpresaPorRazonSocial", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@RazonSocial", razonSocial) },
+                    new Func<IDataReader, Empresa>((reader) =>
+                    {
+                        var r = LlenarEntidad<Empresa>(reader);
+                        return r;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener empresa por razón social {RazonSocial}", razonSocial);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener la empresa";
             }

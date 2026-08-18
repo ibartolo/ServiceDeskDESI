@@ -22,25 +22,11 @@ namespace ServiceDeskDESIWebApi.Controllers
             _empresaService = new EmpresaService();
         }
 
-        [HttpGet, Route("List")]
-        public ModelResponse ObtenerEmpresas()
-        {
-            var result = _empresaService.ObtenerTodasLasEmpresas();
-            return result;
-        }
-
         [HttpGet, Route("{id:long}")]
         public ModelResponse ObtenerEmpresasPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _empresaService.ObtenerEmpresaPorId(id, usuario);
-            return result;
-        }
-
-        [HttpPost, Route("RFC")]
-        public ModelResponse ObtenerEmpresasPorRFC(Empresa empresa)
-        {
-            var result = _empresaService.ObtenerEmpresaPorRFC(empresa.RFC);
             return result;
         }
 

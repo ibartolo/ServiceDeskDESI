@@ -193,13 +193,20 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                ExecuteNonQuery("EliminarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                var result = ExecuteScalar("EliminarTicket", CommandType.StoredProcedure, new SqlParameter[]
                 {
                     new SqlParameter("@Id", id),
                     new SqlParameter("@ModificadoPor", modificadoPor),
                     new SqlParameter("@FechaModificacion", fechaModificacion),
                     new SqlParameter("@Usuario", usuario)
                 });
+
+                if (Convert.ToInt64(result) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para eliminar este ticket.";
+                    return modelResponse;
+                }
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Ticket eliminado correctamente";

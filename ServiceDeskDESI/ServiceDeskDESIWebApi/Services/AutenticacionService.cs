@@ -66,7 +66,7 @@ namespace ServiceDeskDESIWebApi.Services
             {
                 if (string.IsNullOrWhiteSpace(nombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerUsuarioPorNombreUsuario(nombreUsuario);
+                return _dbWrapper.ObtenerUsuarioPorNombreUsuario(nombreUsuario, nombreUsuario);
             }
             catch (ArgumentException ex)
             {

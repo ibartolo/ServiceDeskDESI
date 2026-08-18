@@ -11,19 +11,20 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerUsuarioPagina()
+        public ModelResponse ObtenerUsuarioPagina(string usuario)
         {
             var modelResponse = new ModelResponse();
             try
             {
-                var usuario = GetObjects("ObtenerUsuarioPagina", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                var usuarioResp = GetObjects("ObtenerUsuarioPagina", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Usuario", usuario) },
                   new Func<IDataReader, UsuarioPagina>((reader) =>
                   {
                       var usuarioPagina = LlenarEntidad<UsuarioPagina>(reader);
                       return usuarioPagina;
                   }));
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = usuario;
+                modelResponse.Response = usuarioResp;
                 modelResponse.Message = "UsuarioPagina obtenidas correctamente";
             }
             catch (Exception ex)
@@ -56,7 +57,7 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
-        public ModelResponse ObtenerUsuarioPaginaPorId(long id)
+        public ModelResponse ObtenerUsuarioPaginaPorId(long id, string usuario)
         {
             var modelResponse = new ModelResponse();
             try
@@ -70,6 +71,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     ParameterName = "@Id",
                     SqlDbType = System.Data.SqlDbType.Int
                 });
+                parameters.Add(new SqlParameter("@Usuario", usuario));
 
                 var result = GetObject("ObtenerUsuarioPaginaPorId", System.Data.CommandType.StoredProcedure,
                     parameters, new Func<System.Data.IDataReader, UsuarioPagina>((reader) =>

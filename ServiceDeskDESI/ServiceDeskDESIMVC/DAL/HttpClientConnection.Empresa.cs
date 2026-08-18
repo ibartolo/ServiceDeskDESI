@@ -12,35 +12,9 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodasLasEmpresas()
-        {
-            var result = await RequestAsync<object>($"api/Empresas/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }));
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
-        }
-
         public async Task<ModelResponse> ObtenerEmpresaPorId(long id)
         {
             var result = await RequestAsync<object>($"api/Empresas/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse> ObtenerEmpresasPorRFC(string rfc)
-        {
-            var empresa = new Empresa { RFC = rfc };
-
-            var result = await RequestAsync<object>($"api/Empresas/RFC", HttpMethod.Post, empresa,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

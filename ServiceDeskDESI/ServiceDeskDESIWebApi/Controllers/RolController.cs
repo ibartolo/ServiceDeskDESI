@@ -125,7 +125,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         {
             // Obtener el EmpresaId del usuario autenticado desde el token o base de datos
             var usuario = User.Identity.Name;
-            var userResponse = dbWrapper.ObtenerUsuarioPorNombreUsuario(usuario);
+            var userResponse = dbWrapper.ObtenerUsuarioPorNombreUsuario(usuario, usuario);
             if (userResponse.IsSuccess && userResponse.Response != null)
             {
                 var usuarioObj = (Usuario)userResponse.Response;

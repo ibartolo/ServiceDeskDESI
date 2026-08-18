@@ -46,7 +46,7 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(nombrePagina)) { throw new ArgumentException("El nombre de la página es requerido."); }
                 if (string.IsNullOrWhiteSpace(accion)) { throw new ArgumentException("La acción es requerida."); }
 
-                var usuarioResponse = _dbWrapper.ObtenerUsuarioPorNombreUsuario(usuario);
+                var usuarioResponse = _dbWrapper.ObtenerUsuarioPorNombreUsuario(usuario, usuario);
                 if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
                 {
                     throw new ArgumentException("Usuario no encontrado.");
@@ -123,7 +123,7 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 // Validar que el usuario sea administrador
-                var usuarioResponse = _dbWrapper.ObtenerUsuarioPorNombreUsuario(usuario);
+                var usuarioResponse = _dbWrapper.ObtenerUsuarioPorNombreUsuario(usuario, usuario);
                 if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
                 {
                     throw new ArgumentException("Usuario no encontrado.");

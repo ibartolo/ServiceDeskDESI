@@ -17,19 +17,9 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerTodasLasEmpresas()
-        {
-            return await _httpClient.ObtenerTodasLasEmpresas();
-        }
-
         public async Task<ModelResponse> ObtenerEmpresaPorId(long id)
         {
             return await _httpClient.ObtenerEmpresaPorId(id);
-        }
-
-        public async Task<ModelResponse> ObtenerEmpresasPorRFC(string rfc)
-        {
-            return await _httpClient.ObtenerEmpresasPorRFC(rfc);
         }
 
         public async Task<ModelResponse> GuardarOActualizarEmpresa(Empresa empresa)

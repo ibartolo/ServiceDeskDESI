@@ -17,13 +17,15 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpGet, Route("List")]
         public ModelResponse ObtenerUsuarioPagina()
         {
-            var result = dbWrapper.ObtenerUsuarioPagina();
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerUsuarioPagina(usuario);
             return result;
         }
         [HttpGet, Route("{id:long}")]
         public ModelResponse ObtenerUsuarioPaginaPorId(long id)
         {
-            var result = dbWrapper.ObtenerUsuarioPaginaPorId(id);
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerUsuarioPaginaPorId(id, usuario);
             return result;
         }
         [Permiso("Permisos")]
