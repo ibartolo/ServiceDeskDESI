@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="sucursal">Objeto sucursal con los datos</param>
         /// <returns>Sucursal guardada con su ID actualizado</returns>
+        [Permiso("Sucursales")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarActualizarSucursal(Sucursal sucursal)
         {
@@ -64,6 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="sucursal">Sucursal a eliminar (debe incluir Id, ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Sucursales", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarSucursal(Sucursal sucursal)
         {

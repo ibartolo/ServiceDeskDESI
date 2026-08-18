@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,6 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Relaciones")]
     public class RelacionController : BaseController
     {
-        [AllowAnonymous]
         [HttpGet, Route("List")]
         public ModelResponse ObtenerRelaciones ()
         {
@@ -26,6 +26,7 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = dbWrapper.ObtenerRelacionPorId(id);
             return result;
         }
+        [Permiso("Responsables por Categoría")]
         [HttpPost, Route("")]
         public ModelResponse GuardarOActualizarRelaciones(UsuarioPagina r)
         {

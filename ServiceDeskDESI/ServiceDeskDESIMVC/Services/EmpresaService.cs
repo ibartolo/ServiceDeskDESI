@@ -42,6 +42,11 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.GuardarNuevaEmpresa(empresa);
         }
 
+        public async Task<ModelResponse> RegistrarEmpresa(Empresa empresa)
+        {
+            return await _httpClient.RegistrarEmpresa(empresa);
+        }
+
         public async Task<ModelResponse> GuardarNuevaEmpresaCompleta(Empresa empresa)
         {
             return await _httpClient.GuardarNuevaEmpresaCompleta(empresa);

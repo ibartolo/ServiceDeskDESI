@@ -1,6 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -52,6 +53,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="ticket">Objeto ticket con los datos</param>
         /// <returns>Ticket guardado con su ID actualizado</returns>
+        [Permiso("Tickets")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarTicket(Ticket ticket)
         {
@@ -65,6 +67,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="ticket">Ticket a eliminar (debe incluir Id, ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Tickets", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarTicket(Ticket ticket)
         {

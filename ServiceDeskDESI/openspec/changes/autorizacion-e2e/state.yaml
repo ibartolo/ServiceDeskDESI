@@ -6,9 +6,9 @@ execution_mode: interactive
 phases:
   explore: done
   propose: done
-  spec: in-progress
-  design: pending
-  tasks: pending
-  apply: pending
+  spec: done
+  design: done
+  tasks: done
+  apply: done
   verify: pending
   archive: pending

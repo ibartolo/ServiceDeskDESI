@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="compania">Objeto compañía con los datos</param>
         /// <returns>Compañía guardada con su ID actualizado</returns>
+        [Permiso("Compañías")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarCompania(Compania compania)
         {
@@ -64,6 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="compania">Compañía a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Compañías", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarCompania(Compania compania)
         {

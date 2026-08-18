@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -50,6 +51,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="tipoActivo">Objeto tipo de activo con los datos</param>
         /// <returns>Tipo de activo guardado con su ID actualizado</returns>
+        [Permiso("Tipo Activo")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarTipoActivo(TipoActivo tipoActivo)
         {
@@ -63,6 +65,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="tipoActivo">Tipo de activo a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Tipo Activo", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarTipoActivo(TipoActivo tipoActivo)
         {

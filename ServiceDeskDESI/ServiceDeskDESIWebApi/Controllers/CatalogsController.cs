@@ -1,6 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -80,6 +81,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="categoria">Objeto categoría con los datos</param>
         /// <returns>Categoría guardada con su ID actualizado</returns>
+        [Permiso("Categorías")]
         [HttpPost, Route("Categoria")]
         public ModelResponse GuardarOActualizarCategoria(Categoria categoria)
         {
@@ -93,6 +95,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="categoria">Categoría a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Categorías", "Eliminar")]
         [HttpDelete, Route("Categoria")]
         public ModelResponse EliminarCategoria(Categoria categoria)
         {
@@ -133,6 +136,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="categoriaResponsable">Objeto CategoriaResponsable</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Responsables por Categoría")]
         [HttpPost, Route("CategoriaResponsable")]
         public ModelResponse GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
@@ -146,6 +150,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="categoriaResponsable">Objeto CategoriaResponsable con Id</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Responsables por Categoría", "Eliminar")]
         [HttpDelete, Route("CategoriaResponsable")]
         public ModelResponse EliminarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {

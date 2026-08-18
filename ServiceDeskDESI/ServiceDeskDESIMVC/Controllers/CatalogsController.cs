@@ -15,11 +15,10 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Management;
 using System.Web.Mvc;
-using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
+using ServiceDeskDESIMVC.Filters;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
-    [Autenticated]
     public class CatalogsController : BaseController
     {
         TokenCookie token;
@@ -585,11 +584,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _areaService.ObtenerAreaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Áreas")]
         public async Task<string> GuardarOActualizarArea(Area a)
         {
             var response = await _areaService.GuardarOActualizarArea(a);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Áreas", "Eliminar")]
         public async Task<string> EliminarArea(Area a)
         {
             var response = await _areaService.EliminarArea(a);
@@ -598,6 +599,7 @@ namespace ServiceDeskDESIMVC.Controllers
         #endregion
 
         #region Mi Perfil
+        [Permiso("Mi Perfil", "Editar")]
         public async Task<string> GuardarPerfil()
         {
             var modelResponse = new ModelResponse();
@@ -649,6 +651,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 return JsonConvert.SerializeObject(modelResponse);
             }
         }
+        [Permiso("Mi Perfil", "Editar")]
         public async Task<string> CambiarContrasena(CambioContrasenaRequest request)
         {
             var modelResponse = new ModelResponse();
@@ -700,6 +703,7 @@ namespace ServiceDeskDESIMVC.Controllers
         #endregion
 
         #region Categoria
+        [Permiso("Categorías")]
         public async Task<string> GuardarOActualizarCategoria(Categoria categoria)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -719,6 +723,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _categoriaService.GuardarOActualizarCategoria(categoria);
             return JsonConvert.SerializeObject(response);
         }
+        [Permiso("Categorías", "Eliminar")]
         public async Task<string> EliminarCategoria(Categoria categoria)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -747,11 +752,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _companiaService.ObtenerCompaniaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Compañías")]
         public async Task<string> GuardarOActualizarCompanias(Compania c)
         {
             var response = await _companiaService.GuardarOActualizarCompania(c);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Compañías", "Eliminar")]
         public async Task<string> EliminarCompanias(Compania c)
         {
             var response = await _companiaService.EliminarCompania(c);
@@ -770,11 +777,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _sucursalService.ObtenerSucursalPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Sucursales")]
         public async Task<string> GuardarActualizarSucursales(Sucursal s)
         {
             var response = await _sucursalService.GuardarOActualizarSucursal(s);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Sucursales", "Eliminar")]
         public async Task<string> EliminarSucurales(Sucursal s)
         {
             var response = await _sucursalService.EliminarSucursal(s);
@@ -794,12 +803,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Tipped")]
         public async Task<string> GuardarOActualizarPuesto(Puesto p)
         {
             var response = await _puestoService.GuardarOActualizarPuesto(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Tipped", "Eliminar")]
         public async Task<string> EliminarPuesto(Puesto p)
         {
             var response = await _puestoService.EliminarPuesto(p);
@@ -819,12 +830,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("People")]
         public async Task<string> GuardarOActualizarPersona(Persona p)
         {
             var response = await _personaService.GuardarOActualizarPersona(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("People", "Eliminar")]
         public async Task<string> EliminarPersona(Persona p)
         {
             var response = await _personaService.EliminarPersona(p);
@@ -843,11 +856,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _tipoActivoService.ObtenerTipoActivoPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Tipo Activo")]
         public async Task<string> GuardarOActualizarTipoActivo(TipoActivo t)
         {
             var response = await _tipoActivoService.GuardarOActualizarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Tipo Activo", "Eliminar")]
         public async Task<string> EliminarTipoActivo(TipoActivo t)
         {
             var response = await _tipoActivoService.EliminarTipoActivo(t);
@@ -866,12 +881,14 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _modeloService.ObtenerModeloPorId(id);
             return JsonConvert.SerializeObject(response);
         }
+        [Permiso("Modelos")]
         public async Task<string> GuardarOActualizarModelos(Modelo m)
         {
             m.Estatus = true;
             var response = await _modeloService.GuardarOActualizarModelo(m);
             return JsonConvert.SerializeObject(response);
         }
+        [Permiso("Modelos", "Eliminar")]
         public async Task<string> EliminarModelos(Modelo m)
         {
             var response = await _modeloService.EliminarModelo(m);
@@ -900,11 +917,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _marcaService.ObtenerMarcaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Marcas")]
         public async Task<string> GuardarOActualizarMarca(Marca m)
         {
             var response = await _marcaService.GuardarOActualizarMarca(m);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Marcas", "Eliminar")]
         public async Task<string> EliminarMarcas(Marca m)
         {
             var response = await _marcaService.EliminarMarca(m);
@@ -924,12 +943,14 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _activoService.ObtenerActivoPorId(id);
             return JsonConvert.SerializeObject(response);
         }
+        [Permiso("Activos")]
         public async Task<string> GuardarOActualizarActivos(Activo a)
         {
             var response = await _activoService.GuardarOActualizarActivo(a);
             return JsonConvert.SerializeObject(response);
 
         }
+        [Permiso("Activos", "Eliminar")]
         public async Task<string> EliminarActivos(Activo a)
         {
             var response = await _activoService.EliminarActivo(a);
@@ -949,6 +970,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Responsables por Categoría", "Crear")]
         public async Task<string> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -969,6 +991,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Responsables por Categoría", "Eliminar")]
         public async Task<string> EliminarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
             var tokenCookie = SessionHelper.GetSessionUser();

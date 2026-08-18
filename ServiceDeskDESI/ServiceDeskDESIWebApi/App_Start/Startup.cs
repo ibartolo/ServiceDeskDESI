@@ -1,9 +1,12 @@
 ﻿using Microsoft.Owin;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
+using ServiceDeskDESIEntities.Autenticacion;
+using ServiceDeskDESIEntities.Seguridad;
 using Swashbuckle.Application;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -33,6 +36,32 @@ namespace ServiceDeskDESIWebApi.App_Start
                 .CreateLogger();
 
             //Log.Information("Inicializando aplicación Web API");
+
+            // Middleware OWIN temprano para CORS restrictivo (antes de OAuth para manejar preflight)
+            app.Use(async (context, next) =>
+            {
+                var allowedOrigins = new HashSet<string>(
+                    (ConfigurationManager.AppSettings["AllowedCorsOrigins"] ?? string.Empty)
+                        .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(o => o.Trim()),
+                    StringComparer.OrdinalIgnoreCase);
+
+                var origin = context.Request.Headers.Get("Origin");
+                if (!string.IsNullOrEmpty(origin) && allowedOrigins.Contains(origin))
+                {
+                    context.Response.Headers.Set("Access-Control-Allow-Origin", origin);
+                    context.Response.Headers.Set("Access-Control-Allow-Headers", "Authorization, Content-Type");
+                    context.Response.Headers.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+
+                    if (string.Equals(context.Request.Method, "OPTIONS", StringComparison.OrdinalIgnoreCase))
+                    {
+                        context.Response.StatusCode = 200;
+                        return;
+                    }
+                }
+
+                await next.Invoke();
+            });
 
             ConfigureOAuth(app);
 
@@ -93,7 +122,7 @@ namespace ServiceDeskDESIWebApi.App_Start
         {
             OAuthAuthorizationServerOptions OAuthServerOptions = new OAuthAuthorizationServerOptions()
             {
-                AllowInsecureHttp = true,
+                AllowInsecureHttp = bool.Parse(ConfigurationManager.AppSettings["AllowInsecureHttp"]),
                 TokenEndpointPath = new PathString("/token"),
                 AccessTokenExpireTimeSpan = TimeSpan.FromHours(6),
                 Provider = new SimpleAuthorizationServerProvider()
@@ -143,13 +172,25 @@ namespace ServiceDeskDESIWebApi.App_Start
     {
         public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
         {
-            context.Validated();
+            var clientId = ConfigurationManager.AppSettings["client_id"];
+            var clientSecret = ConfigurationManager.AppSettings["client_secret"];
+
+            var providedSecret = context.Parameters.Get("client_secret");
+
+            if (string.Equals(context.ClientId, clientId, StringComparison.Ordinal) &&
+                string.Equals(providedSecret, clientSecret, StringComparison.Ordinal))
+            {
+                context.Validated();
+                return;
+            }
+
+            Log.Warning("Cliente OAuth no válido. ClientId: {ClientId}", context.ClientId);
+            context.SetError("invalid_client", "El client_id o client_secret no es válido.");
+            context.Rejected();
         }
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-            context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
-
             Log.Information("=== INICIO GrantResourceOwnerCredentials ===");
             Log.Information("Username: {Username}", context.UserName);
 
@@ -164,11 +205,23 @@ namespace ServiceDeskDESIWebApi.App_Start
 
             Log.Information("Usuario autenticado correctamente: {Username}", context.UserName);
 
+            var usuario = (Usuario)user.Response;
+
             var identity = new ClaimsIdentity(context.Options.AuthenticationType);
             identity.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
-            identity.AddClaim(new Claim("role", "user"));
+            identity.AddClaim(new Claim("usuarioId", usuario.Id.ToString()));
 
-            Log.Information("Claims agregados: ClaimTypes.Name = {Name}", context.UserName);
+            var rolesResponse = new DAL.DbWrapper().ObtenerRolesPorUsuario(context.UserName);
+            if (rolesResponse != null && rolesResponse.IsSuccess && rolesResponse.Response != null)
+            {
+                var roles = (IEnumerable<Rol>)rolesResponse.Response;
+                foreach (var rol in roles)
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, rol.Nombre));
+                }
+            }
+
+            Log.Information("Claims agregados: ClaimTypes.Name = {Name}, usuarioId = {UsuarioId}", context.UserName, usuario.Id);
             Log.Information("=== FIN GrantResourceOwnerCredentials ===");
 
             context.Validated(identity);

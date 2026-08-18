@@ -1,6 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -52,6 +53,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="rol">Objeto rol con los datos</param>
         /// <returns>Rol guardado con su ID actualizado</returns>
+        [Permiso("Roles")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarRol(Rol rol)
         {
@@ -65,6 +67,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="rol">Rol a eliminar (debe incluir Id)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Roles", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarRol(Rol rol)
         {
@@ -79,6 +82,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="request">Objeto con UsuarioId y RolId</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Roles", "Crear")]
         [HttpPost, Route("Asignar")]
         public ModelResponse AsignarRolUsuario([FromBody] AsignarRolRequest request)
         {
@@ -106,6 +110,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="request">Objeto con UsuarioRolId</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Roles", "Eliminar")]
         [HttpDelete, Route("EliminarUsuarioRol")]
         public ModelResponse EliminarRolUsuario([FromBody] EliminarRolUsuarioRequest request)
         {

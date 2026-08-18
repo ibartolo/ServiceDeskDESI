@@ -5,11 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
-    [Autenticated]
     public class PermissionsController : BaseController
     {
         private readonly PermisosService _permisosService;

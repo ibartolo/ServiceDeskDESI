@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
 {
-    [AllowAnonymous]
+    [Authorize]
     [RoutePrefix("api/Autentication")]
     public class AutenticationController : BaseController
     {
@@ -51,6 +52,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="u">Objeto usuario con los datos</param>
         /// <returns>Usuario guardado con su ID actualizado</returns>
+        [Permiso("Usuarios")]
         [HttpPost, Route("User")]
         public ModelResponse GuardarOActualizarUsuario(Usuario u)
         {
@@ -63,7 +65,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="u">Objeto usuario con los datos</param>
         /// <returns>Usuario guardado con su ID actualizado</returns>
-        [AllowAnonymous]
+        [Permiso("Usuarios")]
         [HttpPost, Route("User/Empresa")]
         public ModelResponse GuardarUsuarioEmpresa(Usuario u)
         {
@@ -76,6 +78,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="usuario">Objeto usuario con los datos a actualizar</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Mi Perfil", "Editar")]
         [HttpPost, Route("ActualizarPerfil")]
         public ModelResponse ActualizarPerfilUsuario(Usuario usuario)
         {
@@ -89,6 +92,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="u">Usuario a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Usuarios", "Eliminar")]
         [HttpDelete, Route("User")]
         public ModelResponse EliminarUsuario(Usuario u)
         {
@@ -102,6 +106,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="u">Objeto usuario con NombreUsuario y Contrasena</param>
         /// <returns>Usuario autenticado con sus datos completos y empresa</returns>
+        [AllowAnonymous]
         [HttpPost, Route("autenticar")]
         public ModelResponse AutenticarUsuario(Usuario u)
         {
@@ -114,6 +119,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="u">Objeto usuario con Correo</param>
         /// <returns>Resultado de la operación</returns>
+        [AllowAnonymous]
         [HttpPost, Route("ValidarRecetearContrasenia")]
         public ModelResponse ValidarRecetearContrasenia(Usuario u)
         {
@@ -126,6 +132,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="token">Token GUID</param>
         /// <returns>Información del token y usuario</returns>
+        [AllowAnonymous]
         [HttpGet, Route("validarToken/{token}")]
         public ModelResponse ValidarTokenRecuperacion(string token)
         {
@@ -138,6 +145,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="request">Objeto con token y nueva contraseña</param>
         /// <returns>Resultado de la operación</returns>
+        [AllowAnonymous]
         [HttpPost, Route("restablecerContrasenia")]
         public ModelResponse RestablecerContrasenia(RestablecerContraseniaRequest request)
         {
@@ -150,6 +158,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="usuario">Objeto usuario con los datos</param>
         /// <returns>Usuario guardado con su ID actualizado</returns>
+        [Permiso("Usuarios")]
         [HttpPost, Route("Admin/Usuario")]
         public ModelResponse GuardarOActualizarUsuarioAdmin(Usuario usuario)
         {

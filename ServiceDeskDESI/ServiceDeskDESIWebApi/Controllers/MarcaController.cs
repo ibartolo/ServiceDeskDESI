@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -49,6 +50,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="marca">Objeto marca con los datos</param>
         /// <returns>Marca guardada con su ID actualizado</returns>
+        [Permiso("Marcas")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarMarca(Marca marca)
         {
@@ -62,6 +64,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="marca">Marca a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Marcas", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarMarca(Marca marca)
         {

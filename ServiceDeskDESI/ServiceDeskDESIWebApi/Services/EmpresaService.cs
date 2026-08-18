@@ -168,6 +168,77 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
+        public ModelResponse RegistrarEmpresa(Empresa empresa)
+        {
+            try
+            {
+                // 1. Validar campos requeridos (espejo del flujo MVC pre-login)
+                if (empresa == null) { throw new ArgumentException("Los datos de la empresa son requeridos."); }
+                if (string.IsNullOrWhiteSpace(empresa.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
+                if (string.IsNullOrWhiteSpace(empresa.RazonSocial)) { throw new ArgumentException("La razón social es requerida."); }
+                if (string.IsNullOrWhiteSpace(empresa.RFC)) { throw new ArgumentException("El RFC es requerido."); }
+                if (string.IsNullOrWhiteSpace(empresa.Responsable)) { throw new ArgumentException("El responsable es requerido."); }
+                if (string.IsNullOrWhiteSpace(empresa.Direccion)) { throw new ArgumentException("La dirección es requerida."); }
+                if (string.IsNullOrWhiteSpace(empresa.CorreoContacto)) { throw new ArgumentException("El correo de contacto es requerido."); }
+
+                // 2. Unicidad server-side
+                var rfcResponse = ObtenerEmpresaPorRFC(empresa.RFC);
+                if (rfcResponse.IsSuccess && rfcResponse.Response != null)
+                {
+                    throw new ArgumentException("Ya existe una empresa registrada con este RFC.");
+                }
+
+                var empresasResponse = ObtenerTodasLasEmpresas();
+                if (empresasResponse.IsSuccess && empresasResponse.Response != null)
+                {
+                    var empresas = (IEnumerable<Empresa>)empresasResponse.Response;
+
+                    if (empresas.Any(e => !string.IsNullOrWhiteSpace(e.CorreoContacto) &&
+                                          e.CorreoContacto.Equals(empresa.CorreoContacto, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        throw new ArgumentException("Ya existe una empresa registrada con este correo de contacto.");
+                    }
+
+                    if (empresas.Any(e => !string.IsNullOrWhiteSpace(e.NombreComercial) &&
+                                          e.NombreComercial.Equals(empresa.NombreComercial, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        throw new ArgumentException("Ya existe una empresa registrada con este nombre comercial.");
+                    }
+
+                    if (empresas.Any(e => !string.IsNullOrWhiteSpace(e.RazonSocial) &&
+                                          e.RazonSocial.Equals(empresa.RazonSocial, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        throw new ArgumentException("Ya existe una empresa registrada con esta razón social.");
+                    }
+                }
+
+                // 3. Campos de vigencia / periodo de prueba (espejo del flujo MVC pre-login)
+                empresa.FechaVigenciaInicio = DateTime.Now;
+                empresa.FechaVigenciaFin = DateTime.Now.AddDays(30);
+                empresa.EsPeriodoPrueba = true;
+                empresa.CreadoPor = "system.register";
+                empresa.FechaCreacion = DateTime.Now;
+                empresa.Estatus = true;
+
+                // 4. Registro completo (empresa + datos iniciales vía SPs)
+                return GuardarNuevaEmpresaConDatosIniciales(empresa);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en RegistrarEmpresa");
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en EmpresaService.RegistrarEmpresa");
+                return new ModelResponse
+                {
+                    IsSuccess = false,
+                    Message = "Ocurrió un error al registrar la empresa."
+                };
+            }
+        }
+
         public ModelResponse EliminarEmpresa(long id, string modificadoPor, DateTime fechaModificacion, string usuario)
         {
             try

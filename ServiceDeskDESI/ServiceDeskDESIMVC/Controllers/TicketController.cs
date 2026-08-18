@@ -10,11 +10,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
+using ServiceDeskDESIMVC.Filters;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
-    [Autenticated]
     public class TicketController : BaseController
     {
         private readonly TicketService _ticketService;
@@ -94,6 +93,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return View(ticket);
         }
 
+        [Permiso("Tickets")]
         public async Task<string> GuardarOActualizarTicket(Ticket ticket)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -119,6 +119,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Tickets", "Eliminar")]
         public async Task<string> EliminarTicket(Ticket ticket)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -175,6 +176,7 @@ namespace ServiceDeskDESIMVC.Controllers
         }
 
         [HttpPost]
+        [Permiso("Tickets", "Editar")]
         public async Task<string> CambiarEstatusTicket(long ticketId, int nuevoEstatusId)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -199,6 +201,7 @@ namespace ServiceDeskDESIMVC.Controllers
         }
 
         [HttpPost]
+        [Permiso("Tickets", "Editar")]
         public async Task<string> AsignarTicketAgente(long ticketId, long agenteId)
         {
             // TODO: Implementar asignación de ticket a un agente

@@ -1,4 +1,5 @@
 ﻿using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -74,6 +75,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="request">Objeto con los datos del permiso</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Permisos", "Editar")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarPermisosRol([FromBody] GuardarPermisosRequest request)
         {
@@ -97,6 +99,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="request">Objeto con RolId y lista de permisos</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Permisos", "Editar")]
         [HttpPost, Route("GuardarMasivo")]
         public ModelResponse GuardarPermisosRolMasivo([FromBody] GuardarPermisosMasivoRequest request)
         {

@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="puesto">Objeto puesto con los datos</param>
         /// <returns>Puesto guardado con su ID actualizado</returns>
+        [Permiso("Tipped")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarPuesto(Puesto puesto)
         {
@@ -64,6 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="puesto">Puesto a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Tipped", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarPuesto(Puesto puesto)
         {

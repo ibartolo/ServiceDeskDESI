@@ -10,11 +10,10 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
-using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
+using ServiceDeskDESIMVC.Filters;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
-    [Autenticated]
     public class SecurityController : BaseController
     {
         private readonly PermisosService _permisosService;
@@ -115,12 +114,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Roles")]
         public async Task<string> GuardarOActualizarRol(Rol r)
         {
             var response = await _rolService.GuardarOActualizarRol(r);
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Roles", "Eliminar")]
         public async Task<string> EliminarRol(Rol r)
         {
             var response = await _rolService.EliminarRol(r);
@@ -133,12 +134,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Permisos", "Editar")]
         public async Task<string> GuardarPermisosRol(GuardarPermisosRequest request)
         {
             var response = await _permisosService.GuardarPermisosRol(request);
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Permisos", "Editar")]
         public async Task<string> GuardarPermisosRolMasivo([FromBody] GuardarPermisosMasivoRequest request)
         {
             var response = await _permisosService.GuardarPermisosRolMasivo(request);

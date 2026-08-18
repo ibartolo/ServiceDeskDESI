@@ -12,7 +12,6 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
@@ -28,17 +27,14 @@ namespace ServiceDeskDESIMVC.Controllers
         }
 
         #region Views
-        [NoAutenticated]
         public ActionResult Autentication()
         {
             return View();
         }
-        [Autenticated]
         public ActionResult Index()
         {
             return View();
         }
-        [NoAutenticated]
         public ActionResult RecoverPassword(string id)
         {
             ViewBag.Token = id;
@@ -131,7 +127,6 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(mr);
         }
 
-        [Autenticated]
         public ActionResult LogOut()
         {
             SessionHelper.CloseSession();
@@ -167,138 +162,8 @@ namespace ServiceDeskDESIMVC.Controllers
         [HttpPost]
         public async Task<string> GuardarNuevaEmpresa(Empresa empresa)
         {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                // Validar campos requeridos
-                if (string.IsNullOrWhiteSpace(empresa.NombreComercial))
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "El nombre comercial es requerido";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                if (string.IsNullOrWhiteSpace(empresa.RazonSocial))
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "La razón social es requerida";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                if (string.IsNullOrWhiteSpace(empresa.RFC))
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "El RFC es requerido";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                if (string.IsNullOrWhiteSpace(empresa.Responsable))
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "El responsable es requerido";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                if (string.IsNullOrWhiteSpace(empresa.Direccion))
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "La dirección es requerida";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                if (string.IsNullOrWhiteSpace(empresa.CorreoContacto))
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "El correo de contacto es requerido";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Obtener todas las empresas
-                //  ING AQUI TAMBIEN LE PUESE 0 
-                var empresasResponse = await _empresaService.ObtenerTodasLasEmpresas();
-
-                if (!empresasResponse.IsSuccess)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Error al validar los datos de la empresa";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                var empresas = JsonConvert.DeserializeObject<List<Empresa>>(empresasResponse.Response.ToString());
-
-                // Validar si ya existe una empresa con el mismo RFC
-                var existePorRFC = empresas.Any(e => e.RFC == empresa.RFC);
-                if (existePorRFC)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Ya existe una empresa registrada con estos datos.";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Validar si ya existe una empresa con el mismo correo de contacto
-                var existePorCorreo = empresas.Any(e => e.CorreoContacto == empresa.CorreoContacto);
-                if (existePorCorreo)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Ya existe una empresa registrada con estos datos.";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Validar si ya existe una empresa con el mismo nombre comercial
-                var existePorNombreComercial = empresas.Any(e => e.NombreComercial == empresa.NombreComercial);
-                if (existePorNombreComercial)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Ya existe una empresa registrada con estos datos.";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Validar si ya existe una empresa con la misma razón social
-                var existePorRazonSocial = empresas.Any(e => e.RazonSocial == empresa.RazonSocial);
-                if (existePorRazonSocial)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Ya existe una empresa registrada con estos datos.";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Establecer fechas de vigencia (prueba gratis 30 días)
-                empresa.FechaVigenciaInicio = DateTime.Now;
-                empresa.FechaVigenciaFin = DateTime.Now.AddDays(30);
-                empresa.EsPeriodoPrueba = true;
-                empresa.CreadoPor = "system.register";
-                empresa.FechaCreacion = DateTime.Now;
-                empresa.Estatus = true;
-
-                // Guardar la empresa
-                var response = await _empresaService.GuardarNuevaEmpresa(empresa);
-
-                if (response.IsSuccess && response.Response != null)
-                {
-                    var empresaGuardada = JsonConvert.DeserializeObject<Empresa>(response.Response.ToString());
-
-                    // Aquí puedes agregar lógica adicional como:
-                    // - Enviar correo de bienvenida con las credenciales
-                    // - Crear roles por defecto para la empresa
-
-                    modelResponse.IsSuccess = true;
-                    modelResponse.Message = "Empresa registrada correctamente. Se ha enviado un correo con las credenciales de acceso.";
-                    modelResponse.Response = empresaGuardada;
-                }
-                else
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = response.Message ?? "Error al registrar la empresa";
-                }
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al procesar la solicitud";
-            }
-
-            return JsonConvert.SerializeObject(modelResponse);
+            var response = await _empresaService.RegistrarEmpresa(empresa);
+            return JsonConvert.SerializeObject(response);
         }
 
         #endregion

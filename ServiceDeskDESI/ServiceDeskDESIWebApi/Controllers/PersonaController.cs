@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="persona">Objeto persona con los datos</param>
         /// <returns>Persona guardada con su ID actualizado</returns>
+        [Permiso("People")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarOActualizarPersona(Persona persona)
         {
@@ -64,6 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="persona">Persona a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("People", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarPersona(Persona persona)
         {

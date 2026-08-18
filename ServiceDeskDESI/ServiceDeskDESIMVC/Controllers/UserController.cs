@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
+using ServiceDeskDESIMVC.Filters;
 using static ServiceDeskDESIMVC.Controllers.CatalogsController;
 
 namespace ServiceDeskDESIMVC.Controllers
@@ -81,6 +82,7 @@ namespace ServiceDeskDESIMVC.Controllers
         {
             return PartialView();
         }
+        [Permiso("Mi Perfil", "Editar")]
         public async Task<string> ActualizarPerfilUsuario(Usuario usuario, HttpPostedFileBase file)
         {
             var modelResponse = new ModelResponse();
@@ -119,6 +121,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
         }
 
+        [Permiso("Mi Perfil", "Editar")]
         public async Task<string> CambiarContrasena([FromBody] CambioContrasenaRequest request)
         {
             var modelResponse = new ModelResponse();
@@ -301,6 +304,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Usuarios")]
         public async Task<string> GuardarOActualizarUsuarioAdmin(Usuario usuario)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -345,6 +349,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Usuarios", "Eliminar")]
         public async Task<string> EliminarUsuarioAdmin(Usuario usuario)
         {
             var tokenCookie = SessionHelper.GetSessionUser();

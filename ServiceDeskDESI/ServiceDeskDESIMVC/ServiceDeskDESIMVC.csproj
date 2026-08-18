@@ -138,6 +138,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CatalogsController.cs" />
@@ -171,6 +172,7 @@
     </Compile>
     <Compile Include="Helpers\Cryptography.cs" />
     <Compile Include="Helpers\FiltersHelper.cs" />
+    <Compile Include="Filters\PermisoAttribute.cs" />
     <Compile Include="Helpers\SessionHelper.cs" />
     <Compile Include="Models\CategoriaResponsableViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

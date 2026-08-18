@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIMVC.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -38,7 +39,9 @@ namespace ServiceDeskDESIMVC.DAL
                     {
                         new KeyValuePair<string, string>("grant_type","password"),
                         new KeyValuePair<string, string>("UserName",user),
-                        new KeyValuePair<string, string>("Password",pass)
+                        new KeyValuePair<string, string>("Password",pass),
+                        new KeyValuePair<string, string>("client_id", ConfigurationManager.AppSettings["client_id"]),
+                        new KeyValuePair<string, string>("client_secret", ConfigurationManager.AppSettings["client_secret"])
                     }, "application/x-www-url-formencoded");
         }
     }
