@@ -56,8 +56,9 @@ namespace ServiceDeskDESIMVC.DAL
         }
         public async Task<T> RequestAsync<T>(string endPoint, HttpMethod method, T content, Func<string, T> func, string token = "", string contentType = "application/json") where T : class
         {
-            if (!token.Equals(string.Empty))
-                SetParametersHttpCliente(contentType, token);
+            // Siempre configurar headers: limpia cualquier Authorization residual de una
+            // llamada previa en la misma instancia de HttpClient (evita fugas de token).
+            SetParametersHttpCliente(contentType, token);
 
             using (var r = new HttpRequestMessage()
             {
@@ -67,24 +68,29 @@ namespace ServiceDeskDESIMVC.DAL
             })
             using (var responseMessage = await httpClient.SendAsync(r))
             {
+                var stringContent = await responseMessage.Content.ReadAsStringAsync();
+
                 if (responseMessage.IsSuccessStatusCode)
                 {
-                    var stringContent = await responseMessage.Content.ReadAsStringAsync();
-
                     return func?.Invoke(stringContent);
                 }
-                else
+
+                // Respuesta no exitosa: devolver un ModelResponse de error en lugar de null,
+                // para que los DAL no lancen NullReferenceException (result.ToString()).
+                var error = new
                 {
-                    return default(T);
-                }
+                    IsSuccess = false,
+                    Message = $"Error {(int)responseMessage.StatusCode} ({responseMessage.ReasonPhrase}) al consumir {endPoint}.",
+                    Response = (object)null
+                };
+                return func?.Invoke(JsonConvert.SerializeObject(error));
             }
         }
         public async Task<byte[]> RequestAsyncByteArray(string endPoint, HttpMethod method, object content, string token = "", string contentType = "application/json")
         {
             byte[] b = null;
 
-            if (!token.Equals(string.Empty))
-                SetParametersHttpCliente(contentType, token);
+            SetParametersHttpCliente(contentType, token);
 
             using (var r = new HttpRequestMessage()
             {

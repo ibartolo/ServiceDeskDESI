@@ -305,13 +305,10 @@ namespace ServiceDeskDESIWebApi.Services
                 // =========================================
                 // INICIO DE TRANSACCIÓN
                 // =========================================
-                using (var scope = new System.Transactions.TransactionScope(
-                    System.Transactions.TransactionScopeOption.Required,
-                    new System.Transactions.TransactionOptions
-                    {
-                        IsolationLevel = System.Transactions.IsolationLevel.ReadCommitted,
-                        Timeout = TimeSpan.FromMinutes(5)
-                    }))
+                // Se usa una única SqlConnection + SqlTransaction (NO TransactionScope)
+                // para evitar la escalación a MSDTC al abrir múltiples conexiones.
+                _dbWrapper.BeginTransaction();
+                try
                 {
                     Log.Information("Iniciando transacción para registro de empresa...");
 
@@ -564,8 +561,13 @@ namespace ServiceDeskDESIWebApi.Services
                     // =========================================
                     // COMPLETAR TRANSACCIÓN
                     // =========================================
-                    scope.Complete();
+                    _dbWrapper.CommitTransaction();
                     Log.Information("✅ Transacción completada exitosamente.");
+                }
+                catch
+                {
+                    _dbWrapper.RollbackTransaction();
+                    throw;
                 }
 
                 // =========================================
