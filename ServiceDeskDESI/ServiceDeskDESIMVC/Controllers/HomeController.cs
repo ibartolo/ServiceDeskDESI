@@ -76,47 +76,48 @@ namespace ServiceDeskDESIMVC.Controllers
 
             try
             {
+                // 1. Autenticar primero para obtener el mensaje específico del backend
+                //    (contraseña incorrecta, trial expirado, etc.). El /token no devuelve ese detalle.
+                var response = await _autenticacionService.AutenticarUsuario(new Usuario()
+                {
+                    NombreUsuario = user,
+                    Contrasena = pass
+                });
+
+                if (!response.IsSuccess || response.Response == null)
+                {
+                    mr.IsSuccess = false;
+                    mr.Message = response?.Message ?? "Usuario o contraseña incorrectos";
+                    return JsonConvert.SerializeObject(mr);
+                }
+
+                // 2. Obtener el token (solo si la autenticación fue exitosa)
                 Token token = await httpClientConnection.GetToken(user, pass);
 
-                if (token != null)
-                {
-                    var response = await _autenticacionService.AutenticarUsuario(new Usuario()
-                    {
-                        NombreUsuario = user,
-                        Contrasena = pass
-                    });
-
-                    if (response.IsSuccess && response.Response != null)
-                    {
-                        var usuarioAutenticado = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
-
-                        token.ExpirationDate = DateTime.Now.AddSeconds(token.expires_in);
-                        mr.IsSuccess = true;
-                        mr.Message = "Ok";
-
-                        var tokenCookie = new TokenCookie()
-                        {
-                            Token = token,
-                            UserID = usuarioAutenticado.Id,
-                            EmpresaID = usuarioAutenticado.Empresa != null ? usuarioAutenticado.Empresa.Id : 0,
-                            UserName = user,
-                            ProfileImage = usuarioAutenticado.ImagenPerfil,
-                            UserAvatar = GenerarAvatarIniciales(usuarioAutenticado.NombreUsuario)
-                        };
-
-                        SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
-                    }
-                    else
-                    {
-                        mr.IsSuccess = false;
-                        mr.Message = response.Message ?? "Error al obtener datos del usuario";
-                    }
-                }
-                else
+                if (token == null)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "Error de usuario o contraseña";
+                    return JsonConvert.SerializeObject(mr);
                 }
+
+                var usuarioAutenticado = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
+
+                token.ExpirationDate = DateTime.Now.AddSeconds(token.expires_in);
+                mr.IsSuccess = true;
+                mr.Message = "Ok";
+
+                var tokenCookie = new TokenCookie()
+                {
+                    Token = token,
+                    UserID = usuarioAutenticado.Id,
+                    EmpresaID = usuarioAutenticado.Empresa != null ? usuarioAutenticado.Empresa.Id : 0,
+                    UserName = user,
+                    ProfileImage = usuarioAutenticado.ImagenPerfil,
+                    UserAvatar = GenerarAvatarIniciales(usuarioAutenticado.NombreUsuario)
+                };
+
+                SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
             }
             catch (Exception ex)
             {

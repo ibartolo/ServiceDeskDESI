@@ -485,6 +485,14 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 if (usuario != null && Cryptography.VerifyPassword(contrasena, usuario.Contrasena))
                 {
+                    // Enforce trial: si la empresa está en periodo de prueba y ya venció, se bloquea el acceso.
+                    if (usuario.Empresa != null && usuario.Empresa.EsPeriodoPrueba && usuario.Empresa.FechaVigenciaFin < DateTime.Now)
+                    {
+                        modelResponse.IsSuccess = false;
+                        modelResponse.Message = "El periodo de prueba de su empresa ha expirado. Contacte al administrador.";
+                        return modelResponse;
+                    }
+
                     usuario.Contrasena = null; // no exponer el hash/ciphertext en la respuesta
                     modelResponse.IsSuccess = true;
                     modelResponse.Response = usuario;
