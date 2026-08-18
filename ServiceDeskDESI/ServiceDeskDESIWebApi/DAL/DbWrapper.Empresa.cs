@@ -301,6 +301,7 @@ namespace ServiceDeskDESIWebApi.DAL
                 {
                     rol.Nombre,
                     rol.Descripcion,
+                    rol.PuedeAtenderTickets,
                     rol.CreadoPor,
                     rol.FechaCreacion
                 };

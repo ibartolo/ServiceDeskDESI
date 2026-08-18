@@ -955,14 +955,14 @@ BEGIN
         RETURN
     END
 
-    -- Validar que el rol pertenezca a la empresa
+    -- Validar que el rol pertenezca a la empresa (vía Rol.CreadoPor)
     IF NOT EXISTS(
         SELECT 1 
-        FROM UsuarioRol ur
-        INNER JOIN Usuarios u ON ur.UsuarioId = u.Id
-        WHERE ur.RolId = @RolId 
+        FROM Rol r
+        INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
+        WHERE r.Id = @RolId 
             AND u.EmpresaId = @EmpresaId
-            AND ur.Estatus = 1
+            AND u.Estatus = 1
     )
     BEGIN
         SELECT 0
@@ -3461,7 +3461,7 @@ create Procedure [dbo].[GuardarOActualizarUsuarioPagina]
 @UsuarioID bigint =null,
 @PaginaID bigint=null,
 @Estatus bit =null,
-@CreadoPor nvarchaR (25) =null,
+@CreadoPor nvarchar (25) =null,
 @FechaCreacion datetime =null,
 @ModificadoPor nvarchar (25) =null,
 @FechaModificacion	datetime =null
@@ -3479,7 +3479,7 @@ begin
 	else 
 			begin insert into UsuarioPagina(UsuarioID,PaginaID,Estatus,CreadoPor,FechaCreacion,ModificadoPor,FechaModificacion)
 		  values (@UsuarioID,@PaginaID,@Estatus,@CreadoPor,@FechaCreacion,@ModificadoPor,@FechaModificacion)
-		  select @@IDENTITY
+		  select SCOPE_IDENTITY()
 	  end 
 end 
 GO
@@ -3572,13 +3572,14 @@ CREATE PROCEDURE [dbo].[GuardarRolParaNuevaEmpresa]
 (
     @Nombre NVARCHAR(50),
     @Descripcion NVARCHAR(250) = NULL,
+    @PuedeAtenderTickets BIT,
     @CreadoPor NVARCHAR(25),
     @FechaCreacion DATETIME
 )
 AS
 BEGIN
-    INSERT INTO Rol (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus)
-    VALUES (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, 1)
+    INSERT INTO Rol (Nombre, Descripcion, PuedeAtenderTickets, CreadoPor, FechaCreacion, Estatus)
+    VALUES (@Nombre, @Descripcion, @PuedeAtenderTickets, @CreadoPor, @FechaCreacion, 1)
 
     SELECT SCOPE_IDENTITY()
 END
@@ -4146,7 +4147,6 @@ AS
 BEGIN
     SELECT e.*
     FROM Empresa e
-	inner join Usuarios u on e.CreadoPor = u.NombreUsuario
     WHERE e.Estatus = 1
     ORDER BY NombreComercial
 END
@@ -5117,7 +5117,7 @@ BEGIN
     LEFT JOIN Area a ON u.AreaId = a.Id
     LEFT JOIN Empresa e ON u.EmpresaId = e.Id
     WHERE u.Id = @Id 
-        --AND u.Estatus = 1
+        AND u.Estatus = 1
         AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
@@ -5168,6 +5168,7 @@ BEGIN
     LEFT JOIN Area a ON u.AreaId = a.Id
     LEFT JOIN Empresa e ON u.EmpresaId = e.Id
     WHERE u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND u.Estatus = 1
     ORDER BY u.NombreUsuario
 END
 GO

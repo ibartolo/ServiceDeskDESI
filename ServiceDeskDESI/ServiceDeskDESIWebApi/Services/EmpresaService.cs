@@ -420,10 +420,10 @@ namespace ServiceDeskDESIWebApi.Services
 
                     var rolesBase = new List<Rol>
             {
-                new Rol { Nombre = "Administrador", Descripcion = "Control total del sistema", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                new Rol { Nombre = "Supervisor", Descripcion = "Gestión de tickets y usuarios", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                new Rol { Nombre = "Agente", Descripcion = "Atención de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
-                new Rol { Nombre = "Usuario", Descripcion = "Creación de tickets", CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true }
+                new Rol { Nombre = "Administrador", Descripcion = "Control total del sistema", PuedeAtenderTickets = true, CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
+                new Rol { Nombre = "Supervisor", Descripcion = "Gestión de tickets y usuarios", PuedeAtenderTickets = true, CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
+                new Rol { Nombre = "Agente", Descripcion = "Atención de tickets", PuedeAtenderTickets = true, CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true },
+                new Rol { Nombre = "Usuario", Descripcion = "Creación de tickets", PuedeAtenderTickets = false, CreadoPor = usernameAdmin, FechaCreacion = DateTime.Now, Estatus = true }
             };
 
                     foreach (var rol in rolesBase)
