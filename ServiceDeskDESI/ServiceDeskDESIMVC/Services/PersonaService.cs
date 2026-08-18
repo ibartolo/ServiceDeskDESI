@@ -43,7 +43,7 @@ namespace ServiceDeskDESIMVC.Services
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
                 var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Persona");
+                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "People");
             }
             return null;
         }
