@@ -11,9 +11,9 @@ namespace ServiceDeskDESIMVC.Controllers
     public class PermissionsController : BaseController
     {
         private readonly PermisosService _permisosService;
-        public PermissionsController(PermisosService permisosService)
+        public PermissionsController()
         {
-            _permisosService = permisosService;
+            _permisosService = new PermisosService(httpClientConnection);
         }
         public async Task<string> ConsultarPermisosUsuario()
         {
