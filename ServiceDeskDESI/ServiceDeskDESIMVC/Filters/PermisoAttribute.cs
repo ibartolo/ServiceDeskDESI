@@ -43,8 +43,14 @@ namespace ServiceDeskDESIMVC.Filters
 
             var accion = ResolverAccion(filterContext);
 
-            // Se puentea la llamada async con Task.Run para no bloquear el SynchronizationContext (evita deadlock).
-            var permitido = Task.Run(() => new PermisosService(new HttpClientConnection()).TienePermiso(_pagina, accion))
+            // IMPORTANTE: construir el service en el hilo de la petición.
+            // HttpClientConnection (en su constructor) lee el token de sesión desde
+            // HttpContext.Current, que es null en un hilo del thread-pool (Task.Run).
+            // Por eso se construye AQUÍ y solo se ejecuta la espera async dentro de
+            // Task.Run (que ya no toca HttpContext.Current), evitando también el deadlock.
+            var permisosService = new PermisosService(new HttpClientConnection());
+
+            var permitido = Task.Run(() => permisosService.TienePermiso(_pagina, accion))
                 .GetAwaiter()
                 .GetResult();
 
