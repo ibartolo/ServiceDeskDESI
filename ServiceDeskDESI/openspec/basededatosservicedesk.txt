@@ -1,0 +1,5181 @@
+USE [master]
+GO
+/****** Object:  Database [db_9c7990_servicedeskdesi]    Script Date: 17/08/2026 09:59:00 p. m. ******/
+CREATE DATABASE [db_9c7990_servicedeskdesi]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'db_9c7990_servicedeskdesi_Data', FILENAME = N'H:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\db_9c7990_servicedeskdesi_DATA.mdf' , SIZE = 8192KB , MAXSIZE = 102400KB , FILEGROWTH = 10%)
+ LOG ON 
+( NAME = N'db_9c7990_servicedeskdesi_Log', FILENAME = N'H:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\db_9c7990_servicedeskdesi_Log.LDF' , SIZE = 3072KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET COMPATIBILITY_LEVEL = 150
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [db_9c7990_servicedeskdesi].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET  ENABLE_BROKER 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET RECOVERY SIMPLE 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET  MULTI_USER 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET QUERY_STORE = OFF
+GO
+USE [db_9c7990_servicedeskdesi]
+GO
+/****** Object:  Table [dbo].[Activo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Activo](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+	[Descripcion] [nvarchar](250) NULL,
+	[TipoActivoID] [bigint] NULL,
+	[Serial] [nvarchar](50) NULL,
+	[MarcaID] [bigint] NULL,
+	[ModeloID] [bigint] NULL,
+	[Notas] [nvarchar](250) NULL,
+	[FechaCompra] [datetime] NULL,
+	[Estatus] [bit] NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Area]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Area](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[Descripcion] [nvarchar](500) NULL,
+	[Correo] [nvarchar](100) NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Categoria]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Categoria](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NOT NULL,
+	[Descripcion] [nvarchar](500) NULL,
+	[CategoriaPadreId] [bigint] NULL,
+	[AreaId] [bigint] NOT NULL,
+	[Orden] [int] NOT NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+ CONSTRAINT [PK_Categoria] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[CategoriaResponsable]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CategoriaResponsable](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[CategoriaId] [bigint] NOT NULL,
+	[UsuarioId] [bigint] NOT NULL,
+	[EsPrincipal] [bit] NOT NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+ CONSTRAINT [PK_CategoriaResponsable] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Compania]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Compania](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[Acronimo] [nvarchar](50) NULL,
+	[RFC] [nvarchar](50) NULL,
+	[Direccion] [nvarchar](250) NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NULL,
+ CONSTRAINT [PK_Compania] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Empresa]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Empresa](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[NombreComercial] [nvarchar](250) NOT NULL,
+	[RazonSocial] [nvarchar](250) NOT NULL,
+	[RFC] [nvarchar](50) NOT NULL,
+	[Responsable] [nvarchar](250) NOT NULL,
+	[Direccion] [nvarchar](500) NOT NULL,
+	[Ciudad] [nvarchar](100) NULL,
+	[Estado] [nvarchar](100) NULL,
+	[CodigoPostal] [nvarchar](10) NULL,
+	[Telefono] [nvarchar](50) NULL,
+	[CorreoContacto] [nvarchar](250) NOT NULL,
+	[FechaVigenciaInicio] [datetime] NOT NULL,
+	[FechaVigenciaFin] [datetime] NOT NULL,
+	[EsPeriodoPrueba] [bit] NOT NULL,
+	[Estatus] [bit] NOT NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+ CONSTRAINT [PK_Empresa] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Marca]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Marca](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[Descripcion] [nvarchar](250) NULL,
+	[Estatus] [bit] NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Modelo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Modelo](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[Descripcion] [nvarchar](250) NULL,
+	[MarcaId] [bigint] NULL,
+	[Estatus] [bit] NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Pagina]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Pagina](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[Descripcion] [nvarchar](500) NULL,
+	[Tipo] [nvarchar](50) NULL,
+	[Direccion] [nvarchar](250) NULL,
+	[PermisosPadreId] [bigint] NULL,
+	[Logo] [nvarchar](25) NULL,
+	[OrdenB] [int] NULL,
+	[Estatus] [bit] NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Persona]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Persona](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](150) NOT NULL,
+	[Apellido] [nvarchar](250) NOT NULL,
+	[Correo] [nvarchar](250) NULL,
+	[Telefono] [nvarchar](50) NULL,
+	[PuestoId] [bigint] NOT NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+ CONSTRAINT [PK_Persona] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Puesto]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Puesto](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](100) NOT NULL,
+	[Descripcion] [nvarchar](250) NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+ CONSTRAINT [PK_Puesto] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Rol]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Rol](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NOT NULL,
+	[Descripcion] [nvarchar](250) NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+	[PuedeAtenderTickets] [bit] NOT NULL,
+ CONSTRAINT [PK_Rol] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[RolPaginaAccion]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[RolPaginaAccion](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[RolId] [bigint] NOT NULL,
+	[PaginaId] [bigint] NOT NULL,
+	[PuedeLeer] [bit] NOT NULL,
+	[PuedeCrear] [bit] NOT NULL,
+	[PuedeEditar] [bit] NOT NULL,
+	[PuedeEliminar] [bit] NOT NULL,
+	[PuedeExportar] [bit] NOT NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+ CONSTRAINT [PK_RolPaginaAccion] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Sucursal]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Sucursal](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[Descripcion] [nvarchar](500) NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NULL,
+	[Calle] [nvarchar](100) NULL,
+	[Ciudad] [nvarchar](100) NULL,
+	[Colonia] [nvarchar](100) NULL,
+	[CodigoPostal] [nvarchar](10) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Ticket]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Ticket](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[AreaId] [bigint] NOT NULL,
+	[CategoriaId] [bigint] NOT NULL,
+	[SubcategoriaId] [bigint] NULL,
+	[Urgencia] [int] NOT NULL,
+	[Titulo] [nvarchar](250) NOT NULL,
+	[Descripcion] [nvarchar](max) NOT NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+	[TicketEstatusId] [int] NOT NULL,
+ CONSTRAINT [PK_Ticket] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TicketEstatus]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TicketEstatus](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NOT NULL,
+	[Descripcion] [nvarchar](250) NULL,
+	[Color] [nvarchar](20) NULL,
+	[Orden] [int] NOT NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+ CONSTRAINT [PK_TicketEstatus] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TipoActivo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TipoActivo](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[Descripcion] [nvarchar](250) NULL,
+	[Estatus] [bit] NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TokenRecuperacion]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TokenRecuperacion](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[UsuarioId] [bigint] NOT NULL,
+	[Token] [nvarchar](50) NOT NULL,
+	[FechaExpiracion] [datetime] NOT NULL,
+	[Usado] [bit] NOT NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+ CONSTRAINT [PK_TokenRecuperacion] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[UsuarioPagina]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UsuarioPagina](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[UsuarioID] [bigint] NULL,
+	[PaginaID] [bigint] NULL,
+	[Estatus] [bit] NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[UsuarioRol]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UsuarioRol](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[UsuarioId] [bigint] NOT NULL,
+	[RolId] [bigint] NOT NULL,
+	[CreadoPor] [nvarchar](25) NOT NULL,
+	[FechaCreacion] [datetime] NOT NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NOT NULL,
+ CONSTRAINT [PK_UsuarioRol] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Usuarios]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Usuarios](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[NombreUsuario] [nvarchar](25) NULL,
+	[Contrasena] [nvarchar](250) NULL,
+	[ImagenPerfil] [nvarchar](250) NULL,
+	[Correo] [nvarchar](250) NULL,
+	[Nombre] [nvarchar](150) NULL,
+	[Apellido] [nvarchar](250) NULL,
+	[Celular] [nvarchar](50) NULL,
+	[CreadoPor] [nvarchar](25) NULL,
+	[FechaCreacion] [datetime] NULL,
+	[ModificadoPor] [nvarchar](25) NULL,
+	[FechaModificacion] [datetime] NULL,
+	[Estatus] [bit] NULL,
+	[SucursalId] [bigint] NULL,
+	[Firma] [nvarchar](250) NULL,
+	[RFC] [nvarchar](250) NULL,
+	[AreaId] [bigint] NULL,
+	[EmpresaId] [bigint] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Categoria] ADD  DEFAULT ((0)) FOR [Orden]
+GO
+ALTER TABLE [dbo].[Categoria] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[CategoriaResponsable] ADD  DEFAULT ((0)) FOR [EsPrincipal]
+GO
+ALTER TABLE [dbo].[CategoriaResponsable] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[Empresa] ADD  DEFAULT ((1)) FOR [EsPeriodoPrueba]
+GO
+ALTER TABLE [dbo].[Empresa] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[Persona] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[Puesto] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[Rol] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[Rol] ADD  DEFAULT ((0)) FOR [PuedeAtenderTickets]
+GO
+ALTER TABLE [dbo].[RolPaginaAccion] ADD  DEFAULT ((1)) FOR [PuedeLeer]
+GO
+ALTER TABLE [dbo].[RolPaginaAccion] ADD  DEFAULT ((0)) FOR [PuedeCrear]
+GO
+ALTER TABLE [dbo].[RolPaginaAccion] ADD  DEFAULT ((0)) FOR [PuedeEditar]
+GO
+ALTER TABLE [dbo].[RolPaginaAccion] ADD  DEFAULT ((0)) FOR [PuedeEliminar]
+GO
+ALTER TABLE [dbo].[RolPaginaAccion] ADD  DEFAULT ((0)) FOR [PuedeExportar]
+GO
+ALTER TABLE [dbo].[RolPaginaAccion] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[Ticket] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[Ticket] ADD  DEFAULT ((1)) FOR [TicketEstatusId]
+GO
+ALTER TABLE [dbo].[TicketEstatus] ADD  DEFAULT ((0)) FOR [Orden]
+GO
+ALTER TABLE [dbo].[TicketEstatus] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[TokenRecuperacion] ADD  DEFAULT ((0)) FOR [Usado]
+GO
+ALTER TABLE [dbo].[TokenRecuperacion] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[UsuarioRol] ADD  DEFAULT ((1)) FOR [Estatus]
+GO
+ALTER TABLE [dbo].[Activo]  WITH CHECK ADD  CONSTRAINT [FK_Activo_Marca] FOREIGN KEY([MarcaID])
+REFERENCES [dbo].[Marca] ([Id])
+GO
+ALTER TABLE [dbo].[Activo] CHECK CONSTRAINT [FK_Activo_Marca]
+GO
+ALTER TABLE [dbo].[Activo]  WITH CHECK ADD  CONSTRAINT [FK_Activo_Modelo] FOREIGN KEY([ModeloID])
+REFERENCES [dbo].[Modelo] ([Id])
+GO
+ALTER TABLE [dbo].[Activo] CHECK CONSTRAINT [FK_Activo_Modelo]
+GO
+ALTER TABLE [dbo].[Activo]  WITH CHECK ADD  CONSTRAINT [FK_Activo_TipoActivo] FOREIGN KEY([TipoActivoID])
+REFERENCES [dbo].[TipoActivo] ([Id])
+GO
+ALTER TABLE [dbo].[Activo] CHECK CONSTRAINT [FK_Activo_TipoActivo]
+GO
+ALTER TABLE [dbo].[Categoria]  WITH CHECK ADD  CONSTRAINT [FK_Categoria_Area] FOREIGN KEY([AreaId])
+REFERENCES [dbo].[Area] ([Id])
+GO
+ALTER TABLE [dbo].[Categoria] CHECK CONSTRAINT [FK_Categoria_Area]
+GO
+ALTER TABLE [dbo].[Categoria]  WITH CHECK ADD  CONSTRAINT [FK_Categoria_CategoriaPadre] FOREIGN KEY([CategoriaPadreId])
+REFERENCES [dbo].[Categoria] ([Id])
+GO
+ALTER TABLE [dbo].[Categoria] CHECK CONSTRAINT [FK_Categoria_CategoriaPadre]
+GO
+ALTER TABLE [dbo].[CategoriaResponsable]  WITH CHECK ADD  CONSTRAINT [FK_CategoriaResponsable_Categoria] FOREIGN KEY([CategoriaId])
+REFERENCES [dbo].[Categoria] ([Id])
+GO
+ALTER TABLE [dbo].[CategoriaResponsable] CHECK CONSTRAINT [FK_CategoriaResponsable_Categoria]
+GO
+ALTER TABLE [dbo].[CategoriaResponsable]  WITH CHECK ADD  CONSTRAINT [FK_CategoriaResponsable_Usuario] FOREIGN KEY([UsuarioId])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[CategoriaResponsable] CHECK CONSTRAINT [FK_CategoriaResponsable_Usuario]
+GO
+ALTER TABLE [dbo].[Modelo]  WITH CHECK ADD  CONSTRAINT [FK_Modelo_Marca] FOREIGN KEY([MarcaId])
+REFERENCES [dbo].[Marca] ([Id])
+GO
+ALTER TABLE [dbo].[Modelo] CHECK CONSTRAINT [FK_Modelo_Marca]
+GO
+ALTER TABLE [dbo].[Persona]  WITH CHECK ADD  CONSTRAINT [FK_Persona_Puesto] FOREIGN KEY([PuestoId])
+REFERENCES [dbo].[Puesto] ([Id])
+GO
+ALTER TABLE [dbo].[Persona] CHECK CONSTRAINT [FK_Persona_Puesto]
+GO
+ALTER TABLE [dbo].[RolPaginaAccion]  WITH CHECK ADD  CONSTRAINT [FK_RolPaginaAccion_Pagina] FOREIGN KEY([PaginaId])
+REFERENCES [dbo].[Pagina] ([Id])
+GO
+ALTER TABLE [dbo].[RolPaginaAccion] CHECK CONSTRAINT [FK_RolPaginaAccion_Pagina]
+GO
+ALTER TABLE [dbo].[RolPaginaAccion]  WITH CHECK ADD  CONSTRAINT [FK_RolPaginaAccion_Rol] FOREIGN KEY([RolId])
+REFERENCES [dbo].[Rol] ([Id])
+GO
+ALTER TABLE [dbo].[RolPaginaAccion] CHECK CONSTRAINT [FK_RolPaginaAccion_Rol]
+GO
+ALTER TABLE [dbo].[Ticket]  WITH CHECK ADD  CONSTRAINT [FK_Ticket_Area] FOREIGN KEY([AreaId])
+REFERENCES [dbo].[Area] ([Id])
+GO
+ALTER TABLE [dbo].[Ticket] CHECK CONSTRAINT [FK_Ticket_Area]
+GO
+ALTER TABLE [dbo].[Ticket]  WITH CHECK ADD  CONSTRAINT [FK_Ticket_Categoria] FOREIGN KEY([CategoriaId])
+REFERENCES [dbo].[Categoria] ([Id])
+GO
+ALTER TABLE [dbo].[Ticket] CHECK CONSTRAINT [FK_Ticket_Categoria]
+GO
+ALTER TABLE [dbo].[Ticket]  WITH CHECK ADD  CONSTRAINT [FK_Ticket_Subcategoria] FOREIGN KEY([SubcategoriaId])
+REFERENCES [dbo].[Categoria] ([Id])
+GO
+ALTER TABLE [dbo].[Ticket] CHECK CONSTRAINT [FK_Ticket_Subcategoria]
+GO
+ALTER TABLE [dbo].[Ticket]  WITH CHECK ADD  CONSTRAINT [FK_Ticket_TicketEstatus] FOREIGN KEY([TicketEstatusId])
+REFERENCES [dbo].[TicketEstatus] ([Id])
+GO
+ALTER TABLE [dbo].[Ticket] CHECK CONSTRAINT [FK_Ticket_TicketEstatus]
+GO
+ALTER TABLE [dbo].[TokenRecuperacion]  WITH CHECK ADD  CONSTRAINT [FK_TokenRecuperacion_Usuario] FOREIGN KEY([UsuarioId])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[TokenRecuperacion] CHECK CONSTRAINT [FK_TokenRecuperacion_Usuario]
+GO
+ALTER TABLE [dbo].[UsuarioPagina]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioPagina_Pagina] FOREIGN KEY([PaginaID])
+REFERENCES [dbo].[Pagina] ([Id])
+GO
+ALTER TABLE [dbo].[UsuarioPagina] CHECK CONSTRAINT [FK_UsuarioPagina_Pagina]
+GO
+ALTER TABLE [dbo].[UsuarioPagina]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioPagina_Usuarios] FOREIGN KEY([UsuarioID])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[UsuarioPagina] CHECK CONSTRAINT [FK_UsuarioPagina_Usuarios]
+GO
+ALTER TABLE [dbo].[UsuarioRol]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioRol_Rol] FOREIGN KEY([RolId])
+REFERENCES [dbo].[Rol] ([Id])
+GO
+ALTER TABLE [dbo].[UsuarioRol] CHECK CONSTRAINT [FK_UsuarioRol_Rol]
+GO
+ALTER TABLE [dbo].[UsuarioRol]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioRol_Usuario] FOREIGN KEY([UsuarioId])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[UsuarioRol] CHECK CONSTRAINT [FK_UsuarioRol_Usuario]
+GO
+ALTER TABLE [dbo].[Usuarios]  WITH CHECK ADD  CONSTRAINT [FK_Usuarios_Area] FOREIGN KEY([AreaId])
+REFERENCES [dbo].[Area] ([Id])
+GO
+ALTER TABLE [dbo].[Usuarios] CHECK CONSTRAINT [FK_Usuarios_Area]
+GO
+ALTER TABLE [dbo].[Usuarios]  WITH CHECK ADD  CONSTRAINT [FK_Usuarios_Sucursal] FOREIGN KEY([SucursalId])
+REFERENCES [dbo].[Sucursal] ([Id])
+GO
+ALTER TABLE [dbo].[Usuarios] CHECK CONSTRAINT [FK_Usuarios_Sucursal]
+GO
+/****** Object:  StoredProcedure [dbo].[ActualizarContrasena]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ActualizarContrasena]
+(
+    @Id BIGINT,
+    @Contrasena NVARCHAR(250),
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el usuario que realiza el cambio pertenezca a la misma empresa
+    -- que el usuario cuya contraseña se va a actualizar
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios u
+        WHERE u.Id = @Id 
+            AND u.Estatus = 1
+            AND EXISTS(
+                SELECT 1 
+                FROM Usuarios m
+                WHERE m.NombreUsuario = @Usuario 
+                    AND m.EmpresaId = u.EmpresaId
+                    AND m.Estatus = 1
+            )
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Usuarios
+    SET Contrasena = @Contrasena,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id AND Estatus = 1
+    
+    IF @@ROWCOUNT > 0
+        SELECT @Id
+    ELSE
+        SELECT 0
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ActualizarPerfilUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ActualizarPerfilUsuario]
+(
+    @Id BIGINT,
+    @NombreUsuario NVARCHAR(25) = NULL,
+    @ImagenPerfil NVARCHAR(250) = NULL,
+    @Correo NVARCHAR(250) = NULL,
+    @Nombre NVARCHAR(150) = NULL,
+    @Apellido NVARCHAR(250) = NULL,
+    @Celular NVARCHAR(50) = NULL,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @SucursalId BIGINT,
+    @Firma NVARCHAR(250) = NULL,
+    @RFC NVARCHAR(250),
+    @AreaId BIGINT,
+    @EmpresaId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el usuario autenticado (@Usuario) pertenezca a la misma empresa
+    -- que el usuario cuyo perfil se va a actualizar (@Id)
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios u
+        WHERE u.Id = @Id 
+            AND u.Estatus = 1
+            AND EXISTS(
+                SELECT 1 
+                FROM Usuarios m
+                WHERE m.NombreUsuario = @Usuario 
+                    AND m.EmpresaId = u.EmpresaId
+                    AND m.Estatus = 1
+            )
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Usuarios
+    SET NombreUsuario = @NombreUsuario,
+        ImagenPerfil = @ImagenPerfil,
+        Correo = @Correo,
+        Nombre = @Nombre,
+        Apellido = @Apellido,
+        Celular = @Celular,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion,
+        Estatus = @Estatus,
+        SucursalId = @SucursalId,
+        Firma = @Firma,
+        RFC = @RFC,
+        AreaId = @AreaId,
+        EmpresaId = @EmpresaId
+    WHERE Id = @Id
+
+    IF @@ROWCOUNT > 0
+        SELECT @Id
+    ELSE
+        SELECT 0
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ActualizarRolPaginaAccion]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Actualizar permisos de un rol sobre una página
+CREATE PROCEDURE [dbo].[ActualizarRolPaginaAccion]
+(
+    @Id BIGINT,
+    @PuedeLeer BIT,
+    @PuedeCrear BIT,
+    @PuedeEditar BIT,
+    @PuedeEliminar BIT,
+    @PuedeExportar BIT,
+    @ModificadoPor NVARCHAR(25),
+    @UsuarioAutenticado NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el rol pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM RolPaginaAccion rpa
+        INNER JOIN UsuarioRol ur ON rpa.RolId = ur.RolId
+        INNER JOIN Usuarios u ON ur.UsuarioId = u.Id
+        WHERE rpa.Id = @Id 
+            AND u.NombreUsuario = @UsuarioAutenticado
+            AND u.Estatus = 1
+            AND ur.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE RolPaginaAccion
+    SET PuedeLeer = @PuedeLeer,
+        PuedeCrear = @PuedeCrear,
+        PuedeEditar = @PuedeEditar,
+        PuedeEliminar = @PuedeEliminar,
+        PuedeExportar = @PuedeExportar,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = GETDATE()
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ActualizarTokenUsado]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure para marcar token como usado
+CREATE PROCEDURE [dbo].[ActualizarTokenUsado]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME
+)
+AS
+BEGIN
+    UPDATE TokenRecuperacion
+    SET Usado = 1,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[AsignarRolUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =========================================
+-- PROCEDIMIENTOS DE USUARIOROL
+-- =========================================
+
+-- 5. Asignar rol a un usuario
+CREATE PROCEDURE [dbo].[AsignarRolUsuario]
+(
+    @UsuarioId BIGINT,
+    @RolId BIGINT,
+    @AsignadoPor NVARCHAR(25),
+    @EmpresaId BIGINT
+)
+AS
+BEGIN
+    -- Validar que el usuario que asigna sea administrador
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios u
+        INNER JOIN UsuarioRol ur ON u.Id = ur.UsuarioId
+        INNER JOIN Rol r ON ur.RolId = r.Id
+        WHERE u.NombreUsuario = @AsignadoPor 
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+            AND r.Nombre = 'Administrador'
+            AND ur.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que el usuario destino pertenezca a la misma empresa
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios 
+        WHERE Id = @UsuarioId 
+            AND EmpresaId = @EmpresaId
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que el rol pertenezca a la empresa
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM UsuarioRol ur
+        INNER JOIN Usuarios u ON ur.UsuarioId = u.Id
+        WHERE ur.RolId = @RolId 
+            AND u.EmpresaId = @EmpresaId
+            AND ur.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que no tenga ya ese rol asignado
+    IF EXISTS(
+        SELECT 1 
+        FROM UsuarioRol 
+        WHERE UsuarioId = @UsuarioId 
+            AND RolId = @RolId 
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT -1
+        RETURN
+    END
+
+    INSERT INTO UsuarioRol
+    (UsuarioId, RolId, CreadoPor, FechaCreacion, Estatus)
+    VALUES
+    (@UsuarioId, @RolId, @AsignadoPor, GETDATE(), 1)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[AsignarRolUsuarioParaNuevaEmpresa]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Asignar rol a usuario para nueva empresa (sin validación de administrador)
+CREATE PROCEDURE [dbo].[AsignarRolUsuarioParaNuevaEmpresa]
+(
+    @UsuarioId BIGINT,
+    @RolId BIGINT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME
+)
+AS
+BEGIN
+    -- Validar que el usuario exista
+    IF NOT EXISTS(SELECT 1 FROM Usuarios WHERE Id = @UsuarioId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que el rol exista
+    IF NOT EXISTS(SELECT 1 FROM Rol WHERE Id = @RolId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que no exista la asignación
+    IF EXISTS(SELECT 1 FROM UsuarioRol WHERE UsuarioId = @UsuarioId AND RolId = @RolId AND Estatus = 1)
+    BEGIN
+        SELECT -1
+        RETURN
+    END
+
+    INSERT INTO UsuarioRol (UsuarioId, RolId, CreadoPor, FechaCreacion, Estatus)
+    VALUES (@UsuarioId, @RolId, @CreadoPor, @FechaCreacion, 1)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[AutenticarUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[AutenticarUsuario]
+(
+    @NombreUsuario NVARCHAR(25),
+    @Contrasena NVARCHAR(250)
+)
+AS
+BEGIN
+    SELECT u.*, 
+           s.Nombre as SucursalNombre,
+           s.Descripcion as SucursalDescripcion,
+           s.Calle, s.Ciudad, s.Colonia, s.CodigoPostal,
+           a.Nombre as AreaNombre,
+           a.Descripcion as AreaDescripcion,
+           a.Correo as AreaCorreo,
+           e.Id as EmpresaId,
+           e.NombreComercial as EmpresaNombreComercial,
+           e.RazonSocial as EmpresaRazonSocial,
+           e.RFC as EmpresaRFC,
+           e.Responsable as EmpresaResponsable,
+           e.Direccion as EmpresaDireccion,
+           e.Ciudad as EmpresaCiudad,
+           e.Estado as EmpresaEstado,
+           e.CodigoPostal as EmpresaCodigoPostal,
+           e.Telefono as EmpresaTelefono,
+           e.CorreoContacto as EmpresaCorreoContacto,
+           e.FechaVigenciaInicio,
+           e.FechaVigenciaFin,
+           e.EsPeriodoPrueba
+    FROM Usuarios u
+    LEFT JOIN Sucursal s ON u.SucursalId = s.Id
+    LEFT JOIN Area a ON u.AreaId = a.Id
+    LEFT JOIN Empresa e ON u.EmpresaId = e.Id
+    WHERE u.NombreUsuario = @NombreUsuario 
+        AND u.Contrasena = @Contrasena 
+        AND u.Estatus = 1
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarActivo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Eliminar activo (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarActivo]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Activo a
+        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+        WHERE a.Id = @Id 
+            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Activo
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarArea]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[EliminarArea]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Area a
+        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+        WHERE a.Id = @Id 
+            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Area
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarCategoria]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 6. Eliminar categoría (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarCategoria]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Categoria c
+        INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+        WHERE c.Id = @Id 
+            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Categoria
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarCategoriaResponsable]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Eliminar responsable de categoría (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarCategoriaResponsable]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que la relación pertenezca a la empresa
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM CategoriaResponsable cr
+        INNER JOIN Usuarios u ON cr.UsuarioId = u.Id
+        WHERE cr.Id = @Id
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE CategoriaResponsable
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarCompania]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Eliminar compañía (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarCompania]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario modificador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(SELECT 1 FROM Usuarios WHERE NombreUsuario = @ModificadoPor AND EmpresaId = @EmpresaId AND Estatus = 1)
+    BEGIN 
+        SELECT 0
+        RETURN 
+    END
+
+    -- Validar que la compañía pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Compania c
+        INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+        WHERE c.Id = @Id 
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Compania
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarEmpresa]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Eliminar empresa (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarEmpresa]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario modificador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(SELECT 1 FROM Usuarios WHERE NombreUsuario = @ModificadoPor AND EmpresaId = @EmpresaId AND Estatus = 1)
+    BEGIN 
+        SELECT 0
+        RETURN 
+    END
+
+    -- Validar que la empresa pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Empresa e
+        INNER JOIN Usuarios u ON e.CreadoPor = u.NombreUsuario
+        WHERE e.Id = @Id 
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Empresa
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarMarca]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Eliminar marca (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarMarca]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Marca m
+        INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
+        WHERE m.Id = @Id 
+            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Marca
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarModelo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 9. Eliminar modelo (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarModelo]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Modelo mo
+        INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
+        WHERE mo.Id = @Id 
+            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Modelo
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarPermisosRol]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDURE PARA ELIMINAR TODOS LOS PERMISOS DE UN ROL
+-- =========================================
+CREATE PROCEDURE [dbo].[EliminarPermisosRol]
+(
+    @RolId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el rol pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Rol r
+        INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
+        WHERE r.Id = @RolId
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0 AS Resultado
+        RETURN
+    END
+
+    -- Eliminar todos los permisos del rol
+    DELETE FROM RolPaginaAccion
+    WHERE RolId = @RolId
+
+    SELECT @@ROWCOUNT AS Resultado
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarPersona]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 8. Eliminar persona (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarPersona]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario modificador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios 
+        WHERE NombreUsuario = @ModificadoPor 
+            AND EmpresaId = @EmpresaId 
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que la persona pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Persona p
+        INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+        WHERE p.Id = @Id 
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Persona
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarPuesto]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Eliminar puesto (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarPuesto]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario modificador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios 
+        WHERE NombreUsuario = @ModificadoPor 
+            AND EmpresaId = @EmpresaId 
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que el puesto pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Puesto p
+        INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+        WHERE p.Id = @Id 
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Puesto
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarRol]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- 4. Eliminar rol (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarRol]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el rol pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Rol r
+        INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
+        WHERE r.Id = @Id 
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Rol  
+    SET Estatus = 0,  
+        ModificadoPor = @ModificadoPor,  
+        FechaModificacion = @FechaModificacion  
+    WHERE Id = @Id  
+
+    SELECT @Id  
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarRolPaginaAccion]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Quitar configuración de permisos (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarRolPaginaAccion]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @UsuarioAutenticado NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el rol pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM RolPaginaAccion rpa
+        INNER JOIN UsuarioRol ur ON rpa.RolId = ur.RolId
+        INNER JOIN Usuarios u ON ur.UsuarioId = u.Id
+        WHERE rpa.Id = @Id 
+            AND u.NombreUsuario = @UsuarioAutenticado
+            AND u.Estatus = 1
+            AND ur.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE RolPaginaAccion
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = GETDATE()
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarRolUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 7. Eliminar rol de un usuario (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarRolUsuario]
+(
+    @UsuarioRolId BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @EmpresaId BIGINT
+)
+AS
+BEGIN
+    -- Validar que el usuario que modifica sea administrador
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios u
+        INNER JOIN UsuarioRol ur ON u.Id = ur.UsuarioId
+        INNER JOIN Rol r ON ur.RolId = r.Id
+        WHERE u.NombreUsuario = @ModificadoPor 
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+            AND r.Nombre = 'Administrador'
+            AND ur.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- No permitir eliminar el rol de Administrador del usuario administrador
+    IF EXISTS(
+        SELECT 1 
+        FROM UsuarioRol ur
+        INNER JOIN Usuarios u ON ur.UsuarioId = u.Id
+        INNER JOIN Rol r ON ur.RolId = r.Id
+        WHERE ur.Id = @UsuarioRolId 
+            AND u.EmpresaId = @EmpresaId
+            AND r.Nombre = 'Administrador'
+            AND ur.Estatus = 1
+    )
+    BEGIN
+        SELECT -1
+        RETURN
+    END
+
+    UPDATE UsuarioRol
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = GETDATE()
+    WHERE Id = @UsuarioRolId
+
+    SELECT @UsuarioRolId
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarSucursal]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[EliminarSucursal]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+    -- usando el CreadoPor que está en la base de datos
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Sucursal s
+        INNER JOIN Usuarios u ON s.CreadoPor = u.NombreUsuario
+        WHERE s.Id = @Id 
+            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE Sucursal
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarTicket]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Eliminar ticket (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarTicket]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME
+)
+AS
+BEGIN
+    UPDATE Ticket
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarTipoActivo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Eliminar tipo de activo (borrado lógico)
+CREATE PROCEDURE [dbo].[EliminarTipoActivo]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM TipoActivo ta
+        INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
+        WHERE ta.Id = @Id 
+            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    UPDATE TipoActivo
+    SET Estatus = 0,
+        ModificadoPor = @ModificadoPor,
+        FechaModificacion = @FechaModificacion
+    WHERE Id = @Id
+
+    SELECT @Id
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[EliminarUsuario]
+(
+    @Id BIGINT,
+    @ModificadoPor NVARCHAR(25),
+    @FechaModificacion DATETIME
+)
+AS
+BEGIN
+
+    IF EXISTS(
+        SELECT *
+        FROM Usuarios u
+        WHERE u.Id = @Id 
+            AND u.Estatus = 1
+            AND EXISTS(
+                SELECT 1 
+                FROM Usuarios m
+                WHERE m.NombreUsuario = @ModificadoPor 
+                    AND m.EmpresaId = u.EmpresaId
+                    AND m.Estatus = 1
+            )
+    )
+    BEGIN
+        UPDATE Usuarios
+        SET Estatus = 0,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion
+        WHERE Id = @Id
+        
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        SELECT 0
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarUsuarioPagina]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+create procedure [dbo].[EliminarUsuarioPagina]
+(
+  @Id BIGINT,
+  @ModificadoPor NVARCHAR(25),
+  @FechaModificacion DATETIME
+)
+as
+begin 
+update UsuarioPagina
+	set Estatus =0,
+	ModificadoPor=@ModificadoPor,
+	FechaModificacion=@FechaModificacion
+where Id = @Id
+end 
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarNuevaAreaParaEmpresa]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GuardarNuevaAreaParaEmpresa]
+(
+    @Nombre NVARCHAR(250),
+    @Descripcion NVARCHAR(500) = NULL,
+    @Correo NVARCHAR(100) = NULL,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME
+)
+AS
+BEGIN
+    INSERT INTO Area
+    (Nombre, Descripcion, Correo, CreadoPor, FechaCreacion, Estatus)
+    VALUES
+    (@Nombre, @Descripcion, @Correo, @CreadoPor, @FechaCreacion, 1)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarNuevaEmpresa]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GuardarNuevaEmpresa]
+(
+    @NombreComercial NVARCHAR(250),
+    @RazonSocial NVARCHAR(250),
+    @RFC NVARCHAR(50),
+    @Responsable NVARCHAR(250),
+    @Direccion NVARCHAR(500),
+    @Ciudad NVARCHAR(100) = NULL,
+    @Estado NVARCHAR(100) = NULL,
+    @CodigoPostal NVARCHAR(10) = NULL,
+    @Telefono NVARCHAR(50) = NULL,
+    @CorreoContacto NVARCHAR(250),
+    @FechaVigenciaInicio DATETIME,
+    @FechaVigenciaFin DATETIME,
+    @EsPeriodoPrueba BIT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME
+)
+AS
+BEGIN
+    INSERT INTO Empresa
+    (NombreComercial, RazonSocial, RFC, Responsable, Direccion, Ciudad, Estado, CodigoPostal, 
+     Telefono, CorreoContacto, FechaVigenciaInicio, FechaVigenciaFin, EsPeriodoPrueba, 
+     CreadoPor, FechaCreacion, Estatus)
+    VALUES
+    (@NombreComercial, @RazonSocial, @RFC, @Responsable, @Direccion, @Ciudad, @Estado, @CodigoPostal,
+     @Telefono, @CorreoContacto, @FechaVigenciaInicio, @FechaVigenciaFin, @EsPeriodoPrueba,
+     @CreadoPor, @FechaCreacion, 1)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarNuevaSucursalParaEmpresa]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 5. Guardar nueva sucursal para empresa (sin validación de usuario)
+CREATE PROCEDURE [dbo].[GuardarNuevaSucursalParaEmpresa]
+(
+    @Nombre NVARCHAR(250),
+    @Descripcion NVARCHAR(500) = NULL,
+    @Calle NVARCHAR(100) = NULL,
+    @Ciudad NVARCHAR(100) = NULL,
+    @Colonia NVARCHAR(100) = NULL,
+    @CodigoPostal NVARCHAR(10) = NULL,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME
+)
+AS
+BEGIN
+    INSERT INTO Sucursal
+    (Nombre, Descripcion, Calle, Ciudad, Colonia, CodigoPostal, CreadoPor, FechaCreacion, Estatus)
+    VALUES
+    (@Nombre, @Descripcion, @Calle, @Ciudad, @Colonia, @CodigoPostal, @CreadoPor, @FechaCreacion, 1)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarActivo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Guardar o actualizar activo
+CREATE PROCEDURE [dbo].[GuardarOActualizarActivo]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(50),
+    @Descripcion NVARCHAR(250) = NULL,
+    @TipoActivoID BIGINT,
+    @Serial NVARCHAR(50) = NULL,
+    @MarcaID BIGINT,
+    @ModeloID BIGINT,
+    @Notas NVARCHAR(250) = NULL,
+    @FechaCompra DATETIME = NULL,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    IF EXISTS(SELECT * FROM Activo WHERE Id = @Id)
+    BEGIN
+        -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Activo a
+            INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+            WHERE a.Id = @Id 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que el tipo de activo pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM TipoActivo ta
+            INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
+            WHERE ta.Id = @TipoActivoID 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que la marca pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Marca m
+            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
+            WHERE m.Id = @MarcaID 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que el modelo pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Modelo mo
+            INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
+            WHERE mo.Id = @ModeloID 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Activo
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            TipoActivoID = @TipoActivoID,
+            Serial = @Serial,
+            MarcaID = @MarcaID,
+            ModeloID = @ModeloID,
+            Notas = @Notas,
+            FechaCompra = @FechaCompra,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Para INSERT, validar que el usuario creador pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Usuarios 
+            WHERE NombreUsuario = @CreadoPor 
+                AND EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que el tipo de activo pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM TipoActivo ta
+            INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
+            WHERE ta.Id = @TipoActivoID 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que la marca pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Marca m
+            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
+            WHERE m.Id = @MarcaID 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que el modelo pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Modelo mo
+            INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
+            WHERE mo.Id = @ModeloID 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        INSERT INTO Activo
+        (Nombre, Descripcion, TipoActivoID, Serial, MarcaID, ModeloID, Notas, FechaCompra, 
+         CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Descripcion, @TipoActivoID, @Serial, @MarcaID, @ModeloID, @Notas, @FechaCompra,
+         @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarArea]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Guardar o actualizar área
+CREATE PROCEDURE [dbo].[GuardarOActualizarArea]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(250),
+    @Descripcion NVARCHAR(500) = NULL,
+    @Correo NVARCHAR(100) = NULL,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el usuario creador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios 
+        WHERE NombreUsuario = @CreadoPor 
+            AND EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    IF EXISTS(SELECT * FROM Area WHERE Id = @Id)
+    BEGIN
+        UPDATE Area
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            Correo = @Correo,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Area
+        (Nombre, Descripcion, Correo, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Descripcion, @Correo, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarCategoria]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 5. Guardar o actualizar categoría
+CREATE PROCEDURE [dbo].[GuardarOActualizarCategoria]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(250),
+    @Descripcion NVARCHAR(500) = NULL,
+    @CategoriaPadreId BIGINT = NULL,
+    @AreaId BIGINT,
+    @Orden INT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    IF EXISTS(SELECT * FROM Categoria WHERE Id = @Id)
+    BEGIN
+        -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Categoria c
+            INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+            WHERE c.Id = @Id 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Categoria
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            CategoriaPadreId = @CategoriaPadreId,
+            AreaId = @AreaId,
+            Orden = @Orden,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Para INSERT, validar que el usuario creador pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Usuarios 
+            WHERE NombreUsuario = @CreadoPor 
+                AND EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que el área pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Area a
+            INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+            WHERE a.Id = @AreaId 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        INSERT INTO Categoria
+        (Nombre, Descripcion, CategoriaPadreId, AreaId, Orden, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Descripcion, @CategoriaPadreId, @AreaId, @Orden, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarCategoriaResponsable]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Guardar o actualizar responsable de categoría
+CREATE PROCEDURE [dbo].[GuardarOActualizarCategoriaResponsable]
+(
+    @Id BIGINT,
+    @CategoriaId BIGINT,
+    @UsuarioId BIGINT,
+    @EsPrincipal BIT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario responsable pertenezca a la empresa
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios 
+        WHERE Id = @UsuarioId 
+            AND EmpresaId = @EmpresaId 
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que el usuario responsable pueda atender tickets
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM UsuarioRol ur
+        INNER JOIN Rol r ON ur.RolId = r.Id
+        WHERE ur.UsuarioId = @UsuarioId
+            AND r.PuedeAtenderTickets = 1
+            AND r.Estatus = 1
+            AND ur.Estatus = 1
+    )
+    BEGIN
+        SELECT -1
+        RETURN
+    END
+
+    -- Validar que la categoría pertenezca a la empresa
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Categoria c
+        INNER JOIN Area a ON c.AreaId = a.Id
+        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+        WHERE c.Id = @CategoriaId
+            AND u.EmpresaId = @EmpresaId
+            AND c.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    IF EXISTS(SELECT * FROM CategoriaResponsable WHERE Id = @Id)
+    BEGIN
+        UPDATE CategoriaResponsable
+        SET CategoriaId = @CategoriaId,
+            UsuarioId = @UsuarioId,
+            EsPrincipal = @EsPrincipal,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Si se marca como principal, desmarcar otros principales de la misma categoría
+        IF @EsPrincipal = 1
+        BEGIN
+            UPDATE CategoriaResponsable
+            SET EsPrincipal = 0
+            WHERE CategoriaId = @CategoriaId AND Estatus = 1
+        END
+
+        INSERT INTO CategoriaResponsable
+        (CategoriaId, UsuarioId, EsPrincipal, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@CategoriaId, @UsuarioId, @EsPrincipal, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarCompania]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Guardar o actualizar compañía
+CREATE PROCEDURE [dbo].[GuardarOActualizarCompania]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(250),
+    @Acronimo NVARCHAR(50),
+    @RFC NVARCHAR(50),
+    @Direccion NVARCHAR(250),
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario creador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(SELECT 1 FROM Usuarios WHERE NombreUsuario = @CreadoPor AND EmpresaId = @EmpresaId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    IF EXISTS(SELECT * FROM Compania WHERE Id = @Id)
+    BEGIN
+        -- Validar que la compañía pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Compania c
+            INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+            WHERE c.Id = @Id 
+                AND u.EmpresaId = @EmpresaId
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Compania
+        SET Nombre = @Nombre,
+            Acronimo = @Acronimo,
+            RFC = @RFC,
+            Direccion = @Direccion,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Compania
+        (Nombre, Acronimo, RFC, Direccion, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Acronimo, @RFC, @Direccion, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarEmpresa]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Guardar o actualizar empresa
+CREATE PROCEDURE [dbo].[GuardarOActualizarEmpresa]
+(
+    @Id BIGINT,
+    @NombreComercial NVARCHAR(250),
+    @RazonSocial NVARCHAR(250),
+    @RFC NVARCHAR(50),
+    @Responsable NVARCHAR(250),
+    @Direccion NVARCHAR(500),
+    @Ciudad NVARCHAR(100) = NULL,
+    @Estado NVARCHAR(100) = NULL,
+    @CodigoPostal NVARCHAR(10) = NULL,
+    @Telefono NVARCHAR(50) = NULL,
+    @CorreoContacto NVARCHAR(250),
+    @FechaVigenciaInicio DATETIME,
+    @FechaVigenciaFin DATETIME,
+    @EsPeriodoPrueba BIT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario creador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(SELECT 1 FROM Usuarios WHERE NombreUsuario = @CreadoPor AND EmpresaId = @EmpresaId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    IF EXISTS(SELECT * FROM Empresa WHERE Id = @Id)
+    BEGIN
+        -- Validar que la empresa pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Empresa e
+            INNER JOIN Usuarios u ON e.CreadoPor = u.NombreUsuario
+            WHERE e.Id = @Id 
+                AND u.EmpresaId = @EmpresaId
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Empresa
+        SET NombreComercial = @NombreComercial,
+            RazonSocial = @RazonSocial,
+            RFC = @RFC,
+            Responsable = @Responsable,
+            Direccion = @Direccion,
+            Ciudad = @Ciudad,
+            Estado = @Estado,
+            CodigoPostal = @CodigoPostal,
+            Telefono = @Telefono,
+            CorreoContacto = @CorreoContacto,
+            FechaVigenciaInicio = @FechaVigenciaInicio,
+            FechaVigenciaFin = @FechaVigenciaFin,
+            EsPeriodoPrueba = @EsPeriodoPrueba,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Empresa
+        (NombreComercial, RazonSocial, RFC, Responsable, Direccion, Ciudad, Estado, CodigoPostal, 
+         Telefono, CorreoContacto, FechaVigenciaInicio, FechaVigenciaFin, EsPeriodoPrueba, 
+         CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@NombreComercial, @RazonSocial, @RFC, @Responsable, @Direccion, @Ciudad, @Estado, @CodigoPostal,
+         @Telefono, @CorreoContacto, @FechaVigenciaInicio, @FechaVigenciaFin, @EsPeriodoPrueba,
+         @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarMarca]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Guardar o actualizar marca
+CREATE PROCEDURE [dbo].[GuardarOActualizarMarca]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(250),
+    @Descripcion NVARCHAR(250) = NULL,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    IF EXISTS(SELECT * FROM Marca WHERE Id = @Id)
+    BEGIN
+        -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Marca m
+            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
+            WHERE m.Id = @Id 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Marca
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Para INSERT, validar que el usuario creador pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Usuarios 
+            WHERE NombreUsuario = @CreadoPor 
+                AND EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        INSERT INTO Marca
+        (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarModelo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 8. Guardar o actualizar modelo
+CREATE PROCEDURE [dbo].[GuardarOActualizarModelo]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(250),
+    @Descripcion NVARCHAR(250) = NULL,
+    @MarcaId BIGINT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    IF EXISTS(SELECT * FROM Modelo WHERE Id = @Id)
+    BEGIN
+        -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Modelo mo
+            INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
+            WHERE mo.Id = @Id 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que la marca pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Marca m
+            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
+            WHERE m.Id = @MarcaId 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Modelo
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            MarcaId = @MarcaId,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Para INSERT, validar que el usuario creador pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Usuarios 
+            WHERE NombreUsuario = @CreadoPor 
+                AND EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que la marca pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Marca m
+            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
+            WHERE m.Id = @MarcaId 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        INSERT INTO Modelo
+        (Nombre, Descripcion, MarcaId, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Descripcion, @MarcaId, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarPersona]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 7. Guardar o actualizar persona
+CREATE PROCEDURE [dbo].[GuardarOActualizarPersona]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(150),
+    @Apellido NVARCHAR(250),
+    @Correo NVARCHAR(250) = NULL,
+    @Telefono NVARCHAR(50) = NULL,
+    @PuestoId BIGINT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario creador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios 
+        WHERE NombreUsuario = @CreadoPor 
+            AND EmpresaId = @EmpresaId 
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que el puesto pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Puesto p
+        INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+        WHERE p.Id = @PuestoId 
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    IF EXISTS(SELECT * FROM Persona WHERE Id = @Id)
+    BEGIN
+        -- Validar que la persona pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Persona p
+            INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+            WHERE p.Id = @Id 
+                AND u.EmpresaId = @EmpresaId
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Persona
+        SET Nombre = @Nombre,
+            Apellido = @Apellido,
+            Correo = @Correo,
+            Telefono = @Telefono,
+            PuestoId = @PuestoId,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Persona
+        (Nombre, Apellido, Correo, Telefono, PuestoId, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Apellido, @Correo, @Telefono, @PuestoId, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarPuesto]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Guardar o actualizar puesto
+CREATE PROCEDURE [dbo].[GuardarOActualizarPuesto]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(100),
+    @Descripcion NVARCHAR(250) = NULL,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario creador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios 
+        WHERE NombreUsuario = @CreadoPor 
+            AND EmpresaId = @EmpresaId 
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    IF EXISTS(SELECT * FROM Puesto WHERE Id = @Id)
+    BEGIN
+        -- Validar que el puesto pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Puesto p
+            INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+            WHERE p.Id = @Id 
+                AND u.EmpresaId = @EmpresaId
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Puesto
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Validar que el nombre del puesto no exista en la empresa
+        IF EXISTS(
+            SELECT 1 
+            FROM Puesto p
+            INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+            WHERE p.Nombre = @Nombre 
+                AND u.EmpresaId = @EmpresaId
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT -1
+            RETURN
+        END
+
+        INSERT INTO Puesto
+        (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarRol]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Guardar o actualizar rol
+CREATE PROCEDURE [dbo].[GuardarOActualizarRol]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(50),
+    @Descripcion NVARCHAR(250) = NULL,
+    @PuedeAtenderTickets BIT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    IF EXISTS(SELECT * FROM Rol WHERE Id = @Id)
+    BEGIN
+        -- Validar que el rol pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Rol r
+            INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
+            WHERE r.Id = @Id 
+                AND u.EmpresaId = @EmpresaId
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Rol
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            PuedeAtenderTickets = @PuedeAtenderTickets,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Validar que el nombre del rol no exista en la empresa
+        IF EXISTS(
+            SELECT 1 
+            FROM Rol r
+            INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
+            WHERE r.Nombre = @Nombre 
+                AND u.EmpresaId = @EmpresaId
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT -1
+            RETURN
+        END
+
+        INSERT INTO Rol
+        (Nombre, Descripcion, PuedeAtenderTickets, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Descripcion, @PuedeAtenderTickets, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarSucursal]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GuardarOActualizarSucursal]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(250),
+    @Descripcion NVARCHAR(500) = NULL,
+    @Calle NVARCHAR(100) = NULL,
+    @Ciudad NVARCHAR(100) = NULL,
+    @Colonia NVARCHAR(100) = NULL,
+    @CodigoPostal NVARCHAR(10) = NULL,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    IF EXISTS(SELECT * FROM Sucursal WHERE Id = @Id)
+    BEGIN
+        -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Sucursal s
+            INNER JOIN Usuarios u ON s.CreadoPor = u.NombreUsuario
+            WHERE s.Id = @Id 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Sucursal
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            Calle = @Calle,
+            Ciudad = @Ciudad,
+            Colonia = @Colonia,
+            CodigoPostal = @CodigoPostal,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Para INSERT, validar que el usuario creador pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Usuarios 
+            WHERE NombreUsuario = @CreadoPor 
+                AND EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        INSERT INTO Sucursal
+        (Nombre, Descripcion, Calle, Ciudad, Colonia, CodigoPostal, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Descripcion, @Calle, @Ciudad, @Colonia, @CodigoPostal, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarTicket]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 7. Guardar o actualizar ticket
+CREATE PROCEDURE [dbo].[GuardarOActualizarTicket]
+(
+    @Id BIGINT,
+    @Area BIGINT,
+    @Categoria BIGINT,
+    @Subcategoria BIGINT = NULL,
+    @Urgencia INT,
+    @Titulo NVARCHAR(250),
+    @Descripcion NVARCHAR(MAX),
+    @TicketEstatusId INT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el usuario creador pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios 
+        WHERE NombreUsuario = @CreadoPor 
+            AND EmpresaId = @EmpresaId 
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que el área pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Area a
+        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+        WHERE a.Id = @Area 
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que la categoría pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Categoria c
+        INNER JOIN Area a ON c.AreaId = a.Id
+        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+        WHERE c.Id = @Categoria 
+            AND u.EmpresaId = @EmpresaId
+            AND c.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que el estatus exista
+    IF NOT EXISTS(SELECT 1 FROM TicketEstatus WHERE Id = @TicketEstatusId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    IF EXISTS(SELECT * FROM Ticket WHERE Id = @Id)
+    BEGIN
+        -- Validar que el ticket pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Ticket t
+            INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+            WHERE t.Id = @Id 
+                AND u.EmpresaId = @EmpresaId
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE Ticket
+        SET AreaId = @Area,
+            CategoriaId = @Categoria,
+            SubcategoriaId = @Subcategoria,
+            Urgencia = @Urgencia,
+            Titulo = @Titulo,
+            Descripcion = @Descripcion,
+            TicketEstatusId = @TicketEstatusId,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Ticket
+        (AreaId, CategoriaId, SubcategoriaId, Urgencia, Titulo, Descripcion, 
+         TicketEstatusId, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Area, @Categoria, @Subcategoria, @Urgencia, @Titulo, @Descripcion,
+         @TicketEstatusId, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarTipoActivo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Guardar o actualizar tipo de activo
+CREATE PROCEDURE [dbo].[GuardarOActualizarTipoActivo]
+(
+    @Id BIGINT,
+    @Nombre NVARCHAR(250),
+    @Descripcion NVARCHAR(250) = NULL,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    IF EXISTS(SELECT * FROM TipoActivo WHERE Id = @Id)
+    BEGIN
+        -- Validar que el registro exista y pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM TipoActivo ta
+            INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
+            WHERE ta.Id = @Id 
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        UPDATE TipoActivo
+        SET Nombre = @Nombre,
+            Descripcion = @Descripcion,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Para INSERT, validar que el usuario creador pertenezca a la empresa del usuario autenticado
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Usuarios 
+            WHERE NombreUsuario = @CreadoPor 
+                AND EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        INSERT INTO TipoActivo
+        (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, @Estatus)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GuardarOActualizarUsuario]
+(
+    @Id BIGINT,
+    @NombreUsuario NVARCHAR(25) = NULL,
+    @Contrasena NVARCHAR(250) = NULL,
+    @ImagenPerfil NVARCHAR(250) = NULL,
+    @Correo NVARCHAR(250) = NULL,
+    @Nombre NVARCHAR(150) = NULL,
+    @Apellido NVARCHAR(250) = NULL,
+    @Celular NVARCHAR(50) = NULL,
+    @CreadoPor NVARCHAR(25) = NULL,
+    @FechaCreacion DATETIME = NULL,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @SucursalId BIGINT,
+    @Firma NVARCHAR(250) = NULL,
+    @RFC NVARCHAR(250),
+    @AreaId BIGINT,
+    @EmpresaId BIGINT
+)
+AS
+BEGIN
+    IF EXISTS(SELECT * FROM Usuarios WHERE Id = @Id)
+    BEGIN
+        -- Validar que el usuario que modifica pertenezca a la misma empresa
+        IF EXISTS(
+            SELECT 1 
+            FROM Usuarios u
+            WHERE u.Id = @Id 
+                AND u.EmpresaId = @EmpresaId
+                AND EXISTS(
+                    SELECT 1 
+                    FROM Usuarios m
+                    WHERE m.NombreUsuario = @ModificadoPor 
+                        AND m.EmpresaId = u.EmpresaId
+                        AND m.Estatus = 1
+                )
+        )
+        BEGIN
+            UPDATE Usuarios
+            SET NombreUsuario = @NombreUsuario,
+                Contrasena = @Contrasena,
+                ImagenPerfil = @ImagenPerfil,
+                Correo = @Correo,
+                Nombre = @Nombre,
+                Apellido = @Apellido,
+                Celular = @Celular,
+                ModificadoPor = @ModificadoPor,
+                FechaModificacion = @FechaModificacion,
+                Estatus = @Estatus,
+                SucursalId = @SucursalId,
+                Firma = @Firma,
+                RFC = @RFC,
+                AreaId = @AreaId,
+                EmpresaId = @EmpresaId
+            WHERE Id = @Id
+
+            SELECT @Id
+        END
+        ELSE
+        BEGIN
+            SELECT 0
+        END
+    END
+    ELSE
+    BEGIN
+        -- Insertar nuevo usuario (sin validación de empresa porque es nuevo)
+        INSERT INTO Usuarios
+        (NombreUsuario, Contrasena, ImagenPerfil, Correo, Nombre, Apellido, 
+         Celular, CreadoPor, FechaCreacion, Estatus, SucursalId, Firma, RFC, AreaId, EmpresaId)
+        VALUES
+        (@NombreUsuario, @Contrasena, @ImagenPerfil, @Correo, @Nombre, @Apellido,
+         @Celular, @CreadoPor, @FechaCreacion, @Estatus, @SucursalId, @Firma, @RFC, @AreaId, @EmpresaId)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarUsuarioAdmin]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GuardarOActualizarUsuarioAdmin]
+(
+    @Id BIGINT,
+    @NombreUsuario NVARCHAR(25),
+    @Contrasena NVARCHAR(250),
+    @ImagenPerfil NVARCHAR(250) = NULL,
+    @Correo NVARCHAR(250),
+    @Nombre NVARCHAR(150),
+    @Apellido NVARCHAR(250),
+    @Celular NVARCHAR(50),
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME,
+    @ModificadoPor NVARCHAR(25) = NULL,
+    @FechaModificacion DATETIME = NULL,
+    @Estatus BIT,
+    @SucursalId BIGINT,
+    @Firma NVARCHAR(250) = NULL,
+    @RFC NVARCHAR(250),
+    @AreaId BIGINT,
+    @EmpresaId BIGINT,
+    @UsuarioAdmin NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el usuario administrador exista y pertenezca a la misma empresa
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Usuarios 
+        WHERE NombreUsuario = @UsuarioAdmin 
+            AND EmpresaId = @EmpresaId
+            AND Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    IF EXISTS(SELECT * FROM Usuarios WHERE Id = @Id)
+    BEGIN
+        -- Validar que el usuario a actualizar pertenezca a la misma empresa
+        IF NOT EXISTS(
+            SELECT 1 
+            FROM Usuarios 
+            WHERE Id = @Id 
+                AND EmpresaId = @EmpresaId
+                AND Estatus = 1
+        )
+        BEGIN
+            SELECT 0
+            RETURN
+        END
+
+        -- Validar que el nombre de usuario no exista en otro registro
+        IF EXISTS(SELECT 1 FROM Usuarios WHERE NombreUsuario = @NombreUsuario AND Id != @Id AND EmpresaId = @EmpresaId AND Estatus = 1)
+        BEGIN
+            SELECT -1 -- Nombre de usuario duplicado
+            RETURN
+        END
+
+        -- Validar que el correo no exista en otro registro
+        IF EXISTS(SELECT 1 FROM Usuarios WHERE Correo = @Correo AND Id != @Id AND EmpresaId = @EmpresaId AND Estatus = 1)
+        BEGIN
+            SELECT -2 -- Correo duplicado
+            RETURN
+        END
+
+        UPDATE Usuarios
+        SET NombreUsuario = @NombreUsuario,
+            Contrasena = @Contrasena,
+            ImagenPerfil = @ImagenPerfil,
+            Correo = @Correo,
+            Nombre = @Nombre,
+            Apellido = @Apellido,
+            Celular = @Celular,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = @FechaModificacion,
+            Estatus = @Estatus,
+            SucursalId = @SucursalId,
+            Firma = @Firma,
+            RFC = @RFC,
+            AreaId = @AreaId,
+            EmpresaId = @EmpresaId
+        WHERE Id = @Id
+
+        SELECT @Id
+    END
+    ELSE
+    BEGIN
+        -- Validar que el nombre de usuario no exista
+        IF EXISTS(SELECT 1 FROM Usuarios WHERE NombreUsuario = @NombreUsuario AND EmpresaId = @EmpresaId)
+        BEGIN
+            SELECT -1 -- Nombre de usuario duplicado
+            RETURN
+        END
+
+        -- Validar que el correo no exista
+        IF EXISTS(SELECT 1 FROM Usuarios WHERE Correo = @Correo AND EmpresaId = @EmpresaId)
+        BEGIN
+            SELECT -2 -- Correo duplicado
+            RETURN
+        END
+
+        INSERT INTO Usuarios
+        (NombreUsuario, Contrasena, ImagenPerfil, Correo, Nombre, Apellido, 
+         Celular, CreadoPor, FechaCreacion, Estatus, SucursalId, Firma, RFC, AreaId, EmpresaId)
+        VALUES
+        (@NombreUsuario, @Contrasena, @ImagenPerfil, @Correo, @Nombre, @Apellido,
+         @Celular, @CreadoPor, @FechaCreacion, @Estatus, @SucursalId, @Firma, @RFC, @AreaId, @EmpresaId)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarOActualizarUsuarioPagina]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create Procedure [dbo].[GuardarOActualizarUsuarioPagina]
+(
+@Id bigint, 
+@UsuarioID bigint =null,
+@PaginaID bigint=null,
+@Estatus bit =null,
+@CreadoPor nvarchaR (25) =null,
+@FechaCreacion datetime =null,
+@ModificadoPor nvarchar (25) =null,
+@FechaModificacion	datetime =null
+)
+as 
+begin 
+	if exists (select * from UsuarioPagina where Id= @Id)
+	begin 
+	update UsuarioPagina set UsuarioID=@UsuarioID, PaginaID= @PaginaID,Estatus=@Estatus,
+		   CreadoPor=@CreadoPor,FechaCreacion=@FechaCreacion,ModificadoPor=@ModificadoPor,FechaModificacion=@FechaModificacion
+
+		  where id=@Id
+		  select @Id
+		  end 
+	else 
+			begin insert into UsuarioPagina(UsuarioID,PaginaID,Estatus,CreadoPor,FechaCreacion,ModificadoPor,FechaModificacion)
+		  values (@UsuarioID,@PaginaID,@Estatus,@CreadoPor,@FechaCreacion,@ModificadoPor,@FechaModificacion)
+		  select @@IDENTITY
+	  end 
+end 
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarPermisosRol]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =========================================
+-- 3. GUARDAR/ACTUALIZAR PERMISOS DE UN ROL
+-- =========================================
+CREATE PROCEDURE [dbo].[GuardarPermisosRol]
+(
+    @RolId BIGINT,
+    @PaginaId BIGINT,
+    @PuedeLeer BIT,
+    @PuedeCrear BIT,
+    @PuedeEditar BIT,
+    @PuedeEliminar BIT,
+    @PuedeExportar BIT,
+    @ModificadoPor NVARCHAR(25),
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    -- Validar que el rol pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Rol r
+        INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
+        WHERE r.Id = @RolId
+            AND u.EmpresaId = @EmpresaId
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que la página exista
+    IF NOT EXISTS(SELECT 1 FROM Pagina WHERE Id = @PaginaId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Verificar si ya existe configuración para este rol y página
+    IF EXISTS(SELECT 1 FROM RolPaginaAccion WHERE RolId = @RolId AND PaginaId = @PaginaId AND Estatus = 1)
+    BEGIN
+        -- Actualizar existente
+        UPDATE RolPaginaAccion
+        SET PuedeLeer = @PuedeLeer,
+            PuedeCrear = @PuedeCrear,
+            PuedeEditar = @PuedeEditar,
+            PuedeEliminar = @PuedeEliminar,
+            PuedeExportar = @PuedeExportar,
+            ModificadoPor = @ModificadoPor,
+            FechaModificacion = GETDATE()
+        WHERE RolId = @RolId AND PaginaId = @PaginaId AND Estatus = 1
+
+        SELECT 1
+    END
+    ELSE
+    BEGIN
+        -- Insertar nuevo
+        INSERT INTO RolPaginaAccion
+        (RolId, PaginaId, PuedeLeer, PuedeCrear, PuedeEditar, PuedeEliminar, PuedeExportar, CreadoPor, FechaCreacion, Estatus)
+        VALUES
+        (@RolId, @PaginaId, @PuedeLeer, @PuedeCrear, @PuedeEditar, @PuedeEliminar, @PuedeExportar, @ModificadoPor, GETDATE(), 1)
+
+        SELECT SCOPE_IDENTITY()
+    END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[GuardarRolParaNuevaEmpresa]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS PARA REGISTRO DE NUEVA EMPRESA (SIN VALIDACIÓN)
+-- =========================================
+
+-- 1. Guardar rol para nueva empresa (sin validación de administrador)
+CREATE PROCEDURE [dbo].[GuardarRolParaNuevaEmpresa]
+(
+    @Nombre NVARCHAR(50),
+    @Descripcion NVARCHAR(250) = NULL,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME
+)
+AS
+BEGIN
+    INSERT INTO Rol (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus)
+    VALUES (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, 1)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[InsertarRolPaginaAccion]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS PARA ROLPAGINAACCION
+-- =========================================
+
+-- 1. Insertar configuración de permisos
+CREATE PROCEDURE [dbo].[InsertarRolPaginaAccion]
+(
+    @RolId BIGINT,
+    @PaginaId BIGINT,
+    @PuedeLeer BIT,
+    @PuedeCrear BIT,
+    @PuedeEditar BIT,
+    @PuedeEliminar BIT,
+    @PuedeExportar BIT,
+    @CreadoPor NVARCHAR(25),
+    @UsuarioAutenticado NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el rol pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM UsuarioRol ur
+        INNER JOIN Usuarios u ON ur.UsuarioId = u.Id
+        WHERE ur.RolId = @RolId 
+            AND u.NombreUsuario = @UsuarioAutenticado
+            AND u.Estatus = 1
+            AND ur.Estatus = 1
+    )
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que la página exista
+    IF NOT EXISTS(SELECT 1 FROM Pagina WHERE Id = @PaginaId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que no exista ya la configuración
+    IF EXISTS(SELECT 1 FROM RolPaginaAccion WHERE RolId = @RolId AND PaginaId = @PaginaId AND Estatus = 1)
+    BEGIN
+        SELECT -1
+        RETURN
+    END
+
+    INSERT INTO RolPaginaAccion
+    (RolId, PaginaId, PuedeLeer, PuedeCrear, PuedeEditar, PuedeEliminar, PuedeExportar, CreadoPor, FechaCreacion, Estatus)
+    VALUES
+    (@RolId, @PaginaId, @PuedeLeer, @PuedeCrear, @PuedeEditar, @PuedeEliminar, @PuedeExportar, @CreadoPor, GETDATE(), 1)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[InsertarTokenRecuperacion]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Procedure para insertar token de recuperación
+CREATE PROCEDURE [dbo].[InsertarTokenRecuperacion]
+(
+    @UsuarioId BIGINT,
+    @Token NVARCHAR(50),
+    @FechaExpiracion DATETIME,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME
+)
+AS
+BEGIN
+    INSERT INTO TokenRecuperacion
+    (UsuarioId, Token, FechaExpiracion, Usado, CreadoPor, FechaCreacion, Estatus)
+    VALUES
+    (@UsuarioId, @Token, @FechaExpiracion, 0, @CreadoPor, @FechaCreacion, 1)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[InsertarUsuarioPagina]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[InsertarUsuarioPagina]
+(
+    @UsuarioId BIGINT,
+    @PaginaId BIGINT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME
+)
+AS
+BEGIN
+    -- Validar que el usuario exista
+    IF NOT EXISTS(SELECT 1 FROM Usuarios WHERE Id = @UsuarioId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que la página exista
+    IF NOT EXISTS(SELECT 1 FROM Pagina WHERE Id = @PaginaId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que no exista la asignación
+    IF EXISTS(SELECT 1 FROM UsuarioPagina WHERE UsuarioId = @UsuarioId AND PaginaId = @PaginaId AND Estatus = 1)
+    BEGIN
+        SELECT -1
+        RETURN
+    END
+
+    INSERT INTO UsuarioPagina (UsuarioId, PaginaId, Estatus, CreadoPor, FechaCreacion)
+    VALUES (@UsuarioId, @PaginaId, 1, @CreadoPor, @FechaCreacion)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[InsertarUsuarioPaginaParaNuevaEmpresa]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Insertar usuario página para nueva empresa (sin validación de administrador)
+CREATE PROCEDURE [dbo].[InsertarUsuarioPaginaParaNuevaEmpresa]
+(
+    @UsuarioId BIGINT,
+    @PaginaId BIGINT,
+    @CreadoPor NVARCHAR(25),
+    @FechaCreacion DATETIME
+)
+AS
+BEGIN
+    -- Validar que el usuario exista
+    IF NOT EXISTS(SELECT 1 FROM Usuarios WHERE Id = @UsuarioId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que la página exista
+    IF NOT EXISTS(SELECT 1 FROM Pagina WHERE Id = @PaginaId AND Estatus = 1)
+    BEGIN
+        SELECT 0
+        RETURN
+    END
+
+    -- Validar que no exista la asignación
+    IF EXISTS(SELECT 1 FROM UsuarioPagina WHERE UsuarioId = @UsuarioId AND PaginaId = @PaginaId AND Estatus = 1)
+    BEGIN
+        SELECT -1
+        RETURN
+    END
+
+    INSERT INTO UsuarioPagina (UsuarioId, PaginaId, Estatus, CreadoPor, FechaCreacion)
+    VALUES (@UsuarioId, @PaginaId, 1, @CreadoPor, @FechaCreacion)
+
+    SELECT SCOPE_IDENTITY()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerActivoPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener activo por ID
+CREATE PROCEDURE [dbo].[ObtenerActivoPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT a.*,
+           ta.Nombre as TipoActivoNombre,
+           ta.Descripcion as TipoActivoDescripcion,
+           m.Nombre as MarcaNombre,
+           m.Descripcion as MarcaDescripcion,
+           mo.Nombre as ModeloNombre,
+           mo.Descripcion as ModeloDescripcion
+    FROM Activo a
+    INNER JOIN TipoActivo ta ON a.TipoActivoID = ta.Id
+    INNER JOIN Marca m ON a.MarcaID = m.Id
+    INNER JOIN Modelo mo ON a.ModeloID = mo.Id
+    INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+    WHERE a.Id = @Id 
+        AND a.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerActivos]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS DE ACTIVO CON FILTRO POR USUARIO
+-- =========================================
+
+-- 1. Obtener todos los activos
+CREATE PROCEDURE [dbo].[ObtenerActivos]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT a.*,
+           ta.Nombre as TipoActivoNombre,
+           ta.Descripcion as TipoActivoDescripcion,
+           m.Nombre as MarcaNombre,
+           m.Descripcion as MarcaDescripcion,
+           mo.Nombre as ModeloNombre,
+           mo.Descripcion as ModeloDescripcion
+    FROM Activo a
+    INNER JOIN TipoActivo ta ON a.TipoActivoID = ta.Id
+    INNER JOIN Marca m ON a.MarcaID = m.Id
+    INNER JOIN Modelo mo ON a.ModeloID = mo.Id
+    INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+    WHERE a.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY a.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerAreaPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener área por ID
+CREATE PROCEDURE [dbo].[ObtenerAreaPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT a.*
+    FROM Area a
+    INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+    WHERE a.Id = @Id 
+        AND a.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerAreas]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS DE ÁREA CON FILTRO POR USUARIO
+-- =========================================
+
+-- 1. Obtener todas las áreas
+CREATE PROCEDURE [dbo].[ObtenerAreas]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT a.*
+    FROM Area a
+    INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
+    WHERE a.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY a.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerCategoriaPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Obtener categoría por ID
+CREATE PROCEDURE [dbo].[ObtenerCategoriaPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT c.*,
+           a.Nombre as AreaNombre,
+           cp.Nombre as CategoriaPadreNombre
+    FROM Categoria c
+    INNER JOIN Area a ON c.AreaId = a.Id
+    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+    LEFT JOIN Categoria cp ON c.CategoriaPadreId = cp.Id
+    WHERE c.Id = @Id 
+        AND c.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerCategorias]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS DE CATEGORÍA CON FILTRO POR USUARIO
+-- =========================================
+
+-- 1. Obtener todas las categorías
+CREATE PROCEDURE [dbo].[ObtenerCategorias]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT c.*,
+           a.Nombre as AreaNombre,
+           cp.Nombre as CategoriaPadreNombre,
+           CASE WHEN c.CategoriaPadreId IS NULL THEN 1 ELSE 2 END as Nivel
+    FROM Categoria c
+    INNER JOIN Area a ON c.AreaId = a.Id
+    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+    LEFT JOIN Categoria cp ON c.CategoriaPadreId = cp.Id
+    WHERE c.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY c.CategoriaPadreId, c.Orden
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerCategoriasPorArea]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener categorías por área
+CREATE PROCEDURE [dbo].[ObtenerCategoriasPorArea]
+(
+    @AreaId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT c.*,
+           a.Nombre as AreaNombre,
+           cp.Nombre as CategoriaPadreNombre,
+           CASE WHEN c.CategoriaPadreId IS NULL THEN 1 ELSE 2 END as Nivel
+    FROM Categoria c
+    INNER JOIN Area a ON c.AreaId = a.Id
+    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+    LEFT JOIN Categoria cp ON c.CategoriaPadreId = cp.Id
+    WHERE c.AreaId = @AreaId 
+        AND c.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY c.CategoriaPadreId, c.Orden
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerCategoriasPorPadre]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Obtener categorías hijas por categoría padre
+CREATE PROCEDURE [dbo].[ObtenerCategoriasPorPadre]
+(
+    @CategoriaPadreId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT c.*,
+           a.Nombre as AreaNombre
+    FROM Categoria c
+    INNER JOIN Area a ON c.AreaId = a.Id
+    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+    WHERE c.CategoriaPadreId = @CategoriaPadreId 
+        AND c.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY c.Orden
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerCategoriasPorResponsable]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener responsables por usuario (todas sus categorías)
+CREATE PROCEDURE [dbo].[ObtenerCategoriasPorResponsable]
+(
+    @UsuarioId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    SELECT cr.*,
+           c.Nombre as CategoriaNombre,
+           c.Descripcion as CategoriaDescripcion,
+           a.Nombre as AreaNombre
+    FROM CategoriaResponsable cr
+    INNER JOIN Categoria c ON cr.CategoriaId = c.Id
+    INNER JOIN Area a ON c.AreaId = a.Id
+    WHERE cr.UsuarioId = @UsuarioId
+        AND cr.Estatus = 1
+        AND c.Estatus = 1
+        AND EXISTS(
+            SELECT 1 
+            FROM Usuarios u
+            WHERE u.Id = @UsuarioId
+                AND u.EmpresaId = @EmpresaId
+                AND u.Estatus = 1
+        )
+    ORDER BY a.Nombre, c.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerCompaniaPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener compañía por ID
+CREATE PROCEDURE [dbo].[ObtenerCompaniaPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT c.*
+    FROM Compania c
+    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+    WHERE c.Id = @Id 
+        AND c.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerCompanias]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS DE COMPAÑÍA CON FILTRO POR USUARIO
+-- =========================================
+
+-- 1. Obtener todas las compañías
+CREATE PROCEDURE [dbo].[ObtenerCompanias]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT c.*
+    FROM Compania c
+    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
+    WHERE c.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY c.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerEmpresaPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS DE EMPRESA CON FILTRO POR USUARIO
+-- =========================================
+
+-- 1. Obtener empresa por ID
+CREATE PROCEDURE [dbo].[ObtenerEmpresaPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT e.*
+    FROM Empresa e
+    INNER JOIN Usuarios u ON e.CreadoPor = u.NombreUsuario
+    WHERE e.Id = @Id 
+        AND e.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerEmpresaPorRFC]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener empresa por RFC
+CREATE PROCEDURE [dbo].[ObtenerEmpresaPorRFC]
+(
+    @RFC NVARCHAR(50)
+)
+AS
+BEGIN
+    SELECT *
+    FROM Empresa
+    WHERE RFC = @RFC AND Estatus = 1
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerEmpresas]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[ObtenerEmpresas]
+AS
+BEGIN
+    SELECT e.*
+    FROM Empresa e
+	inner join Usuarios u on e.CreadoPor = u.NombreUsuario
+    WHERE e.Estatus = 1
+    ORDER BY NombreComercial
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerEmpresasPorPeriodoPrueba]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Obtener empresas por periodo de prueba (vigencia)
+CREATE PROCEDURE [dbo].[ObtenerEmpresasPorPeriodoPrueba]
+AS
+BEGIN
+    SELECT *
+    FROM Empresa
+    WHERE Estatus = 1 
+        AND EsPeriodoPrueba = 1 
+        AND FechaVigenciaFin >= GETDATE()
+    ORDER BY FechaVigenciaFin ASC
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerMarca]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =========================================
+-- PROCEDIMIENTOS DE MARCA CON FILTRO POR USUARIO
+-- =========================================
+
+-- 1. Obtener todas las marcas
+CREATE PROCEDURE [dbo].[ObtenerMarca]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT m.*
+    FROM Marca m
+    INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
+    WHERE m.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY m.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerMarcaPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener marca por ID
+CREATE PROCEDURE [dbo].[ObtenerMarcaPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT m.*
+    FROM Marca m
+    INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
+    WHERE m.Id = @Id 
+        AND m.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerModelo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =========================================
+-- PROCEDIMIENTOS DE MODELO CON FILTRO POR USUARIO
+-- =========================================
+
+-- 5. Obtener todos los modelos
+CREATE PROCEDURE [dbo].[ObtenerModelo]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT mo.*,
+           m.Nombre as MarcaNombre,
+           m.Descripcion as MarcaDescripcion
+    FROM Modelo mo
+    INNER JOIN Marca m ON mo.MarcaId = m.Id
+    INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
+    WHERE mo.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY m.Nombre, mo.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerModeloPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 6. Obtener modelo por ID
+CREATE PROCEDURE [dbo].[ObtenerModeloPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT mo.*,
+           m.Nombre as MarcaNombre,
+           m.Descripcion as MarcaDescripcion
+    FROM Modelo mo
+    INNER JOIN Marca m ON mo.MarcaId = m.Id
+    INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
+    WHERE mo.Id = @Id 
+        AND mo.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerModelos]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ObtenerModelos]
+AS
+BEGIN
+    SELECT m.*, 
+           ma.Nombre as MarcaNombre,
+           ma.Descripcion as MarcaDescripcion
+    FROM Modelo m
+    INNER JOIN Marca ma ON m.MarcaId = ma.Id
+    WHERE m.Estatus = 1
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerModelosPorMarca]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 7. Crear procedure para obtener modelos por marca
+CREATE PROCEDURE [dbo].[ObtenerModelosPorMarca]
+(
+    @MarcaId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT mo.*,
+           m.Nombre as MarcaNombre,
+           m.Descripcion as MarcaDescripcion
+    FROM Modelo mo
+    INNER JOIN Marca m ON mo.MarcaId = m.Id
+    INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
+    WHERE mo.MarcaId = @MarcaId 
+        AND mo.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY mo.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerModelosPorMarcaId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[ObtenerModelosPorMarcaId]
+(
+    @MarcaId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT m.*
+    FROM Modelo m
+    INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
+    WHERE m.Estatus = 1 
+        AND m.MarcaId = @MarcaId
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY m.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerPaginaPorNombre]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ObtenerPaginaPorNombre]
+(
+    @Nombre NVARCHAR(250)
+)
+AS
+BEGIN
+    SELECT *
+    FROM Pagina
+    WHERE Nombre = @Nombre AND Estatus = 1
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerPaginas]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- 1. OBTENER TODAS LAS PÁGINAS (ACTIVAS) - SIN FILTRO DE USUARIO
+-- =========================================
+CREATE PROCEDURE [dbo].[ObtenerPaginas]
+AS
+BEGIN
+    SELECT *
+    FROM Pagina
+    WHERE Estatus = 1
+        AND Direccion IS NOT NULL
+        AND Direccion != ''
+    ORDER BY OrdenB, Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerPaginasPorUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ObtenerPaginasPorUsuario]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Obtener páginas hijas con acceso (con dirección)
+    WITH PaginasConAcceso AS
+    (
+        SELECT DISTINCT p.*
+        FROM Pagina p
+        INNER JOIN RolPaginaAccion rpa ON p.Id = rpa.PaginaId
+        INNER JOIN Rol r ON rpa.RolId = r.Id
+        INNER JOIN UsuarioRol ur ON r.Id = ur.RolId
+        INNER JOIN Usuarios u ON ur.UsuarioId = u.Id
+        WHERE u.NombreUsuario = @Usuario
+            AND u.Estatus = 1
+            AND ur.Estatus = 1
+            AND r.Estatus = 1
+            AND rpa.Estatus = 1
+            AND p.Estatus = 1
+            AND rpa.PuedeLeer = 1
+            AND p.Direccion IS NOT NULL
+            AND p.Direccion != ''
+    )
+    SELECT DISTINCT p.*
+    FROM Pagina p
+    WHERE p.Id IN (SELECT Id FROM PaginasConAcceso)
+        OR p.Id IN (SELECT PermisosPadreId FROM PaginasConAcceso WHERE PermisosPadreId IS NOT NULL)
+    ORDER BY p.OrdenB, p.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerPermisosPorRol]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =========================================
+-- 2. OBTENER PERMISOS DE UN ROL ESPECÍFICO
+-- =========================================
+CREATE PROCEDURE [dbo].[ObtenerPermisosPorRol]
+(
+    @RolId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Validar que el rol pertenezca a la empresa del usuario autenticado
+    IF NOT EXISTS(
+        SELECT 1 
+        FROM Rol r
+        INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
+        WHERE r.Id = @RolId
+            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+            AND u.Estatus = 1
+    )
+    BEGIN
+        SELECT NULL AS Error
+        RETURN
+    END
+
+    SELECT rpa.*,
+           p.Nombre AS PaginaNombre,
+           p.Direccion
+    FROM RolPaginaAccion rpa
+    INNER JOIN Pagina p ON rpa.PaginaId = p.Id
+    WHERE rpa.RolId = @RolId
+        AND rpa.Estatus = 1
+        AND p.Estatus = 1
+    ORDER BY p.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerPermisosPorUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ObtenerPermisosPorUsuario]
+(
+    @NombreUsuario NVARCHAR(25)
+)
+AS
+BEGIN
+    -- Obtener permisos del usuario directamente por nombre de usuario
+    SELECT 
+        p.Id AS PaginaId,
+        p.Nombre AS PaginaNombre,
+        p.Direccion,
+        MAX(CASE WHEN rpa.PuedeLeer = 1 THEN 1 ELSE 0 END) AS PuedeLeer,
+        MAX(CASE WHEN rpa.PuedeCrear = 1 THEN 1 ELSE 0 END) AS PuedeCrear,
+        MAX(CASE WHEN rpa.PuedeEditar = 1 THEN 1 ELSE 0 END) AS PuedeEditar,
+        MAX(CASE WHEN rpa.PuedeEliminar = 1 THEN 1 ELSE 0 END) AS PuedeEliminar,
+        MAX(CASE WHEN rpa.PuedeExportar = 1 THEN 1 ELSE 0 END) AS PuedeExportar
+    FROM Usuarios u
+    INNER JOIN UsuarioRol ur ON u.Id = ur.UsuarioId
+    INNER JOIN Rol r ON ur.RolId = r.Id
+    INNER JOIN RolPaginaAccion rpa ON r.Id = rpa.RolId
+    INNER JOIN Pagina p ON rpa.PaginaId = p.Id
+    WHERE u.NombreUsuario = @NombreUsuario
+        AND u.Estatus = 1
+        AND ur.Estatus = 1
+        AND r.Estatus = 1
+        AND rpa.Estatus = 1
+        AND p.Estatus = 1
+        AND p.Direccion IS NOT NULL  -- Solo páginas con URL
+    GROUP BY p.Id, p.Nombre, p.Direccion
+    ORDER BY p.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerPersonaPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 6. Obtener persona por ID
+CREATE PROCEDURE [dbo].[ObtenerPersonaPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT p.*,
+           pu.Nombre as PuestoNombre
+    FROM Persona p
+    INNER JOIN Puesto pu ON p.PuestoId = pu.Id
+    INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+    WHERE p.Id = @Id 
+        AND p.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerPersonas]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =========================================
+-- PROCEDIMIENTOS DE PERSONA
+-- =========================================
+
+-- 5. Obtener todas las personas
+CREATE PROCEDURE [dbo].[ObtenerPersonas]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT p.*,
+           pu.Nombre as PuestoNombre
+    FROM Persona p
+    INNER JOIN Puesto pu ON p.PuestoId = pu.Id
+    INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+    WHERE p.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY p.Nombre, p.Apellido
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerPuestoPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener puesto por ID
+CREATE PROCEDURE [dbo].[ObtenerPuestoPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT p.*
+    FROM Puesto p
+    INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+    WHERE p.Id = @Id 
+        AND p.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerPuestos]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS DE PUESTO
+-- =========================================
+
+-- 1. Obtener todos los puestos
+CREATE PROCEDURE [dbo].[ObtenerPuestos]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT p.*
+    FROM Puesto p
+    INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
+    WHERE p.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY p.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerResponsablesPorCategoria]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =========================================
+-- PROCEDIMIENTOS DE CATEGORIARESPONSABLE
+-- =========================================
+
+-- 1. Obtener responsables por categoría
+CREATE PROCEDURE [dbo].[ObtenerResponsablesPorCategoria]
+(
+    @CategoriaId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    DECLARE @EmpresaId BIGINT
+    SELECT @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1
+
+    SELECT cr.*,
+           u.NombreUsuario,
+           u.Nombre,
+           u.Apellido,
+           u.Correo,
+           r.PuedeAtenderTickets
+    FROM CategoriaResponsable cr
+    INNER JOIN Usuarios u ON cr.UsuarioId = u.Id
+    INNER JOIN UsuarioRol ur ON u.Id = ur.UsuarioId
+    INNER JOIN Rol r ON ur.RolId = r.Id
+    WHERE cr.CategoriaId = @CategoriaId
+        AND cr.Estatus = 1
+        AND u.EmpresaId = @EmpresaId
+        AND u.Estatus = 1
+        AND r.Estatus = 1
+        AND r.PuedeAtenderTickets = 1
+    ORDER BY cr.EsPrincipal DESC, u.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerRoles]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS DE ROL CON CAMPO PuedeAtenderTickets
+-- =========================================
+
+-- 1. Obtener todos los roles
+CREATE PROCEDURE [dbo].[ObtenerRoles]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT r.*
+    FROM Rol r
+    WHERE r.Estatus = 1
+        AND EXISTS(
+            SELECT 1 
+            FROM Usuarios u
+            WHERE u.NombreUsuario = r.CreadoPor
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+    ORDER BY r.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerRolesPorUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Obtener roles por usuario
+CREATE PROCEDURE [dbo].[ObtenerRolesPorUsuario]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT r.*
+    FROM Rol r
+    INNER JOIN UsuarioRol ur ON r.Id = ur.RolId
+    INNER JOIN Usuarios u ON ur.UsuarioId = u.Id
+    WHERE r.Estatus = 1 
+        AND ur.Estatus = 1
+        AND u.NombreUsuario = @Usuario
+        AND u.Estatus = 1
+    ORDER BY r.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerRolPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener rol por ID
+CREATE PROCEDURE [dbo].[ObtenerRolPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT r.*
+    FROM Rol r
+    WHERE r.Id = @Id 
+        AND r.Estatus = 1
+        AND EXISTS(
+            SELECT 1 
+            FROM Usuarios u
+            WHERE u.NombreUsuario = r.CreadoPor
+                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+                AND u.Estatus = 1
+        )
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerSucursales]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS DE SUCURSAL CON FILTRO POR USUARIO
+-- =========================================
+
+-- 1. Obtener todas las sucursales
+CREATE PROCEDURE [dbo].[ObtenerSucursales]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT s.*
+    FROM Sucursal s
+    INNER JOIN Usuarios u ON s.CreadoPor = u.NombreUsuario
+    WHERE s.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY s.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerSucursalPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener sucursal por ID
+CREATE PROCEDURE [dbo].[ObtenerSucursalPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT s.*
+    FROM Sucursal s
+    INNER JOIN Usuarios u ON s.CreadoPor = u.NombreUsuario
+    WHERE s.Id = @Id 
+        AND s.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTicketEstatus]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure para obtener todos los estatus (sin filtro)
+CREATE PROCEDURE [dbo].[ObtenerTicketEstatus]
+AS
+BEGIN
+    SELECT *
+    FROM TicketEstatus
+    WHERE Estatus = 1
+    ORDER BY Orden, Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTicketPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener ticket por ID
+CREATE PROCEDURE [dbo].[ObtenerTicketPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT t.*, 
+           a.Nombre as AreaNombre,
+           c.Nombre as CategoriaNombre,
+           sc.Nombre as SubcategoriaNombre,
+           u.Nombre as UsuarioCreadorNombre,
+           u.Apellido as UsuarioCreadorApellido,
+           te.Nombre as EstatusNombre,
+           te.Color as EstatusColor
+    FROM Ticket t
+    INNER JOIN Area a ON t.AreaId = a.Id
+    INNER JOIN Categoria c ON t.CategoriaId = c.Id
+    LEFT JOIN Categoria sc ON t.SubcategoriaId = sc.Id
+    INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+    INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
+    WHERE t.Id = @Id 
+        AND t.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTickets]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =========================================
+-- PROCEDIMIENTOS DE TICKET CON FILTRO POR USUARIO Y ESTATUS
+-- =========================================
+
+-- 1. Obtener todos los tickets
+CREATE PROCEDURE [dbo].[ObtenerTickets]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT t.*, 
+           a.Nombre as AreaNombre,
+           c.Nombre as CategoriaNombre,
+           sc.Nombre as SubcategoriaNombre,
+           u.Nombre as UsuarioCreadorNombre,
+           u.Apellido as UsuarioCreadorApellido,
+           te.Nombre as EstatusNombre,
+           te.Color as EstatusColor
+    FROM Ticket t
+    INNER JOIN Area a ON t.AreaId = a.Id
+    INNER JOIN Categoria c ON t.CategoriaId = c.Id
+    LEFT JOIN Categoria sc ON t.SubcategoriaId = sc.Id
+    INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+    INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
+    WHERE t.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY t.FechaCreacion DESC
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTicketsPorArea]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 3. Obtener tickets por área
+CREATE PROCEDURE [dbo].[ObtenerTicketsPorArea]
+(
+    @AreaId BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT t.*, 
+           a.Nombre as AreaNombre,
+           c.Nombre as CategoriaNombre,
+           sc.Nombre as SubcategoriaNombre,
+           u.Nombre as UsuarioCreadorNombre,
+           u.Apellido as UsuarioCreadorApellido,
+           te.Nombre as EstatusNombre,
+           te.Color as EstatusColor
+    FROM Ticket t
+    INNER JOIN Area a ON t.AreaId = a.Id
+    INNER JOIN Categoria c ON t.CategoriaId = c.Id
+    LEFT JOIN Categoria sc ON t.SubcategoriaId = sc.Id
+    INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+    INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
+    WHERE t.AreaId = @AreaId 
+        AND t.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY t.FechaCreacion DESC
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTicketsPorEstatus]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 6. Obtener tickets por estatus
+CREATE PROCEDURE [dbo].[ObtenerTicketsPorEstatus]
+(
+    @TicketEstatusId INT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT t.*, 
+           a.Nombre as AreaNombre,
+           c.Nombre as CategoriaNombre,
+           sc.Nombre as SubcategoriaNombre,
+           u.Nombre as UsuarioCreadorNombre,
+           u.Apellido as UsuarioCreadorApellido,
+           te.Nombre as EstatusNombre,
+           te.Color as EstatusColor
+    FROM Ticket t
+    INNER JOIN Area a ON t.AreaId = a.Id
+    INNER JOIN Categoria c ON t.CategoriaId = c.Id
+    LEFT JOIN Categoria sc ON t.SubcategoriaId = sc.Id
+    INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+    INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
+    WHERE t.TicketEstatusId = @TicketEstatusId 
+        AND t.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY t.FechaCreacion DESC
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTicketsPorUrgencia]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Obtener tickets por urgencia
+CREATE PROCEDURE [dbo].[ObtenerTicketsPorUrgencia]
+(
+    @Urgencia INT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT t.*, 
+           a.Nombre as AreaNombre,
+           c.Nombre as CategoriaNombre,
+           sc.Nombre as SubcategoriaNombre,
+           u.Nombre as UsuarioCreadorNombre,
+           u.Apellido as UsuarioCreadorApellido,
+           te.Nombre as EstatusNombre,
+           te.Color as EstatusColor
+    FROM Ticket t
+    INNER JOIN Area a ON t.AreaId = a.Id
+    INNER JOIN Categoria c ON t.CategoriaId = c.Id
+    LEFT JOIN Categoria sc ON t.SubcategoriaId = sc.Id
+    INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+    INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
+    WHERE t.Urgencia = @Urgencia 
+        AND t.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY t.FechaCreacion DESC
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTicketsPorUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 5. Obtener tickets por usuario (creador)
+CREATE PROCEDURE [dbo].[ObtenerTicketsPorUsuario]
+(
+    @CreadoPor NVARCHAR(25),
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT t.*, 
+           a.Nombre as AreaNombre,
+           c.Nombre as CategoriaNombre,
+           sc.Nombre as SubcategoriaNombre,
+           u.Nombre as UsuarioCreadorNombre,
+           u.Apellido as UsuarioCreadorApellido,
+           te.Nombre as EstatusNombre,
+           te.Color as EstatusColor
+    FROM Ticket t
+    INNER JOIN Area a ON t.AreaId = a.Id
+    INNER JOIN Categoria c ON t.CategoriaId = c.Id
+    LEFT JOIN Categoria sc ON t.SubcategoriaId = sc.Id
+    INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+    INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
+    WHERE t.CreadoPor = @CreadoPor 
+        AND t.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY t.FechaCreacion DESC
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTipoActivo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =========================================
+-- PROCEDIMIENTOS DE TIPOACTIVO CON FILTRO POR USUARIO
+-- =========================================
+
+-- 1. Obtener todos los tipos de activo
+CREATE PROCEDURE [dbo].[ObtenerTipoActivo]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT ta.*
+    FROM TipoActivo ta
+    INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
+    WHERE ta.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY ta.Nombre
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTipoActivoPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 2. Obtener tipo de activo por ID
+CREATE PROCEDURE [dbo].[ObtenerTipoActivoPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT ta.*
+    FROM TipoActivo ta
+    INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
+    WHERE ta.Id = @Id 
+        AND ta.Estatus = 1 
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerTokenRecuperacion]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure para validar token de recuperación
+CREATE PROCEDURE [dbo].[ObtenerTokenRecuperacion]
+(
+    @Token NVARCHAR(50)
+)
+AS
+BEGIN
+    SELECT t.*, 
+           u.Nombre, u.Apellido, u.Correo, u.NombreUsuario
+    FROM TokenRecuperacion t
+    INNER JOIN Usuarios u ON t.UsuarioId = u.Id
+    WHERE t.Token = @Token 
+      AND t.Estatus = 1 
+      AND t.Usado = 0
+      AND t.FechaExpiracion > GETDATE()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerUsuarioPagina]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create procedure [dbo].[ObtenerUsuarioPagina] 
+as
+begin
+select * 
+from UsuarioPagina
+end
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerUsuarioPaginaPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create procedure [dbo].[ObtenerUsuarioPaginaPorId]
+(
+@Id bigint 
+)
+as
+begin 
+select *
+from UsuarioPagina
+where Id=@Id
+end 
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerUsuarioPorCorreo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ObtenerUsuarioPorCorreo]
+(
+    @Correo NVARCHAR(250)
+)
+AS
+BEGIN
+    SELECT u.*, 
+           s.Nombre as SucursalNombre,
+           a.Nombre as AreaNombre,
+           e.NombreComercial as EmpresaNombre
+    FROM Usuarios u
+    LEFT JOIN Sucursal s ON u.SucursalId = s.Id
+    LEFT JOIN Area a ON u.AreaId = a.Id
+    LEFT JOIN Empresa e ON u.EmpresaId = e.Id
+    WHERE u.Correo = @Correo AND u.Estatus = 1
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerUsuarioPorId]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Obtener usuario por ID (con validación de usuario)
+CREATE PROCEDURE [dbo].[ObtenerUsuarioPorId]
+(
+    @Id BIGINT,
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT u.*,
+           s.Nombre as SucursalNombre,
+           a.Nombre as AreaNombre,
+           e.NombreComercial as EmpresaNombre
+    FROM Usuarios u
+    LEFT JOIN Sucursal s ON u.SucursalId = s.Id
+    LEFT JOIN Area a ON u.AreaId = a.Id
+    LEFT JOIN Empresa e ON u.EmpresaId = e.Id
+    WHERE u.Id = @Id 
+        --AND u.Estatus = 1
+        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerUsuarioPorNombreUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Obtener usuario por nombre usuario (con validación de empresa)
+CREATE PROCEDURE [dbo].[ObtenerUsuarioPorNombreUsuario]
+(
+    @NombreUsuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT u.*,
+           s.Nombre as SucursalNombre,
+           a.Nombre as AreaNombre,
+           e.NombreComercial as EmpresaNombre
+    FROM Usuarios u
+    LEFT JOIN Sucursal s ON u.SucursalId = s.Id
+    LEFT JOIN Area a ON u.AreaId = a.Id
+    LEFT JOIN Empresa e ON u.EmpresaId = e.Id
+    WHERE u.NombreUsuario = @NombreUsuario
+        AND u.Estatus = 1
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerUsuarios]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Obtener usuarios por empresa (con validación de usuario)
+CREATE PROCEDURE [dbo].[ObtenerUsuarios]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SELECT u.*,
+           s.Nombre as SucursalNombre,
+           a.Nombre as AreaNombre,
+           e.NombreComercial as EmpresaNombre
+    FROM Usuarios u
+    LEFT JOIN Sucursal s ON u.SucursalId = s.Id
+    LEFT JOIN Area a ON u.AreaId = a.Id
+    LEFT JOIN Empresa e ON u.EmpresaId = e.Id
+    WHERE u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY u.NombreUsuario
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ValidarAccesoPagina]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 4. Verificar si un usuario tiene acceso a una página específica
+CREATE PROCEDURE [dbo].[ValidarAccesoPagina]
+(
+    @Usuario NVARCHAR(25),
+    @Direccion NVARCHAR(250)
+)
+AS
+BEGIN
+    SELECT CASE 
+        WHEN EXISTS(
+            SELECT 1 
+            FROM UsuarioPagina up
+            INNER JOIN Usuarios u ON up.UsuarioID = u.Id
+            INNER JOIN Pagina p ON up.PaginaId = p.Id
+            WHERE u.NombreUsuario = @Usuario
+                AND u.Estatus = 1
+                AND up.Estatus = 1
+                AND p.Estatus = 1
+                AND p.Direccion = @Direccion
+        ) THEN 1
+        ELSE 0
+    END AS TieneAcceso
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ValidarPermisoUsuario]    Script Date: 17/08/2026 09:59:02 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- 5. Validar permiso específico para un usuario, página y acción
+CREATE PROCEDURE [dbo].[ValidarPermisoUsuario]
+(
+    @UsuarioId BIGINT,
+    @PaginaId BIGINT,
+    @Accion NVARCHAR(20)  -- 'Leer', 'Crear', 'Editar', 'Eliminar', 'Exportar'
+)
+AS
+BEGIN
+    DECLARE @TienePermiso BIT = 0
+
+    SELECT @TienePermiso = 
+        CASE 
+            WHEN @Accion = 'Leer' THEN MAX(CASE WHEN rpa.PuedeLeer = 1 THEN 1 ELSE 0 END)
+            WHEN @Accion = 'Crear' THEN MAX(CASE WHEN rpa.PuedeCrear = 1 THEN 1 ELSE 0 END)
+            WHEN @Accion = 'Editar' THEN MAX(CASE WHEN rpa.PuedeEditar = 1 THEN 1 ELSE 0 END)
+            WHEN @Accion = 'Eliminar' THEN MAX(CASE WHEN rpa.PuedeEliminar = 1 THEN 1 ELSE 0 END)
+            WHEN @Accion = 'Exportar' THEN MAX(CASE WHEN rpa.PuedeExportar = 1 THEN 1 ELSE 0 END)
+            ELSE 0
+        END
+    FROM Usuarios u
+    INNER JOIN UsuarioRol ur ON u.Id = ur.UsuarioId
+    INNER JOIN Rol r ON ur.RolId = r.Id
+    INNER JOIN RolPaginaAccion rpa ON r.Id = rpa.RolId
+    WHERE u.Id = @UsuarioId
+        AND rpa.PaginaId = @PaginaId
+        AND u.Estatus = 1
+        AND ur.Estatus = 1
+        AND r.Estatus = 1
+        AND rpa.Estatus = 1
+
+    SELECT ISNULL(@TienePermiso, 0) AS TienePermiso
+END
+GO
+USE [master]
+GO
+ALTER DATABASE [db_9c7990_servicedeskdesi] SET  READ_WRITE 
+GO
