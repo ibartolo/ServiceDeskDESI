@@ -176,8 +176,9 @@ namespace ServiceDeskDESIWebApi.App_Start
             var clientSecret = ConfigurationManager.AppSettings["client_secret"];
 
             var providedSecret = context.Parameters.Get("client_secret");
+            var clientContexId = context.Parameters.Get("client_id");
 
-            if (string.Equals(context.ClientId, clientId, StringComparison.Ordinal) &&
+            if (string.Equals(clientContexId, clientId, StringComparison.Ordinal) &&
                 string.Equals(providedSecret, clientSecret, StringComparison.Ordinal))
             {
                 context.Validated();
