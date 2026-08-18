@@ -746,29 +746,29 @@ GO
 -- =========================================
 -- D1: Tenant de primera clase — EmpresaId en tablas de dominio
 -- =========================================
-ALTER TABLE [dbo].[Activo] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Activo] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[Area] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Area] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[Categoria] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Categoria] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[CategoriaResponsable] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[CategoriaResponsable] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[Marca] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Marca] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[Modelo] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Modelo] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[Persona] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Persona] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[Puesto] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Puesto] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[Rol] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Rol] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[Sucursal] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Sucursal] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[Ticket] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[Ticket] ADD [EmpresaId] [bigint] NOT NULL
 GO
-ALTER TABLE [dbo].[TipoActivo] ADD [EmpresaId] [bigint] NULL
+ALTER TABLE [dbo].[TipoActivo] ADD [EmpresaId] [bigint] NOT NULL
 GO
 ALTER TABLE [dbo].[Activo]  WITH CHECK ADD  CONSTRAINT [FK_Activo_Empresa] FOREIGN KEY([EmpresaId]) REFERENCES [dbo].[Empresa] ([Id])
 GO
@@ -1038,10 +1038,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Rol r
-        INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
-        WHERE r.Id = @RolId 
-            AND u.EmpresaId = @EmpresaId
-            AND u.Estatus = 1
+        WHERE r.Id = @RolId
+            AND r.EmpresaId = @EmpresaId
     )
     BEGIN
         SELECT 0
@@ -1172,10 +1170,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Activo a
-        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
         WHERE a.Id = @Id 
-            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-            AND u.Estatus = 1
+            AND a.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     )
     BEGIN
         SELECT 0
@@ -1209,10 +1205,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Area a
-        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
         WHERE a.Id = @Id 
-            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-            AND u.Estatus = 1
+            AND a.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     )
     BEGIN
         SELECT 0
@@ -1248,10 +1242,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Categoria c
-        INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
         WHERE c.Id = @Id 
-            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-            AND u.Estatus = 1
+            AND c.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     )
     BEGIN
         SELECT 0
@@ -1290,10 +1282,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM CategoriaResponsable cr
-        INNER JOIN Usuarios u ON cr.UsuarioId = u.Id
         WHERE cr.Id = @Id
-            AND u.EmpresaId = @EmpresaId
-            AND u.Estatus = 1
+            AND cr.EmpresaId = @EmpresaId
     )
     BEGIN
         SELECT 0
@@ -1427,10 +1417,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Marca m
-        INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
         WHERE m.Id = @Id 
-            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-            AND u.Estatus = 1
+            AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     )
     BEGIN
         SELECT 0
@@ -1466,10 +1454,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Modelo mo
-        INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
         WHERE mo.Id = @Id 
-            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-            AND u.Estatus = 1
+            AND mo.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     )
     BEGIN
         SELECT 0
@@ -1507,10 +1493,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Rol r
-        INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
         WHERE r.Id = @RolId
-            AND u.EmpresaId = @EmpresaId
-            AND u.Estatus = 1
+            AND r.EmpresaId = @EmpresaId
     )
     BEGIN
         SELECT 0 AS Resultado
@@ -1560,10 +1544,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Persona p
-        INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
         WHERE p.Id = @Id 
-            AND u.EmpresaId = @EmpresaId
-            AND u.Estatus = 1
+            AND p.EmpresaId = @EmpresaId
     )
     BEGIN
         SELECT 0
@@ -1615,10 +1597,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Puesto p
-        INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
         WHERE p.Id = @Id 
-            AND u.EmpresaId = @EmpresaId
-            AND u.Estatus = 1
+            AND p.EmpresaId = @EmpresaId
     )
     BEGIN
         SELECT 0
@@ -1656,10 +1636,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Rol r
-        INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
         WHERE r.Id = @Id 
-            AND u.EmpresaId = @EmpresaId
-            AND u.Estatus = 1
+            AND r.EmpresaId = @EmpresaId
     )
     BEGIN
         SELECT 0
@@ -1791,10 +1769,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Sucursal s
-        INNER JOIN Usuarios u ON s.CreadoPor = u.NombreUsuario
         WHERE s.Id = @Id 
-            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-            AND u.Estatus = 1
+            AND s.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     )
     BEGIN
         SELECT 0
@@ -1830,10 +1806,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1
         FROM Ticket t
-        INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
         WHERE t.Id = @Id
-            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-            AND u.Estatus = 1
+            AND t.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     )
     BEGIN
         SELECT 0
@@ -1869,10 +1843,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM TipoActivo ta
-        INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
         WHERE ta.Id = @Id 
-            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-            AND u.Estatus = 1
+            AND ta.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     )
     BEGIN
         SELECT 0
@@ -2399,10 +2371,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Categoria c
-        INNER JOIN Area a ON c.AreaId = a.Id
-        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
         WHERE c.Id = @CategoriaId
-            AND u.EmpresaId = @EmpresaId
+            AND c.EmpresaId = @EmpresaId
             AND c.Estatus = 1
     )
     BEGIN
@@ -2434,9 +2404,9 @@ BEGIN
         END
 
         INSERT INTO CategoriaResponsable
-        (CategoriaId, UsuarioId, EsPrincipal, CreadoPor, FechaCreacion, Estatus)
+        (CategoriaId, UsuarioId, EsPrincipal, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@CategoriaId, @UsuarioId, @EsPrincipal, @CreadoPor, @FechaCreacion, @Estatus)
+        (@CategoriaId, @UsuarioId, @EsPrincipal, @CreadoPor, @FechaCreacion, @Estatus, @EmpresaId)
 
         SELECT SCOPE_IDENTITY()
     END
@@ -2635,10 +2605,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Marca m
-            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
             WHERE m.Id = @Id 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2671,9 +2639,9 @@ BEGIN
         END
 
         INSERT INTO Marca
-        (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus)
+        (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, @Estatus)
+        (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, @Estatus, (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1))
 
         SELECT SCOPE_IDENTITY()
     END
@@ -2707,10 +2675,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Modelo mo
-            INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
             WHERE mo.Id = @Id 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND mo.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2721,10 +2687,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Marca m
-            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
             WHERE m.Id = @MarcaId 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2761,10 +2725,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Marca m
-            INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
             WHERE m.Id = @MarcaId 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -2772,9 +2734,9 @@ BEGIN
         END
 
         INSERT INTO Modelo
-        (Nombre, Descripcion, MarcaId, CreadoPor, FechaCreacion, Estatus)
+        (Nombre, Descripcion, MarcaId, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Descripcion, @MarcaId, @CreadoPor, @FechaCreacion, @Estatus)
+        (@Nombre, @Descripcion, @MarcaId, @CreadoPor, @FechaCreacion, @Estatus, (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1))
 
         SELECT SCOPE_IDENTITY()
     END
@@ -2824,10 +2786,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Puesto p
-        INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
         WHERE p.Id = @PuestoId 
-            AND u.EmpresaId = @EmpresaId
-            AND u.Estatus = 1
+            AND p.EmpresaId = @EmpresaId
     )
     BEGIN
         SELECT 0
@@ -2840,10 +2800,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Persona p
-            INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
             WHERE p.Id = @Id 
-                AND u.EmpresaId = @EmpresaId
-                AND u.Estatus = 1
+                AND p.EmpresaId = @EmpresaId
         )
         BEGIN
             SELECT 0
@@ -2866,9 +2824,9 @@ BEGIN
     ELSE
     BEGIN
         INSERT INTO Persona
-        (Nombre, Apellido, Correo, Telefono, PuestoId, CreadoPor, FechaCreacion, Estatus)
+        (Nombre, Apellido, Correo, Telefono, PuestoId, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Apellido, @Correo, @Telefono, @PuestoId, @CreadoPor, @FechaCreacion, @Estatus)
+        (@Nombre, @Apellido, @Correo, @Telefono, @PuestoId, @CreadoPor, @FechaCreacion, @Estatus, @EmpresaId)
 
         SELECT SCOPE_IDENTITY()
     END
@@ -2917,10 +2875,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Puesto p
-            INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
             WHERE p.Id = @Id 
-                AND u.EmpresaId = @EmpresaId
-                AND u.Estatus = 1
+                AND p.EmpresaId = @EmpresaId
         )
         BEGIN
             SELECT 0
@@ -2943,10 +2899,8 @@ BEGIN
         IF EXISTS(
             SELECT 1 
             FROM Puesto p
-            INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
             WHERE p.Nombre = @Nombre 
-                AND u.EmpresaId = @EmpresaId
-                AND u.Estatus = 1
+                AND p.EmpresaId = @EmpresaId
         )
         BEGIN
             SELECT -1
@@ -2954,9 +2908,9 @@ BEGIN
         END
 
         INSERT INTO Puesto
-        (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus)
+        (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, @Estatus)
+        (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, @Estatus, @EmpresaId)
 
         SELECT SCOPE_IDENTITY()
     END
@@ -2993,10 +2947,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Rol r
-            INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
             WHERE r.Id = @Id 
-                AND u.EmpresaId = @EmpresaId
-                AND u.Estatus = 1
+                AND r.EmpresaId = @EmpresaId
         )
         BEGIN
             SELECT 0
@@ -3020,10 +2972,8 @@ BEGIN
         IF EXISTS(
             SELECT 1 
             FROM Rol r
-            INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
             WHERE r.Nombre = @Nombre 
-                AND u.EmpresaId = @EmpresaId
-                AND u.Estatus = 1
+                AND r.EmpresaId = @EmpresaId
         )
         BEGIN
             SELECT -1
@@ -3031,9 +2981,9 @@ BEGIN
         END
 
         INSERT INTO Rol
-        (Nombre, Descripcion, PuedeAtenderTickets, CreadoPor, FechaCreacion, Estatus)
+        (Nombre, Descripcion, PuedeAtenderTickets, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Descripcion, @PuedeAtenderTickets, @CreadoPor, @FechaCreacion, @Estatus)
+        (@Nombre, @Descripcion, @PuedeAtenderTickets, @CreadoPor, @FechaCreacion, @Estatus, @EmpresaId)
 
         SELECT SCOPE_IDENTITY()
     END
@@ -3068,10 +3018,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Sucursal s
-            INNER JOIN Usuarios u ON s.CreadoPor = u.NombreUsuario
             WHERE s.Id = @Id 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND s.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -3108,9 +3056,9 @@ BEGIN
         END
 
         INSERT INTO Sucursal
-        (Nombre, Descripcion, Calle, Ciudad, Colonia, CodigoPostal, CreadoPor, FechaCreacion, Estatus)
+        (Nombre, Descripcion, Calle, Ciudad, Colonia, CodigoPostal, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Descripcion, @Calle, @Ciudad, @Colonia, @CodigoPostal, @CreadoPor, @FechaCreacion, @Estatus)
+        (@Nombre, @Descripcion, @Calle, @Ciudad, @Colonia, @CodigoPostal, @CreadoPor, @FechaCreacion, @Estatus, (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1))
 
         SELECT SCOPE_IDENTITY()
     END
@@ -3162,10 +3110,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Area a
-        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
         WHERE a.Id = @Area 
-            AND u.EmpresaId = @EmpresaId
-            AND u.Estatus = 1
+            AND a.EmpresaId = @EmpresaId
     )
     BEGIN
         SELECT 0
@@ -3176,11 +3122,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Categoria c
-        INNER JOIN Area a ON c.AreaId = a.Id
-        INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
         WHERE c.Id = @Categoria 
-            AND u.EmpresaId = @EmpresaId
-            AND c.Estatus = 1
+            AND c.EmpresaId = @EmpresaId
     )
     BEGIN
         SELECT 0
@@ -3200,10 +3143,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Ticket t
-            INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
             WHERE t.Id = @Id 
-                AND u.EmpresaId = @EmpresaId
-                AND u.Estatus = 1
+                AND t.EmpresaId = @EmpresaId
         )
         BEGIN
             SELECT 0
@@ -3229,10 +3170,10 @@ BEGIN
     BEGIN
         INSERT INTO Ticket
         (AreaId, CategoriaId, SubcategoriaId, Urgencia, Titulo, Descripcion, 
-         TicketEstatusId, CreadoPor, FechaCreacion, Estatus)
+         TicketEstatusId, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
         (@Area, @Categoria, @Subcategoria, @Urgencia, @Titulo, @Descripcion,
-         @TicketEstatusId, @CreadoPor, @FechaCreacion, @Estatus)
+         @TicketEstatusId, @CreadoPor, @FechaCreacion, @Estatus, @EmpresaId)
 
         SELECT SCOPE_IDENTITY()
     END
@@ -3265,10 +3206,8 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM TipoActivo ta
-            INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
             WHERE ta.Id = @Id 
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
+                AND ta.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
             SELECT 0
@@ -3301,9 +3240,9 @@ BEGIN
         END
 
         INSERT INTO TipoActivo
-        (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus)
+        (Nombre, Descripcion, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, @Estatus)
+        (@Nombre, @Descripcion, @CreadoPor, @FechaCreacion, @Estatus, (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1))
 
         SELECT SCOPE_IDENTITY()
     END
@@ -3849,10 +3788,9 @@ BEGIN
     INNER JOIN TipoActivo ta ON a.TipoActivoID = ta.Id
     INNER JOIN Marca m ON a.MarcaID = m.Id
     INNER JOIN Modelo mo ON a.ModeloID = mo.Id
-    INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
     WHERE a.Id = @Id 
         AND a.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND a.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerActivos]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -3882,9 +3820,8 @@ BEGIN
     INNER JOIN TipoActivo ta ON a.TipoActivoID = ta.Id
     INNER JOIN Marca m ON a.MarcaID = m.Id
     INNER JOIN Modelo mo ON a.ModeloID = mo.Id
-    INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
     WHERE a.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND a.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY a.Nombre
 END
 GO
@@ -3904,10 +3841,9 @@ AS
 BEGIN
     SELECT a.*
     FROM Area a
-    INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
     WHERE a.Id = @Id 
         AND a.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND a.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerAreas]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -3928,9 +3864,8 @@ AS
 BEGIN
     SELECT a.*
     FROM Area a
-    INNER JOIN Usuarios u ON a.CreadoPor = u.NombreUsuario
     WHERE a.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND a.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY a.Nombre
 END
 GO
@@ -3953,11 +3888,10 @@ BEGIN
            cp.Nombre as CategoriaPadreNombre
     FROM Categoria c
     INNER JOIN Area a ON c.AreaId = a.Id
-    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
     LEFT JOIN Categoria cp ON c.CategoriaPadreId = cp.Id
     WHERE c.Id = @Id 
         AND c.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND c.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerCategorias]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -3982,10 +3916,9 @@ BEGIN
            CASE WHEN c.CategoriaPadreId IS NULL THEN 1 ELSE 2 END as Nivel
     FROM Categoria c
     INNER JOIN Area a ON c.AreaId = a.Id
-    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
     LEFT JOIN Categoria cp ON c.CategoriaPadreId = cp.Id
     WHERE c.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND c.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY c.CategoriaPadreId, c.Orden
 END
 GO
@@ -4009,11 +3942,10 @@ BEGIN
            CASE WHEN c.CategoriaPadreId IS NULL THEN 1 ELSE 2 END as Nivel
     FROM Categoria c
     INNER JOIN Area a ON c.AreaId = a.Id
-    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
     LEFT JOIN Categoria cp ON c.CategoriaPadreId = cp.Id
     WHERE c.AreaId = @AreaId 
         AND c.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND c.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY c.CategoriaPadreId, c.Orden
 END
 GO
@@ -4035,10 +3967,9 @@ BEGIN
            a.Nombre as AreaNombre
     FROM Categoria c
     INNER JOIN Area a ON c.AreaId = a.Id
-    INNER JOIN Usuarios u ON c.CreadoPor = u.NombreUsuario
     WHERE c.CategoriaPadreId = @CategoriaPadreId 
         AND c.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND c.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY c.Orden
 END
 GO
@@ -4259,9 +4190,8 @@ AS
 BEGIN
     SELECT m.*
     FROM Marca m
-    INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
     WHERE m.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY m.Nombre
 END
 GO
@@ -4281,10 +4211,9 @@ AS
 BEGIN
     SELECT m.*
     FROM Marca m
-    INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
     WHERE m.Id = @Id 
         AND m.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerModelo]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -4309,9 +4238,8 @@ BEGIN
            m.Descripcion as MarcaDescripcion
     FROM Modelo mo
     INNER JOIN Marca m ON mo.MarcaId = m.Id
-    INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
     WHERE mo.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND mo.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY m.Nombre, mo.Nombre
 END
 GO
@@ -4334,10 +4262,9 @@ BEGIN
            m.Descripcion as MarcaDescripcion
     FROM Modelo mo
     INNER JOIN Marca m ON mo.MarcaId = m.Id
-    INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
     WHERE mo.Id = @Id 
         AND mo.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND mo.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerModelos]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -4375,10 +4302,9 @@ BEGIN
            m.Descripcion as MarcaDescripcion
     FROM Modelo mo
     INNER JOIN Marca m ON mo.MarcaId = m.Id
-    INNER JOIN Usuarios u ON mo.CreadoPor = u.NombreUsuario
     WHERE mo.MarcaId = @MarcaId 
         AND mo.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND mo.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY mo.Nombre
 END
 GO
@@ -4397,10 +4323,9 @@ AS
 BEGIN
     SELECT m.*
     FROM Modelo m
-    INNER JOIN Usuarios u ON m.CreadoPor = u.NombreUsuario
     WHERE m.Estatus = 1 
         AND m.MarcaId = @MarcaId
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY m.Nombre
 END
 GO
@@ -4496,10 +4421,8 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Rol r
-        INNER JOIN Usuarios u ON r.CreadoPor = u.NombreUsuario
         WHERE r.Id = @RolId
-            AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-            AND u.Estatus = 1
+            AND r.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     )
     BEGIN
         SELECT NULL AS Error
@@ -4572,10 +4495,9 @@ BEGIN
            pu.Nombre as PuestoNombre
     FROM Persona p
     INNER JOIN Puesto pu ON p.PuestoId = pu.Id
-    INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
     WHERE p.Id = @Id 
         AND p.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND p.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerPersonas]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -4599,9 +4521,8 @@ BEGIN
            pu.Nombre as PuestoNombre
     FROM Persona p
     INNER JOIN Puesto pu ON p.PuestoId = pu.Id
-    INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
     WHERE p.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND p.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY p.Nombre, p.Apellido
 END
 GO
@@ -4621,10 +4542,9 @@ AS
 BEGIN
     SELECT p.*
     FROM Puesto p
-    INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
     WHERE p.Id = @Id 
         AND p.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND p.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerPuestos]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -4645,9 +4565,8 @@ AS
 BEGIN
     SELECT p.*
     FROM Puesto p
-    INNER JOIN Usuarios u ON p.CreadoPor = u.NombreUsuario
     WHERE p.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND p.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY p.Nombre
 END
 GO
@@ -4710,13 +4629,7 @@ BEGIN
     SELECT r.*
     FROM Rol r
     WHERE r.Estatus = 1
-        AND EXISTS(
-            SELECT 1 
-            FROM Usuarios u
-            WHERE u.NombreUsuario = r.CreadoPor
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
-        )
+        AND r.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY r.Nombre
 END
 GO
@@ -4762,13 +4675,7 @@ BEGIN
     FROM Rol r
     WHERE r.Id = @Id 
         AND r.Estatus = 1
-        AND EXISTS(
-            SELECT 1 
-            FROM Usuarios u
-            WHERE u.NombreUsuario = r.CreadoPor
-                AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
-                AND u.Estatus = 1
-        )
+        AND r.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerSucursales]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -4789,9 +4696,8 @@ AS
 BEGIN
     SELECT s.*
     FROM Sucursal s
-    INNER JOIN Usuarios u ON s.CreadoPor = u.NombreUsuario
     WHERE s.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND s.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY s.Nombre
 END
 GO
@@ -4811,10 +4717,9 @@ AS
 BEGIN
     SELECT s.*
     FROM Sucursal s
-    INNER JOIN Usuarios u ON s.CreadoPor = u.NombreUsuario
     WHERE s.Id = @Id 
         AND s.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND s.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerTicketEstatus]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -4863,7 +4768,7 @@ BEGIN
     INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
     WHERE t.Id = @Id 
         AND t.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND t.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerTickets]    Script Date: 17/08/2026 09:59:02 p. m. ******/
@@ -4898,7 +4803,7 @@ BEGIN
     INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
     INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
     WHERE t.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND t.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY t.FechaCreacion DESC
 END
 GO
@@ -4932,7 +4837,7 @@ BEGIN
     INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
     WHERE t.AreaId = @AreaId 
         AND t.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND t.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY t.FechaCreacion DESC
 END
 GO
@@ -4966,7 +4871,7 @@ BEGIN
     INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
     WHERE t.TicketEstatusId = @TicketEstatusId 
         AND t.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND t.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY t.FechaCreacion DESC
 END
 GO
@@ -5000,7 +4905,7 @@ BEGIN
     INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
     WHERE t.Urgencia = @Urgencia 
         AND t.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND t.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY t.FechaCreacion DESC
 END
 GO
@@ -5034,7 +4939,7 @@ BEGIN
     INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
     WHERE t.CreadoPor = @CreadoPor 
         AND t.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND t.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY t.FechaCreacion DESC
 END
 GO
@@ -5056,9 +4961,8 @@ AS
 BEGIN
     SELECT ta.*
     FROM TipoActivo ta
-    INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
     WHERE ta.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND ta.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
     ORDER BY ta.Nombre
 END
 GO
@@ -5078,10 +4982,9 @@ AS
 BEGIN
     SELECT ta.*
     FROM TipoActivo ta
-    INNER JOIN Usuarios u ON ta.CreadoPor = u.NombreUsuario
     WHERE ta.Id = @Id 
         AND ta.Estatus = 1 
-        AND u.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+        AND ta.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
 END
 GO
 /****** Object:  StoredProcedure [dbo].[ObtenerTokenRecuperacion]    Script Date: 17/08/2026 09:59:02 p. m. ******/

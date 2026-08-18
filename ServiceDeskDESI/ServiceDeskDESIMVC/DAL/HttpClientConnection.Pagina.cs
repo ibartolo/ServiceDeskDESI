@@ -23,22 +23,5 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
-
-        public async Task<ModelResponse> ValidarAccesoPagina(string direccion)
-        {
-            var request = new
-            {
-                Direccion = direccion
-            };
-
-            var result = await RequestAsync<object>($"api/Pagina/ValidarAcceso", HttpMethod.Post, request,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
-        }
     }
 }

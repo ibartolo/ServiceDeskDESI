@@ -38,34 +38,6 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ValidarAccesoPagina(string usuario, string direccion)
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var resultado = ExecuteScalar("ValidarAccesoPagina", CommandType.StoredProcedure, new SqlParameter[]
-                {
-                    new SqlParameter("@Usuario", usuario),
-                    new SqlParameter("@Direccion", direccion)
-                });
-
-                var tieneAcceso = Convert.ToInt32(resultado) == 1;
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = tieneAcceso;
-                modelResponse.Message = tieneAcceso ? "Acceso permitido" : "Acceso denegado";
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error al validar acceso para usuario {Usuario} a {Direccion}", usuario, direccion);
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al validar el acceso";
-            }
-
-            return modelResponse;
-        }
-
         public ModelResponse ObtenerPaginaPorNombre(string nombre)
         {
             var modelResponse = new ModelResponse();

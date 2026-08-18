@@ -33,19 +33,6 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         /// <summary>
-        /// Valida si el usuario autenticado tiene acceso a una página específica
-        /// </summary>
-        /// <param name="request">Objeto con la dirección de la página</param>
-        /// <returns>True si tiene acceso, False en caso contrario</returns>
-        [HttpPost, Route("ValidarAcceso")]
-        public ModelResponse ValidarAccesoPagina([FromBody] ValidarAccesoRequest request)
-        {
-            var usuario = User.Identity.Name;
-            var result = _paginaService.ValidarAccesoPagina(usuario, request.Direccion);
-            return result;
-        }
-
-        /// <summary>
         /// Obtiene todas las páginas del sistema (activas)
         /// </summary>
         /// <returns>Lista de páginas</returns>
@@ -67,10 +54,5 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = _paginaService.ObtenerPaginaPorNombre(nombre);
             return result;
         }
-    }
-
-    public class ValidarAccesoRequest
-    {
-        public string Direccion { get; set; }
     }
 }
