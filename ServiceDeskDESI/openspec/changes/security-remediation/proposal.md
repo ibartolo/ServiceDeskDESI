@@ -9,29 +9,33 @@
 
 > Referencias: **W**=webapi-review, **D**=database-review, **M**=mvc-review, **E**=entities-review (número de hallazgo).
 
-| Hallazgo consolidado (referencias) | Severidad | Fase |
-|---|---|---|
-| Secretos en git: connection string + password SMTP en `Web.config` (W1) | CRÍTICO/URGENTE | 1 |
-| Sin autorización real de extremo a extremo: `[AllowAnonymous]` de clase, claim `role="user"` hardcodeado, `AllowInsecureHttp`, `ValidateClientAuthentication` ciego, CORS `*`, sin `[Authorize(Roles)]`, permisos solo cosméticos (W2, W3, W5, M2) | CRÍTICO/URGENTE | 1 |
-| Contraseñas reversibles (Rijndael `P@@Sw0rd`) + default `Admin123!` + `Contrasena` devuelta en respuestas y renderizada en HTML (W4, D3, M4, E1) | CRÍTICO/URGENTE | 1 |
-| Fuga de datos entre tenants: SPs sin filtro, IDOR (`EliminarTicket`, `CambiarEstatusTicket`), endpoints anónimos, `@Usuario` spoofeable, directorio de empresas expuesto (D1, D2, D15, W6, M6, M11) | CRÍTICO/URGENTE | 1 |
-| Trial sin enforcement: `AutenticarUsuario` no valida vigencia (D5) | CRÍTICO/URGENTE | 1 |
-| Info disclosure: `debug=true`, `customErrors mode=Off`, NRE en cadena con stack trace (M7) | CRÍTICO/URGENTE | 1 |
-| Sesión/expiración no forzada: `UserController` sin `[Autenticated]`, `BaseController` muerto, `PermissionsController` roto por DI (M1, M3, M8) | CRÍTICO/URGENTE | 1 |
-| Tenant estructural: sin `EmpresaId` en tablas de dominio, `NombreUsuario` no único, tenant vía `CreadoPor` (string) (D1) | ALTO | 2 |
-| Registro de empresa sin transacción (8+ SPs sueltos) + provisioning sin template (D4) | ALTO | 2 |
-| Bugs de BD que rompen flujos: rol sin `PuedeAtenderTickets`, typo `nvarchaR`, `@@IDENTITY`, JOIN muerto en `ObtenerEmpresas`, `Estatus` comentado (D6, D10, D11, D12, D13) | ALTO | 2 |
-| Dos sistemas de permisos en conflicto: `RolPaginaAccion` vs `UsuarioPagina` (D7) | ALTO | 2 |
-| Mapeo por reflection frágil + FKs como navegación vs `*Id` + `TicketEstatus.Id` int/long (W10, E2, E3) | ALTO | 2 |
-| Contrato de respuesta sin tipar: `ModelResponse.Response object`, `IsSuccess=true` por defecto (E8) | ALTO | 2 |
-| CSRF / verbos HTTP ausentes / `[FromBody]` (WebApi) dentro de MVC (M13, M14) | ALTO | 2 |
-| FKs sin entidad (`RolPaginaAccion`, `UsuarioRol`, `TokenRecuperacion`) + `Compania` vs `Empresa` (E4, E10, D17) | MEDIO | 3 |
-| Robustez de datos: NULLabilidad no reflejada en POCOs, `throw ex` resetea stack, `ObtenerUsuarios` devuelve borrados (E5, W9, D13) | MEDIO | 3 |
-| Sin manejo global de excepciones / códigos HTTP; validación manual duplicada sin ModelState (W12, W13, M15, E6) | MEDIO | 3 |
-| Sin índices no-cluster ni paginación en listados (D8, W11, D9) | MEDIO | 3 |
-| Rendimiento: N+1 en `ConsultarUsuariosQuePuedenAtender`, dedupe client-side de RFC/correo (M10, M6) | MEDIO | 3 |
-| Higiene de código: dependencias muertas (EF Core), Swagger duplicado, layering MVC→WebApi, código muerto, lógica en controllers (W7, W8, M9, M12, M12bis, W14) | MEDIO | 3 |
-| Naming/typos, rutas ES/EN mixtas, magic numbers, dashboard mock, `_Layout` null, seed data no reproducible (W15, W17, M16-M20, D16, D18-D21, E7, E9, E11-E14) | BAJO | 4 |
+| Estado | Hallazgo consolidado (referencias) | Severidad | Fase |
+|---|---|---|---|
+| Pendiente | Secretos en git: connection string + password SMTP en `Web.config` (W1) | CRÍTICO/URGENTE | 1 |
+| Hecho — `autorizacion-e2e` | Sin autorización real de extremo a extremo: `[AllowAnonymous]` de clase, claim `role="user"` hardcodeado, `AllowInsecureHttp`, `ValidateClientAuthentication` ciego, CORS `*`, sin `[Authorize(Roles)]`, permisos solo cosméticos (W2, W3, W5, M2) | CRÍTICO/URGENTE | 1 |
+| Pendiente | Contraseñas reversibles (Rijndael `P@@Sw0rd`) + default `Admin123!` + `Contrasena` devuelta en respuestas y renderizada en HTML (W4, D3, M4, E1) | CRÍTICO/URGENTE | 1 |
+| Hecho — `tenant-isolation` (contención) | Fuga de datos entre tenants: SPs sin filtro, IDOR (`EliminarTicket`, `CambiarEstatusTicket`), endpoints anónimos, `@Usuario` spoofeable, directorio de empresas expuesto (D1, D2, D15, W6, M6, M11) | CRÍTICO/URGENTE | 1 |
+| Pendiente | Trial sin enforcement: `AutenticarUsuario` no valida vigencia (D5) | CRÍTICO/URGENTE | 1 |
+| Parcial — NRE/`RequestAsync` listo; `debug=false`/`customErrors` pendiente | Info disclosure: `debug=true`, `customErrors mode=Off`, NRE en cadena con stack trace (M7) | CRÍTICO/URGENTE | 1 |
+| Hecho — `sesion-expiracion` | Sesión/expiración no forzada: `UserController` sin `[Autenticated]`, `BaseController` muerto, `PermissionsController` roto por DI (M1, M3, M8) | CRÍTICO/URGENTE | 1 |
+| Pendiente | Tenant estructural: sin `EmpresaId` en tablas de dominio, `NombreUsuario` no único, tenant vía `CreadoPor` (string) (D1) | ALTO | 2 |
+| Parcial — transacción lista; template pendiente | Registro de empresa sin transacción (8+ SPs sueltos) + provisioning sin template (D4) | ALTO | 2 |
+| Hecho — `bugs-bd` | Bugs de BD que rompen flujos: rol sin `PuedeAtenderTickets`, typo `nvarchaR`, `@@IDENTITY`, JOIN muerto en `ObtenerEmpresas`, `Estatus` comentado (D6, D10, D11, D12, D13) | ALTO | 2 |
+| Parcial — `RolPaginaAccion` autoritativo; deprecar `UsuarioPagina` pendiente | Dos sistemas de permisos en conflicto: `RolPaginaAccion` vs `UsuarioPagina` (D7) | ALTO | 2 |
+| Parcial — E3+W10 listos; E2 (FKs→`*Id`) pendiente | Mapeo por reflection frágil + FKs como navegación vs `*Id` + `TicketEstatus.Id` int/long (W10, E2, E3) | ALTO | 2 |
+| Pendiente | Contrato de respuesta sin tipar: `ModelResponse.Response object`, `IsSuccess=true` por defecto (E8) | ALTO | 2 |
+| Pendiente | CSRF / verbos HTTP ausentes / `[FromBody]` (WebApi) dentro de MVC (M13, M14) | ALTO | 2 |
+| Pendiente | FKs sin entidad (`RolPaginaAccion`, `UsuarioRol`, `TokenRecuperacion`) + `Compania` vs `Empresa` (E4, E10, D17) | MEDIO | 3 |
+| Parcial — `Estatus` borrados listo; nullabilidad (E5) y `throw ex` (W9) pendientes | Robustez de datos: NULLabilidad no reflejada en POCOs, `throw ex` resetea stack, `ObtenerUsuarios` devuelve borrados (E5, W9, D13) | MEDIO | 3 |
+| Pendiente | Sin manejo global de excepciones / códigos HTTP; validación manual duplicada sin ModelState (W12, W13, M15, E6) | MEDIO | 3 |
+| Pendiente | Sin índices no-cluster ni paginación en listados (D8, W11, D9) | MEDIO | 3 |
+| Parcial — dedupe server-side (M6) listo; N+1 (M10) pendiente | Rendimiento: N+1 en `ConsultarUsuariosQuePuedenAtender`, dedupe client-side de RFC/correo (M10, M6) | MEDIO | 3 |
+| Pendiente | Higiene de código: dependencias muertas (EF Core), Swagger duplicado, layering MVC→WebApi, código muerto, lógica en controllers (W7, W8, M9, M12, M12bis, W14) | MEDIO | 3 |
+| Pendiente | Naming/typos, rutas ES/EN mixtas, magic numbers, dashboard mock, `_Layout` null, seed data no reproducible (W15, W17, M16-M20, D16, D18-D21, E7, E9, E11-E14) | BAJO | 4 |
+
+> **Estado**: **Hecho** = implementado (se indica el cambio SDD). **Parcial** = avance parcial (se indica lo que falta). **Pendiente** = sin iniciar.
+>
+> Cambios SDD ya cerrados: `autorizacion-e2e`, `tenant-isolation`, `sesion-expiracion`, `bugs-bd`, `mapeo-reflection`.
 
 ---
 
