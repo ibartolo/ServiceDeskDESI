@@ -312,5 +312,106 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+        public ModelResponse TomarTicket(long ticketId, string usuario, string comentario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("TomarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@Usuario", usuario),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo tomar el ticket. Verifique que sea un agente, que el ticket sea de su área y que esté disponible.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket tomado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al tomar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al tomar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ReasignarTicket(long ticketId, long nuevoUsuarioId, string usuario, string comentario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("ReasignarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@NuevoUsuarioId", nuevoUsuarioId),
+                    new SqlParameter("@Usuario", usuario),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo reasignar el ticket. Solo el responsable del área puede reasignar.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket reasignado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al reasignar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al reasignar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse<List<TicketAsignacionDTO>> ObtenerTicketAsignaciones(long ticketId)
+        {
+            var modelResponse = new ModelResponse<List<TicketAsignacionDTO>>();
+
+            try
+            {
+                var asignaciones = GetObjects("ObtenerTicketAsignaciones", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@TicketId", ticketId) },
+                    new Func<IDataReader, TicketAsignacionDTO>((reader) =>
+                    {
+                        var ta = LlenarEntidad<TicketAsignacionDTO>(reader);
+                        return ta;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = asignaciones.ToList();
+                modelResponse.Message = "Asignaciones obtenidas correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener asignaciones del ticket {TicketId}", ticketId);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener las asignaciones del ticket.";
+            }
+
+            return modelResponse;
+        }
     }
 }

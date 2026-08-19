@@ -145,6 +145,7 @@
 <script>
     // Pasar permisos a JavaScript
     var permisosGlobal = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(permisos));
+    var esAgenteGlobal = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.EsAgente ?? false));
 
     var tablaTicket;
 
@@ -290,6 +291,17 @@
                     }
                 },
                 {
+                    data: 'AgenteNombre',
+                    title: 'Agente',
+                    defaultContent: '---',
+                    render: function (data, type, row) {
+                        if (row.AgenteNombre) {
+                            return row.AgenteNombre + ' ' + (row.AgenteApellido || '');
+                        }
+                        return '---';
+                    }
+                },
+                {
                     data: 'FechaCreacion',
                     title: 'Fecha Creación',
                     render: function (data) {
@@ -301,8 +313,13 @@
                     }
                 },
                 {
-                    data: 'Id', title: 'Acciones', render: function (data) {
+                    data: 'Id', title: 'Acciones', render: function (data, type, row) {
                         var html = '<div class="d-flex gap-3">';
+
+                        // Botón Tomar - solo si el usuario es agente y el ticket no tiene agente asignado
+                        if (esAgenteGlobal && row && !row.AgenteId) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-success" onclick="TomarTicket(' + data + ')"><i class="fas fa-hand-paper"></i></button>';
+                        }
 
                         // Botón Editar - solo si tiene permiso
                         if (permisosGlobal && permisosGlobal.PuedeEditar) {
@@ -542,6 +559,62 @@
                             }
                             $("#frmTicket")[0].reset();
                             $("#Id").val(0);
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function TomarTicket(id) {
+        Swal.fire({
+            title: '¿Tomar ticket?',
+            text: 'Se te asignará este ticket y pasará a "En Progreso"',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, tomar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#4e73df',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Tomando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                PostMVC('/Ticket/TomarTicket', { ticketId: id, comentario: null }, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: response.Message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        }).then(() => {
+                            var areaId = $("#ddlFiltroArea").val();
+                            if (areaId && areaId !== "") {
+                                ConsultarTicketsPorArea(areaId);
+                            } else {
+                                ConsultarTodasTickets();
+                            }
                         });
                     } else {
                         Swal.fire({

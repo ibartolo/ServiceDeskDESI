@@ -240,5 +240,72 @@ namespace ServiceDeskDESIWebApi.Services
                 };
             }
         }
+
+        public ModelResponse TomarTicket(long ticketId, string usuario, string comentario)
+        {
+            try
+            {
+                if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                return _dbWrapper.TomarTicket(ticketId, usuario, comentario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en TomarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en TicketService.TomarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al tomar el ticket." };
+            }
+        }
+
+        public ModelResponse ReasignarTicket(long ticketId, long nuevoUsuarioId, string usuario, string comentario)
+        {
+            try
+            {
+                if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
+                if (nuevoUsuarioId <= 0) { throw new ArgumentException("El nuevo agente es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                return _dbWrapper.ReasignarTicket(ticketId, nuevoUsuarioId, usuario, comentario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ReasignarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en TicketService.ReasignarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al reasignar el ticket." };
+            }
+        }
+
+        public ModelResponse<List<TicketAsignacionDTO>> ObtenerTicketAsignaciones(long ticketId)
+        {
+            try
+            {
+                if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
+
+                return _dbWrapper.ObtenerTicketAsignaciones(ticketId);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ObtenerTicketAsignaciones");
+                return new ModelResponse<List<TicketAsignacionDTO>> { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en TicketService.ObtenerTicketAsignaciones para ticket {TicketId}", ticketId);
+                return new ModelResponse<List<TicketAsignacionDTO>>
+                {
+                    IsSuccess = false,
+                    Message = "Ocurrió un error al obtener las asignaciones del ticket."
+                };
+            }
+        }
     }
 }

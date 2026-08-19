@@ -63,6 +63,21 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.ObtenerTicketEstatus();
         }
 
+        public async Task<ModelResponse> TomarTicket(long ticketId, string comentario)
+        {
+            return await _httpClient.TomarTicket(ticketId, comentario);
+        }
+
+        public async Task<ModelResponse> ReasignarTicket(long ticketId, long nuevoUsuarioId, string comentario)
+        {
+            return await _httpClient.ReasignarTicket(ticketId, nuevoUsuarioId, comentario);
+        }
+
+        public async Task<ModelResponse<List<TicketAsignacionDTO>>> ObtenerTicketAsignaciones(long ticketId)
+        {
+            return await _httpClient.ObtenerTicketAsignaciones(ticketId);
+        }
+
         public async Task<object> ObtenerPermisosParaTicket()
         {
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();

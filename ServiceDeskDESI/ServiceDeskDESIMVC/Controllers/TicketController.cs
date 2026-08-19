@@ -19,12 +19,14 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly TicketService _ticketService;
         private readonly AreaService _areaService;
         private readonly CategoriaService _categoriaService;
+        private readonly RolService _rolService;
 
         public TicketController()
         {
             _ticketService = new TicketService(httpClientConnection);
             _areaService = new AreaService(httpClientConnection);
             _categoriaService = new CategoriaService(httpClientConnection);
+            _rolService = new RolService(httpClientConnection);
         }
 
         public async Task<ActionResult> Index(long id = 0)
@@ -88,6 +90,16 @@ namespace ServiceDeskDESIMVC.Controllers
 
             // Pasar permisos a la vista
             ViewBag.Permisos = permisos;
+
+            // Determinar si el usuario es agente (tiene un rol con PuedeAtenderTickets)
+            bool esAgente = false;
+            var tokenCookie = SessionHelper.GetSessionUser();
+            if (tokenCookie != null && tokenCookie.UserID > 0)
+            {
+                var rolesResponse = await _rolService.ObtenerRolesPorUsuario(tokenCookie.UserID);
+                esAgente = rolesResponse.IsSuccess && rolesResponse.Response != null && rolesResponse.Response.Any(r => r.PuedeAtenderTickets);
+            }
+            ViewBag.EsAgente = esAgente;
 
             return View(ticket);
         }
@@ -201,17 +213,25 @@ namespace ServiceDeskDESIMVC.Controllers
 
         [HttpPost]
         [Permiso("Tickets", "Editar")]
-        public async Task<string> AsignarTicketAgente(long ticketId, long agenteId)
+        public async Task<string> TomarTicket(long ticketId, string comentario)
         {
-            // TODO: Implementar asignación de ticket a un agente
-            // Esta funcionalidad requiere que la tabla Ticket tenga un campo AgenteId
-            // Por ahora es un placeholder
-            var modelResponse = new ModelResponse
-            {
-                IsSuccess = true,
-                Message = "Ticket asignado correctamente"
-            };
-            return JsonConvert.SerializeObject(modelResponse);
+            var response = await _ticketService.TomarTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Editar")]
+        public async Task<string> ReasignarTicket(long ticketId, long nuevoUsuarioId, string comentario)
+        {
+            var response = await _ticketService.ReasignarTicket(ticketId, nuevoUsuarioId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        public async Task<string> ObtenerTicketAsignaciones(long ticketId)
+        {
+            var response = await _ticketService.ObtenerTicketAsignaciones(ticketId);
+            return JsonConvert.SerializeObject(response);
         }
     }
 }

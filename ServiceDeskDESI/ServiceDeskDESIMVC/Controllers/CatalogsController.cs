@@ -77,7 +77,10 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
             }
 
-            // 4. Pasar permisos a la vista
+            // 4. Cargar usuarios que pueden atender tickets (para el dropdown "Responsable del área")
+            ViewBag.UsuariosQuePuedenAtender = await ObtenerUsuariosQuePuedenAtenderLista();
+
+            // 5. Pasar permisos a la vista
             ViewBag.Permisos = permisos;
 
             return View(area);
@@ -948,34 +951,40 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<string> ConsultarUsuariosQuePuedenAtender()
         {
-            var response = await _usuarioService.ConsultarTodosLosUsuarios();
+            var usuariosFiltrados = await ObtenerUsuariosQuePuedenAtenderLista();
+            var response = new ModelResponse<List<UsuarioDTO>>
+            {
+                IsSuccess = true,
+                Response = usuariosFiltrados,
+                Message = "Usuarios obtenidos correctamente"
+            };
+            return JsonConvert.SerializeObject(response);
+        }
 
+        /// <summary>
+        /// Devuelve los usuarios de la empresa que tienen al menos un rol con PuedeAtenderTickets = true.
+        /// </summary>
+        private async Task<List<UsuarioDTO>> ObtenerUsuariosQuePuedenAtenderLista()
+        {
+            var usuariosFiltrados = new List<UsuarioDTO>();
+
+            var response = await _usuarioService.ConsultarTodosLosUsuarios();
             if (response.IsSuccess && response.Response != null)
             {
-                // Filtrar usuarios que pueden atender tickets
-                // Nota: Para esto necesitas que el objeto Usuario tenga la información del rol
-                // o necesitas obtener los roles de cada usuario
-                // Por ahora, filtramos por los usuarios que tengan roles que pueden atender
-                var usuariosFiltrados = new List<UsuarioDTO>();
-
                 foreach (var usuario in response.Response)
                 {
-                    // Obtener roles del usuario
                     var rolesResponse = await _rolService.ObtenerRolesPorUsuario(usuario.Id);
                     if (rolesResponse.IsSuccess && rolesResponse.Response != null)
                     {
-                        // Verificar si alguno de sus roles permite atender tickets
                         if (rolesResponse.Response.Any(r => r.PuedeAtenderTickets))
                         {
                             usuariosFiltrados.Add(usuario);
                         }
                     }
                 }
-
-                response.Response = usuariosFiltrados;
             }
 
-            return JsonConvert.SerializeObject(response);
+            return usuariosFiltrados;
         }
 
         #endregion

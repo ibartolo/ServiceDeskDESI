@@ -139,5 +139,52 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = _ticketService.ObtenerTicketEstatus();
             return result;
         }
+
+        /// <summary>
+        /// Asigna el ticket al agente autenticado (tomar ticket) y lo pasa a "En Progreso".
+        /// </summary>
+        [Permiso("Tickets", "Editar")]
+        [HttpPost, Route("Tomar")]
+        public ModelResponse TomarTicket([FromBody] TomarTicketRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _ticketService.TomarTicket(request.TicketId, usuario, request.Comentario);
+            return result;
+        }
+
+        /// <summary>
+        /// Reasigna el ticket a otro agente. Solo el responsable del área puede hacerlo.
+        /// </summary>
+        [Permiso("Tickets", "Editar")]
+        [HttpPost, Route("Reasignar")]
+        public ModelResponse ReasignarTicket([FromBody] ReasignarTicketRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ReasignarTicket(request.TicketId, request.NuevoUsuarioId, usuario, request.Comentario);
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene el historial de asignaciones de un ticket.
+        /// </summary>
+        [HttpGet, Route("Asignaciones/{ticketId:long}")]
+        public ModelResponse<List<TicketAsignacionDTO>> ObtenerTicketAsignaciones(long ticketId)
+        {
+            var result = _ticketService.ObtenerTicketAsignaciones(ticketId);
+            return result;
+        }
+    }
+
+    public class TomarTicketRequest
+    {
+        public long TicketId { get; set; }
+        public string Comentario { get; set; }
+    }
+
+    public class ReasignarTicketRequest
+    {
+        public long TicketId { get; set; }
+        public long NuevoUsuarioId { get; set; }
+        public string Comentario { get; set; }
     }
 }

@@ -79,6 +79,8 @@
     <Compile Include="Seguridad\UsuarioRol.cs" />
     <Compile Include="Tickets\Ticket.cs" />
     <Compile Include="Tickets\TicketDTO.cs" />
+    <Compile Include="Tickets\TicketAsignacion.cs" />
+    <Compile Include="Tickets\TicketAsignacionDTO.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
