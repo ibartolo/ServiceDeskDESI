@@ -27,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de activos</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerTodosLosActivos()
+        public ModelResponse<List<ActivoDTO>> ObtenerTodosLosActivos()
         {
             var usuario = User.Identity.Name;
             var result = _activoService.ObtenerTodosLosActivos(usuario);
@@ -40,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del activo</param>
         /// <returns>Activo encontrado</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerActivoPorId(long id)
+        public ModelResponse<ActivoDTO> ObtenerActivoPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _activoService.ObtenerActivoPorId(id, usuario);
@@ -54,7 +54,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Activo guardado con su ID actualizado</returns>
         [Permiso("Activos")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarActivo(Activo activo)
+        public ModelResponse<Activo> GuardarOActualizarActivo(Activo activo)
         {
             var usuario = User.Identity.Name;
             var result = _activoService.GuardarOActualizarActivo(activo, usuario);

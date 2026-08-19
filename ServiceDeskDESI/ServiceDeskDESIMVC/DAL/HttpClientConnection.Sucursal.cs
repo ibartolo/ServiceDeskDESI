@@ -12,39 +12,20 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodasLasSucursales()
+        public async Task<ModelResponse<List<Sucursal>>> ObtenerTodasLasSucursales()
         {
-            var result = await RequestAsync<object>($"api/Sucursales/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }),
-                token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<Sucursal>>($"api/Sucursales/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerSucursalPorId(long id)
+        public async Task<ModelResponse<Sucursal>> ObtenerSucursalPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Sucursales/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Sucursal>($"api/Sucursales/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarActualizarSucursal(Sucursal sucursal)
+        public async Task<ModelResponse<Sucursal>> GuardarActualizarSucursal(Sucursal sucursal)
         {
             MappingColumSecurity(sucursal);
-            var result = await RequestAsync<object>($"api/Sucursales/Guardar", HttpMethod.Post, sucursal,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Sucursal>($"api/Sucursales/Guardar", HttpMethod.Post, sucursal, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarSucursal(Sucursal sucursal)
@@ -55,6 +36,7 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }

@@ -18,7 +18,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerPermisosPorUsuario(string usuario)
+        public ModelResponse<List<PermisosViewModel>> ObtenerPermisosPorUsuario(string usuario)
         {
             try
             {
@@ -29,16 +29,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerPermisosPorUsuario para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<PermisosViewModel>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ObtenerPermisosPorUsuario para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los permisos." };
+                return new ModelResponse<List<PermisosViewModel>> { IsSuccess = false, Message = "Ocurrió un error al obtener los permisos." };
             }
         }
 
-        public ModelResponse ValidarPermisoUsuario(string usuario, string nombrePagina, string accion)
+        public ModelResponse<bool> ValidarPermisoUsuario(string usuario, string nombrePagina, string accion)
         {
             try
             {
@@ -68,17 +68,17 @@ namespace ServiceDeskDESIWebApi.Services
             {
                 Log.Warning(ex, "Error de validación en ValidarPermisoUsuario para usuario {Usuario}, página {NombrePagina}, acción {Accion}",
                     usuario, nombrePagina, accion);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<bool> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ValidarPermisoUsuario para usuario {Usuario}, página {NombrePagina}, acción {Accion}",
                     usuario, nombrePagina, accion);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al validar el permiso." };
+                return new ModelResponse<bool> { IsSuccess = false, Message = "Ocurrió un error al validar el permiso." };
             }
         }
 
-        public ModelResponse ObtenerPaginas()
+        public ModelResponse<List<Pagina>> ObtenerPaginas()
         {
             try
             {
@@ -87,11 +87,11 @@ namespace ServiceDeskDESIWebApi.Services
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ObtenerPaginas");
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener las páginas." };
+                return new ModelResponse<List<Pagina>> { IsSuccess = false, Message = "Ocurrió un error al obtener las páginas." };
             }
         }
 
-        public ModelResponse ObtenerPermisosPorRol(long rolId, string usuario)
+        public ModelResponse<List<RolPaginaAccionDTO>> ObtenerPermisosPorRol(long rolId, string usuario)
         {
             try
             {
@@ -103,12 +103,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerPermisosPorRol para rol {RolId} y usuario {Usuario}", rolId, usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<RolPaginaAccionDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ObtenerPermisosPorRol para rol {RolId} y usuario {Usuario}", rolId, usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los permisos del rol." };
+                return new ModelResponse<List<RolPaginaAccionDTO>> { IsSuccess = false, Message = "Ocurrió un error al obtener los permisos del rol." };
             }
         }
 

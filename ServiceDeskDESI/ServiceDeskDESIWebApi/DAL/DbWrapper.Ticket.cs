@@ -1,4 +1,4 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using System;
@@ -13,51 +13,22 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTickets(string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTickets(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<TicketDTO>>();
 
             try
             {
                 var tickets = GetObjects("ObtenerTickets", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
-                    new Func<IDataReader, Ticket>((reader) =>
+                    new Func<IDataReader, TicketDTO>((reader) =>
                     {
-                        var ticket = LlenarEntidad<Ticket>(reader);
-
-                        ticket.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        ticket.Categoria = new Categoria()
-                        {
-                            Id = MapearPorpiedades<long>(reader["CategoriaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["CategoriaNombre"])
-                        };
-
-                        if (reader["SubcategoriaId"] != DBNull.Value)
-                        {
-                            ticket.Subcategoria = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["SubcategoriaId"]),
-                                Nombre = MapearPorpiedades<string>(reader["SubcategoriaNombre"])
-                            };
-                        }
-
-                        ticket.TicketEstatus = new TicketEstatus()
-                        {
-                            Id = MapearPorpiedades<int>(reader["TicketEstatusId"]),
-                            Nombre = MapearPorpiedades<string>(reader["EstatusNombre"]),
-                            Color = MapearPorpiedades<string>(reader["EstatusColor"])
-                        };
-
+                        var ticket = LlenarEntidad<TicketDTO>(reader);
                         return ticket;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = tickets;
+                modelResponse.Response = tickets.ToList();
                 modelResponse.Message = "Tickets obtenidos correctamente";
             }
             catch (Exception ex)
@@ -70,9 +41,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerTicketPorId(long id, string usuario)
+        public ModelResponse<TicketDTO> ObtenerTicketPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<TicketDTO>();
 
             try
             {
@@ -81,38 +52,9 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@Id", id),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Ticket>((reader) =>
+                    new Func<IDataReader, TicketDTO>((reader) =>
                     {
-                        var t = LlenarEntidad<Ticket>(reader);
-
-                        t.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        t.Categoria = new Categoria()
-                        {
-                            Id = MapearPorpiedades<long>(reader["CategoriaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["CategoriaNombre"])
-                        };
-
-                        if (reader["SubcategoriaId"] != DBNull.Value)
-                        {
-                            t.Subcategoria = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["SubcategoriaId"]),
-                                Nombre = MapearPorpiedades<string>(reader["SubcategoriaNombre"])
-                            };
-                        }
-
-                        t.TicketEstatus = new TicketEstatus()
-                        {
-                            Id = MapearPorpiedades<int>(reader["TicketEstatusId"]),
-                            Nombre = MapearPorpiedades<string>(reader["EstatusNombre"]),
-                            Color = MapearPorpiedades<string>(reader["EstatusColor"])
-                        };
-
+                        var t = LlenarEntidad<TicketDTO>(reader);
                         return t;
                     }));
 
@@ -137,22 +79,22 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarTicket(Ticket t, string usuario)
+        public ModelResponse<Ticket> GuardarOActualizarTicket(Ticket t, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Ticket>();
 
             try
             {
                 var parametrosObj = new
                 {
                     t.Id,
-                    Area = t.Area.Id,
-                    Categoria = t.Categoria.Id,
-                    Subcategoria = t.Subcategoria?.Id,
+                    t.AreaId,
+                    t.CategoriaId,
+                    t.SubcategoriaId,
                     t.Urgencia,
                     t.Titulo,
                     t.Descripcion,
-                    TicketEstatusId = t.TicketEstatus.Id,
+                    t.TicketEstatusId,
                     t.CreadoPor,
                     t.FechaCreacion,
                     t.ModificadoPor,
@@ -221,9 +163,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerTicketsPorArea(long areaId, string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorArea(long areaId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<TicketDTO>>();
 
             try
             {
@@ -232,43 +174,14 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@AreaId", areaId),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Ticket>((reader) =>
+                    new Func<IDataReader, TicketDTO>((reader) =>
                     {
-                        var ticket = LlenarEntidad<Ticket>(reader);
-
-                        ticket.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        ticket.Categoria = new Categoria()
-                        {
-                            Id = MapearPorpiedades<long>(reader["CategoriaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["CategoriaNombre"])
-                        };
-
-                        if (reader["SubcategoriaId"] != DBNull.Value)
-                        {
-                            ticket.Subcategoria = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["SubcategoriaId"]),
-                                Nombre = MapearPorpiedades<string>(reader["SubcategoriaNombre"])
-                            };
-                        }
-
-                        ticket.TicketEstatus = new TicketEstatus()
-                        {
-                            Id = MapearPorpiedades<int>(reader["TicketEstatusId"]),
-                            Nombre = MapearPorpiedades<string>(reader["EstatusNombre"]),
-                            Color = MapearPorpiedades<string>(reader["EstatusColor"])
-                        };
-
+                        var ticket = LlenarEntidad<TicketDTO>(reader);
                         return ticket;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = tickets;
+                modelResponse.Response = tickets.ToList();
                 modelResponse.Message = "Tickets por área obtenidos correctamente";
             }
             catch (Exception ex)
@@ -281,9 +194,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerTicketsPorUsuario(string creadoPor, string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorUsuario(string creadoPor, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<TicketDTO>>();
 
             try
             {
@@ -292,43 +205,14 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@CreadoPor", creadoPor),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Ticket>((reader) =>
+                    new Func<IDataReader, TicketDTO>((reader) =>
                     {
-                        var ticket = LlenarEntidad<Ticket>(reader);
-
-                        ticket.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        ticket.Categoria = new Categoria()
-                        {
-                            Id = MapearPorpiedades<long>(reader["CategoriaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["CategoriaNombre"])
-                        };
-
-                        if (reader["SubcategoriaId"] != DBNull.Value)
-                        {
-                            ticket.Subcategoria = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["SubcategoriaId"]),
-                                Nombre = MapearPorpiedades<string>(reader["SubcategoriaNombre"])
-                            };
-                        }
-
-                        ticket.TicketEstatus = new TicketEstatus()
-                        {
-                            Id = MapearPorpiedades<int>(reader["TicketEstatusId"]),
-                            Nombre = MapearPorpiedades<string>(reader["EstatusNombre"]),
-                            Color = MapearPorpiedades<string>(reader["EstatusColor"])
-                        };
-
+                        var ticket = LlenarEntidad<TicketDTO>(reader);
                         return ticket;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = tickets;
+                modelResponse.Response = tickets.ToList();
                 modelResponse.Message = "Tickets por usuario obtenidos correctamente";
             }
             catch (Exception ex)
@@ -341,9 +225,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerTicketsPorUrgencia(int urgencia, string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorUrgencia(int urgencia, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<TicketDTO>>();
 
             try
             {
@@ -352,43 +236,14 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@Urgencia", urgencia),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Ticket>((reader) =>
+                    new Func<IDataReader, TicketDTO>((reader) =>
                     {
-                        var ticket = LlenarEntidad<Ticket>(reader);
-
-                        ticket.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        ticket.Categoria = new Categoria()
-                        {
-                            Id = MapearPorpiedades<long>(reader["CategoriaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["CategoriaNombre"])
-                        };
-
-                        if (reader["SubcategoriaId"] != DBNull.Value)
-                        {
-                            ticket.Subcategoria = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["SubcategoriaId"]),
-                                Nombre = MapearPorpiedades<string>(reader["SubcategoriaNombre"])
-                            };
-                        }
-
-                        ticket.TicketEstatus = new TicketEstatus()
-                        {
-                            Id = MapearPorpiedades<int>(reader["TicketEstatusId"]),
-                            Nombre = MapearPorpiedades<string>(reader["EstatusNombre"]),
-                            Color = MapearPorpiedades<string>(reader["EstatusColor"])
-                        };
-
+                        var ticket = LlenarEntidad<TicketDTO>(reader);
                         return ticket;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = tickets;
+                modelResponse.Response = tickets.ToList();
                 modelResponse.Message = "Tickets por urgencia obtenidos correctamente";
             }
             catch (Exception ex)
@@ -401,9 +256,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerTicketsPorEstatus(int ticketEstatusId, string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorEstatus(int ticketEstatusId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<TicketDTO>>();
 
             try
             {
@@ -412,43 +267,14 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@TicketEstatusId", ticketEstatusId),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Ticket>((reader) =>
+                    new Func<IDataReader, TicketDTO>((reader) =>
                     {
-                        var ticket = LlenarEntidad<Ticket>(reader);
-
-                        ticket.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        ticket.Categoria = new Categoria()
-                        {
-                            Id = MapearPorpiedades<long>(reader["CategoriaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["CategoriaNombre"])
-                        };
-
-                        if (reader["SubcategoriaId"] != DBNull.Value)
-                        {
-                            ticket.Subcategoria = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["SubcategoriaId"]),
-                                Nombre = MapearPorpiedades<string>(reader["SubcategoriaNombre"])
-                            };
-                        }
-
-                        ticket.TicketEstatus = new TicketEstatus()
-                        {
-                            Id = MapearPorpiedades<int>(reader["TicketEstatusId"]),
-                            Nombre = MapearPorpiedades<string>(reader["EstatusNombre"]),
-                            Color = MapearPorpiedades<string>(reader["EstatusColor"])
-                        };
-
+                        var ticket = LlenarEntidad<TicketDTO>(reader);
                         return ticket;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = tickets;
+                modelResponse.Response = tickets.ToList();
                 modelResponse.Message = "Tickets por estatus obtenidos correctamente";
             }
             catch (Exception ex)
@@ -460,9 +286,9 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
-        public ModelResponse ObtenerTicketEstatus()
+        public ModelResponse<List<TicketEstatus>> ObtenerTicketEstatus()
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<TicketEstatus>>();
 
             try
             {
@@ -474,7 +300,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = estatus;
+                modelResponse.Response = estatus.ToList();
                 modelResponse.Message = "Estatus obtenidos correctamente";
             }
             catch (Exception ex)

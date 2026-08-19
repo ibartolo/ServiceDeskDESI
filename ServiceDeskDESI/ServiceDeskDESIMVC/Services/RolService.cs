@@ -16,17 +16,22 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerTodosLosRoles()
+        public async Task<ModelResponse<List<Rol>>> ObtenerTodosLosRoles()
         {
             return await _httpClient.ObtenerTodosLosRoles();
         }
 
-        public async Task<ModelResponse> ObtenerRolPorId(long id)
+        public async Task<Rol> ObtenerRolPorId(long id)
         {
-            return await _httpClient.ObtenerRolPorId(id);
+            var response = await _httpClient.ObtenerRolPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarRol(Rol rol)
+        public async Task<ModelResponse<Rol>> GuardarOActualizarRol(Rol rol)
         {
             return await _httpClient.GuardarOActualizarRol(rol);
         }
@@ -41,7 +46,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.AsignarRolUsuario(usuarioId, rolId);
         }
 
-        public async Task<ModelResponse> ObtenerRolesPorUsuario(long usuarioId)
+        public async Task<ModelResponse<List<Rol>>> ObtenerRolesPorUsuario(long usuarioId)
         {
             return await _httpClient.ObtenerRolesPorUsuario(usuarioId);
         }
@@ -56,8 +61,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Roles");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Roles");
             }
             return null;
         }

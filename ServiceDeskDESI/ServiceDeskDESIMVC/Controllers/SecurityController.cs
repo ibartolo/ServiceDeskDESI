@@ -43,13 +43,13 @@ namespace ServiceDeskDESIMVC.Controllers
             if (id > 0)
             {
                 var response = await _rolService.ObtenerRolPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                if (response != null)
                 {
-                    rol = JsonConvert.DeserializeObject<Rol>(response.Response.ToString());
+                    rol = response;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró el rol.";
                 }
             }
 
@@ -75,7 +75,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var roles = new List<Rol>();
             if (rolesResponse.IsSuccess && rolesResponse.Response != null)
             {
-                roles = JsonConvert.DeserializeObject<List<Rol>>(rolesResponse.Response.ToString());
+                roles = rolesResponse.Response;
             }
             ViewBag.Roles = roles;
 
@@ -84,7 +84,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var paginas = new List<Pagina>();
             if (paginasResponse.IsSuccess && paginasResponse.Response != null)
             {
-                paginas = JsonConvert.DeserializeObject<List<Pagina>>(paginasResponse.Response.ToString());
+                paginas = paginasResponse.Response;
             }
             ViewBag.Paginas = paginas;
 

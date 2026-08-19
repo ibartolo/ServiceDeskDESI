@@ -27,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de usuarios</returns>
         [HttpGet, Route("User/List")]
-        public ModelResponse ObtenerUsuarios()
+        public ModelResponse<List<UsuarioDTO>> ObtenerUsuarios()
         {
             var usuario = User.Identity.Name;
             var result = _autenticacionService.ObtenerUsuarios(usuario);
@@ -40,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del usuario</param>
         /// <returns>Usuario encontrado</returns>
         [HttpGet, Route("User/{id:long}")]
-        public ModelResponse ObtenerUsuarioPorId(long id)
+        public ModelResponse<UsuarioDTO> ObtenerUsuarioPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _autenticacionService.ObtenerUsuarioPorId(id, usuario);
@@ -54,7 +54,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Usuario guardado con su ID actualizado</returns>
         [Permiso("Usuarios")]
         [HttpPost, Route("User")]
-        public ModelResponse GuardarOActualizarUsuario(Usuario u)
+        public ModelResponse<Usuario> GuardarOActualizarUsuario(Usuario u)
         {
             var result = _autenticacionService.GuardarOActualizarUsuario(u);
             return result;
@@ -67,7 +67,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Usuario guardado con su ID actualizado</returns>
         [Permiso("Usuarios")]
         [HttpPost, Route("User/Empresa")]
-        public ModelResponse GuardarUsuarioEmpresa(Usuario u)
+        public ModelResponse<Usuario> GuardarUsuarioEmpresa(Usuario u)
         {
             var result = _autenticacionService.GuardarOActualizarUsuario(u);
             return result;
@@ -80,7 +80,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Resultado de la operación</returns>
         [Permiso("Mi Perfil", "Editar")]
         [HttpPost, Route("ActualizarPerfil")]
-        public ModelResponse ActualizarPerfilUsuario(Usuario usuario)
+        public ModelResponse<Usuario> ActualizarPerfilUsuario(Usuario usuario)
         {
             var usuarioAutenticado = User.Identity.Name;
             var result = _autenticacionService.ActualizarPerfilUsuario(usuario, usuarioAutenticado);
@@ -108,7 +108,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Usuario autenticado con sus datos completos y empresa</returns>
         [AllowAnonymous]
         [HttpPost, Route("autenticar")]
-        public ModelResponse AutenticarUsuario(Usuario u)
+        public ModelResponse<UsuarioDTO> AutenticarUsuario(Usuario u)
         {
             var result = _autenticacionService.AutenticarUsuario(u.NombreUsuario, u.Contrasena);
             return result;
@@ -134,7 +134,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Información del token y usuario</returns>
         [AllowAnonymous]
         [HttpGet, Route("validarToken/{token}")]
-        public ModelResponse ValidarTokenRecuperacion(string token)
+        public ModelResponse<TokenRecuperacionDTO> ValidarTokenRecuperacion(string token)
         {
             var result = _autenticacionService.ObtenerTokenRecuperacion(token);
             return result;
@@ -160,7 +160,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Usuario guardado con su ID actualizado</returns>
         [Permiso("Usuarios")]
         [HttpPost, Route("Admin/Usuario")]
-        public ModelResponse GuardarOActualizarUsuarioAdmin(Usuario usuario)
+        public ModelResponse<Usuario> GuardarOActualizarUsuarioAdmin(Usuario usuario)
         {
             var usuarioAdmin = User.Identity.Name;
             var result = _autenticacionService.GuardarOActualizarUsuarioAdmin(usuario, usuarioAdmin);

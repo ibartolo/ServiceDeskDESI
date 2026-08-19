@@ -28,7 +28,7 @@
         @Html.HiddenFor(x => x.FechaModificacion)
         @Html.HiddenFor(x => x.Estatus)
         @Html.HiddenFor(x => x.Contrasena)
-        @Html.HiddenFor(x => x.Empresa.Id)
+        @Html.HiddenFor(x => x.EmpresaId)
 
         <div class="row">
             <div class="col-md-6">
@@ -79,13 +79,13 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Sucursal:</label>
-                    @Html.DropDownListFor(x => x.Sucursal.Id, new SelectList(ViewBag.Sucursales, "Id", "Nombre"), "Seleccione una sucursal", new { @class = "form-control" })
+                    @Html.DropDownListFor(x => x.SucursalId, new SelectList(ViewBag.Sucursales, "Id", "Nombre"), "Seleccione una sucursal", new { @class = "form-control" })
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Área:</label>
-                    @Html.DropDownListFor(x => x.Area.Id, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control" })
+                    @Html.DropDownListFor(x => x.AreaId, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control" })
                 </div>
             </div>
         </div>
@@ -198,8 +198,8 @@
             parameters.push({ Name: "Apellido", Value: $("#Apellido").val() });
             parameters.push({ Name: "Celular", Value: $("#Celular").val() });
             parameters.push({ Name: "RFC", Value: $("#RFC").val() });
-            parameters.push({ Name: "Sucursal.Id", Value: $("#Sucursal_Id").val() });
-            parameters.push({ Name: "Area.Id", Value: $("#Area_Id").val() });
+            parameters.push({ Name: "SucursalId", Value: $("#SucursalId").val() });
+            parameters.push({ Name: "AreaId", Value: $("#AreaId").val() });
             parameters.push({ Name: "CreadoPor", Value: $("#CreadoPor").val() });
             parameters.push({ Name: "FechaCreacion", Value: $("#FechaCreacion").val() });
             parameters.push({ Name: "ModificadoPor", Value: $("#ModificadoPor").val() });
@@ -208,7 +208,7 @@
             parameters.push({ Name: "Contrasena", Value: $("#Contrasena").val() });
             parameters.push({ Name: "NombreUsuario", Value: $("#NombreUsuario").val() });
             parameters.push({ Name: "Correo", Value: $("#Correo").val() });
-            parameters.push({ Name: "Empresa.Id", Value: $("#Empresa_Id").val() });
+            parameters.push({ Name: "EmpresaId", Value: $("#EmpresaId").val() });
             parameters.push({ Name: "ImagenPerfil", Value: perfilTemp });
 
 

@@ -27,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de personas</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerTodasLasPersonas()
+        public ModelResponse<List<PersonaDTO>> ObtenerTodasLasPersonas()
         {
             var usuario = User.Identity.Name;
             var result = _personaService.ObtenerTodasLasPersonas(usuario);
@@ -40,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID de la persona</param>
         /// <returns>Persona encontrada</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerPersonaPorId(long id)
+        public ModelResponse<PersonaDTO> ObtenerPersonaPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _personaService.ObtenerPersonaPorId(id, usuario);
@@ -54,7 +54,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Persona guardada con su ID actualizado</returns>
         [Permiso("People")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarPersona(Persona persona)
+        public ModelResponse<Persona> GuardarOActualizarPersona(Persona persona)
         {
             var usuario = User.Identity.Name;
             var result = _personaService.GuardarOActualizarPersona(persona, usuario);

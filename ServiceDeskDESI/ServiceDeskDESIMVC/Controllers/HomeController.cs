@@ -50,7 +50,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var paginas = new List<Pagina>();
             if (paginasResponse.IsSuccess && paginasResponse.Response != null)
             {
-                paginas = JsonConvert.DeserializeObject<List<Pagina>>(paginasResponse.Response.ToString());
+                paginas = paginasResponse.Response;
             }
             return PartialView(paginas);
         }
@@ -101,7 +101,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     return JsonConvert.SerializeObject(mr);
                 }
 
-                var usuarioAutenticado = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
+                var usuarioAutenticado = response.Response;
 
                 token.ExpirationDate = DateTime.Now.AddSeconds(token.expires_in);
                 mr.IsSuccess = true;
@@ -111,7 +111,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 {
                     Token = token,
                     UserID = usuarioAutenticado.Id,
-                    EmpresaID = usuarioAutenticado.Empresa != null ? usuarioAutenticado.Empresa.Id : 0,
+                    EmpresaID = usuarioAutenticado.EmpresaId ?? 0,
                     UserName = user,
                     ProfileImage = usuarioAutenticado.ImagenPerfil,
                     UserAvatar = GenerarAvatarIniciales(usuarioAutenticado.NombreUsuario)

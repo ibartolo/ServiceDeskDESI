@@ -12,38 +12,20 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodasCompanias()
+        public async Task<ModelResponse<List<Compania>>> ObtenerTodasCompanias()
         {
-            var result = await RequestAsync<object>($"api/Compania/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<Compania>>($"api/Compania/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerCompaniaPorId(long id)
+        public async Task<ModelResponse<Compania>> ObtenerCompaniaPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Compania/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Compania>($"api/Compania/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarActualizarCompania(Compania compania)
+        public async Task<ModelResponse<Compania>> GuardarActualizarCompania(Compania compania)
         {
             MappingColumSecurity(compania);
-            var result = await RequestAsync<object>($"api/Compania/Guardar", HttpMethod.Post, compania,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Compania>($"api/Compania/Guardar", HttpMethod.Post, compania, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarCompania(Compania compania)

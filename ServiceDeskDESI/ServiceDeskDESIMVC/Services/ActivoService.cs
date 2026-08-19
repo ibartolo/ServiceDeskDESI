@@ -17,12 +17,17 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerActivoPorId(long id)
+        public async Task<ActivoDTO> ObtenerActivoPorId(long id)
         {
-            return await _httpClient.ObtenerActivoPorId(id);
+            var response = await _httpClient.ObtenerActivoPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarActivo(Activo activo)
+        public async Task<ModelResponse<Activo>> GuardarOActualizarActivo(Activo activo)
         {
             return await _httpClient.GuardarOActualizarActivo(activo);
         }
@@ -32,7 +37,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarActivo(activo);
         }
 
-        public async Task<ModelResponse> ConsultarTodosLosActivos()
+        public async Task<ModelResponse<List<ActivoDTO>>> ConsultarTodosLosActivos()
         {
             return await _httpClient.ObtenerTodosLosActivos();
         }
@@ -42,8 +47,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Activos");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Activos");
             }
             return null;
         }

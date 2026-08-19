@@ -1,4 +1,4 @@
-﻿﻿@model ServiceDeskDESIEntities.Catalogos.Categoria
+﻿@model ServiceDeskDESIEntities.Catalogos.Categoria
 @{
     ViewBag.Title = "Categorías";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -28,13 +28,13 @@
         @Html.HiddenFor(x => x.ModificadoPor)
         @Html.HiddenFor(x => x.FechaModificacion)
         @Html.HiddenFor(x => x.Estatus)
-        @Html.HiddenFor(x => x.CategoriaPadre.Id)
+        @Html.HiddenFor(x => x.CategoriaPadreId)
 
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Área:</label>
-                    @Html.DropDownListFor(x => x.Area.Id, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
+                    @Html.DropDownListFor(x => x.AreaId, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
                 </div>
             </div>
             <div class="col-md-4">
@@ -46,11 +46,11 @@
                         {
                             foreach (var item in (List<ServiceDeskDESIEntities.Catalogos.Categoria>)ViewBag.CategoriasPadre)
                             {
-                                <option value="@item.Id" @(Model.CategoriaPadre != null && Model.CategoriaPadre.Id == item.Id ? "selected" : "")>@item.Nombre</option>
+                                <option value="@item.Id" @(Model.CategoriaPadreId != null && Model.CategoriaPadreId == item.Id ? "selected" : "")>@item.Nombre</option>
                             }
                         }
                     </select>
-                    @Html.HiddenFor(x => x.CategoriaPadre.Id)
+                    @Html.HiddenFor(x => x.CategoriaPadreId)
                 </div>
             </div>
             <div class="col-md-4">
@@ -111,8 +111,8 @@
                 { data: 'Id', title: 'ID', visible: false },
                 { data: 'Nombre', title: 'Nombre' },
                 { data: 'Descripcion', title: 'Descripción' },
-                { data: 'CategoriaPadre.Nombre', title: 'Categoría Padre', defaultContent: '---' },
-                { data: 'Area.Nombre', title: 'Área' },
+                { data: 'CategoriaPadreNombre', title: 'Categoría Padre', defaultContent: '---' },
+                { data: 'AreaNombre', title: 'Área' },
                 { data: 'Orden', title: 'Orden', visible: false },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
@@ -145,7 +145,7 @@
     $(function () {
         $("#frmCategoria").validate({
             rules: {
-                "Area.Id": {
+                "AreaId": {
                     required: true,
                     min: 1
                 },
@@ -155,7 +155,7 @@
                 }
             },
             messages: {
-                "Area.Id": {
+                "AreaId": {
                     required: "El campo 'Área' es requerido.",
                     min: "Seleccione un área válida."
                 },
@@ -191,7 +191,7 @@
 
                     // Filtrar por área y solo categorías principales (sin padre)
                     var categoriasFiltradas = todasCategorias.filter(function (c) {
-                        return c.Area.Id === parseInt(areaId) && c.CategoriaPadre === null;
+                        return c.AreaId === parseInt(areaId) && c.CategoriaPadreId === null;
                     });
 
                     // Ordenar por Orden
@@ -203,8 +203,8 @@
                         ddl.append('<option value="' + c.Id + '">' + c.Nombre + '</option>');
                     });
 
-                    if ($("#CategoriaPadre_Id").val() != '') {
-                        ddl.val($("#CategoriaPadre_Id").val());
+                    if ($("#CategoriaPadreId").val() != '') {
+                        ddl.val($("#CategoriaPadreId").val());
                     }
                 }
             });
@@ -250,8 +250,8 @@
                 Id: $("#Id").val() || 0,
                 Nombre: $("#Nombre").val(),
                 Descripcion: $("#Descripcion").val(),
-                CategoriaPadre: $("#ddlCategoriaPadre").val() ? { Id: parseInt($("#ddlCategoriaPadre").val()) } : null,
-                Area: { Id: parseInt($("#ddlArea").val()) },
+                CategoriaPadreId: $("#ddlCategoriaPadre").val() ? parseInt($("#ddlCategoriaPadre").val()) : null,
+                AreaId: parseInt($("#ddlArea").val()),
                 Orden: parseInt($("#Orden").val()) || 0,
                 CreadoPor: $("#CreadoPor").val(),
                 FechaCreacion: $("#FechaCreacion").val(),

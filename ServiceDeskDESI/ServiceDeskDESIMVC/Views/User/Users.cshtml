@@ -1,4 +1,4 @@
-﻿﻿﻿@model ServiceDeskDESIEntities.Autenticacion.Usuario
+﻿@model ServiceDeskDESIEntities.Autenticacion.Usuario
 @{
     ViewBag.Title = "Usuarios";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -87,13 +87,13 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Sucursal:</label>
-                    @Html.DropDownListFor(x => x.Sucursal.Id, (IEnumerable<SelectListItem>)ViewBag.Sucursales, "Seleccione una sucursal", new { @class = "form-control", id = "ddlSucursal" })
+                    @Html.DropDownListFor(x => x.SucursalId, (IEnumerable<SelectListItem>)ViewBag.Sucursales, "Seleccione una sucursal", new { @class = "form-control", id = "ddlSucursal" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Área:</label>
-                    @Html.DropDownListFor(x => x.Area.Id, (IEnumerable<SelectListItem>)ViewBag.Areas, "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
+                    @Html.DropDownListFor(x => x.AreaId, (IEnumerable<SelectListItem>)ViewBag.Areas, "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
                 </div>
             </div>
             <div class="col-md-4">
@@ -156,8 +156,8 @@
                 { data: 'NombreUsuario', title: 'Usuario' },
                 { data: 'Nombre', title: 'Nombre' },
                 { data: 'Correo', title: 'Correo' },
-                { data: 'Sucursal.Nombre', title: 'Sucursal', defaultContent: '---' },
-                { data: 'Area.Nombre', title: 'Área', defaultContent: '---' },
+                { data: 'SucursalNombre', title: 'Sucursal', defaultContent: '---' },
+                { data: 'AreaNombre', title: 'Área', defaultContent: '---' },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
                         return '<div class="d-flex gap-3">' +
@@ -334,15 +334,15 @@
             Apellido: $("#txtApellido").val(),
             Celular: $("#Celular").val(),
             RFC: $("#RFC").val(),
-            Sucursal: { Id: parseInt($("#ddlSucursal").val()) },
-            Area: { Id: parseInt($("#ddlArea").val()) },
+            SucursalId: parseInt($("#ddlSucursal").val()),
+            AreaId: parseInt($("#ddlArea").val()),
             Firma: $("#Firma").val() || null,
             CreadoPor: $("#CreadoPor").val(),
             FechaCreacion: $("#FechaCreacion").val(),
             ModificadoPor: $("#ModificadoPor").val() || null,
             FechaModificacion: null,
             Estatus: true,
-            Empresa: { Id: @ViewBag.EmpresaId }
+            EmpresaId: @ViewBag.EmpresaId
         };
 
         PostMVC('/User/GuardarOActualizarUsuarioAdmin', usuario, function (response) {

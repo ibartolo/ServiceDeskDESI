@@ -17,12 +17,17 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerCategoriaPorId(long id)
+        public async Task<CategoriaDTO> ObtenerCategoriaPorId(long id)
         {
-            return await _httpClient.ObtenerCategoriaPorId(id);
+            var response = await _httpClient.ObtenerCategoriaPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarCategoria(Categoria categoria)
+        public async Task<ModelResponse<Categoria>> GuardarOActualizarCategoria(Categoria categoria)
         {
             return await _httpClient.GuardarOActualizarCategoria(categoria);
         }
@@ -32,7 +37,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarCategoria(categoria);
         }
 
-        public async Task<ModelResponse> ConsultarTodasCategorias()
+        public async Task<ModelResponse<List<CategoriaDTO>>> ConsultarTodasCategorias()
         {
             return await _httpClient.ObtenerCategorias();
         }
@@ -42,18 +47,17 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Categorías");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Categorías");
             }
             return null;
         }
 
-        public async Task<ModelResponse> ObtenerCategoriasPorArea(long areaId)
+        public async Task<ModelResponse<List<CategoriaDTO>>> ObtenerCategoriasPorArea(long areaId)
         {
             return await _httpClient.ObtenerCategoriasPorArea(areaId);
         }
 
-        public async Task<ModelResponse> ObtenerCategoriasPorPadre(long categoriaPadreId)
+        public async Task<ModelResponse<List<CategoriaDTO>>> ObtenerCategoriasPorPadre(long categoriaPadreId)
         {
             return await _httpClient.ObtenerCategoriasPorPadre(categoriaPadreId);
         }

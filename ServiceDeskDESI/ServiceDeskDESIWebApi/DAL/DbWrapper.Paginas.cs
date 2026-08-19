@@ -10,9 +10,9 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerPaginasPorUsuario(string usuario)
+        public ModelResponse<List<Pagina>> ObtenerPaginasPorUsuario(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Pagina>>();
 
             try
             {
@@ -25,7 +25,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = paginas;
+                modelResponse.Response = paginas.ToList();
                 modelResponse.Message = "Páginas obtenidas correctamente";
             }
             catch (Exception ex)
@@ -38,9 +38,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerPaginaPorNombre(string nombre)
+        public ModelResponse<Pagina> ObtenerPaginaPorNombre(string nombre)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Pagina>();
 
             try
             {
@@ -73,9 +73,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerPaginas()
+        public ModelResponse<List<Pagina>> ObtenerPaginas()
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Pagina>>();
 
             try
             {
@@ -87,7 +87,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = paginas;
+                modelResponse.Response = paginas.ToList();
                 modelResponse.Message = "Páginas obtenidas correctamente.";
             }
             catch (Exception ex)

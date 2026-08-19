@@ -13,38 +13,20 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodosLosRoles()
+        public async Task<ModelResponse<List<Rol>>> ObtenerTodosLosRoles()
         {
-            var result = await RequestAsync<object>($"api/Rol/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<Rol>>($"api/Rol/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerRolPorId(long id)
+        public async Task<ModelResponse<Rol>> ObtenerRolPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Rol/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Rol>($"api/Rol/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarRol(Rol rol)
+        public async Task<ModelResponse<Rol>> GuardarOActualizarRol(Rol rol)
         {
             MappingColumSecurity(rol);
-            var result = await RequestAsync<object>($"api/Rol/Guardar", HttpMethod.Post, rol,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Rol>($"api/Rol/Guardar", HttpMethod.Post, rol, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarRol(Rol rol)
@@ -55,6 +37,7 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
@@ -72,19 +55,14 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerRolesPorUsuario(long usuarioId)
+        public async Task<ModelResponse<List<Rol>>> ObtenerRolesPorUsuario(long usuarioId)
         {
-            var result = await RequestAsync<object>($"api/Rol/Usuario/{usuarioId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<Rol>>($"api/Rol/Usuario/{usuarioId}", HttpMethod.Get, null, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarRolUsuario(long usuarioRolId)
@@ -99,6 +77,7 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }

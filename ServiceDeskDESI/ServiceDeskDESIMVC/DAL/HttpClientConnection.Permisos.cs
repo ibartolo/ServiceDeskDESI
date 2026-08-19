@@ -12,19 +12,12 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerPermisosPorUsuario()
+        public async Task<ModelResponse<List<PermisosViewModel>>> ObtenerPermisosPorUsuario()
         {
-            var result = await RequestAsync<object>($"api/Permisos/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<PermisosViewModel>>($"api/Permisos/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ValidarPermisoUsuario(string nombrePagina, string accion)
+        public async Task<ModelResponse<bool>> ValidarPermisoUsuario(string nombrePagina, string accion)
         {
             var request = new
             {
@@ -32,38 +25,17 @@ namespace ServiceDeskDESIMVC.DAL
                 Accion = accion
             };
 
-            var result = await RequestAsync<object>($"api/Permisos/Validar", HttpMethod.Post, request,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<bool>($"api/Permisos/Validar", HttpMethod.Post, request, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerPaginas()
+        public async Task<ModelResponse<List<Pagina>>> ObtenerPaginas()
         {
-            var result = await RequestAsync<object>($"api/Permisos/Paginas", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<Pagina>>($"api/Permisos/Paginas", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerPermisosPorRol(long rolId)
+        public async Task<ModelResponse<List<RolPaginaAccionDTO>>> ObtenerPermisosPorRol(long rolId)
         {
-            var result = await RequestAsync<object>($"api/Permisos/Rol/{rolId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<RolPaginaAccionDTO>>($"api/Permisos/Rol/{rolId}", HttpMethod.Get, null, token.Token.access_token);
         }
 
         public async Task<ModelResponse> GuardarPermisosRol(GuardarPermisosRequest request)

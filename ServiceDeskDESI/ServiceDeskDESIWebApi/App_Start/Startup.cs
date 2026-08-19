@@ -211,9 +211,9 @@ namespace ServiceDeskDESIWebApi.App_Start
             var identity = new ClaimsIdentity(context.Options.AuthenticationType);
             identity.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
             identity.AddClaim(new Claim("usuarioId", usuario.Id.ToString()));
-            if (usuario.Empresa != null && usuario.Empresa.Id > 0)
+            if (usuario.EmpresaId != null && usuario.EmpresaId.Value > 0)
             {
-                identity.AddClaim(new Claim("empresaId", usuario.Empresa.Id.ToString()));
+                identity.AddClaim(new Claim("empresaId", usuario.EmpresaId.Value.ToString()));
             }
 
             var rolesResponse = new DAL.DbWrapper().ObtenerRolesPorUsuario(context.UserName);

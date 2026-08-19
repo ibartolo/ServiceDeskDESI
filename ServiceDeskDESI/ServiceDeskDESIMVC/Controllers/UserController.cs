@@ -43,16 +43,11 @@ namespace ServiceDeskDESIMVC.Controllers
                 return RedirectToAction("Autentication", "Home");
             }
 
-            var usuario = new Usuario();
-            var response = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
-
-            if (response.IsSuccess && response.Response != null)
+            var usuario = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
+            if (usuario == null)
             {
-                usuario = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
-            }
-            else
-            {
-                ViewBag.ErrorMessage = response.Message;
+                usuario = new Usuario();
+                ViewBag.ErrorMessage = "No se pudo obtener el usuario.";
             }
 
             // Cargar listas para los dropdowns
@@ -127,14 +122,14 @@ namespace ServiceDeskDESIMVC.Controllers
             var sucursalesList = new List<Sucursal>();
             if (sucursalesResponse.IsSuccess && sucursalesResponse.Response != null)
             {
-                sucursalesList = JsonConvert.DeserializeObject<List<Sucursal>>(sucursalesResponse.Response.ToString());
+                sucursalesList = sucursalesResponse.Response;
             }
 
             var areasResponse = await _areaService.ConsultarTodasAreas();
             var areasList = new List<Area>();
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
-                areasList = JsonConvert.DeserializeObject<List<Area>>(areasResponse.Response.ToString());
+                areasList = areasResponse.Response;
             }
 
             // Cargar roles
@@ -144,16 +139,16 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (rolesResponse.IsSuccess && rolesResponse.Response != null)
             {
-                rolesList = JsonConvert.DeserializeObject<List<Rol>>(rolesResponse.Response.ToString());
+                rolesList = rolesResponse.Response;
             }
 
             if (id > 0)
             {
-                var response = await _usuarioService.ObtenerUsuarioPorId(id);
+                var usuarioResponse = await _usuarioService.ObtenerUsuarioPorId(id);
 
-                if (response.IsSuccess && response.Response != null)
+                if (usuarioResponse != null)
                 {
-                    usuario = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
+                    usuario = usuarioResponse;
 
                     // La contraseña no se expone (viene vacía del API); el campo solo acepta una nueva contraseña.
 
@@ -161,21 +156,20 @@ namespace ServiceDeskDESIMVC.Controllers
                     var rolesUsuarioResponse = await _rolService.ObtenerRolesPorUsuario(usuario.Id);
                     if (rolesUsuarioResponse.IsSuccess && rolesUsuarioResponse.Response != null)
                     {
-                        var rolesUsuario = JsonConvert.DeserializeObject<List<Rol>>(rolesUsuarioResponse.Response.ToString());
-                        if (rolesUsuario.Any())
+                        if (rolesUsuarioResponse.Response.Any())
                         {
-                            rolSeleccionadoId = rolesUsuario.First().Id;
+                            rolSeleccionadoId = rolesUsuarioResponse.Response.First().Id;
                         }
                     }
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se pudo obtener el usuario.";
                 }
             }
 
             // Asignar Sucursales
-            if (id > 0 && usuario.Sucursal != null && usuario.Sucursal.Id > 0)
+            if (id > 0 && usuario.SucursalId.HasValue && usuario.SucursalId.Value > 0)
             {
                 var selectListSucursales = new List<SelectListItem>();
                 foreach (var s in sucursalesList)
@@ -184,7 +178,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     {
                         Value = s.Id.ToString(),
                         Text = s.Nombre,
-                        Selected = (s.Id == usuario.Sucursal.Id)
+                        Selected = (s.Id == usuario.SucursalId)
                     };
                     selectListSucursales.Add(item);
                 }
@@ -196,7 +190,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             // Asignar Áreas
-            if (id > 0 && usuario.Area != null && usuario.Area.Id > 0)
+            if (id > 0 && usuario.AreaId.HasValue && usuario.AreaId.Value > 0)
             {
                 var selectListAreas = new List<SelectListItem>();
                 foreach (var a in areasList)
@@ -205,7 +199,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     {
                         Value = a.Id.ToString(),
                         Text = a.Nombre,
-                        Selected = (a.Id == usuario.Area.Id)
+                        Selected = (a.Id == usuario.AreaId)
                     };
                     selectListAreas.Add(item);
                 }
@@ -248,7 +242,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var tokenCookie = SessionHelper.GetSessionUser();
 
             // Asignar empresa
-            usuario.Empresa = new Empresa { Id = tokenCookie.EmpresaID };
+            usuario.EmpresaId = tokenCookie.EmpresaID;
 
             // Guardar usuario
             var response = await _usuarioService.GuardarOActualizarUsuarioAdmin(usuario);
@@ -256,7 +250,7 @@ namespace ServiceDeskDESIMVC.Controllers
             // Si el usuario se guardó correctamente y tiene un rol seleccionado
             if (response.IsSuccess && response.Response != null)
             {
-                var usuarioGuardado = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
+                var usuarioGuardado = response.Response;
 
                 // Obtener el rol seleccionado del formulario (se envía como campo oculto o desde el DDL)
                 var rolId = HttpContext.Request.Form["RolId"];
@@ -266,8 +260,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     var rolesUsuarioResponse = await _rolService.ObtenerRolesPorUsuario(usuarioGuardado.Id);
                     if (rolesUsuarioResponse.IsSuccess && rolesUsuarioResponse.Response != null)
                     {
-                        var rolesUsuario = JsonConvert.DeserializeObject<List<Rol>>(rolesUsuarioResponse.Response.ToString());
-                        foreach (var rol in rolesUsuario)
+                        foreach (var rol in rolesUsuarioResponse.Response)
                         {
                             await _rolService.EliminarRolUsuario(rol.Id);
                         }

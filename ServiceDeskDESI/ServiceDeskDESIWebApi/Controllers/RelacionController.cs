@@ -15,20 +15,20 @@ namespace ServiceDeskDESIWebApi.Controllers
     public class RelacionController : BaseController
     {
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerRelaciones ()
+        public ModelResponse<List<UsuarioPagina>> ObtenerRelaciones ()
         {
             var result = dbWrapper.ObtenerTodasRelaciones();
             return result;
         }
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerRelacionesPorId (long id)
+        public ModelResponse<UsuarioPagina> ObtenerRelacionesPorId (long id)
         {
             var result = dbWrapper.ObtenerRelacionPorId(id);
             return result;
         }
         [Permiso("Responsables por Categoría")]
         [HttpPost, Route("")]
-        public ModelResponse GuardarOActualizarRelaciones(UsuarioPagina r)
+        public ModelResponse<UsuarioPagina> GuardarOActualizarRelaciones(UsuarioPagina r)
         {
             var result = dbWrapper.GuardarOActualizarRelacion(r);
             return result;

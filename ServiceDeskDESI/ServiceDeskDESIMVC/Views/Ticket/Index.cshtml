@@ -1,4 +1,4 @@
-﻿﻿@model ServiceDeskDESIEntities.Tickets.Ticket
+﻿@model ServiceDeskDESIEntities.Tickets.Ticket
 @{
     ViewBag.Title = "Tickets";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -29,13 +29,13 @@
         @Html.HiddenFor(x => x.ModificadoPor)
         @Html.HiddenFor(x => x.FechaModificacion)
         @Html.HiddenFor(x => x.Estatus)
-        @Html.HiddenFor(x => x.TicketEstatus.Id)
+        @Html.HiddenFor(x => x.TicketEstatusId)
 
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Área:</label>
-                    @Html.DropDownListFor(x => x.Area.Id, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
+                    @Html.DropDownListFor(x => x.AreaId, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
                 </div>
             </div>
             <div class="col-md-4">
@@ -44,7 +44,7 @@
                     <select id="ddlCategoria" class="form-control">
                         <option value="">Seleccione una categoría</option>
                     </select>
-                    @Html.HiddenFor(x => x.Categoria.Id)
+                    @Html.HiddenFor(x => x.CategoriaId)
                 </div>
             </div>
             <div class="col-md-4">
@@ -53,7 +53,7 @@
                     <select id="ddlSubcategoria" class="form-control">
                         <option value="">Seleccione una subcategoría</option>
                     </select>
-                    @Html.HiddenFor(x => x.Subcategoria.Id)
+                    @Html.HiddenFor(x => x.SubcategoriaId)
                 </div>
             </div>
         </div>
@@ -75,7 +75,7 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Estatus:</label>
-                    @Html.DropDownListFor(x => x.TicketEstatus.Id, new SelectList(ViewBag.Estatus, "Id", "Nombre"), "Seleccione un estatus", new { @class = "form-control", id = "ddlEstatus" })
+                    @Html.DropDownListFor(x => x.TicketEstatusId, new SelectList(ViewBag.Estatus, "Id", "Nombre"), "Seleccione un estatus", new { @class = "form-control", id = "ddlEstatus" })
                 </div>
             </div>
             <div class="col-md-4">
@@ -210,8 +210,8 @@
             // Limpiar categorías y subcategorías
             $("#ddlCategoria").empty().append('<option value="">Seleccione una categoría</option>');
             $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
-            $("#Categoria_Id").val('');
-            $("#Subcategoria_Id").val('');
+            $("#CategoriaId").val('');
+            $("#SubcategoriaId").val('');
 
             if (areaId) {
                 // Primera llamada: obtener todas las categorías por área
@@ -239,7 +239,7 @@
 
             // Limpiar subcategorías
             $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
-            $("#Subcategoria_Id").val('');
+            $("#SubcategoriaId").val('');
 
             if (categoriaId) {
                 // Segunda llamada: obtener subcategorías por categoría padre
@@ -262,9 +262,9 @@
             columns: [
                 { data: 'Id', title: 'ID', visible: false },
                 { data: 'Titulo', title: 'Título' },
-                { data: 'Area.Nombre', title: 'Área' },
-                { data: 'Categoria.Nombre', title: 'Categoría' },
-                { data: 'Subcategoria.Nombre', title: 'Subcategoría', defaultContent: '---' },
+                { data: 'AreaNombre', title: 'Área' },
+                { data: 'CategoriaNombre', title: 'Categoría' },
+                { data: 'SubcategoriaNombre', title: 'Subcategoría', defaultContent: '---' },
                 {
                     data: 'Urgencia',
                     title: 'Urgencia',
@@ -279,12 +279,12 @@
                     }
                 },
                 {
-                    data: 'TicketEstatus.Nombre',
+                    data: 'EstatusNombre',
                     title: 'Estatus',
                     defaultContent: '---',
                     render: function (data, type, row) {
-                        if (row.TicketEstatus && row.TicketEstatus.Color) {
-                            return '<span class="badge" style="background-color: ' + row.TicketEstatus.Color + '; color: white;">' + row.TicketEstatus.Nombre + '</span>';
+                        if (row.EstatusColor) {
+                            return '<span class="badge" style="background-color: ' + row.EstatusColor + '; color: white;">' + row.EstatusNombre + '</span>';
                         }
                         return data || '---';
                     }
@@ -447,13 +447,13 @@
 
             var ticket = {
                 Id: $("#Id").val() || 0,
-                Area: { Id: parseInt($("#ddlArea").val()) },
-                Categoria: { Id: parseInt($("#ddlCategoria").val()) },
-                Subcategoria: { Id: parseInt($("#ddlSubcategoria").val()) },
+                AreaId: parseInt($("#ddlArea").val()),
+                CategoriaId: parseInt($("#ddlCategoria").val()),
+                SubcategoriaId: parseInt($("#ddlSubcategoria").val()),
                 Urgencia: parseInt($("#ddlUrgencia").val()),
                 Titulo: $("#Titulo").val(),
                 Descripcion: $("#Descripcion").val(),
-                TicketEstatus: { Id: parseInt($("#ddlEstatus").val()) },
+                TicketEstatusId: parseInt($("#ddlEstatus").val()),
                 CreadoPor: $("#CreadoPor").val(),
                 FechaCreacion: $("#FechaCreacion").val(),
                 ModificadoPor: $("#ModificadoPor").val() || null,

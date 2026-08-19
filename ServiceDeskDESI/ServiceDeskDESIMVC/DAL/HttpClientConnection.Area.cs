@@ -12,38 +12,20 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerAreas()
+        public async Task<ModelResponse<List<Area>>> ObtenerAreas()
         {
-            var result = await RequestAsync<object>($"api/Area/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<Area>>($"api/Area/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerAreaPorId(long id)
+        public async Task<ModelResponse<Area>> ObtenerAreaPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Area/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Area>($"api/Area/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarArea(Area area)
+        public async Task<ModelResponse<Area>> GuardarOActualizarArea(Area area)
         {
             MappingColumSecurity(area);
-            var result = await RequestAsync<object>($"api/Area/Guardar", HttpMethod.Post, area,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Area>($"api/Area/Guardar", HttpMethod.Post, area, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarArea(Area area)

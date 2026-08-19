@@ -16,11 +16,18 @@ namespace ServiceDeskDESIMVC.Services
         {
             _httpClient = httpClient;
         }
-        public async Task<ModelResponse> ObtenerCompaniaPorId(long id)
+
+        public async Task<Compania> ObtenerCompaniaPorId(long id)
         {
-            return await _httpClient.ObtenerCompaniaPorId(id);
+            var response = await _httpClient.ObtenerCompaniaPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
-        public async Task<ModelResponse> GuardarOActualizarCompania(Compania compania)
+
+        public async Task<ModelResponse<Compania>> GuardarOActualizarCompania(Compania compania)
         {
             return await _httpClient.GuardarActualizarCompania(compania);
         }
@@ -30,7 +37,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarCompania(compania);
         }
 
-        public async Task<ModelResponse> ConsultarTodasCompanias()
+        public async Task<ModelResponse<List<Compania>>> ConsultarTodasCompanias()
         {
             return await _httpClient.ObtenerTodasCompanias();
         }
@@ -40,8 +47,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Compañías");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Compañías");
             }
             return null;
         }

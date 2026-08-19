@@ -27,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de puestos</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerTodosLosPuestos()
+        public ModelResponse<List<Puesto>> ObtenerTodosLosPuestos()
         {
             var usuario = User.Identity.Name;
             var result = _puestoService.ObtenerTodosLosPuestos(usuario);
@@ -40,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del puesto</param>
         /// <returns>Puesto encontrado</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerPuestoPorId(long id)
+        public ModelResponse<Puesto> ObtenerPuestoPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _puestoService.ObtenerPuestoPorId(id, usuario);
@@ -54,7 +54,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Puesto guardado con su ID actualizado</returns>
         [Permiso("Tipped")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarPuesto(Puesto puesto)
+        public ModelResponse<Puesto> GuardarOActualizarPuesto(Puesto puesto)
         {
             var usuario = User.Identity.Name;
             var result = _puestoService.GuardarOActualizarPuesto(puesto, usuario);

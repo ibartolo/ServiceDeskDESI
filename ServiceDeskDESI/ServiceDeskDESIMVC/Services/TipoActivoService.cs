@@ -17,12 +17,17 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerTipoActivoPorId(long id)
+        public async Task<TipoActivo> ObtenerTipoActivoPorId(long id)
         {
-            return await _httpClient.ObtenerTipoActivoPorId(id);
+            var response = await _httpClient.ObtenerTipoActivoPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarTipoActivo(TipoActivo tipoActivo)
+        public async Task<ModelResponse<TipoActivo>> GuardarOActualizarTipoActivo(TipoActivo tipoActivo)
         {
             return await _httpClient.GuardarOActualizarTipoActivo(tipoActivo);
         }
@@ -32,7 +37,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarTipoActivo(tipoActivo);
         }
 
-        public async Task<ModelResponse> ConsultarTodosLosTipoActivos()
+        public async Task<ModelResponse<List<TipoActivo>>> ConsultarTodosLosTipoActivos()
         {
             return await _httpClient.ObtenerTodosLosTipoActivos();
         }
@@ -42,8 +47,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Tipo Activo");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Tipo Activo");
             }
             return null;
         }

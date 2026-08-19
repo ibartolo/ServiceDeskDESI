@@ -5,43 +5,28 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerCategorias(string usuario)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategorias(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<CategoriaDTO>>();
 
             try
             {
                 var categorias = GetObjects("ObtenerCategorias", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
-                    new Func<IDataReader, Categoria>((reader) =>
+                    new Func<IDataReader, CategoriaDTO>((reader) =>
                     {
-                        var categoria = LlenarEntidad<Categoria>(reader);
-
-                        categoria.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        if (reader["CategoriaPadreId"] != DBNull.Value)
-                        {
-                            categoria.CategoriaPadre = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"]),
-                                Nombre = MapearPorpiedades<string>(reader["CategoriaPadreNombre"])
-                            };
-                        }
-
+                        var categoria = LlenarEntidad<CategoriaDTO>(reader);
                         return categoria;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = categorias;
+                modelResponse.Response = categorias.ToList();
                 modelResponse.Message = "Categorías obtenidas correctamente";
             }
             catch (Exception ex)
@@ -54,9 +39,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerCategoriasPorArea(long areaId, string usuario)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategoriasPorArea(long areaId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<CategoriaDTO>>();
 
             try
             {
@@ -65,30 +50,14 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@AreaId", areaId),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Categoria>((reader) =>
+                    new Func<IDataReader, CategoriaDTO>((reader) =>
                     {
-                        var categoria = LlenarEntidad<Categoria>(reader);
-
-                        categoria.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        if (reader["CategoriaPadreId"] != DBNull.Value)
-                        {
-                            categoria.CategoriaPadre = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"]),
-                                Nombre = MapearPorpiedades<string>(reader["CategoriaPadreNombre"])
-                            };
-                        }
-
+                        var categoria = LlenarEntidad<CategoriaDTO>(reader);
                         return categoria;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = categorias;
+                modelResponse.Response = categorias.ToList();
                 modelResponse.Message = "Categorías por área obtenidas correctamente";
             }
             catch (Exception ex)
@@ -101,9 +70,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerCategoriaPorId(long id, string usuario)
+        public ModelResponse<CategoriaDTO> ObtenerCategoriaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<CategoriaDTO>();
 
             try
             {
@@ -112,25 +81,9 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@Id", id),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Categoria>((reader) =>
+                    new Func<IDataReader, CategoriaDTO>((reader) =>
                     {
-                        var c = LlenarEntidad<Categoria>(reader);
-
-                        c.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        if (reader["CategoriaPadreId"] != DBNull.Value)
-                        {
-                            c.CategoriaPadre = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"]),
-                                Nombre = MapearPorpiedades<string>(reader["CategoriaPadreNombre"])
-                            };
-                        }
-
+                        var c = LlenarEntidad<CategoriaDTO>(reader);
                         return c;
                     }));
 
@@ -155,9 +108,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerCategoriasPorPadre(long categoriaPadreId, string usuario)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategoriasPorPadre(long categoriaPadreId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<CategoriaDTO>>();
 
             try
             {
@@ -166,21 +119,14 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@CategoriaPadreId", categoriaPadreId),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Categoria>((reader) =>
+                    new Func<IDataReader, CategoriaDTO>((reader) =>
                     {
-                        var c = LlenarEntidad<Categoria>(reader);
-
-                        c.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
+                        var c = LlenarEntidad<CategoriaDTO>(reader);
                         return c;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = categorias;
+                modelResponse.Response = categorias.ToList();
                 modelResponse.Message = "Subcategorías obtenidas correctamente";
             }
             catch (Exception ex)
@@ -193,9 +139,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarCategoria(Categoria c, string usuario)
+        public ModelResponse<Categoria> GuardarOActualizarCategoria(Categoria c, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Categoria>();
 
             try
             {
@@ -204,8 +150,8 @@ namespace ServiceDeskDESIWebApi.DAL
                     c.Id,
                     c.Nombre,
                     c.Descripcion,
-                    CategoriaPadreId = c.CategoriaPadre?.Id,
-                    AreaId = c.Area.Id,
+                    c.CategoriaPadreId,
+                    c.AreaId,
                     c.Orden,
                     c.CreadoPor,
                     c.FechaCreacion,

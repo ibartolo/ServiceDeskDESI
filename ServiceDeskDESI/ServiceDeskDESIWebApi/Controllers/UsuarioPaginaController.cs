@@ -15,14 +15,14 @@ namespace ServiceDeskDESIWebApi.Controllers
     public class UsuarioPaginaController : BaseController
     {
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerUsuarioPagina()
+        public ModelResponse<List<UsuarioPagina>> ObtenerUsuarioPagina()
         {
             var usuario = User.Identity.Name;
             var result = dbWrapper.ObtenerUsuarioPagina(usuario);
             return result;
         }
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerUsuarioPaginaPorId(long id)
+        public ModelResponse<UsuarioPagina> ObtenerUsuarioPaginaPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = dbWrapper.ObtenerUsuarioPaginaPorId(id, usuario);
@@ -30,7 +30,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
         [Permiso("Permisos")]
         [HttpPost, Route("")]
-        public ModelResponse GuardarOActualizarUsuarioPagina(UsuarioPagina r)
+        public ModelResponse<UsuarioPagina> GuardarOActualizarUsuarioPagina(UsuarioPagina r)
         {
             var result = dbWrapper.GuardarOActualizarUsuarioPagina(r);
             return result;

@@ -12,41 +12,20 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodosLosActivos()
+        public async Task<ModelResponse<List<ActivoDTO>>> ObtenerTodosLosActivos()
         {
-            var result = await RequestAsync<object>($"api/Activo/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<ActivoDTO>>($"api/Activo/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerActivoPorId(long id)
+        public async Task<ModelResponse<ActivoDTO>> ObtenerActivoPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Activo/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<ActivoDTO>($"api/Activo/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarActivo(Activo activo)
+        public async Task<ModelResponse<Activo>> GuardarOActualizarActivo(Activo activo)
         {
             MappingColumSecurity(activo);
-            var result = await RequestAsync<object>($"api/Activo/Guardar", HttpMethod.Post, activo,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Activo>($"api/Activo/Guardar", HttpMethod.Post, activo, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarActivo(Activo activo)

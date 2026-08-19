@@ -30,7 +30,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de categorías ordenadas jerárquicamente</returns>
         [HttpGet, Route("Categoria/List")]
-        public ModelResponse ObtenerCategorias()
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategorias()
         {
             var usuario = User.Identity.Name;
             var result = _categoriaService.ObtenerCategorias(usuario);
@@ -43,7 +43,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="areaId">ID del área</param>
         /// <returns>Lista de categorías con jerarquía</returns>
         [HttpGet, Route("Categoria/Lista/{areaId:long}")]
-        public ModelResponse ObtenerCategoriasPorArea(long areaId)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategoriasPorArea(long areaId)
         {
             var usuario = User.Identity.Name;
             var result = _categoriaService.ObtenerCategoriasPorArea(areaId, usuario);
@@ -56,7 +56,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID de la categoría</param>
         /// <returns>Categoría encontrada</returns>
         [HttpGet, Route("Categoria/{id:long}")]
-        public ModelResponse ObtenerCategoriaPorId(long id)
+        public ModelResponse<CategoriaDTO> ObtenerCategoriaPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _categoriaService.ObtenerCategoriaPorId(id, usuario);
@@ -69,7 +69,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="categoriaPadreId">ID de la categoría padre</param>
         /// <returns>Lista de subcategorías</returns>
         [HttpGet, Route("Categoria/Subcategorias/{categoriaPadreId:long}")]
-        public ModelResponse ObtenerCategoriasPorPadre(long categoriaPadreId)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategoriasPorPadre(long categoriaPadreId)
         {
             var usuario = User.Identity.Name;
             var result = _categoriaService.ObtenerCategoriasPorPadre(categoriaPadreId, usuario);
@@ -83,7 +83,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Categoría guardada con su ID actualizado</returns>
         [Permiso("Categorías")]
         [HttpPost, Route("Categoria")]
-        public ModelResponse GuardarOActualizarCategoria(Categoria categoria)
+        public ModelResponse<Categoria> GuardarOActualizarCategoria(Categoria categoria)
         {
             var usuario = User.Identity.Name;
             var result = _categoriaService.GuardarOActualizarCategoria(categoria, usuario);
@@ -111,7 +111,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="categoriaId">ID de la categoría</param>
         /// <returns>Lista de responsables</returns>
         [HttpGet, Route("CategoriaResponsable/{categoriaId:long}")]
-        public ModelResponse ObtenerResponsablesPorCategoria(long categoriaId)
+        public ModelResponse<List<CategoriaResponsableDTO>> ObtenerResponsablesPorCategoria(long categoriaId)
         {
             var usuario = User.Identity.Name;
             var result = _categoriaResponsableService.ObtenerResponsablesPorCategoria(categoriaId, usuario);
@@ -124,7 +124,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="usuarioId">ID del usuario</param>
         /// <returns>Lista de categorías</returns>
         [HttpGet, Route("CategoriaResponsable/Usuario/{usuarioId:long}")]
-        public ModelResponse ObtenerCategoriasPorResponsable(long usuarioId)
+        public ModelResponse<List<CategoriaResponsableDTO>> ObtenerCategoriasPorResponsable(long usuarioId)
         {
             var usuario = User.Identity.Name;
             var result = _categoriaResponsableService.ObtenerCategoriasPorResponsable(usuarioId, usuario);
@@ -138,7 +138,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Resultado de la operación</returns>
         [Permiso("Responsables por Categoría")]
         [HttpPost, Route("CategoriaResponsable")]
-        public ModelResponse GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
+        public ModelResponse<CategoriaResponsable> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
             var usuario = User.Identity.Name;
             var result = _categoriaResponsableService.GuardarOActualizarCategoriaResponsable(categoriaResponsable, usuario);

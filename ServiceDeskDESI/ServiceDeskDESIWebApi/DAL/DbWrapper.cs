@@ -67,16 +67,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
             foreach (var p in parametersName)
             {
-                if (p.GetValue(o)?.GetType().GetProperty("Id") == null)
-                    listParameters.Add(new SqlParameter($"@{p.Name}", p.GetValue(o))
-                    {
-                        IsNullable = true
-                    });
-                else
-                    listParameters.Add(new SqlParameter($"@{p.Name}", p.GetValue(o).GetType().GetProperty("Id").GetValue(p.GetValue(o)))
-                    {
-                        IsNullable = true
-                    });
+                listParameters.Add(new SqlParameter($"@{p.Name}", p.GetValue(o))
+                {
+                    IsNullable = true
+                });
             }
 
             return listParameters;

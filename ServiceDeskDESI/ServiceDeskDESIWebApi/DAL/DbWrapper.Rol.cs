@@ -4,14 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerRoles(string usuario)
+        public ModelResponse<List<Rol>> ObtenerRoles(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Rol>>();
 
             try
             {
@@ -24,7 +25,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = roles;
+                modelResponse.Response = roles.ToList();
                 modelResponse.Message = "Roles obtenidos correctamente";
             }
             catch (Exception ex)
@@ -37,9 +38,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerRolPorId(long id, string usuario)
+        public ModelResponse<Rol> ObtenerRolPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Rol>();
 
             try
             {
@@ -75,9 +76,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarRol(Rol rol, string usuarioAdmin)
+        public ModelResponse<Rol> GuardarOActualizarRol(Rol rol, string usuarioAdmin)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Rol>();
 
             try
             {
@@ -249,9 +250,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerRolesPorUsuario(string usuario)
+        public ModelResponse<List<Rol>> ObtenerRolesPorUsuario(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Rol>>();
 
             try
             {
@@ -264,7 +265,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = roles;
+                modelResponse.Response = roles.ToList();
                 modelResponse.Message = "Roles obtenidos correctamente";
             }
             catch (Exception ex)

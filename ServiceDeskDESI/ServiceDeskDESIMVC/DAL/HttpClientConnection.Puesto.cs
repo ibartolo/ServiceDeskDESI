@@ -13,38 +13,20 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodosLosPuestos()
+        public async Task<ModelResponse<List<Puesto>>> ObtenerTodosLosPuestos()
         {
-            var result = await RequestAsync<object>($"api/Puesto/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<Puesto>>($"api/Puesto/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerPuestoPorId(long id)
+        public async Task<ModelResponse<Puesto>> ObtenerPuestoPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Puesto/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Puesto>($"api/Puesto/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarPuesto(Puesto puesto)
+        public async Task<ModelResponse<Puesto>> GuardarOActualizarPuesto(Puesto puesto)
         {
             MappingColumSecurity(puesto);
-            var result = await RequestAsync<object>($"api/Puesto/Guardar", HttpMethod.Post, puesto,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Puesto>($"api/Puesto/Guardar", HttpMethod.Post, puesto, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarPuesto(Puesto puesto)
@@ -55,6 +37,7 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }

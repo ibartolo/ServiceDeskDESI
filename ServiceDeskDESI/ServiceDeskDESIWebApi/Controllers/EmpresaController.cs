@@ -23,7 +23,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerEmpresasPorId(long id)
+        public ModelResponse<Empresa> ObtenerEmpresasPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _empresaService.ObtenerEmpresaPorId(id, usuario);
@@ -32,7 +32,7 @@ namespace ServiceDeskDESIWebApi.Controllers
 
         [Permiso("Compañías")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarEmpresa(Empresa e)
+        public ModelResponse<Empresa> GuardarOActualizarEmpresa(Empresa e)
         {
             var usuario = User.Identity.Name;
             var result = _empresaService.GuardarOActualizarEmpresa(e, usuario);
@@ -41,7 +41,7 @@ namespace ServiceDeskDESIWebApi.Controllers
 
         [Permiso("Compañías", "Crear")]
         [HttpPost, Route("Nueva")]
-        public ModelResponse GuardarNuevaEmpresa(Empresa e)
+        public ModelResponse<Empresa> GuardarNuevaEmpresa(Empresa e)
         {
             var result = _empresaService.GuardarNuevaEmpresa(e);
             return result;
@@ -49,7 +49,7 @@ namespace ServiceDeskDESIWebApi.Controllers
 
         [Permiso("Compañías", "Crear")]
         [HttpPost, Route("NuevaCompleta")]
-        public ModelResponse GuardarNuevaEmpresaCompleta(Empresa e)
+        public ModelResponse<Empresa> GuardarNuevaEmpresaCompleta(Empresa e)
         {
             var result = _empresaService.GuardarNuevaEmpresaConDatosIniciales(e);
             return result;
@@ -63,7 +63,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Resultado del registro</returns>
         [AllowAnonymous]
         [HttpPost, Route("Registrar")]
-        public ModelResponse Registrar(Empresa e)
+        public ModelResponse<Empresa> Registrar(Empresa e)
         {
             return _empresaService.RegistrarEmpresa(e);
         }

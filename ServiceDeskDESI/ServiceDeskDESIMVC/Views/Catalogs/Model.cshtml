@@ -1,4 +1,4 @@
-﻿﻿@model ServiceDeskDESIEntities.Catalogos.Modelo
+﻿@model ServiceDeskDESIEntities.Catalogos.Modelo
 @{
     ViewBag.Title = "Model";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -48,7 +48,7 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Marca</label>
-                    @Html.DropDownListFor(x => x.Marca.Id, (IEnumerable<SelectListItem>)ViewBag.Marcas, "Seleccione una marca", new { @class = "form-control", id = "ddlMarca" })
+                    @Html.DropDownListFor(x => x.MarcaId, (IEnumerable<SelectListItem>)ViewBag.Marcas, "Seleccione una marca", new { @class = "form-control", id = "ddlMarca" })
                 </div>
             </div>
         </div>
@@ -133,7 +133,7 @@
                 { data: 'Id', title: 'ID', visible: false },
                 { data: 'Nombre', title: 'Nombre' },
                 { data: 'Descripcion', title: 'Descripción' },
-                { data: 'Marca.Nombre', title: 'Marca' },
+                { data: 'MarcaNombre', title: 'Marca' },
                 {
                     data: 'FechaCreacion',
                     title: 'Fecha Creación',
@@ -219,7 +219,7 @@
                 Id: $("#Id").val() || 0,
                 Nombre: $("#Nombre").val(),
                 Descripcion: $("#Descripcion").val(),
-                Marca: { Id: parseInt($("#ddlMarca").val()) },
+                MarcaId: parseInt($("#ddlMarca").val()),
                 CreadoPor: $("#CreadoPor").val(),
                 FechaCreacion: $("#FechaCreacion").val(),
                 ModificadoPor: $("#ModificadoPor").val() || null,

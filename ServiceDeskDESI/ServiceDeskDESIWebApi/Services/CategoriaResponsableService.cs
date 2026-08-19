@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
 using System;
+using System.Collections.Generic;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -15,7 +16,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerResponsablesPorCategoria(long categoriaId, string usuario)
+        public ModelResponse<List<CategoriaResponsableDTO>> ObtenerResponsablesPorCategoria(long categoriaId, string usuario)
         {
             try
             {
@@ -27,12 +28,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerResponsablesPorCategoria para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<CategoriaResponsableDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CategoriaResponsableService.ObtenerResponsablesPorCategoria para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<CategoriaResponsableDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener los responsables."
@@ -40,7 +41,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerCategoriasPorResponsable(long usuarioId, string usuario)
+        public ModelResponse<List<CategoriaResponsableDTO>> ObtenerCategoriasPorResponsable(long usuarioId, string usuario)
         {
             try
             {
@@ -52,12 +53,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerCategoriasPorResponsable para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<CategoriaResponsableDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CategoriaResponsableService.ObtenerCategoriasPorResponsable para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<CategoriaResponsableDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener las categorías."
@@ -65,12 +66,12 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable, string usuario)
+        public ModelResponse<CategoriaResponsable> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable, string usuario)
         {
             try
             {
-                if (categoriaResponsable.Categoria == null || categoriaResponsable.Categoria.Id <= 0) { throw new ArgumentException("La categoría es requerida."); }
-                if (categoriaResponsable.Usuario == null || categoriaResponsable.Usuario.Id <= 0) { throw new ArgumentException("El usuario es requerido."); }
+                if (categoriaResponsable.CategoriaId <= 0) { throw new ArgumentException("La categoría es requerida."); }
+                if (categoriaResponsable.UsuarioId <= 0) { throw new ArgumentException("El usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(categoriaResponsable.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -79,12 +80,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarCategoriaResponsable para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<CategoriaResponsable> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CategoriaResponsableService.GuardarOActualizarCategoriaResponsable para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<CategoriaResponsable>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al guardar el responsable."

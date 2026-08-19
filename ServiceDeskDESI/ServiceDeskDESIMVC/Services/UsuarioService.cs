@@ -17,27 +17,32 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerUsuarioPorId(long id)
+        public async Task<Usuario> ObtenerUsuarioPorId(long id)
         {
-            return await _httpClient.ObtenerUsuarioPorId(id);
+            var response = await _httpClient.ObtenerUsuarioPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> ObtenerUsuarios()
+        public async Task<ModelResponse<List<UsuarioDTO>>> ObtenerUsuarios()
         {
             return await _httpClient.ObtenerUsuarios();
         }
 
-        public async Task<ModelResponse> GuardarOActualizarUsuario(Usuario usuario)
+        public async Task<ModelResponse<Usuario>> GuardarOActualizarUsuario(Usuario usuario)
         {
             return await _httpClient.GuardarOActualizarUsuario(usuario);
         }
 
-        public async Task<ModelResponse> GuardarUsuarioEmpresa(Usuario usuario)
+        public async Task<ModelResponse<Usuario>> GuardarUsuarioEmpresa(Usuario usuario)
         {
             return await _httpClient.GuardarUsuarioEmpresa(usuario);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarUsuarioAdmin(Usuario usuario)
+        public async Task<ModelResponse<Usuario>> GuardarOActualizarUsuarioAdmin(Usuario usuario)
         {
             return await _httpClient.GuardarOActualizarUsuarioAdmin(usuario);
         }
@@ -47,7 +52,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarUsuario(usuario);
         }
 
-        public async Task<ModelResponse> ConsultarTodosLosUsuarios()
+        public async Task<ModelResponse<List<UsuarioDTO>>> ConsultarTodosLosUsuarios()
         {
             return await _httpClient.ObtenerUsuarios();
         }
@@ -57,8 +62,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Usuarios");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Usuarios");
             }
             return null;
         }

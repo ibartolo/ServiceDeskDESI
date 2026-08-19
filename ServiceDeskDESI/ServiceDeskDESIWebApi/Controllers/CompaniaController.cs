@@ -27,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de compañías</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerCompanias()
+        public ModelResponse<List<Compania>> ObtenerCompanias()
         {
             var usuario = User.Identity.Name;
             var result = _companiaService.ObtenerCompanias(usuario);
@@ -40,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID de la compañía</param>
         /// <returns>Compañía encontrada</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerCompaniaPorId(long id)
+        public ModelResponse<Compania> ObtenerCompaniaPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _companiaService.ObtenerCompaniaPorId(id, usuario);
@@ -54,7 +54,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Compañía guardada con su ID actualizado</returns>
         [Permiso("Compañías")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarCompania(Compania compania)
+        public ModelResponse<Compania> GuardarOActualizarCompania(Compania compania)
         {
             var usuario = User.Identity.Name;
             var result = _companiaService.GuardarOActualizarCompania(compania, usuario);

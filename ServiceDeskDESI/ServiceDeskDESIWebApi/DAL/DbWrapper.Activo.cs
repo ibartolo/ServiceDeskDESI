@@ -5,49 +5,28 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodosLosActivos(string usuario)
+        public ModelResponse<List<ActivoDTO>> ObtenerTodosLosActivos(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<ActivoDTO>>();
 
             try
             {
                 var activos = GetObjects("ObtenerActivos", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
-                    new Func<IDataReader, Activo>((reader) =>
+                    new Func<IDataReader, ActivoDTO>((reader) =>
                     {
-                        var activo = LlenarEntidad<Activo>(reader);
-
-                        activo.TipoActivo = new TipoActivo()
-                        {
-                            Id = MapearPorpiedades<long>(reader["TipoActivoID"]),
-                            Nombre = MapearPorpiedades<string>(reader["TipoActivoNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["TipoActivoDescripcion"])
-                        };
-
-                        activo.Marca = new Marca()
-                        {
-                            Id = MapearPorpiedades<long>(reader["MarcaID"]),
-                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
-                        };
-
-                        activo.Modelo = new Modelo()
-                        {
-                            Id = MapearPorpiedades<long>(reader["ModeloID"]),
-                            Nombre = MapearPorpiedades<string>(reader["ModeloNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["ModeloDescripcion"])
-                        };
-
+                        var activo = LlenarEntidad<ActivoDTO>(reader);
                         return activo;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = activos;
+                modelResponse.Response = activos.ToList();
                 modelResponse.Message = "Activos obtenidos correctamente";
             }
             catch (Exception ex)
@@ -60,9 +39,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerActivoPorId(long id, string usuario)
+        public ModelResponse<ActivoDTO> ObtenerActivoPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<ActivoDTO>();
 
             try
             {
@@ -71,31 +50,9 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@Id", id),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Activo>((reader) =>
+                    new Func<IDataReader, ActivoDTO>((reader) =>
                     {
-                        var a = LlenarEntidad<Activo>(reader);
-
-                        a.TipoActivo = new TipoActivo()
-                        {
-                            Id = MapearPorpiedades<long>(reader["TipoActivoID"]),
-                            Nombre = MapearPorpiedades<string>(reader["TipoActivoNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["TipoActivoDescripcion"])
-                        };
-
-                        a.Marca = new Marca()
-                        {
-                            Id = MapearPorpiedades<long>(reader["MarcaID"]),
-                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
-                        };
-
-                        a.Modelo = new Modelo()
-                        {
-                            Id = MapearPorpiedades<long>(reader["ModeloID"]),
-                            Nombre = MapearPorpiedades<string>(reader["ModeloNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["ModeloDescripcion"])
-                        };
-
+                        var a = LlenarEntidad<ActivoDTO>(reader);
                         return a;
                     }));
 
@@ -120,9 +77,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarActivo(Activo a, string usuario)
+        public ModelResponse<Activo> GuardarOActualizarActivo(Activo a, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Activo>();
 
             try
             {
@@ -131,10 +88,10 @@ namespace ServiceDeskDESIWebApi.DAL
                     a.Id,
                     a.Nombre,
                     a.Descripcion,
-                    TipoActivoID = a.TipoActivo.Id,
+                    a.TipoActivoId,
                     a.Serial,
-                    MarcaID = a.Marca.Id,
-                    ModeloID = a.Modelo.Id,
+                    a.MarcaId,
+                    a.ModeloId,
                     a.Notas,
                     a.FechaCompra,
                     a.CreadoPor,

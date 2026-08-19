@@ -11,9 +11,9 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerEmpresaPorId(long id, string usuario)
+        public ModelResponse<Empresa> ObtenerEmpresaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Empresa>();
 
             try
             {
@@ -49,9 +49,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerEmpresaPorRFC(string rfc)
+        public ModelResponse<Empresa> ObtenerEmpresaPorRFC(string rfc)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Empresa>();
 
             try
             {
@@ -77,9 +77,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerEmpresaPorCorreoContacto(string correoContacto)
+        public ModelResponse<Empresa> ObtenerEmpresaPorCorreoContacto(string correoContacto)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Empresa>();
 
             try
             {
@@ -104,9 +104,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerEmpresaPorNombreComercial(string nombreComercial)
+        public ModelResponse<Empresa> ObtenerEmpresaPorNombreComercial(string nombreComercial)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Empresa>();
 
             try
             {
@@ -131,9 +131,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerEmpresaPorRazonSocial(string razonSocial)
+        public ModelResponse<Empresa> ObtenerEmpresaPorRazonSocial(string razonSocial)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Empresa>();
 
             try
             {
@@ -158,9 +158,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarEmpresa(Empresa e, string usuario)
+        public ModelResponse<Empresa> GuardarOActualizarEmpresa(Empresa e, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Empresa>();
 
             try
             {
@@ -214,9 +214,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarNuevaEmpresa(Empresa e)
+        public ModelResponse<Empresa> GuardarNuevaEmpresa(Empresa e)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Empresa>();
 
             try
             {
@@ -325,9 +325,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerPlantillaRoles()
+        public ModelResponse<List<Rol>> ObtenerPlantillaRoles()
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Rol>>();
 
             try
             {
@@ -339,7 +339,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = roles;
+                modelResponse.Response = roles.ToList();
                 modelResponse.Message = "Plantilla de roles obtenida correctamente.";
             }
             catch (Exception ex)

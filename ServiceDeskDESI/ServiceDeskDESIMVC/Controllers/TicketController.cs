@@ -51,8 +51,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var categoriasResponse = await _categoriaService.ConsultarTodasCategorias();
             if (categoriasResponse.IsSuccess && categoriasResponse.Response != null)
             {
-                var todasCategorias = JsonConvert.DeserializeObject<List<Categoria>>(categoriasResponse.Response.ToString());
-                var categoriasPrincipales = todasCategorias.Where(c => c.CategoriaPadre == null).ToList();
+                var categoriasPrincipales = categoriasResponse.Response.Where(c => c.CategoriaPadreId == null).Cast<Categoria>().ToList();
                 ViewBag.Categorias = categoriasPrincipales;
             }
 
@@ -69,12 +68,12 @@ namespace ServiceDeskDESIMVC.Controllers
 
                 if (response.IsSuccess && response.Response != null)
                 {
-                    ticket = JsonConvert.DeserializeObject<Ticket>(response.Response.ToString());
+                    ticket = response.Response;
 
                     // Cargar subcategorías según la categoría seleccionada
-                    if (ticket.Categoria != null && ticket.Categoria.Id > 0)
+                    if (ticket.CategoriaId > 0)
                     {
-                        var subcategoriasResponse = await _categoriaService.ObtenerCategoriasPorPadre(ticket.Categoria.Id);
+                        var subcategoriasResponse = await _categoriaService.ObtenerCategoriasPorPadre(ticket.CategoriaId);
                         if (subcategoriasResponse.IsSuccess && subcategoriasResponse.Response != null)
                         {
                             ViewBag.Subcategorias = subcategoriasResponse.Response;
@@ -103,9 +102,9 @@ namespace ServiceDeskDESIMVC.Controllers
                 ticket.CreadoPor = tokenCookie?.UserName ?? "system";
                 ticket.FechaCreacion = DateTime.Now;
                 // Por defecto, el estatus inicial es "Nuevo" (Id = 1)
-                if (ticket.TicketEstatus == null || ticket.TicketEstatus.Id == 0)
+                if (ticket.TicketEstatusId == 0)
                 {
-                    ticket.TicketEstatus = new TicketEstatus { Id = 1 };
+                    ticket.TicketEstatusId = 1;
                 }
             }
             else
@@ -191,8 +190,8 @@ namespace ServiceDeskDESIMVC.Controllers
                 });
             }
 
-            var ticket = JsonConvert.DeserializeObject<Ticket>(response.Response.ToString());
-            ticket.TicketEstatus = new TicketEstatus { Id = nuevoEstatusId };
+            var ticket = response.Response;
+            ticket.TicketEstatusId = nuevoEstatusId;
             ticket.ModificadoPor = tokenCookie?.UserName ?? "system";
             ticket.FechaModificacion = DateTime.Now;
 

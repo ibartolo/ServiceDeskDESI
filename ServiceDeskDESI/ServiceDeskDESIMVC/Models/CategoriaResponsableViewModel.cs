@@ -9,7 +9,7 @@ namespace ServiceDeskDESIMVC.Models
     public class CategoriaResponsableViewModel
     {
         public long CategoriaId { get; set; }
-        public Categoria Categoria { get; set; }
+        public CategoriaDTO Categoria { get; set; }
         public List<CategoriaResponsable> Responsables { get; set; }
     }
 }

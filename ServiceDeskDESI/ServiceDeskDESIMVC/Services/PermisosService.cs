@@ -17,22 +17,22 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerPermisosPorUsuario()
+        public async Task<ModelResponse<List<PermisosViewModel>>> ObtenerPermisosPorUsuario()
         {
             return await _httpClient.ObtenerPermisosPorUsuario();
         }
 
-        public async Task<ModelResponse> ValidarPermisoUsuario(string nombrePagina, string accion)
+        public async Task<ModelResponse<bool>> ValidarPermisoUsuario(string nombrePagina, string accion)
         {
             return await _httpClient.ValidarPermisoUsuario(nombrePagina, accion);
         }
 
-        public async Task<ModelResponse> ObtenerPaginas()
+        public async Task<ModelResponse<List<Pagina>>> ObtenerPaginas()
         {
             return await _httpClient.ObtenerPaginas();
         }
 
-        public async Task<ModelResponse> ObtenerPermisosPorRol(long rolId)
+        public async Task<ModelResponse<List<RolPaginaAccionDTO>>> ObtenerPermisosPorRol(long rolId)
         {
             return await _httpClient.ObtenerPermisosPorRol(rolId);
         }
@@ -52,8 +52,7 @@ namespace ServiceDeskDESIMVC.Services
             var response = await _httpClient.ObtenerPermisosPorUsuario();
             if (response.IsSuccess && response.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(response.Response.ToString());
-                return listaPermisos.Where(p => p.PaginaNombre == nombrePagina).ToList();
+                return response.Response.Where(p => p.PaginaNombre == nombrePagina).ToList();
             }
             return new List<PermisosViewModel>();
         }
@@ -61,9 +60,9 @@ namespace ServiceDeskDESIMVC.Services
         public async Task<bool> TienePermiso(string nombrePagina, string accion)
         {
             var response = await _httpClient.ValidarPermisoUsuario(nombrePagina, accion);
-            if (response.IsSuccess && response.Response != null)
+            if (response.IsSuccess)
             {
-                return (bool)response.Response;
+                return response.Response;
             }
             return false;
         }
@@ -73,8 +72,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Permisos");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Permisos");
             }
             return null;
         }

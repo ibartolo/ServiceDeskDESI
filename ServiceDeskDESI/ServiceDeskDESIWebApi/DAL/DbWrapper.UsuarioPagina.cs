@@ -11,9 +11,9 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerUsuarioPagina(string usuario)
+        public ModelResponse<List<UsuarioPagina>> ObtenerUsuarioPagina(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<UsuarioPagina>>();
             try
             {
                 var usuarioResp = GetObjects("ObtenerUsuarioPagina", CommandType.StoredProcedure,
@@ -24,7 +24,7 @@ namespace ServiceDeskDESIWebApi.DAL
                       return usuarioPagina;
                   }));
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = usuarioResp;
+                modelResponse.Response = usuarioResp.ToList();
                 modelResponse.Message = "UsuarioPagina obtenidas correctamente";
             }
             catch (Exception ex)
@@ -35,9 +35,9 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             return modelResponse;
         }
-        public ModelResponse GuardarOActualizarUsuarioPagina(UsuarioPagina u)
+        public ModelResponse<UsuarioPagina> GuardarOActualizarUsuarioPagina(UsuarioPagina u)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioPagina>();
             try
             {
                 var parametros = ObtenerParametrosSQL(u).ToArray();
@@ -57,9 +57,9 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
-        public ModelResponse ObtenerUsuarioPaginaPorId(long id, string usuario)
+        public ModelResponse<UsuarioPagina> ObtenerUsuarioPaginaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioPagina>();
             try
             {
                 modelResponse.IsSuccess = true;

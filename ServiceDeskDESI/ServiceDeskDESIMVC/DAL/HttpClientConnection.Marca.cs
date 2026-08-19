@@ -12,41 +12,20 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodosLasMarcas()
+        public async Task<ModelResponse<List<Marca>>> ObtenerTodosLasMarcas()
         {
-            var result = await RequestAsync<object>($"api/Marca/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<Marca>>($"api/Marca/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerMarcaPorId(long id)
+        public async Task<ModelResponse<Marca>> ObtenerMarcaPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Marca/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Marca>($"api/Marca/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarMarca(Marca marca)
+        public async Task<ModelResponse<Marca>> GuardarOActualizarMarca(Marca marca)
         {
             MappingColumSecurity(marca);
-            var result = await RequestAsync<object>($"api/Marca/Guardar", HttpMethod.Post, marca,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Marca>($"api/Marca/Guardar", HttpMethod.Post, marca, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarMarca(Marca marca)

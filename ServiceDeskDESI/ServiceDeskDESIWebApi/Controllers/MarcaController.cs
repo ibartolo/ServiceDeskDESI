@@ -25,7 +25,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de marcas</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerTodosLasMarcas()
+        public ModelResponse<List<Marca>> ObtenerTodosLasMarcas()
         {
             var usuario = User.Identity.Name;
             var result = _marcaService.ObtenerMarcas(usuario);
@@ -38,7 +38,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID de la marca</param>
         /// <returns>Marca encontrada</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerMarcaPorId(long id)
+        public ModelResponse<Marca> ObtenerMarcaPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _marcaService.ObtenerMarcaPorId(id, usuario);
@@ -52,7 +52,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Marca guardada con su ID actualizado</returns>
         [Permiso("Marcas")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarMarca(Marca marca)
+        public ModelResponse<Marca> GuardarOActualizarMarca(Marca marca)
         {
             var usuario = User.Identity.Name;
             var result = _marcaService.GuardarOActualizarMarca(marca, usuario);

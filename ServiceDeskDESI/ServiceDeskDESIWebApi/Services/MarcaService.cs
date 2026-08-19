@@ -18,7 +18,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerMarcas(string usuario)
+        public ModelResponse<List<Marca>> ObtenerMarcas(string usuario)
         {
             try
             {
@@ -29,16 +29,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerMarcas para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<Marca>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en MarcaService.ObtenerMarcas para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener las marcas." };
+                return new ModelResponse<List<Marca>> { IsSuccess = false, Message = "Ocurrió un error al obtener las marcas." };
             }
         }
 
-        public ModelResponse ObtenerMarcaPorId(long id, string usuario)
+        public ModelResponse<Marca> ObtenerMarcaPorId(long id, string usuario)
         {
             try
             {
@@ -50,16 +50,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerMarcaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Marca> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en MarcaService.ObtenerMarcaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener la marca." };
+                return new ModelResponse<Marca> { IsSuccess = false, Message = "Ocurrió un error al obtener la marca." };
             }
         }
 
-        public ModelResponse GuardarOActualizarMarca(Marca marca, string usuario)
+        public ModelResponse<Marca> GuardarOActualizarMarca(Marca marca, string usuario)
         {
             try
             {
@@ -74,12 +74,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarMarca para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Marca> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en MarcaService.GuardarOActualizarMarca para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar la marca." };
+                return new ModelResponse<Marca> { IsSuccess = false, Message = "Ocurrió un error al guardar la marca." };
             }
         }
 

@@ -22,10 +22,10 @@
 | Hecho — transacción (capa app) + `PlantillaRol` | Registro de empresa sin transacción (8+ SPs sueltos) + provisioning sin template (D4) | ALTO | 2 |
 | Hecho — `bugs-bd` | Bugs de BD que rompen flujos: rol sin `PuedeAtenderTickets`, typo `nvarchaR`, `@@IDENTITY`, JOIN muerto en `ObtenerEmpresas`, `Estatus` comentado (D6, D10, D11, D12, D13) | ALTO | 2 |
 | Hecho — `RolPaginaAccion` único; `ValidarAccesoPagina`/`UsuarioPagina` legacy eliminado | Dos sistemas de permisos en conflicto: `RolPaginaAccion` vs `UsuarioPagina` (D7) | ALTO | 2 |
-| Parcial — E3+W10 listos; E2 (FKs→`*Id`) pendiente | Mapeo por reflection frágil + FKs como navegación vs `*Id` + `TicketEstatus.Id` int/long (W10, E2, E3) | ALTO | 2 |
+| Hecho — `mapeo-reflection` (E3+W10) + `fk-escalares` (E2) | Mapeo por reflection frágil + FKs como navegación vs `*Id` + `TicketEstatus.Id` int/long (W10, E2, E3) | ALTO | 2 |
 | Pendiente | Contrato de respuesta sin tipar: `ModelResponse.Response object`, `IsSuccess=true` por defecto (E8) | ALTO | 2 |
 | Pendiente | CSRF / verbos HTTP ausentes / `[FromBody]` (WebApi) dentro de MVC (M13, M14) | ALTO | 2 |
-| Pendiente | FKs sin entidad (`RolPaginaAccion`, `UsuarioRol`, `TokenRecuperacion`) + `Compania` vs `Empresa` (E4, E10, D17) | MEDIO | 3 |
+| Hecho — `entidades-faltantes` | FKs sin entidad (`RolPaginaAccion`, `UsuarioRol`, `TokenRecuperacion`) + `Compania` vs `Empresa` (E4, E10, D17) | MEDIO | 3 |
 | Parcial — `Estatus` borrados listo; nullabilidad (E5) y `throw ex` (W9) pendientes | Robustez de datos: NULLabilidad no reflejada en POCOs, `throw ex` resetea stack, `ObtenerUsuarios` devuelve borrados (E5, W9, D13) | MEDIO | 3 |
 | Pendiente | Sin manejo global de excepciones / códigos HTTP; validación manual duplicada sin ModelState (W12, W13, M15, E6) | MEDIO | 3 |
 | Pendiente | Sin índices no-cluster ni paginación en listados (D8, W11, D9) | MEDIO | 3 |
@@ -35,7 +35,7 @@
 
 > **Estado**: **Hecho** = implementado (se indica el cambio SDD). **Parcial** = avance parcial (se indica lo que falta). **Pendiente** = sin iniciar.
 >
-> Cambios SDD ya cerrados: `autorizacion-e2e`, `tenant-isolation`, `sesion-expiracion`, `bugs-bd`, `mapeo-reflection`.
+> Cambios SDD ya cerrados: `autorizacion-e2e`, `tenant-isolation`, `sesion-expiracion`, `bugs-bd`, `mapeo-reflection`, `fk-escalares`, `entidades-faltantes`.
 
 ---
 
@@ -194,6 +194,6 @@ Hallazgos incluidos:
 2. **Longitud/política mínima de contraseña**: hoy es 6; se propone 12+ con reglas de complejidad. Validar con el negocio.
 3. **Migración de `CreadoPor` (string) a `Usuarios.Id`**: en esta iteración se propone solo hacer `NombreUsuario` único global (mitigación). La migración completa del campo de auditoría queda para una iteración futura.
 4. **Fuente de verdad de permisos**: se propone `RolPaginaAccion` y deprecar `UsuarioPagina`, pero hay que confirmar si el flujo legacy de `UsuarioPagina` se usa en clientes reales.
-5. **`Compania`**: confirmar si es un residuo eliminable o si tiene propósito real (¿legal/contable?).
+5. **`Compania`**: RESUELTO en `entidades-faltantes` — no es residuo (CRUD completo: tabla + 4 SPs + `CompaniaController`/`CompaniaService`/`DbWrapper.Compania.cs` + vista `Company.cshtml`). Es un catálogo simple (4 campos) distinto de `Empresa` (tenant); su merge/relación queda diferido como decisión de negocio.
 6. **Rate limiting en `/token`** (W5/next-steps): alcance y herramienta (middleware propio vs librería) — se deja como ítem opcional de Fase 1.
 7. **Alcance de "autorización server-side" en MVC**: se recomienda un filtro global con allowlist anónima en vez de atributos por-action; confirmar si se acepta ese refactor en Fase 1 o se prefiere atributo por acción.

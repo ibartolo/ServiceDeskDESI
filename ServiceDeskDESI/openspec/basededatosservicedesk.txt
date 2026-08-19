@@ -2025,10 +2025,10 @@ CREATE PROCEDURE [dbo].[GuardarOActualizarActivo]
     @Id BIGINT,
     @Nombre NVARCHAR(50),
     @Descripcion NVARCHAR(250) = NULL,
-    @TipoActivoID BIGINT,
+    @TipoActivoId BIGINT,
     @Serial NVARCHAR(50) = NULL,
-    @MarcaID BIGINT,
-    @ModeloID BIGINT,
+    @MarcaId BIGINT,
+    @ModeloId BIGINT,
     @Notas NVARCHAR(250) = NULL,
     @FechaCompra DATETIME = NULL,
     @CreadoPor NVARCHAR(25),
@@ -2058,7 +2058,7 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM TipoActivo ta
-            WHERE ta.Id = @TipoActivoID 
+            WHERE ta.Id = @TipoActivoId 
                 AND ta.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
@@ -2070,7 +2070,7 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Marca m
-            WHERE m.Id = @MarcaID 
+            WHERE m.Id = @MarcaId 
                 AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
@@ -2082,7 +2082,7 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Modelo mo
-            WHERE mo.Id = @ModeloID 
+            WHERE mo.Id = @ModeloId 
                 AND mo.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
@@ -2093,10 +2093,10 @@ BEGIN
         UPDATE Activo
         SET Nombre = @Nombre,
             Descripcion = @Descripcion,
-            TipoActivoID = @TipoActivoID,
+            TipoActivoID = @TipoActivoId,
             Serial = @Serial,
-            MarcaID = @MarcaID,
-            ModeloID = @ModeloID,
+            MarcaID = @MarcaId,
+            ModeloID = @ModeloId,
             Notas = @Notas,
             FechaCompra = @FechaCompra,
             ModificadoPor = @ModificadoPor,
@@ -2125,7 +2125,7 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM TipoActivo ta
-            WHERE ta.Id = @TipoActivoID 
+            WHERE ta.Id = @TipoActivoId 
                 AND ta.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
@@ -2137,7 +2137,7 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Marca m
-            WHERE m.Id = @MarcaID 
+            WHERE m.Id = @MarcaId 
                 AND m.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
@@ -2149,7 +2149,7 @@ BEGIN
         IF NOT EXISTS(
             SELECT 1 
             FROM Modelo mo
-            WHERE mo.Id = @ModeloID 
+            WHERE mo.Id = @ModeloId 
                 AND mo.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
         )
         BEGIN
@@ -2161,7 +2161,7 @@ BEGIN
         (Nombre, Descripcion, TipoActivoID, Serial, MarcaID, ModeloID, Notas, FechaCompra, 
          CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Nombre, @Descripcion, @TipoActivoID, @Serial, @MarcaID, @ModeloID, @Notas, @FechaCompra,
+        (@Nombre, @Descripcion, @TipoActivoId, @Serial, @MarcaId, @ModeloId, @Notas, @FechaCompra,
          @CreadoPor, @FechaCreacion, @Estatus, (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1))
 
         SELECT SCOPE_IDENTITY()
@@ -3074,9 +3074,9 @@ GO
 CREATE PROCEDURE [dbo].[GuardarOActualizarTicket]
 (
     @Id BIGINT,
-    @Area BIGINT,
-    @Categoria BIGINT,
-    @Subcategoria BIGINT = NULL,
+    @AreaId BIGINT,
+    @CategoriaId BIGINT,
+    @SubcategoriaId BIGINT = NULL,
     @Urgencia INT,
     @Titulo NVARCHAR(250),
     @Descripcion NVARCHAR(MAX),
@@ -3110,7 +3110,7 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Area a
-        WHERE a.Id = @Area 
+        WHERE a.Id = @AreaId 
             AND a.EmpresaId = @EmpresaId
     )
     BEGIN
@@ -3122,7 +3122,7 @@ BEGIN
     IF NOT EXISTS(
         SELECT 1 
         FROM Categoria c
-        WHERE c.Id = @Categoria 
+        WHERE c.Id = @CategoriaId 
             AND c.EmpresaId = @EmpresaId
     )
     BEGIN
@@ -3152,9 +3152,9 @@ BEGIN
         END
 
         UPDATE Ticket
-        SET AreaId = @Area,
-            CategoriaId = @Categoria,
-            SubcategoriaId = @Subcategoria,
+        SET AreaId = @AreaId,
+            CategoriaId = @CategoriaId,
+            SubcategoriaId = @SubcategoriaId,
             Urgencia = @Urgencia,
             Titulo = @Titulo,
             Descripcion = @Descripcion,
@@ -3172,7 +3172,7 @@ BEGIN
         (AreaId, CategoriaId, SubcategoriaId, Urgencia, Titulo, Descripcion, 
          TicketEstatusId, CreadoPor, FechaCreacion, Estatus, EmpresaId)
         VALUES
-        (@Area, @Categoria, @Subcategoria, @Urgencia, @Titulo, @Descripcion,
+        (@AreaId, @CategoriaId, @SubcategoriaId, @Urgencia, @Titulo, @Descripcion,
          @TicketEstatusId, @CreadoPor, @FechaCreacion, @Estatus, @EmpresaId)
 
         SELECT SCOPE_IDENTITY()
@@ -3405,7 +3405,7 @@ BEGIN
 
         UPDATE Usuarios
         SET NombreUsuario = @NombreUsuario,
-            Contrasena = @Contrasena,
+            Contrasena = CASE WHEN @Contrasena IS NULL OR @Contrasena = '' THEN Contrasena ELSE @Contrasena END,
             ImagenPerfil = @ImagenPerfil,
             Correo = @Correo,
             Nombre = @Nombre,

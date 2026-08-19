@@ -19,7 +19,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerEmpresaPorId(long id, string usuario)
+        public ModelResponse<Empresa> ObtenerEmpresaPorId(long id, string usuario)
         {
             try
             {
@@ -31,12 +31,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerEmpresaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Empresa> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en EmpresaService.ObtenerEmpresaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<Empresa>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener la empresa."
@@ -44,7 +44,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerEmpresaPorRFC(string rfc)
+        public ModelResponse<Empresa> ObtenerEmpresaPorRFC(string rfc)
         {
             try
             {
@@ -55,12 +55,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerEmpresaPorRFC para RFC {RFC}", rfc);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Empresa> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en EmpresaService.ObtenerEmpresaPorRFC para RFC {RFC}", rfc);
-                return new ModelResponse
+                return new ModelResponse<Empresa>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener la empresa."
@@ -68,7 +68,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse GuardarOActualizarEmpresa(Empresa empresa, string usuario)
+        public ModelResponse<Empresa> GuardarOActualizarEmpresa(Empresa empresa, string usuario)
         {
             try
             {
@@ -96,12 +96,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarEmpresa para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Empresa> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en EmpresaService.GuardarOActualizarEmpresa para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<Empresa>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al guardar la empresa."
@@ -109,7 +109,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse GuardarNuevaEmpresa(Empresa empresa)
+        public ModelResponse<Empresa> GuardarNuevaEmpresa(Empresa empresa)
         {
             try
             {
@@ -138,12 +138,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarNuevaEmpresa");
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Empresa> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en EmpresaService.GuardarNuevaEmpresa");
-                return new ModelResponse
+                return new ModelResponse<Empresa>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al registrar la empresa."
@@ -151,7 +151,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse RegistrarEmpresa(Empresa empresa)
+        public ModelResponse<Empresa> RegistrarEmpresa(Empresa empresa)
         {
             try
             {
@@ -203,12 +203,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en RegistrarEmpresa");
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Empresa> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en EmpresaService.RegistrarEmpresa");
-                return new ModelResponse
+                return new ModelResponse<Empresa>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al registrar la empresa."
@@ -242,9 +242,9 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse GuardarNuevaEmpresaConDatosIniciales(Empresa empresa)
+        public ModelResponse<Empresa> GuardarNuevaEmpresaConDatosIniciales(Empresa empresa)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Empresa>();
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Empresa empresaGuardada = null;
             Sucursal sucursalGuardada = null;
@@ -310,7 +310,7 @@ namespace ServiceDeskDESIWebApi.Services
                         throw new Exception(empresaResponse.Message ?? "Error al guardar la empresa");
                     }
 
-                    empresaGuardada = (Empresa)empresaResponse.Response;
+                    empresaGuardada = empresaResponse.Response;
                     Log.Information("✅ PASO 1/8 - Empresa guardada exitosamente. Id: {EmpresaId}, Nombre: {NombreEmpresa}",
                         empresaGuardada.Id, empresaGuardada.NombreComercial);
 
@@ -372,7 +372,7 @@ namespace ServiceDeskDESIWebApi.Services
                         throw new Exception(areaResponse.Message ?? "Error al guardar el área");
                     }
 
-                    areaGuardada = (Area)areaResponse.Response;
+                    areaGuardada = areaResponse.Response;
                     Log.Information("✅ PASO 3/8 - Área 'TI' creada exitosamente. Id: {AreaId}, Nombre: {AreaNombre}",
                         areaGuardada.Id, areaGuardada.Nombre);
 
@@ -393,11 +393,11 @@ namespace ServiceDeskDESIWebApi.Services
                         Nombre = "Administrador",
                         Apellido = "Sistema",
                         Celular = empresaGuardada.Telefono,
-                        Sucursal = sucursalGuardada,
+                        SucursalId = sucursalGuardada.Id,
                         Firma = null,
                         RFC = empresaGuardada.RFC,
-                        Area = areaGuardada,
-                        Empresa = empresaGuardada,
+                        AreaId = areaGuardada.Id,
+                        EmpresaId = empresaGuardada.Id,
                         CreadoPor = usernameAdmin,
                         FechaCreacion = DateTime.Now,
                         Estatus = true
@@ -412,7 +412,7 @@ namespace ServiceDeskDESIWebApi.Services
                         throw new Exception(usuarioResponse.Message ?? "Error al guardar el usuario administrador");
                     }
 
-                    usuarioAdmin = (Usuario)usuarioResponse.Response;
+                    usuarioAdmin = usuarioResponse.Response;
                     usuarioAdminId = usuarioAdmin.Id;
                     Log.Information("✅ PASO 4/8 - Usuario administrador creado exitosamente. Id: {UsuarioId}, Username: {Username}, Correo: {Correo}",
                         usuarioAdminId, usernameAdmin, empresaGuardada.CorreoContacto);
@@ -428,7 +428,7 @@ namespace ServiceDeskDESIWebApi.Services
                         throw new Exception("No se pudo obtener la plantilla de roles para el registro de la empresa.");
                     }
 
-                    var rolesBase = ((IEnumerable<Rol>)plantillaResponse.Response)
+                    var rolesBase = plantillaResponse.Response
                         .Select(t => new Rol
                         {
                             Nombre = t.Nombre,

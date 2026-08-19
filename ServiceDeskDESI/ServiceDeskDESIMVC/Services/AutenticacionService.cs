@@ -17,12 +17,12 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> AutenticarUsuario(Usuario usuario)
+        public async Task<ModelResponse<UsuarioDTO>> AutenticarUsuario(Usuario usuario)
         {
             return await _httpClient.AutenticarUsuario(usuario);
         }
 
-        public async Task<ModelResponse> ActualizarPerfilUsuario(Usuario usuario)
+        public async Task<ModelResponse<Usuario>> ActualizarPerfilUsuario(Usuario usuario)
         {
             return await _httpClient.ActualizarPerfilUsuario(usuario);
         }
@@ -42,7 +42,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.ValidarRecetearContrasenia(usuario);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarUsuarioAdmin(Usuario usuario)
+        public async Task<ModelResponse<Usuario>> GuardarOActualizarUsuarioAdmin(Usuario usuario)
         {
             return await _httpClient.GuardarOActualizarUsuarioAdmin(usuario);
         }

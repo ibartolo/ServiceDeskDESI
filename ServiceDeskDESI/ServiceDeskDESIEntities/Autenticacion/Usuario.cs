@@ -16,10 +16,10 @@ namespace ServiceDeskDESIEntities.Autenticacion
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public string Celular { get; set; }
-        public Sucursal Sucursal { get; set; }
+        public long? SucursalId { get; set; }
         public string Firma { get; set; }
         public string RFC { get; set; }
-        public Area Area { get; set; }
-        public Empresa Empresa { get; set; }
+        public long? AreaId { get; set; }
+        public long? EmpresaId { get; set; }
     }
 }

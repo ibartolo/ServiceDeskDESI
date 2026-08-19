@@ -11,9 +11,9 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerAreas(string usuario)
+        public ModelResponse<List<Area>> ObtenerAreas(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Area>>();
 
             try
             {
@@ -26,7 +26,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = areas;
+                modelResponse.Response = areas.ToList();
                 modelResponse.Message = "Áreas obtenidas correctamente";
             }
             catch (Exception ex)
@@ -39,9 +39,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerAreaPorId(long id, string usuario)
+        public ModelResponse<Area> ObtenerAreaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Area>();
 
             try
             {
@@ -77,9 +77,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarArea(Area a)
+        public ModelResponse<Area> GuardarOActualizarArea(Area a)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Area>();
 
             try
             {
@@ -157,9 +157,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarNuevaAreaParaEmpresa(Area area, long empresaId)
+        public ModelResponse<Area> GuardarNuevaAreaParaEmpresa(Area area, long empresaId)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Area>();
 
             try
             {

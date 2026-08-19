@@ -28,7 +28,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de roles</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerRoles()
+        public ModelResponse<List<Rol>> ObtenerRoles()
         {
             var usuario = User.Identity.Name;
             var result = _rolService.ObtenerRoles(usuario);
@@ -41,7 +41,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del rol</param>
         /// <returns>Rol encontrado</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerRolPorId(long id)
+        public ModelResponse<Rol> ObtenerRolPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _rolService.ObtenerRolPorId(id, usuario);
@@ -55,7 +55,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Rol guardado con su ID actualizado</returns>
         [Permiso("Roles")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarRol(Rol rol)
+        public ModelResponse<Rol> GuardarOActualizarRol(Rol rol)
         {
             var usuarioAdmin = User.Identity.Name;
             var result = _rolService.GuardarOActualizarRol(rol, usuarioAdmin);
@@ -98,7 +98,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="usuarioId">ID del usuario</param>
         /// <returns>Lista de roles del usuario</returns>
         [HttpGet, Route("Usuario/{usuarioId:long}")]
-        public ModelResponse ObtenerRolesPorUsuario(long usuarioId)
+        public ModelResponse<List<Rol>> ObtenerRolesPorUsuario(long usuarioId)
         {
             var usuarioAutenticado = User.Identity.Name;
             var result = _rolService.ObtenerRolesPorUsuario(usuarioId, usuarioAutenticado);
@@ -129,7 +129,7 @@ namespace ServiceDeskDESIWebApi.Controllers
             if (userResponse.IsSuccess && userResponse.Response != null)
             {
                 var usuarioObj = (Usuario)userResponse.Response;
-                return usuarioObj.Empresa.Id;
+                return usuarioObj.EmpresaId ?? 0;
             }
             return 0;
         }

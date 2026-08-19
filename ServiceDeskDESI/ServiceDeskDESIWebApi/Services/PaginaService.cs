@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
 using System;
+using System.Collections.Generic;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -14,7 +15,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerPaginasPorUsuario(string usuario)
+        public ModelResponse<List<Pagina>> ObtenerPaginasPorUsuario(string usuario)
         {
             try
             {
@@ -25,16 +26,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerPaginasPorUsuario para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<Pagina>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ObtenerPaginasPorUsuario para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener las páginas." };
+                return new ModelResponse<List<Pagina>> { IsSuccess = false, Message = "Ocurrió un error al obtener las páginas." };
             }
         }
 
-        public ModelResponse ObtenerPaginaPorNombre(string nombre)
+        public ModelResponse<Pagina> ObtenerPaginaPorNombre(string nombre)
         {
             try
             {
@@ -45,16 +46,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerPaginaPorNombre para nombre {Nombre}", nombre);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Pagina> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ObtenerPaginaPorNombre para nombre {Nombre}", nombre);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener la página." };
+                return new ModelResponse<Pagina> { IsSuccess = false, Message = "Ocurrió un error al obtener la página." };
             }
         }
 
-        public ModelResponse ObtenerPaginas()
+        public ModelResponse<List<Pagina>> ObtenerPaginas()
         {
             try
             {
@@ -63,7 +64,7 @@ namespace ServiceDeskDESIWebApi.Services
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ObtenerPaginas");
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener las páginas." };
+                return new ModelResponse<List<Pagina>> { IsSuccess = false, Message = "Ocurrió un error al obtener las páginas." };
             }
         }
     }

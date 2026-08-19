@@ -17,27 +17,32 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerEmpresaPorId(long id)
+        public async Task<Empresa> ObtenerEmpresaPorId(long id)
         {
-            return await _httpClient.ObtenerEmpresaPorId(id);
+            var response = await _httpClient.ObtenerEmpresaPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarEmpresa(Empresa empresa)
+        public async Task<ModelResponse<Empresa>> GuardarOActualizarEmpresa(Empresa empresa)
         {
             return await _httpClient.GuardarOActualizarEmpresa(empresa);
         }
 
-        public async Task<ModelResponse> GuardarNuevaEmpresa(Empresa empresa)
+        public async Task<ModelResponse<Empresa>> GuardarNuevaEmpresa(Empresa empresa)
         {
             return await _httpClient.GuardarNuevaEmpresa(empresa);
         }
 
-        public async Task<ModelResponse> RegistrarEmpresa(Empresa empresa)
+        public async Task<ModelResponse<Empresa>> RegistrarEmpresa(Empresa empresa)
         {
             return await _httpClient.RegistrarEmpresa(empresa);
         }
 
-        public async Task<ModelResponse> GuardarNuevaEmpresaCompleta(Empresa empresa)
+        public async Task<ModelResponse<Empresa>> GuardarNuevaEmpresaCompleta(Empresa empresa)
         {
             return await _httpClient.GuardarNuevaEmpresaCompleta(empresa);
         }
@@ -52,8 +57,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Compañías");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Compañías");
             }
             return null;
         }

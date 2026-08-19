@@ -19,7 +19,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerUsuarios(string usuario)
+        public ModelResponse<List<UsuarioDTO>> ObtenerUsuarios(string usuario)
         {
             try
             {
@@ -30,16 +30,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerUsuarios para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<UsuarioDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AutenticacionService.ObtenerUsuarios para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los usuarios." };
+                return new ModelResponse<List<UsuarioDTO>> { IsSuccess = false, Message = "Ocurrió un error al obtener los usuarios." };
             }
         }
 
-        public ModelResponse ObtenerUsuarioPorId(long id, string usuario)
+        public ModelResponse<UsuarioDTO> ObtenerUsuarioPorId(long id, string usuario)
         {
             try
             {
@@ -51,16 +51,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerUsuarioPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<UsuarioDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AutenticacionService.ObtenerUsuarioPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el usuario." };
+                return new ModelResponse<UsuarioDTO> { IsSuccess = false, Message = "Ocurrió un error al obtener el usuario." };
             }
         }
 
-        public ModelResponse ObtenerUsuarioPorNombreUsuario(string nombreUsuario)
+        public ModelResponse<UsuarioDTO> ObtenerUsuarioPorNombreUsuario(string nombreUsuario)
         {
             try
             {
@@ -71,16 +71,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerUsuarioPorNombreUsuario para usuario {Usuario}", nombreUsuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<UsuarioDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AutenticacionService.ObtenerUsuarioPorNombreUsuario para usuario {Usuario}", nombreUsuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el usuario." };
+                return new ModelResponse<UsuarioDTO> { IsSuccess = false, Message = "Ocurrió un error al obtener el usuario." };
             }
         }
 
-        public ModelResponse ObtenerUsuarioPorCorreo(string correo)
+        public ModelResponse<UsuarioDTO> ObtenerUsuarioPorCorreo(string correo)
         {
             try
             {
@@ -91,16 +91,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerUsuarioPorCorreo para correo {Correo}", correo);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<UsuarioDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AutenticacionService.ObtenerUsuarioPorCorreo para correo {Correo}", correo);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el usuario." };
+                return new ModelResponse<UsuarioDTO> { IsSuccess = false, Message = "Ocurrió un error al obtener el usuario." };
             }
         }
 
-        public ModelResponse GuardarOActualizarUsuario(Usuario usuario)
+        public ModelResponse<Usuario> GuardarOActualizarUsuario(Usuario usuario)
         {
             try
             {
@@ -114,9 +114,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (usuario.Nombre.Length > 150) { throw new ArgumentException("El nombre no puede exceder los 150 caracteres."); }
                 if (string.IsNullOrWhiteSpace(usuario.Apellido)) { throw new ArgumentException("El apellido es requerido."); }
                 if (usuario.Apellido.Length > 250) { throw new ArgumentException("El apellido no puede exceder los 250 caracteres."); }
-                if (usuario.Sucursal == null || usuario.Sucursal.Id <= 0) { throw new ArgumentException("La sucursal es requerida."); }
-                if (usuario.Area == null || usuario.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (usuario.Empresa == null || usuario.Empresa.Id <= 0) { throw new ArgumentException("La empresa es requerida."); }
+                if ((usuario.SucursalId ?? 0) <= 0) { throw new ArgumentException("La sucursal es requerida."); }
+                if ((usuario.AreaId ?? 0) <= 0) { throw new ArgumentException("El área es requerida."); }
+                if ((usuario.EmpresaId ?? 0) <= 0) { throw new ArgumentException("La empresa es requerida."); }
                 if (string.IsNullOrWhiteSpace(usuario.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
 
                 return _dbWrapper.GuardarOActualizarUsuario(usuario);
@@ -124,32 +124,32 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarUsuario para usuario {Usuario}", usuario.NombreUsuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Usuario> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AutenticacionService.GuardarOActualizarUsuario para usuario {Usuario}", usuario.NombreUsuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar el usuario." };
+                return new ModelResponse<Usuario> { IsSuccess = false, Message = "Ocurrió un error al guardar el usuario." };
             }
         }
 
-        public ModelResponse GuardarOActualizarUsuarioAdmin(Usuario usuario, string usuarioAdmin)
+        public ModelResponse<Usuario> GuardarOActualizarUsuarioAdmin(Usuario usuario, string usuarioAdmin)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(usuario.NombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (usuario.NombreUsuario.Length > 25) { throw new ArgumentException("El nombre de usuario no puede exceder los 25 caracteres."); }
-                if (string.IsNullOrWhiteSpace(usuario.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
-                if (usuario.Contrasena.Length > 250) { throw new ArgumentException("La contraseña no puede exceder los 250 caracteres."); }
+                if (usuario.Id <= 0 && string.IsNullOrWhiteSpace(usuario.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
+                if (!string.IsNullOrWhiteSpace(usuario.Contrasena) && usuario.Contrasena.Length > 250) { throw new ArgumentException("La contraseña no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(usuario.Correo)) { throw new ArgumentException("El correo es requerido."); }
                 if (usuario.Correo.Length > 250) { throw new ArgumentException("El correo no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(usuario.Nombre)) { throw new ArgumentException("El nombre es requerido."); }
                 if (usuario.Nombre.Length > 150) { throw new ArgumentException("El nombre no puede exceder los 150 caracteres."); }
                 if (string.IsNullOrWhiteSpace(usuario.Apellido)) { throw new ArgumentException("El apellido es requerido."); }
                 if (usuario.Apellido.Length > 250) { throw new ArgumentException("El apellido no puede exceder los 250 caracteres."); }
-                if (usuario.Sucursal == null || usuario.Sucursal.Id <= 0) { throw new ArgumentException("La sucursal es requerida."); }
-                if (usuario.Area == null || usuario.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (usuario.Empresa == null || usuario.Empresa.Id <= 0) { throw new ArgumentException("La empresa es requerida."); }
+                if ((usuario.SucursalId ?? 0) <= 0) { throw new ArgumentException("La sucursal es requerida."); }
+                if ((usuario.AreaId ?? 0) <= 0) { throw new ArgumentException("El área es requerida."); }
+                if ((usuario.EmpresaId ?? 0) <= 0) { throw new ArgumentException("La empresa es requerida."); }
                 if (string.IsNullOrWhiteSpace(usuario.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuarioAdmin)) { throw new ArgumentException("El usuario administrador es requerido."); }
 
@@ -163,16 +163,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarUsuarioAdmin para usuario {UsuarioAdmin}", usuarioAdmin);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Usuario> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AutenticacionService.GuardarOActualizarUsuarioAdmin para usuario {UsuarioAdmin}", usuarioAdmin);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar el usuario." };
+                return new ModelResponse<Usuario> { IsSuccess = false, Message = "Ocurrió un error al guardar el usuario." };
             }
         }
 
-        public ModelResponse ActualizarPerfilUsuario(Usuario usuario, string usuarioAutenticado)
+        public ModelResponse<Usuario> ActualizarPerfilUsuario(Usuario usuario, string usuarioAutenticado)
         {
             try
             {
@@ -185,9 +185,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (usuario.Nombre.Length > 150) { throw new ArgumentException("El nombre no puede exceder los 150 caracteres."); }
                 if (string.IsNullOrWhiteSpace(usuario.Apellido)) { throw new ArgumentException("El apellido es requerido."); }
                 if (usuario.Apellido.Length > 250) { throw new ArgumentException("El apellido no puede exceder los 250 caracteres."); }
-                if (usuario.Sucursal == null || usuario.Sucursal.Id <= 0) { throw new ArgumentException("La sucursal es requerida."); }
-                if (usuario.Area == null || usuario.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (usuario.Empresa == null || usuario.Empresa.Id <= 0) { throw new ArgumentException("La empresa es requerida."); }
+                if ((usuario.SucursalId ?? 0) <= 0) { throw new ArgumentException("La sucursal es requerida."); }
+                if ((usuario.AreaId ?? 0) <= 0) { throw new ArgumentException("El área es requerida."); }
+                if ((usuario.EmpresaId ?? 0) <= 0) { throw new ArgumentException("La empresa es requerida."); }
                 if (string.IsNullOrWhiteSpace(usuario.ModificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuarioAutenticado)) { throw new ArgumentException("El usuario autenticado es requerido."); }
 
@@ -196,12 +196,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ActualizarPerfilUsuario para usuario {UsuarioAutenticado}", usuarioAutenticado);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Usuario> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AutenticacionService.ActualizarPerfilUsuario para usuario {UsuarioAutenticado}", usuarioAutenticado);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al actualizar el perfil." };
+                return new ModelResponse<Usuario> { IsSuccess = false, Message = "Ocurrió un error al actualizar el perfil." };
             }
         }
 
@@ -226,7 +226,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse AutenticarUsuario(string nombreUsuario, string contrasena)
+        public ModelResponse<UsuarioDTO> AutenticarUsuario(string nombreUsuario, string contrasena)
         {
             try
             {
@@ -238,12 +238,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en AutenticarUsuario para usuario {NombreUsuario}", nombreUsuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<UsuarioDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AutenticacionService.AutenticarUsuario para usuario {NombreUsuario}", nombreUsuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al autenticar el usuario." };
+                return new ModelResponse<UsuarioDTO> { IsSuccess = false, Message = "Ocurrió un error al autenticar el usuario." };
             }
         }
 
@@ -270,7 +270,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerTokenRecuperacion(string token)
+        public ModelResponse<TokenRecuperacionDTO> ObtenerTokenRecuperacion(string token)
         {
             try
             {
@@ -281,12 +281,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTokenRecuperacion para token {Token}", token);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<TokenRecuperacionDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AutenticacionService.ObtenerTokenRecuperacion para token {Token}", token);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el token." };
+                return new ModelResponse<TokenRecuperacionDTO> { IsSuccess = false, Message = "Ocurrió un error al obtener el token." };
             }
         }
 
@@ -328,7 +328,7 @@ namespace ServiceDeskDESIWebApi.Services
                     return modelResponse;
                 }
 
-                var usuario = (Usuario)userResponse.Response;
+                var usuario = userResponse.Response;
 
                 // Generar token único para recuperación
                 string token = Guid.NewGuid().ToString();
@@ -401,7 +401,7 @@ namespace ServiceDeskDESIWebApi.Services
                     return modelResponse;
                 }
 
-                dynamic tokenInfo = tokenResponse.Response;
+                var tokenInfo = tokenResponse.Response;
 
                 // Actualizar contraseña del usuario
                 var usuario = new Usuario

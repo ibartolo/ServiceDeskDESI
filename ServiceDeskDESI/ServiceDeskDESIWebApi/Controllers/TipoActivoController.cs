@@ -26,7 +26,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de tipos de activo</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerTodosLosTipoActivos()
+        public ModelResponse<List<TipoActivo>> ObtenerTodosLosTipoActivos()
         {
             var usuario = User.Identity.Name;
             var result = _tipoActivoService.ObtenerTodosLosTipoActivos(usuario);
@@ -39,7 +39,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del tipo de activo</param>
         /// <returns>Tipo de activo encontrado</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerTipoActivoPorId(long id)
+        public ModelResponse<TipoActivo> ObtenerTipoActivoPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _tipoActivoService.ObtenerTipoActivoPorId(id, usuario);
@@ -53,7 +53,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <returns>Tipo de activo guardado con su ID actualizado</returns>
         [Permiso("Tipo Activo")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarTipoActivo(TipoActivo tipoActivo)
+        public ModelResponse<TipoActivo> GuardarOActualizarTipoActivo(TipoActivo tipoActivo)
         {
             var usuario = User.Identity.Name;
             var result = _tipoActivoService.GuardarOActualizarTipoActivo(tipoActivo, usuario);

@@ -46,7 +46,7 @@ namespace ServiceDeskDESIWebApi.Filters
 
             var resultado = new PermisosService().ValidarPermisoUsuario(usuario, _pagina, accion);
 
-            if (resultado == null || !resultado.IsSuccess || !(resultado.Response is bool) || !(bool)resultado.Response)
+            if (resultado == null || !resultado.IsSuccess || !resultado.Response)
             {
                 actionContext.Response = actionContext.Request.CreateErrorResponse(
                     HttpStatusCode.Forbidden,
