@@ -6,14 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerResponsablesPorCategoria(long categoriaId, string usuario)
+        public ModelResponse<List<CategoriaResponsableDTO>> ObtenerResponsablesPorCategoria(long categoriaId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<CategoriaResponsableDTO>>();
 
             try
             {
@@ -22,29 +23,14 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@CategoriaId", categoriaId),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, CategoriaResponsable>((reader) =>
+                    new Func<IDataReader, CategoriaResponsableDTO>((reader) =>
                     {
-                        var cr = LlenarEntidad<CategoriaResponsable>(reader);
-
-                        cr.Categoria = new Categoria()
-                        {
-                            Id = MapearPorpiedades<long>(reader["CategoriaId"])
-                        };
-
-                        cr.Usuario = new Usuario()
-                        {
-                            Id = MapearPorpiedades<long>(reader["UsuarioId"]),
-                            NombreUsuario = MapearPorpiedades<string>(reader["NombreUsuario"]),
-                            Nombre = MapearPorpiedades<string>(reader["Nombre"]),
-                            Apellido = MapearPorpiedades<string>(reader["Apellido"]),
-                            Correo = MapearPorpiedades<string>(reader["Correo"])
-                        };
-
+                        var cr = LlenarEntidad<CategoriaResponsableDTO>(reader);
                         return cr;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = responsables;
+                modelResponse.Response = responsables.ToList();
                 modelResponse.Message = "Responsables obtenidos correctamente";
             }
             catch (Exception ex)
@@ -57,9 +43,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerCategoriasPorResponsable(long usuarioId, string usuario)
+        public ModelResponse<List<CategoriaResponsableDTO>> ObtenerCategoriasPorResponsable(long usuarioId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<CategoriaResponsableDTO>>();
 
             try
             {
@@ -68,31 +54,14 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@UsuarioId", usuarioId),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, CategoriaResponsable>((reader) =>
+                    new Func<IDataReader, CategoriaResponsableDTO>((reader) =>
                     {
-                        var cr = LlenarEntidad<CategoriaResponsable>(reader);
-
-                        cr.Categoria = new Categoria()
-                        {
-                            Id = MapearPorpiedades<long>(reader["CategoriaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["CategoriaNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["CategoriaDescripcion"]),
-                            Area = new Area()
-                            {
-                                Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                            }
-                        };
-
-                        cr.Usuario = new Usuario()
-                        {
-                            Id = MapearPorpiedades<long>(reader["UsuarioId"])
-                        };
-
+                        var cr = LlenarEntidad<CategoriaResponsableDTO>(reader);
                         return cr;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = categorias;
+                modelResponse.Response = categorias.ToList();
                 modelResponse.Message = "Categorías por responsable obtenidas correctamente";
             }
             catch (Exception ex)
@@ -105,17 +74,17 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarCategoriaResponsable(CategoriaResponsable cr, string usuario)
+        public ModelResponse<CategoriaResponsable> GuardarOActualizarCategoriaResponsable(CategoriaResponsable cr, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<CategoriaResponsable>();
 
             try
             {
                 var parametrosObj = new
                 {
                     cr.Id,
-                    CategoriaId = cr.Categoria.Id,
-                    UsuarioId = cr.Usuario.Id,
+                    cr.CategoriaId,
+                    cr.UsuarioId,
                     cr.EsPrincipal,
                     cr.CreadoPor,
                     cr.FechaCreacion,

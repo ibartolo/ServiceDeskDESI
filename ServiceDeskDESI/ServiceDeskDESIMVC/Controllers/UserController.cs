@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
+using ServiceDeskDESIMVC.Filters;
 using static ServiceDeskDESIMVC.Controllers.CatalogsController;
 
 namespace ServiceDeskDESIMVC.Controllers
@@ -42,16 +43,11 @@ namespace ServiceDeskDESIMVC.Controllers
                 return RedirectToAction("Autentication", "Home");
             }
 
-            var usuario = new Usuario();
-            var response = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
-
-            if (response.IsSuccess && response.Response != null)
+            var usuario = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
+            if (usuario == null)
             {
-                usuario = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
-            }
-            else
-            {
-                ViewBag.ErrorMessage = response.Message;
+                usuario = new Usuario();
+                ViewBag.ErrorMessage = "No se pudo obtener el usuario.";
             }
 
             // Cargar listas para los dropdowns
@@ -77,10 +73,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return View(usuario);
         }
 
-        public async Task<ActionResult> PartialChangePass()
-        {
-            return PartialView();
-        }
+        [Permiso("Mi Perfil", "Editar")]
         public async Task<string> ActualizarPerfilUsuario(Usuario usuario, HttpPostedFileBase file)
         {
             var modelResponse = new ModelResponse();
@@ -119,59 +112,6 @@ namespace ServiceDeskDESIMVC.Controllers
             }
         }
 
-        public async Task<string> CambiarContrasena([FromBody] CambioContrasenaRequest request)
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var tokenCookie = SessionHelper.GetSessionUser();
-                if (tokenCookie == null || tokenCookie.UserID == 0)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Sesión no válida";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Validar contraseña actual
-                var usuarioResponse = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
-
-                if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo obtener la información del usuario";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                var usuario = JsonConvert.DeserializeObject<Usuario>(usuarioResponse.Response.ToString());
-
-                if (usuario.Contrasena != Cryptography.Encrypt(request.ContrasenaActual))
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "La contraseña actual es incorrecta";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                usuario.Contrasena = Cryptography.Encrypt(request.NuevaContrasena);
-
-                // Actualizar contraseña
-                //usuario.Contrasena = request.NuevaContrasena;
-                //usuario.ModificadoPor = tokenCookie.UserName;
-                //usuario.FechaModificacion = DateTime.Now;
-                //
-                //var response = await httpClientConnection.ActualizarContrasena(usuario);
-                var response = await _usuarioService.GuardarOActualizarUsuario(usuario);
-                return JsonConvert.SerializeObject(response);
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al cambiar la contraseña";
-                return JsonConvert.SerializeObject(modelResponse);
-            }
-        }
-
-
         #region Catelogo de usuarios
         public async Task<ActionResult> Users(long id = 0)
         {
@@ -182,14 +122,14 @@ namespace ServiceDeskDESIMVC.Controllers
             var sucursalesList = new List<Sucursal>();
             if (sucursalesResponse.IsSuccess && sucursalesResponse.Response != null)
             {
-                sucursalesList = JsonConvert.DeserializeObject<List<Sucursal>>(sucursalesResponse.Response.ToString());
+                sucursalesList = sucursalesResponse.Response;
             }
 
             var areasResponse = await _areaService.ConsultarTodasAreas();
             var areasList = new List<Area>();
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
-                areasList = JsonConvert.DeserializeObject<List<Area>>(areasResponse.Response.ToString());
+                areasList = areasResponse.Response;
             }
 
             // Cargar roles
@@ -199,42 +139,37 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (rolesResponse.IsSuccess && rolesResponse.Response != null)
             {
-                rolesList = JsonConvert.DeserializeObject<List<Rol>>(rolesResponse.Response.ToString());
+                rolesList = rolesResponse.Response;
             }
 
             if (id > 0)
             {
-                var response = await _usuarioService.ObtenerUsuarioPorId(id);
+                var usuarioResponse = await _usuarioService.ObtenerUsuarioPorId(id);
 
-                if (response.IsSuccess && response.Response != null)
+                if (usuarioResponse != null)
                 {
-                    usuario = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
+                    usuario = usuarioResponse;
 
-                    // Desencriptar la contraseña para mostrarla en el input
-                    if (!string.IsNullOrEmpty(usuario.Contrasena))
-                    {
-                        usuario.Contrasena = Cryptography.Decrypt(usuario.Contrasena);
-                    }
+                    // La contraseña no se expone (viene vacía del API); el campo solo acepta una nueva contraseña.
 
                     // Obtener el rol del usuario en modo edición
                     var rolesUsuarioResponse = await _rolService.ObtenerRolesPorUsuario(usuario.Id);
                     if (rolesUsuarioResponse.IsSuccess && rolesUsuarioResponse.Response != null)
                     {
-                        var rolesUsuario = JsonConvert.DeserializeObject<List<Rol>>(rolesUsuarioResponse.Response.ToString());
-                        if (rolesUsuario.Any())
+                        if (rolesUsuarioResponse.Response.Any())
                         {
-                            rolSeleccionadoId = rolesUsuario.First().Id;
+                            rolSeleccionadoId = rolesUsuarioResponse.Response.First().Id;
                         }
                     }
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se pudo obtener el usuario.";
                 }
             }
 
             // Asignar Sucursales
-            if (id > 0 && usuario.Sucursal != null && usuario.Sucursal.Id > 0)
+            if (id > 0 && usuario.SucursalId.HasValue && usuario.SucursalId.Value > 0)
             {
                 var selectListSucursales = new List<SelectListItem>();
                 foreach (var s in sucursalesList)
@@ -243,7 +178,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     {
                         Value = s.Id.ToString(),
                         Text = s.Nombre,
-                        Selected = (s.Id == usuario.Sucursal.Id)
+                        Selected = (s.Id == usuario.SucursalId)
                     };
                     selectListSucursales.Add(item);
                 }
@@ -255,7 +190,7 @@ namespace ServiceDeskDESIMVC.Controllers
             }
 
             // Asignar Áreas
-            if (id > 0 && usuario.Area != null && usuario.Area.Id > 0)
+            if (id > 0 && usuario.AreaId.HasValue && usuario.AreaId.Value > 0)
             {
                 var selectListAreas = new List<SelectListItem>();
                 foreach (var a in areasList)
@@ -264,7 +199,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     {
                         Value = a.Id.ToString(),
                         Text = a.Nombre,
-                        Selected = (a.Id == usuario.Area.Id)
+                        Selected = (a.Id == usuario.AreaId)
                     };
                     selectListAreas.Add(item);
                 }
@@ -301,18 +236,13 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Usuarios")]
         public async Task<string> GuardarOActualizarUsuarioAdmin(Usuario usuario)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
 
-            // Encriptar la contraseña antes de guardar
-            if (!string.IsNullOrEmpty(usuario.Contrasena))
-            {
-                usuario.Contrasena = Cryptography.Encrypt(usuario.Contrasena);
-            }
-
             // Asignar empresa
-            usuario.Empresa = new Empresa { Id = tokenCookie.EmpresaID };
+            usuario.EmpresaId = tokenCookie.EmpresaID;
 
             // Guardar usuario
             var response = await _usuarioService.GuardarOActualizarUsuarioAdmin(usuario);
@@ -320,7 +250,7 @@ namespace ServiceDeskDESIMVC.Controllers
             // Si el usuario se guardó correctamente y tiene un rol seleccionado
             if (response.IsSuccess && response.Response != null)
             {
-                var usuarioGuardado = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
+                var usuarioGuardado = response.Response;
 
                 // Obtener el rol seleccionado del formulario (se envía como campo oculto o desde el DDL)
                 var rolId = HttpContext.Request.Form["RolId"];
@@ -330,8 +260,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     var rolesUsuarioResponse = await _rolService.ObtenerRolesPorUsuario(usuarioGuardado.Id);
                     if (rolesUsuarioResponse.IsSuccess && rolesUsuarioResponse.Response != null)
                     {
-                        var rolesUsuario = JsonConvert.DeserializeObject<List<Rol>>(rolesUsuarioResponse.Response.ToString());
-                        foreach (var rol in rolesUsuario)
+                        foreach (var rol in rolesUsuarioResponse.Response)
                         {
                             await _rolService.EliminarRolUsuario(rol.Id);
                         }
@@ -345,6 +274,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Usuarios", "Eliminar")]
         public async Task<string> EliminarUsuarioAdmin(Usuario usuario)
         {
             var tokenCookie = SessionHelper.GetSessionUser();

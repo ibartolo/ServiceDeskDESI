@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerCompanias(string usuario)
+        public ModelResponse<List<Compania>> ObtenerCompanias(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Compania>>();
 
             try
             {
@@ -25,7 +26,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = companias;
+                modelResponse.Response = companias.ToList();
                 modelResponse.Message = "Compañías obtenidas correctamente";
             }
             catch (Exception ex)
@@ -38,9 +39,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerCompaniaPorId(long id, string usuario)
+        public ModelResponse<Compania> ObtenerCompaniaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Compania>();
 
             try
             {
@@ -76,9 +77,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarCompania(Compania c, string usuario)
+        public ModelResponse<Compania> GuardarOActualizarCompania(Compania c, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Compania>();
 
             try
             {

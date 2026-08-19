@@ -9,12 +9,12 @@ namespace ServiceDeskDESIEntities.Tickets
 {
     public class Ticket : BaseObject
     {
-        public Area Area { get; set; }
-        public Categoria Categoria { get; set; }
-        public Categoria Subcategoria { get; set; }
+        public long AreaId { get; set; }
+        public long CategoriaId { get; set; }
+        public long? SubcategoriaId { get; set; }
         public int Urgencia { get; set; }
         public string Titulo { get; set; }
         public string Descripcion { get; set; }
-        public TicketEstatus TicketEstatus { get; set; }
+        public int TicketEstatusId { get; set; }
     }
 }

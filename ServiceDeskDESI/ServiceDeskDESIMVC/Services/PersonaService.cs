@@ -17,12 +17,17 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerPersonaPorId(long id)
+        public async Task<PersonaDTO> ObtenerPersonaPorId(long id)
         {
-            return await _httpClient.ObtenerPersonaPorId(id);
+            var response = await _httpClient.ObtenerPersonaPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarPersona(Persona persona)
+        public async Task<ModelResponse<Persona>> GuardarOActualizarPersona(Persona persona)
         {
             return await _httpClient.GuardarOActualizarPersona(persona);
         }
@@ -32,7 +37,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarPersona(persona);
         }
 
-        public async Task<ModelResponse> ConsultarTodasLasPersonas()
+        public async Task<ModelResponse<List<PersonaDTO>>> ConsultarTodasLasPersonas()
         {
             return await _httpClient.ObtenerTodasLasPersonas();
         }
@@ -42,8 +47,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "People");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "People");
             }
             return null;
         }

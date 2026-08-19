@@ -5,35 +5,28 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodasLasPersonas(string usuario)
+        public ModelResponse<List<PersonaDTO>> ObtenerTodasLasPersonas(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<PersonaDTO>>();
 
             try
             {
                 var personas = GetObjects("ObtenerPersonas", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
-                    new Func<IDataReader, Persona>((reader) =>
+                    new Func<IDataReader, PersonaDTO>((reader) =>
                     {
-                        var persona = LlenarEntidad<Persona>(reader);
-
-                        persona.Puesto = new Puesto()
-                        {
-                            Id = MapearPorpiedades<long>(reader["PuestoID"]),
-                            Nombre = MapearPorpiedades<string>(reader["PuestoNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["PuestoDescripcion"])
-                        };
-
+                        var persona = LlenarEntidad<PersonaDTO>(reader);
                         return persona;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = personas;
+                modelResponse.Response = personas.ToList();
                 modelResponse.Message = "Personas obtenidas correctamente";
             }
             catch (Exception ex)
@@ -46,9 +39,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerPersonaPorId(long id, string usuario)
+        public ModelResponse<PersonaDTO> ObtenerPersonaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<PersonaDTO>();
 
             try
             {
@@ -57,17 +50,9 @@ namespace ServiceDeskDESIWebApi.DAL
                     new SqlParameter("@Id", id),
                     new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Persona>((reader) =>
+                    new Func<IDataReader, PersonaDTO>((reader) =>
                     {
-                        var p = LlenarEntidad<Persona>(reader);
-
-                        p.Puesto = new Puesto()
-                        {
-                            Id = MapearPorpiedades<long>(reader["PuestoID"]),
-                            Nombre = MapearPorpiedades<string>(reader["PuestoNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["PuestoDescripcion"])
-                        };
-
+                        var p = LlenarEntidad<PersonaDTO>(reader);
                         return p;
                     }));
 
@@ -92,9 +77,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarPersona(Persona p, string usuario)
+        public ModelResponse<Persona> GuardarOActualizarPersona(Persona p, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Persona>();
 
             try
             {
@@ -105,7 +90,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     p.Apellido,
                     p.Correo,
                     p.Telefono,
-                    PuestoId = p.Puesto.Id,
+                    p.PuestoId,
                     p.CreadoPor,
                     p.FechaCreacion,
                     p.ModificadoPor,

@@ -17,12 +17,17 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerSucursalPorId(long id)
+        public async Task<Sucursal> ObtenerSucursalPorId(long id)
         {
-            return await _httpClient.ObtenerSucursalPorId(id);
+            var response = await _httpClient.ObtenerSucursalPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarSucursal(Sucursal sucursal)
+        public async Task<ModelResponse<Sucursal>> GuardarOActualizarSucursal(Sucursal sucursal)
         {
             return await _httpClient.GuardarActualizarSucursal(sucursal);
         }
@@ -32,7 +37,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarSucursal(sucursal);
         }
 
-        public async Task<ModelResponse> ConsultarTodasSucursales()
+        public async Task<ModelResponse<List<Sucursal>>> ConsultarTodasSucursales()
         {
             return await _httpClient.ObtenerTodasLasSucursales();
         }
@@ -42,8 +47,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Sucursales");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Sucursales");
             }
             return null;
         }

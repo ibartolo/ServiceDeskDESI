@@ -17,12 +17,17 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerMarcaPorId(long id)
+        public async Task<Marca> ObtenerMarcaPorId(long id)
         {
-            return await _httpClient.ObtenerMarcaPorId(id);
+            var response = await _httpClient.ObtenerMarcaPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarMarca(Marca marca)
+        public async Task<ModelResponse<Marca>> GuardarOActualizarMarca(Marca marca)
         {
             return await _httpClient.GuardarOActualizarMarca(marca);
         }
@@ -32,7 +37,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarMarca(marca);
         }
 
-        public async Task<ModelResponse> ConsultarTodosLasMarcas()
+        public async Task<ModelResponse<List<Marca>>> ConsultarTodosLasMarcas()
         {
             return await _httpClient.ObtenerTodosLasMarcas();
         }
@@ -42,8 +47,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Marcas");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Marcas");
             }
             return null;
         }

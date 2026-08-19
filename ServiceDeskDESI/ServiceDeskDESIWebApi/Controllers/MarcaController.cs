@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de marcas</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerTodosLasMarcas()
+        public ModelResponse<List<Marca>> ObtenerTodosLasMarcas()
         {
             var usuario = User.Identity.Name;
             var result = _marcaService.ObtenerMarcas(usuario);
@@ -37,7 +38,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID de la marca</param>
         /// <returns>Marca encontrada</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerMarcaPorId(long id)
+        public ModelResponse<Marca> ObtenerMarcaPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _marcaService.ObtenerMarcaPorId(id, usuario);
@@ -49,8 +50,9 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="marca">Objeto marca con los datos</param>
         /// <returns>Marca guardada con su ID actualizado</returns>
+        [Permiso("Marcas")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarMarca(Marca marca)
+        public ModelResponse<Marca> GuardarOActualizarMarca(Marca marca)
         {
             var usuario = User.Identity.Name;
             var result = _marcaService.GuardarOActualizarMarca(marca, usuario);
@@ -62,6 +64,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="marca">Marca a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Marcas", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarMarca(Marca marca)
         {

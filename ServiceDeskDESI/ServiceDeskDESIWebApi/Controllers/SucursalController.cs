@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de sucursales</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerSucursales()
+        public ModelResponse<List<Sucursal>> ObtenerSucursales()
         {
             var usuario = User.Identity.Name;
             var result = _sucursalService.ObtenerSucursales(usuario);
@@ -39,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID de la sucursal</param>
         /// <returns>Sucursal encontrada</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerSucursalPorId(long id)
+        public ModelResponse<Sucursal> ObtenerSucursalPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _sucursalService.ObtenerSucursalPorId(id, usuario);
@@ -51,8 +52,9 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="sucursal">Objeto sucursal con los datos</param>
         /// <returns>Sucursal guardada con su ID actualizado</returns>
+        [Permiso("Sucursales")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarActualizarSucursal(Sucursal sucursal)
+        public ModelResponse<Sucursal> GuardarActualizarSucursal(Sucursal sucursal)
         {
             var usuario = User.Identity.Name;
             var result = _sucursalService.GuardarOActualizarSucursal(sucursal, usuario);
@@ -64,6 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="sucursal">Sucursal a eliminar (debe incluir Id, ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Sucursales", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarSucursal(Sucursal sucursal)
         {

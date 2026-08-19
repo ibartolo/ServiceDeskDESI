@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de áreas</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerAreas()
+        public ModelResponse<List<Area>> ObtenerAreas()
         {
             var usuario = User.Identity.Name;
             var result = _areaService.ObtenerAreas(usuario);
@@ -41,7 +42,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del área</param>
         /// <returns>Área encontrada</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerAreaPorId(long id)
+        public ModelResponse<Area> ObtenerAreaPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _areaService.ObtenerAreaPorId(id, usuario);
@@ -53,8 +54,9 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="area">Objeto área con los datos</param>
         /// <returns>Área guardada con su ID actualizado</returns>
+        [Permiso("Áreas")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarArea(Area area)
+        public ModelResponse<Area> GuardarOActualizarArea(Area area)
         {
             var usuario = User.Identity.Name;
             var result = _areaService.GuardarOActualizarArea(area, usuario);
@@ -66,6 +68,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="area">Área a eliminar (debe incluir Id, ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Áreas", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarArea(Area area)
         {

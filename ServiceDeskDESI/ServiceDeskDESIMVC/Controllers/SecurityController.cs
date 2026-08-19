@@ -10,11 +10,10 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
-using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
+using ServiceDeskDESIMVC.Filters;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
-    [Autenticated]
     public class SecurityController : BaseController
     {
         private readonly PermisosService _permisosService;
@@ -44,13 +43,13 @@ namespace ServiceDeskDESIMVC.Controllers
             if (id > 0)
             {
                 var response = await _rolService.ObtenerRolPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                if (response != null)
                 {
-                    rol = JsonConvert.DeserializeObject<Rol>(response.Response.ToString());
+                    rol = response;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró el rol.";
                 }
             }
 
@@ -76,7 +75,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var roles = new List<Rol>();
             if (rolesResponse.IsSuccess && rolesResponse.Response != null)
             {
-                roles = JsonConvert.DeserializeObject<List<Rol>>(rolesResponse.Response.ToString());
+                roles = rolesResponse.Response;
             }
             ViewBag.Roles = roles;
 
@@ -85,7 +84,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var paginas = new List<Pagina>();
             if (paginasResponse.IsSuccess && paginasResponse.Response != null)
             {
-                paginas = JsonConvert.DeserializeObject<List<Pagina>>(paginasResponse.Response.ToString());
+                paginas = paginasResponse.Response;
             }
             ViewBag.Paginas = paginas;
 
@@ -115,12 +114,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Roles")]
         public async Task<string> GuardarOActualizarRol(Rol r)
         {
             var response = await _rolService.GuardarOActualizarRol(r);
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Roles", "Eliminar")]
         public async Task<string> EliminarRol(Rol r)
         {
             var response = await _rolService.EliminarRol(r);
@@ -133,12 +134,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Permisos", "Editar")]
         public async Task<string> GuardarPermisosRol(GuardarPermisosRequest request)
         {
             var response = await _permisosService.GuardarPermisosRol(request);
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Permisos", "Editar")]
         public async Task<string> GuardarPermisosRolMasivo([FromBody] GuardarPermisosMasivoRequest request)
         {
             var response = await _permisosService.GuardarPermisosRolMasivo(request);

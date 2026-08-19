@@ -1,4 +1,4 @@
-﻿﻿@model ServiceDeskDESIMVC.Models.CategoriaResponsableViewModel
+﻿@model ServiceDeskDESIMVC.Models.CategoriaResponsableViewModel
 @{
     ViewBag.Title = "Responsables por Categoría";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -151,7 +151,7 @@
                 <span class="text-muted"> - @Model.Categoria.Descripcion</span>
             }
             <br />
-            <strong><i class="fas fa-chart-simple me-2"></i>Área:</strong> @Model.Categoria.Area?.Nombre
+            <strong><i class="fas fa-chart-simple me-2"></i>Área:</strong> @Model.Categoria.AreaNombre
         </div>
     }
 
@@ -384,9 +384,9 @@
                     tablaResponsables.row.add({
                         Id: item.Id,
                         CategoriaId: item.CategoriaId,
-                        CategoriaNombre: item.Categoria ? item.Categoria.Nombre : 'N/A',
-                        AreaNombre: item.Categoria && item.Categoria.Area ? item.Categoria.Area.Nombre : 'N/A',
-                        UsuarioNombre: item.Usuario ? item.Usuario.Nombre + ' ' + item.Usuario.Apellido : 'N/A',
+                        CategoriaNombre: item.CategoriaNombre || 'N/A',
+                        AreaNombre: item.AreaNombre || 'N/A',
+                        UsuarioNombre: item.Nombre ? item.Nombre + ' ' + (item.Apellido || '') : 'N/A',
                         EsPrincipal: item.EsPrincipal
                     });
                 });
@@ -701,8 +701,8 @@
 
                 responsablesByCategoria.asignados.forEach(function (usuario) {
                     var responsable = {
-                        Categoria: { Id: categoriaSeleccionadaId },
-                        Usuario: { Id: usuario.Id },
+                        CategoriaId: categoriaSeleccionadaId,
+                        UsuarioId: usuario.Id,
                         EsPrincipal: usuario.EsPrincipal || false,
                         CreadoPor: $("#CreadoPor").val() || "system",
                         FechaCreacion: new Date().toISOString(),

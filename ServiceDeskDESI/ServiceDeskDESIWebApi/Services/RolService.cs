@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
 using System;
+using System.Collections.Generic;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -14,7 +15,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerRoles(string usuario)
+        public ModelResponse<List<Rol>> ObtenerRoles(string usuario)
         {
             try
             {
@@ -25,16 +26,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerRoles para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<Rol>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en RolService.ObtenerRoles para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los roles." };
+                return new ModelResponse<List<Rol>> { IsSuccess = false, Message = "Ocurrió un error al obtener los roles." };
             }
         }
 
-        public ModelResponse ObtenerRolPorId(long id, string usuario)
+        public ModelResponse<Rol> ObtenerRolPorId(long id, string usuario)
         {
             try
             {
@@ -46,16 +47,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerRolPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Rol> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en RolService.ObtenerRolPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el rol." };
+                return new ModelResponse<Rol> { IsSuccess = false, Message = "Ocurrió un error al obtener el rol." };
             }
         }
 
-        public ModelResponse GuardarOActualizarRol(Rol rol, string usuarioAdmin)
+        public ModelResponse<Rol> GuardarOActualizarRol(Rol rol, string usuarioAdmin)
         {
             try
             {
@@ -70,12 +71,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarRol para usuario {UsuarioAdmin}", usuarioAdmin);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Rol> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en RolService.GuardarOActualizarRol para usuario {UsuarioAdmin}", usuarioAdmin);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar el rol." };
+                return new ModelResponse<Rol> { IsSuccess = false, Message = "Ocurrió un error al guardar el rol." };
             }
         }
 
@@ -123,7 +124,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerRolesPorUsuario(long usuarioId, string usuarioAutenticado)
+        public ModelResponse<List<Rol>> ObtenerRolesPorUsuario(long usuarioId, string usuarioAutenticado)
         {
             try
             {
@@ -135,12 +136,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerRolesPorUsuario para usuario {UsuarioId}", usuarioId);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<Rol>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en RolService.ObtenerRolesPorUsuario para usuario {UsuarioId}", usuarioId);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los roles del usuario." };
+                return new ModelResponse<List<Rol>> { IsSuccess = false, Message = "Ocurrió un error al obtener los roles del usuario." };
             }
         }
 

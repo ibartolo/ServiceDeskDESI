@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
 using System;
+using System.Collections.Generic;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -15,7 +16,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerTodosLosTipoActivos(string usuario)
+        public ModelResponse<List<TipoActivo>> ObtenerTodosLosTipoActivos(string usuario)
         {
             try
             {
@@ -26,16 +27,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTodosLosTipoActivos para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<TipoActivo>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TipoActivoService.ObtenerTodosLosTipoActivos para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los tipos de activo." };
+                return new ModelResponse<List<TipoActivo>> { IsSuccess = false, Message = "Ocurrió un error al obtener los tipos de activo." };
             }
         }
 
-        public ModelResponse ObtenerTipoActivoPorId(long id, string usuario)
+        public ModelResponse<TipoActivo> ObtenerTipoActivoPorId(long id, string usuario)
         {
             try
             {
@@ -47,16 +48,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTipoActivoPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<TipoActivo> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TipoActivoService.ObtenerTipoActivoPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el tipo de activo." };
+                return new ModelResponse<TipoActivo> { IsSuccess = false, Message = "Ocurrió un error al obtener el tipo de activo." };
             }
         }
 
-        public ModelResponse GuardarOActualizarTipoActivo(TipoActivo tipoActivo, string usuario)
+        public ModelResponse<TipoActivo> GuardarOActualizarTipoActivo(TipoActivo tipoActivo, string usuario)
         {
             try
             {
@@ -71,12 +72,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarTipoActivo para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<TipoActivo> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TipoActivoService.GuardarOActualizarTipoActivo para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar el tipo de activo." };
+                return new ModelResponse<TipoActivo> { IsSuccess = false, Message = "Ocurrió un error al guardar el tipo de activo." };
             }
         }
 

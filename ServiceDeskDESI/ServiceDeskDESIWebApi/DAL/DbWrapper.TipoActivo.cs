@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodosLosTipoActivos(string usuario)
+        public ModelResponse<List<TipoActivo>> ObtenerTodosLosTipoActivos(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<TipoActivo>>();
 
             try
             {
@@ -25,7 +26,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = tipoActivos;
+                modelResponse.Response = tipoActivos.ToList();
                 modelResponse.Message = "Tipos de activo obtenidos correctamente";
             }
             catch (Exception ex)
@@ -38,9 +39,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerTipoActivoPorId(long id, string usuario)
+        public ModelResponse<TipoActivo> ObtenerTipoActivoPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<TipoActivo>();
 
             try
             {
@@ -76,9 +77,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarTipoActivo(TipoActivo ta, string usuario)
+        public ModelResponse<TipoActivo> GuardarOActualizarTipoActivo(TipoActivo ta, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<TipoActivo>();
 
             try
             {

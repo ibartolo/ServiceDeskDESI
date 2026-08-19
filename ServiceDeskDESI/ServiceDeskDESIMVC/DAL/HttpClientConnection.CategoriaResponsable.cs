@@ -12,41 +12,20 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerResponsablesPorCategoria(long categoriaId)
+        public async Task<ModelResponse<List<CategoriaResponsableDTO>>> ObtenerResponsablesPorCategoria(long categoriaId)
         {
-            var result = await RequestAsync<object>($"api/Catalogs/CategoriaResponsable/{categoriaId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<CategoriaResponsableDTO>>($"api/Catalogs/CategoriaResponsable/{categoriaId}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerCategoriasPorResponsable(long usuarioId)
+        public async Task<ModelResponse<List<CategoriaResponsableDTO>>> ObtenerCategoriasPorResponsable(long usuarioId)
         {
-            var result = await RequestAsync<object>($"api/Catalogs/CategoriaResponsable/Usuario/{usuarioId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<CategoriaResponsableDTO>>($"api/Catalogs/CategoriaResponsable/Usuario/{usuarioId}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
+        public async Task<ModelResponse<CategoriaResponsable>> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
             MappingColumSecurity(categoriaResponsable);
-            var result = await RequestAsync<object>($"api/Catalogs/CategoriaResponsable", HttpMethod.Post, categoriaResponsable,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<CategoriaResponsable>($"api/Catalogs/CategoriaResponsable", HttpMethod.Post, categoriaResponsable, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarCategoriaResponsable(CategoriaResponsable categoriaResponsable)

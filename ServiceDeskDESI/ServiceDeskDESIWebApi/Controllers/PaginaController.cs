@@ -25,23 +25,10 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de páginas</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerPaginasPorUsuario()
+        public ModelResponse<List<Pagina>> ObtenerPaginasPorUsuario()
         {
             var usuario = User.Identity.Name;
             var result = _paginaService.ObtenerPaginasPorUsuario(usuario);
-            return result;
-        }
-
-        /// <summary>
-        /// Valida si el usuario autenticado tiene acceso a una página específica
-        /// </summary>
-        /// <param name="request">Objeto con la dirección de la página</param>
-        /// <returns>True si tiene acceso, False en caso contrario</returns>
-        [HttpPost, Route("ValidarAcceso")]
-        public ModelResponse ValidarAccesoPagina([FromBody] ValidarAccesoRequest request)
-        {
-            var usuario = User.Identity.Name;
-            var result = _paginaService.ValidarAccesoPagina(usuario, request.Direccion);
             return result;
         }
 
@@ -50,7 +37,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de páginas</returns>
         [HttpGet, Route("Todas")]
-        public ModelResponse ObtenerPaginas()
+        public ModelResponse<List<Pagina>> ObtenerPaginas()
         {
             var result = _paginaService.ObtenerPaginas();
             return result;
@@ -62,15 +49,10 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="nombre">Nombre de la página</param>
         /// <returns>Página encontrada</returns>
         [HttpGet, Route("PorNombre/{nombre}")]
-        public ModelResponse ObtenerPaginaPorNombre(string nombre)
+        public ModelResponse<Pagina> ObtenerPaginaPorNombre(string nombre)
         {
             var result = _paginaService.ObtenerPaginaPorNombre(nombre);
             return result;
         }
-    }
-
-    public class ValidarAccesoRequest
-    {
-        public string Direccion { get; set; }
     }
 }

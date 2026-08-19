@@ -11,9 +11,9 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerMarcas(string usuario)
+        public ModelResponse<List<Marca>> ObtenerMarcas(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Marca>>();
 
             try
             {
@@ -26,7 +26,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = marcas;
+                modelResponse.Response = marcas.ToList();
                 modelResponse.Message = "Marcas obtenidas correctamente";
             }
             catch (Exception ex)
@@ -39,9 +39,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerMarcaPorId(long id, string usuario)
+        public ModelResponse<Marca> ObtenerMarcaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Marca>();
 
             try
             {
@@ -77,9 +77,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarMarca(Marca m)
+        public ModelResponse<Marca> GuardarOActualizarMarca(Marca m)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Marca>();
 
             try
             {

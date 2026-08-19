@@ -17,12 +17,17 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerPuestoPorId(long id)
+        public async Task<Puesto> ObtenerPuestoPorId(long id)
         {
-            return await _httpClient.ObtenerPuestoPorId(id);
+            var response = await _httpClient.ObtenerPuestoPorId(id);
+            if (response.IsSuccess && response.Response != null)
+            {
+                return response.Response;
+            }
+            return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarPuesto(Puesto puesto)
+        public async Task<ModelResponse<Puesto>> GuardarOActualizarPuesto(Puesto puesto)
         {
             return await _httpClient.GuardarOActualizarPuesto(puesto);
         }
@@ -32,7 +37,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarPuesto(puesto);
         }
 
-        public async Task<ModelResponse> ConsultarTodosLosPuestos()
+        public async Task<ModelResponse<List<Puesto>>> ConsultarTodosLosPuestos()
         {
             return await _httpClient.ObtenerTodosLosPuestos();
         }
@@ -42,8 +47,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Tipped");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Tipped");
             }
             return null;
         }
