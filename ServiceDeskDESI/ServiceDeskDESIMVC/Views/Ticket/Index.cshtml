@@ -9,179 +9,79 @@
 <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
 <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
 
+<style>
+    .ticket-mio {
+        background-color: #e8f4ff !important;
+    }
+</style>
+
 <div class="form-section">
     @if (ViewBag.ErrorMessage != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Tickets</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="section-title mb-0"><i class="fas fa-ticket-alt me-2"></i>Tickets</h3>
 
-    <form id="frmTicket" name="frmTicket" method="post">
-        @Html.HiddenFor(x => x.Id)
-        @Html.HiddenFor(x => x.CreadoPor)
-        @Html.HiddenFor(x => x.FechaCreacion)
-        @Html.HiddenFor(x => x.ModificadoPor)
-        @Html.HiddenFor(x => x.FechaModificacion)
-        @Html.HiddenFor(x => x.Estatus)
-        @Html.HiddenFor(x => x.TicketEstatusId)
+        @if (permisos != null && permisos.PuedeCrear)
+        {
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCapturarTicket">
+                <i class="fas fa-plus me-1"></i>Nuevo Ticket
+            </button>
+        }
+    </div>
 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label>Área:</label>
-                    @Html.DropDownListFor(x => x.AreaId, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label>Categoría:</label>
-                    <select id="ddlCategoria" class="form-control">
-                        <option value="">Seleccione una categoría</option>
-                    </select>
-                    @Html.HiddenFor(x => x.CategoriaId)
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label>Subcategoría:</label>
-                    <select id="ddlSubcategoria" class="form-control">
-                        <option value="">Seleccione una subcategoría</option>
-                    </select>
-                    @Html.HiddenFor(x => x.SubcategoriaId)
-                </div>
+    <!--<div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label>Filtrar por Área:</label>
+                @Html.DropDownList("ddlFiltroArea", new SelectList(ViewBag.Areas, "Id", "Nombre"), "Todas las áreas", new { @class = "form-control w-25", id = "ddlFiltroArea" })
             </div>
         </div>
+    </div>-->
 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label>Urgencia:</label>
-                    <select id="ddlUrgencia" class="form-control">
-                        <option value="">Seleccione un nivel</option>
-                        <option value="1">Baja</option>
-                        <option value="2">Media</option>
-                        <option value="3">Alta</option>
-                        <option value="4">Crítica</option>
-                    </select>
-                    @Html.HiddenFor(x => x.Urgencia)
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label>Estatus:</label>
-                    @Html.DropDownListFor(x => x.TicketEstatusId, new SelectList(ViewBag.Estatus, "Id", "Nombre"), "Seleccione un estatus", new { @class = "form-control", id = "ddlEstatus" })
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label>Título:</label>
-                    @Html.TextBoxFor(x => x.Titulo, new { @class = "form-control", placeholder = "Título del ticket" })
-                </div>
+    <div class="row">
+        <div class="col-md-12 table-responsive">
+            <div class="mb-3">
+                <table id="tblTicket" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Área</th>
+                            <th>Categoría</th>
+                            <th>Subcategoría</th>
+                            <th>Urgencia</th>
+                            <th>Estatus</th>
+                            <th>Agente</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="mb-3">
-                    <label>Descripción:</label>
-                    @Html.TextAreaFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripción detallada del problema", rows = 5 })
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="mb-3">
-                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
-                    {
-                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarTicket()" />
-                    }
-                    <a href="/Ticket/Index" class="btn btn-warning">Cancelar</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="mb-3">
-                    <label>Filtrar por Área:</label>
-                    @Html.DropDownList("ddlFiltroArea", new SelectList(ViewBag.Areas, "Id", "Nombre"), "Todas las áreas", new { @class = "form-control w-25", id = "ddlFiltroArea" })
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12 table-responsive">
-                <div class="mb-3">
-                    <table id="tblTicket" class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Título</th>
-                                <th>Área</th>
-                                <th>Categoría</th>
-                                <th>Subcategoría</th>
-                                <th>Urgencia</th>
-                                <th>Estatus</th>
-                                <th>Fecha Creación</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </form>
+    </div>
 </div>
 
+@Html.Partial("_CapturarTicket")
+@Html.Partial("_ReasignarTicket")
+@Html.Partial("_DetalleTicket")
+
 <script>
-    // Pasar permisos a JavaScript
-    var permisosGlobal = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(permisos));
-    var esAgenteGlobal = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.EsAgente ?? false));
+    // Pasar permisos y datos de sesión a JavaScript
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+    var esAgenteGlobal = @Html.Raw(JsonConvert.SerializeObject(ViewBag.EsAgente ?? false));
+    var usuarioActualIdGlobal = @Html.Raw(JsonConvert.SerializeObject(ViewBag.UsuarioActualId ?? 0));
+    var esResponsableAreaGlobal = @Html.Raw(JsonConvert.SerializeObject(ViewBag.EsResponsableArea ?? false));
 
     var tablaTicket;
-
-    $(function () {
-        $("#frmTicket").validate({
-            rules: {
-                "Titulo": {
-                    required: true,
-                    maxlength: 250
-                },
-                "Descripcion": {
-                    required: true
-                }
-            },
-            messages: {
-                "Titulo": {
-                    required: "El campo 'Título' es requerido.",
-                    maxlength: "El título no puede superar los 250 caracteres."
-                },
-                "Descripcion": {
-                    required: "El campo 'Descripción' es requerido."
-                }
-            },
-            errorElement: "span",
-            errorClass: "text-danger",
-            highlight: function (element) {
-                $(element).addClass("is-invalid").removeClass("is-valid");
-            },
-            unhighlight: function (element) {
-                $(element).removeClass("is-invalid").addClass("is-valid");
-            },
-            errorPlacement: function (error, element) {
-                error.insertAfter(element);
-            }
-        });
-    });
 
     $(document).ready(function () {
         // Inicializar DataTable
@@ -197,64 +97,7 @@
 
         // Eventos
         $("#ddlFiltroArea").change(function () {
-            var areaId = $(this).val();
-            if (areaId && areaId !== "") {
-                ConsultarTicketsPorArea(areaId);
-            } else {
-                ConsultarTodasTickets();
-            }
-        });
-
-        $("#ddlArea").change(function () {
-            var areaId = $(this).val();
-
-            // Limpiar categorías y subcategorías
-            $("#ddlCategoria").empty().append('<option value="">Seleccione una categoría</option>');
-            $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
-            $("#CategoriaId").val('');
-            $("#SubcategoriaId").val('');
-
-            if (areaId) {
-                // Primera llamada: obtener todas las categorías por área
-                GetMVC('/Ticket/ObtenerCategoriasPorArea?areaId=' + areaId, function (response) {
-                    var result = typeof response === 'string' ? JSON.parse(response) : response;
-                    if (result.IsSuccess && result.Response) {
-                        var todasCategorias = result.Response;
-                        var ddlCategoria = $("#ddlCategoria");
-
-                        // Filtrar solo categorías padre (CategoriaPadre === null)
-                        var categoriasPadre = todasCategorias.filter(function (c) {
-                            return c.CategoriaPadre === null;
-                        });
-
-                        categoriasPadre.forEach(function (c) {
-                            ddlCategoria.append('<option value="' + c.Id + '">' + c.Nombre + '</option>');
-                        });
-                    }
-                });
-            }
-        });
-
-        $("#ddlCategoria").change(function () {
-            var categoriaId = $(this).val();
-
-            // Limpiar subcategorías
-            $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
-            $("#SubcategoriaId").val('');
-
-            if (categoriaId) {
-                // Segunda llamada: obtener subcategorías por categoría padre
-                GetMVC('/Ticket/ObtenerSubcategoriasPorCategoria?categoriaId=' + categoriaId, function (result) {
-                    if (result.IsSuccess && result.Response) {
-                        var subcategorias = result.Response;
-                        var ddlSubcategoria = $("#ddlSubcategoria");
-
-                        subcategorias.forEach(function (s) {
-                            ddlSubcategoria.append('<option value="' + s.Id + '">' + s.Nombre + '</option>');
-                        });
-                    }
-                });
-            }
+            RefrescarTabla();
         });
     });
 
@@ -270,13 +113,7 @@
                     data: 'Urgencia',
                     title: 'Urgencia',
                     render: function (data) {
-                        switch(data) {
-                            case 1: return '<span class="badge bg-success">Baja</span>';
-                            case 2: return '<span class="badge bg-info">Media</span>';
-                            case 3: return '<span class="badge bg-warning">Alta</span>';
-                            case 4: return '<span class="badge bg-danger">Crítica</span>';
-                            default: return '---';
-                        }
+                        return badgeUrgencia(data);
                     }
                 },
                 {
@@ -314,21 +151,39 @@
                 },
                 {
                     data: 'Id', title: 'Acciones', render: function (data, type, row) {
-                        var html = '<div class="d-flex gap-3">';
+                        var html = '<div class="d-flex gap-2">';
 
-                        // Botón Tomar - solo si el usuario es agente y el ticket no tiene agente asignado
-                        if (esAgenteGlobal && row && !row.AgenteId) {
-                            html += '<button type="button" class="btn btn-sm btn-outline-success" onclick="TomarTicket(' + data + ')"><i class="fas fa-hand-paper"></i></button>';
+                        // Tomar - agente, ticket nuevo y sin agente asignado
+                        if (esAgenteGlobal && row.TicketEstatusId === 1 && !row.AgenteId) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-success" title="Tomar ticket" onclick="TomarTicket(' + data + ')"><i class="fas fa-hand-paper"></i></button>';
                         }
 
-                        // Botón Editar - solo si tiene permiso
-                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
-                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarTicket(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        // Ver - siempre
+                        html += '<button type="button" class="btn btn-sm btn-outline-secondary" title="Ver detalle" onclick="VerTicket(' + data + ')"><i class="fas fa-eye"></i></button>';
+
+                        // Resolver - agente dueño del ticket en progreso
+                        if (esAgenteGlobal && row.AgenteId === usuarioActualIdGlobal && row.TicketEstatusId === 2) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" title="Resolver ticket" onclick="ResolverTicket(' + data + ')"><i class="fas fa-check-circle"></i></button>';
                         }
 
-                        // Botón Eliminar - solo si tiene permiso
-                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
-                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarTicket(' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        // Retomar - agente sobre un ticket rechazado
+                        if (esAgenteGlobal && row.TicketEstatusId === 4) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-warning" title="Retomar ticket" onclick="RetomarTicket(' + data + ')"><i class="fas fa-redo"></i></button>';
+                        }
+
+                        // Cerrar - solicitante dueño sobre un ticket resuelto
+                        if (row.CreadoPorId === usuarioActualIdGlobal && row.TicketEstatusId === 3) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-success" title="Cerrar ticket" onclick="CerrarTicket(' + data + ')"><i class="fas fa-check-double"></i></button>';
+                        }
+
+                        // Rechazar - solicitante dueño sobre un ticket resuelto
+                        if (row.CreadoPorId === usuarioActualIdGlobal && row.TicketEstatusId === 3) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" title="Rechazar ticket" onclick="RechazarTicket(' + data + ')"><i class="fas fa-times-circle"></i></button>';
+                        }
+
+                        // Reasignar - responsable de área sobre un ticket en progreso o rechazado
+                        if (esResponsableAreaGlobal && (row.TicketEstatusId === 2 || row.TicketEstatusId === 4)) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-info" title="Reasignar ticket" onclick="AbrirReasignar(' + data + ', ' + row.AreaId + ')"><i class="fas fa-user-plus"></i></button>';
                         }
 
                         html += '</div>';
@@ -336,6 +191,11 @@
                     }
                 }
             ],
+            createdRow: function (row, data) {
+                if (data.AgenteId && data.AgenteId === usuarioActualIdGlobal) {
+                    $(row).addClass('ticket-mio');
+                }
+            },
             language: {
                 url: "/Content/datatables/i18n/es-ES.json"
             }
@@ -386,192 +246,36 @@
         });
     }
 
-    function GuardarActualizarTicket() {
-        if ($("#frmTicket").valid()) {
-            // Validar área
-            if (!$("#ddlArea").val()) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Debe seleccionar un área',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-                return;
-            }
-
-            // Validar categoría
-            if (!$("#ddlCategoria").val()) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Debe seleccionar una categoría',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-                return;
-            }
-
-            // Validar subcategoría
-            if (!$("#ddlSubcategoria").val()) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Debe seleccionar una subcategoría',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-                return;
-            }
-
-            // Validar urgencia
-            if (!$("#ddlUrgencia").val()) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Debe seleccionar un nivel de urgencia',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-                return;
-            }
-
-            // Validar estatus
-            if (!$("#ddlEstatus").val()) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Debe seleccionar un estatus',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-                return;
-            }
-
-            Swal.fire({
-                title: 'Guardando...',
-                text: 'Por favor espere',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            var ticket = {
-                Id: $("#Id").val() || 0,
-                AreaId: parseInt($("#ddlArea").val()),
-                CategoriaId: parseInt($("#ddlCategoria").val()),
-                SubcategoriaId: parseInt($("#ddlSubcategoria").val()),
-                Urgencia: parseInt($("#ddlUrgencia").val()),
-                Titulo: $("#Titulo").val(),
-                Descripcion: $("#Descripcion").val(),
-                TicketEstatusId: parseInt($("#ddlEstatus").val()),
-                CreadoPor: $("#CreadoPor").val(),
-                FechaCreacion: $("#FechaCreacion").val(),
-                ModificadoPor: $("#ModificadoPor").val() || null,
-                FechaModificacion: null,
-                Estatus: true
-            };
-
-            PostMVC('/Ticket/GuardarOActualizarTicket', ticket, function (response) {
-                Swal.close();
-
-                if (response.IsSuccess) {
-                    Swal.fire({
-                        title: '¡Éxito!',
-                        text: response.Message,
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        background: 'white',
-                        iconColor: '#4e73df'
-                    }).then(() => {
-                        window.location.href = '/Ticket/Index';
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: response.Message,
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar',
-                        background: 'white',
-                        confirmButtonColor: '#4e73df'
-                    });
-                }
-            });
+    function RefrescarTabla() {
+        var areaId = $("#ddlFiltroArea").val();
+        if (areaId && areaId !== "") {
+            ConsultarTicketsPorArea(areaId);
+        } else {
+            ConsultarTodasTickets();
         }
     }
 
-    function EditarTicket(id) {
-        window.location.href = '/Ticket/Index/' + id;
+    function badgeUrgencia(data) {
+        switch (data) {
+            case 1: return '<span class="badge bg-success">Baja</span>';
+            case 2: return '<span class="badge bg-info">Media</span>';
+            case 3: return '<span class="badge bg-warning">Alta</span>';
+            case 4: return '<span class="badge bg-danger">Crítica</span>';
+            default: return '---';
+        }
     }
 
-    function EliminarTicket(id) {
+    function ToastExito(message) {
         Swal.fire({
-            title: '¿Está seguro?',
-            text: 'Esta acción eliminará lógicamente el registro',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#e74a3b',
-            cancelButtonColor: '#858796'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'Eliminando...',
-                    text: 'Por favor espere',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                var ticket = {
-                    Id: id,
-                    ModificadoPor: $("#ModificadoPor").val() || "system",
-                    FechaModificacion: new Date().toISOString()
-                };
-
-                PostMVC('/Ticket/EliminarTicket', ticket, function (response) {
-                    Swal.close();
-
-                    if (response.IsSuccess) {
-                        Swal.fire({
-                            title: '¡Eliminado!',
-                            text: response.Message,
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false,
-                            background: 'white',
-                            iconColor: '#4e73df'
-                        }).then(() => {
-                            var areaId = $("#ddlFiltroArea").val();
-                            if (areaId && areaId !== "") {
-                                ConsultarTicketsPorArea(areaId);
-                            } else {
-                                ConsultarTodasTickets();
-                            }
-                            $("#frmTicket")[0].reset();
-                            $("#Id").val(0);
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error',
-                            text: response.Message,
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                            background: 'white',
-                            confirmButtonColor: '#4e73df'
-                        });
-                    }
-                });
-            }
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: message || 'Operación realizada con éxito',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            background: 'white',
+            iconColor: '#4e73df'
         });
     }
 
@@ -609,12 +313,7 @@
                             background: 'white',
                             iconColor: '#4e73df'
                         }).then(() => {
-                            var areaId = $("#ddlFiltroArea").val();
-                            if (areaId && areaId !== "") {
-                                ConsultarTicketsPorArea(areaId);
-                            } else {
-                                ConsultarTodasTickets();
-                            }
+                            RefrescarTabla();
                         });
                     } else {
                         Swal.fire({
@@ -629,5 +328,263 @@
                 });
             }
         });
+    }
+
+    function ResolverTicket(id) {
+        Swal.fire({
+            title: 'Resolver ticket',
+            text: 'Describe la solución (obligatorio, máximo 300 caracteres)',
+            input: 'textarea',
+            inputPlaceholder: 'Describe la solución...',
+            inputAttributes: {
+                maxlength: 300
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Resolver',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#4e73df',
+            cancelButtonColor: '#858796',
+            background: 'white',
+            inputValidator: function (value) {
+                if (!value || !value.trim()) {
+                    return 'Debe escribir un comentario para resolver el ticket.';
+                }
+                if (value.length > 300) {
+                    return 'El comentario no puede superar los 300 caracteres.';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Resolviendo...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                PostMVC('/Ticket/ResolverTicket', { ticketId: id, comentario: result.value }, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        ToastExito(response.Message);
+                        RefrescarTabla();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function RechazarTicket(id) {
+        Swal.fire({
+            title: 'Rechazar ticket',
+            text: 'Describe el motivo del rechazo (obligatorio, máximo 300 caracteres)',
+            input: 'textarea',
+            inputPlaceholder: 'Motivo del rechazo...',
+            inputAttributes: {
+                maxlength: 300
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Rechazar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796',
+            background: 'white',
+            inputValidator: function (value) {
+                if (!value || !value.trim()) {
+                    return 'Debe escribir un comentario para rechazar el ticket.';
+                }
+                if (value.length > 300) {
+                    return 'El comentario no puede superar los 300 caracteres.';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Rechazando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                PostMVC('/Ticket/RechazarTicket', { ticketId: id, comentario: result.value }, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        ToastExito(response.Message);
+                        RefrescarTabla();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function CerrarTicket(id) {
+        Swal.fire({
+            title: 'Cerrar ticket',
+            text: 'Describe el motivo del cierre (obligatorio, máximo 300 caracteres)',
+            input: 'textarea',
+            inputPlaceholder: 'Motivo del cierre...',
+            inputAttributes: {
+                maxlength: 300
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Cerrar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#4e73df',
+            cancelButtonColor: '#858796',
+            background: 'white',
+            inputValidator: function (value) {
+                if (!value || !value.trim()) {
+                    return 'Debe escribir un comentario para cerrar el ticket.';
+                }
+                if (value.length > 300) {
+                    return 'El comentario no puede superar los 300 caracteres.';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Cerrando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                PostMVC('/Ticket/CerrarTicket', { ticketId: id, comentario: result.value }, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        ToastExito(response.Message);
+                        RefrescarTabla();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function RetomarTicket(id) {
+        Swal.fire({
+            title: '¿Retomar ticket?',
+            text: 'El ticket volverá a "En Progreso" y se te asignará.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, retomar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#4e73df',
+            cancelButtonColor: '#858796'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Retomando...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                PostMVC('/Ticket/RetomarTicket', { ticketId: id }, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        ToastExito(response.Message);
+                        RefrescarTabla();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.Message,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function VerTicket(id) {
+        if (typeof tablaTicket === 'undefined' || !tablaTicket) {
+            return;
+        }
+
+        var row = tablaTicket.rows().data().toArray().find(function (r) {
+            return r.Id === id;
+        });
+
+        if (!row) {
+            return;
+        }
+
+        $("#detTitulo").text(row.Titulo || '---');
+        $("#detArea").text(row.AreaNombre || '---');
+        $("#detCategoria").text(row.CategoriaNombre || '---');
+        $("#detSubcategoria").text(row.SubcategoriaNombre || '---');
+        $("#detUrgencia").html(badgeUrgencia(row.Urgencia));
+        $("#detEstatus").html(row.EstatusColor
+            ? '<span class="badge" style="background-color: ' + row.EstatusColor + '; color: white;">' + row.EstatusNombre + '</span>'
+            : (row.EstatusNombre || '---'));
+        $("#detAgente").text(row.AgenteNombre ? row.AgenteNombre + ' ' + (row.AgenteApellido || '') : '---');
+        $("#detCreadoPor").text(row.CreadoPor || '---');
+        $("#detFechaCreacion").text(row.FechaCreacion ? new Date(row.FechaCreacion).toLocaleString() : '---');
+        $("#detDescripcion").text(row.Descripcion || '---');
+
+        if (typeof CargarHistorial === 'function') {
+            CargarHistorial(id);
+        }
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetalleTicket')).show();
+    }
+
+    function AbrirReasignar(id, areaId) {
+        $("#ticketIdReasignar").val(id);
+        $("#comentarioReasignar").val('');
+        $("#ddlUsuarioReasignar").empty().append('<option value="">Seleccione un usuario</option>');
+
+        GetMVC('/Ticket/ObtenerUsuariosArea?areaId=' + areaId, function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+            if (result.IsSuccess && result.Response) {
+                result.Response.forEach(function (u) {
+                    $("#ddlUsuarioReasignar").append('<option value="' + u.Id + '">' + u.Nombre + ' ' + (u.Apellido || '') + '</option>');
+                });
+            }
+        });
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalReasignarTicket')).show();
     }
 </script>

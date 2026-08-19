@@ -432,3 +432,8 @@ body {
         font-size: 1.5rem;
     }
 }
+
+/* Resaltado de tickets asignados al usuario actual */
+.ticket-mio {
+    background-color: #e8f4ff !important;
+}

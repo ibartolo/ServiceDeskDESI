@@ -1,0 +1,240 @@
+﻿@using ServiceDeskDESIEntities.Catalogos
+@{
+    var areas = ViewBag.Areas as List<Area>;
+}
+
+<div class="modal fade" id="modalCapturarTicket" tabindex="-1" aria-labelledby="modalCapturarTicketLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCapturarTicketLabel"><i class="fas fa-ticket-alt me-2"></i>Nuevo Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmCapturaTicket" name="frmCapturaTicket" method="post">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label>Área:</label>
+                                <select id="ddlArea" name="AreaId" class="form-control">
+                                    <option value="">Seleccione un área</option>
+                                    @if (areas != null)
+                                    {
+                                        foreach (var a in areas)
+                                        {
+                                            <option value="@a.Id">@a.Nombre</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label>Categoría:</label>
+                                <select id="ddlCategoria" name="CategoriaId" class="form-control">
+                                    <option value="">Seleccione una categoría</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label>Subcategoría:</label>
+                                <select id="ddlSubcategoria" name="SubcategoriaId" class="form-control">
+                                    <option value="">Seleccione una subcategoría</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label>Urgencia:</label>
+                                <select id="ddlUrgencia" name="Urgencia" class="form-control">
+                                    <option value="">Seleccione un nivel</option>
+                                    <option value="1">Baja</option>
+                                    <option value="2">Media</option>
+                                    <option value="3">Alta</option>
+                                    <option value="4">Crítica</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label>Título:</label>
+                                <input type="text" id="Titulo" name="Titulo" class="form-control" maxlength="250" placeholder="Título del ticket" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label>Descripción:</label>
+                                <textarea id="Descripcion" name="Descripcion" class="form-control" rows="5" placeholder="Descripción detallada del problema"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="GuardarTicket()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Cascada Área -> Categoría
+        $("#ddlArea").change(function () {
+            var areaId = $(this).val();
+
+            // Limpiar categorías y subcategorías
+            $("#ddlCategoria").empty().append('<option value="">Seleccione una categoría</option>');
+            $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
+
+            if (areaId) {
+                GetMVC('/Ticket/ObtenerCategoriasPorArea?areaId=' + areaId, function (response) {
+                    var result = typeof response === 'string' ? JSON.parse(response) : response;
+                    if (result.IsSuccess && result.Response) {
+                        var todasCategorias = result.Response;
+                        var ddlCategoria = $("#ddlCategoria");
+
+                        // Filtrar solo categorías padre (CategoriaPadreId == null)
+                        var categoriasPadre = todasCategorias.filter(function (c) {
+                            return c.CategoriaPadreId == null;
+                        });
+
+                        categoriasPadre.forEach(function (c) {
+                            ddlCategoria.append('<option value="' + c.Id + '">' + c.Nombre + '</option>');
+                        });
+                    }
+                });
+            }
+        });
+
+        // Cascada Categoría -> Subcategoría
+        $("#ddlCategoria").change(function () {
+            var categoriaId = $(this).val();
+
+            // Limpiar subcategorías
+            $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
+
+            if (categoriaId) {
+                GetMVC('/Ticket/ObtenerSubcategoriasPorCategoria?categoriaId=' + categoriaId, function (result) {
+                    if (result.IsSuccess && result.Response) {
+                        var subcategorias = result.Response;
+                        var ddlSubcategoria = $("#ddlSubcategoria");
+
+                        subcategorias.forEach(function (s) {
+                            ddlSubcategoria.append('<option value="' + s.Id + '">' + s.Nombre + '</option>');
+                        });
+                    }
+                });
+            }
+        });
+
+        // Reset al abrir el modal
+        $("#modalCapturarTicket").on("shown.bs.modal", function () {
+            LimpiarCaptura();
+        });
+    });
+
+    function LimpiarCaptura() {
+        if ($("#frmCapturaTicket")[0]) {
+            $("#frmCapturaTicket")[0].reset();
+        }
+        $("#ddlCategoria").empty().append('<option value="">Seleccione una categoría</option>');
+        $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
+    }
+
+    function GuardarTicket() {
+        var areaId = $("#ddlArea").val();
+        var categoriaId = $("#ddlCategoria").val();
+        var subcategoriaId = $("#ddlSubcategoria").val();
+        var urgencia = $("#ddlUrgencia").val();
+        var titulo = $("#Titulo").val();
+        var descripcion = $("#Descripcion").val();
+
+        if (!areaId) {
+            Swal.fire({ title: 'Error', text: 'Debe seleccionar un área', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+        if (!categoriaId) {
+            Swal.fire({ title: 'Error', text: 'Debe seleccionar una categoría', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+        if (!subcategoriaId) {
+            Swal.fire({ title: 'Error', text: 'Debe seleccionar una subcategoría', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+        if (!urgencia) {
+            Swal.fire({ title: 'Error', text: 'Debe seleccionar un nivel de urgencia', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+        if (!titulo || !titulo.trim()) {
+            Swal.fire({ title: 'Error', text: 'Debe ingresar un título', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+        if (!descripcion || !descripcion.trim()) {
+            Swal.fire({ title: 'Error', text: 'Debe ingresar una descripción', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Guardando...',
+            text: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        var ticket = {
+            Id: 0,
+            AreaId: parseInt(areaId),
+            CategoriaId: parseInt(categoriaId),
+            SubcategoriaId: parseInt(subcategoriaId),
+            Urgencia: parseInt(urgencia),
+            Titulo: titulo,
+            Descripcion: descripcion,
+            TicketEstatusId: 1
+        };
+
+        PostMVC('/Ticket/GuardarOActualizarTicket', ticket, function (response) {
+            Swal.close();
+
+            if (response.IsSuccess) {
+                bootstrap.Modal.getInstance(document.getElementById('modalCapturarTicket')).hide();
+                LimpiarCaptura();
+
+                if (typeof RefrescarTabla === 'function') {
+                    RefrescarTabla();
+                } else {
+                    window.location.reload();
+                }
+
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: response.Message,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: 'white',
+                    iconColor: '#4e73df'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: response.Message,
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+</script>

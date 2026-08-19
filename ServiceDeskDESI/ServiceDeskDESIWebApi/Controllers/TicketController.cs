@@ -1,4 +1,5 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using ServiceDeskDESIEntities.Autenticacion;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIWebApi.Filters;
@@ -173,6 +174,65 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = _ticketService.ObtenerTicketAsignaciones(ticketId);
             return result;
         }
+
+        /// <summary>
+        /// Marca el ticket como resuelto (agente asignado) con comentario obligatorio.
+        /// </summary>
+        [Permiso("Tickets", "Editar")]
+        [HttpPost, Route("Resolver")]
+        public ModelResponse ResolverTicket([FromBody] TransicionTicketRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ResolverTicket(request.TicketId, usuario, request.Comentario);
+            return result;
+        }
+
+        /// <summary>
+        /// Cierra el ticket (solicitante). Sin comentario.
+        /// </summary>
+        [Permiso("Tickets", "Leer")]
+        [HttpPost, Route("Cerrar")]
+        public ModelResponse CerrarTicket([FromBody] TransicionTicketRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _ticketService.CerrarTicket(request.TicketId, usuario, request.Comentario);
+            return result;
+        }
+
+        /// <summary>
+        /// Rechaza el ticket (solicitante) con comentario obligatorio.
+        /// </summary>
+        [Permiso("Tickets", "Leer")]
+        [HttpPost, Route("Rechazar")]
+        public ModelResponse RechazarTicket([FromBody] TransicionTicketRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _ticketService.RechazarTicket(request.TicketId, usuario, request.Comentario);
+            return result;
+        }
+
+        /// <summary>
+        /// Retoma el ticket rechazado (agente del área). Sin comentario.
+        /// </summary>
+        [Permiso("Tickets", "Editar")]
+        [HttpPost, Route("Retomar")]
+        public ModelResponse RetomarTicket([FromBody] TransicionTicketRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _ticketService.RetomarTicket(request.TicketId, usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene los usuarios (agentes) de un área.
+        /// </summary>
+        [HttpGet, Route("UsuariosArea/{areaId:long}")]
+        public ModelResponse<List<UsuarioDTO>> ObtenerUsuariosArea(long areaId)
+        {
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ObtenerUsuariosArea(areaId, usuario);
+            return result;
+        }
     }
 
     public class TomarTicketRequest
@@ -186,5 +246,12 @@ namespace ServiceDeskDESIWebApi.Controllers
         public long TicketId { get; set; }
         public long NuevoUsuarioId { get; set; }
         public string Comentario { get; set; }
+    }
+
+    public class TransicionTicketRequest
+    {
+        public long TicketId { get; set; }
+        public string Comentario { get; set; }
+        public long? NuevoUsuarioId { get; set; }
     }
 }

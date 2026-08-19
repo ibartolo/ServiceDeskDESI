@@ -199,6 +199,7 @@
   <ItemGroup>
     <Content Include="Global.asax" />
     <Content Include="Template\Template_AltaEmpresa.html" />
+    <Content Include="Template\Template_CambioEstatusTicket.html" />
     <Content Include="Template\Template_NuevoPass.html" />
     <Content Include="Template\Template_NuevoUsuario.html" />
     <Content Include="Template\Template_RecuperarEmail.html" />

@@ -1,3 +1,4 @@
+﻿using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
@@ -319,11 +320,12 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                var resultado = ExecuteScalar("TomarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
                 {
                     new SqlParameter("@TicketId", ticketId),
-                    new SqlParameter("@Usuario", usuario),
-                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value)
+                    new SqlParameter("@TipoMovimiento", "Tomar"),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+                    new SqlParameter("@Usuario", usuario)
                 });
 
                 var resultadoLong = Convert.ToInt64(resultado);
@@ -355,12 +357,13 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                var resultado = ExecuteScalar("ReasignarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
                 {
                     new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@TipoMovimiento", "Reasignar"),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
                     new SqlParameter("@NuevoUsuarioId", nuevoUsuarioId),
-                    new SqlParameter("@Usuario", usuario),
-                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value)
+                    new SqlParameter("@Usuario", usuario)
                 });
 
                 var resultadoLong = Convert.ToInt64(resultado);
@@ -381,6 +384,184 @@ namespace ServiceDeskDESIWebApi.DAL
                 Log.Error(ex, "Error al reasignar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al reasignar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ResolverTicket(long ticketId, string usuario, string comentario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@TipoMovimiento", "Resolver"),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo resolver el ticket. Verifique que sea el agente asignado y que el ticket esté en progreso.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket resuelto correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al resolver ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al resolver el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse RechazarTicket(long ticketId, string usuario, string comentario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@TipoMovimiento", "Rechazar"),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo rechazar el ticket. Verifique que sea el solicitante y que el ticket esté resuelto.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket rechazado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al rechazar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al rechazar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse CerrarTicket(long ticketId, string usuario, string comentario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@TipoMovimiento", "Cerrar"),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo cerrar el ticket. Verifique que sea el solicitante y que el ticket esté resuelto.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket cerrado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al cerrar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al cerrar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse RetomarTicket(long ticketId, string usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@TipoMovimiento", "Retomar"),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo retomar el ticket. Verifique que sea un agente y que el ticket esté rechazado.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket retomado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al retomar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al retomar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse<List<UsuarioDTO>> ObtenerUsuariosArea(long areaId, string usuario)
+        {
+            var modelResponse = new ModelResponse<List<UsuarioDTO>>();
+
+            try
+            {
+                var usuarios = GetObjects("ObtenerUsuariosArea", CommandType.StoredProcedure,
+                    new[] {
+                        new SqlParameter("@AreaId", areaId),
+                        new SqlParameter("@Usuario", usuario)
+                    },
+                    new Func<IDataReader, UsuarioDTO>((reader) =>
+                    {
+                        var u = LlenarEntidad<UsuarioDTO>(reader);
+                        return u;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = usuarios.ToList();
+                modelResponse.Message = "Usuarios del área obtenidos correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener usuarios del área {AreaId} para usuario {Usuario}", areaId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener los usuarios del área.";
             }
 
             return modelResponse;

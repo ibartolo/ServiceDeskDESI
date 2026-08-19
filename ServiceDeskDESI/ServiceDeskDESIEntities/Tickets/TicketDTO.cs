@@ -1,4 +1,4 @@
-namespace ServiceDeskDESIEntities.Tickets
+﻿namespace ServiceDeskDESIEntities.Tickets
 {
     public class TicketDTO : Ticket
     {
@@ -11,5 +11,6 @@ namespace ServiceDeskDESIEntities.Tickets
         public string AgenteNombre { get; set; }
         public string AgenteApellido { get; set; }
         public string AgenteNombreUsuario { get; set; }
+        public long? CreadoPorId { get; set; }
     }
 }

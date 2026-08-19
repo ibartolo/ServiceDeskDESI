@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace ServiceDeskDESIEntities.Tickets
 {
@@ -12,5 +12,7 @@ namespace ServiceDeskDESIEntities.Tickets
         public long UsuarioId { get; set; }
         public string Comentario { get; set; }
         public bool EsActiva { get; set; }
+        public string TipoMovimiento { get; set; }
+        public int? TicketEstatusId { get; set; }
     }
 }

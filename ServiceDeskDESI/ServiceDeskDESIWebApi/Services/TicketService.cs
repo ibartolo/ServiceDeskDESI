@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
@@ -269,6 +270,14 @@ namespace ServiceDeskDESIWebApi.Services
                 if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
                 if (nuevoUsuarioId <= 0) { throw new ArgumentException("El nuevo agente es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(comentario) || comentario.Length > 300)
+                {
+                    return new ModelResponse
+                    {
+                        IsSuccess = false,
+                        Message = "El comentario de reasignación es requerido (máx 300 caracteres)."
+                    };
+                }
 
                 return _dbWrapper.ReasignarTicket(ticketId, nuevoUsuarioId, usuario, comentario);
             }
@@ -304,6 +313,139 @@ namespace ServiceDeskDESIWebApi.Services
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener las asignaciones del ticket."
+                };
+            }
+        }
+
+        public ModelResponse ResolverTicket(long ticketId, string usuario, string comentario)
+        {
+            try
+            {
+                if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(comentario) || comentario.Length > 300)
+                {
+                    return new ModelResponse
+                    {
+                        IsSuccess = false,
+                        Message = "El comentario de resolución es requerido (máx 300 caracteres)."
+                    };
+                }
+
+                return _dbWrapper.ResolverTicket(ticketId, usuario, comentario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ResolverTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en TicketService.ResolverTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al resolver el ticket." };
+            }
+        }
+
+        public ModelResponse RechazarTicket(long ticketId, string usuario, string comentario)
+        {
+            try
+            {
+                if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(comentario) || comentario.Length > 300)
+                {
+                    return new ModelResponse
+                    {
+                        IsSuccess = false,
+                        Message = "El comentario de rechazo es requerido (máx 300 caracteres)."
+                    };
+                }
+
+                return _dbWrapper.RechazarTicket(ticketId, usuario, comentario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en RechazarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en TicketService.RechazarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al rechazar el ticket." };
+            }
+        }
+
+        public ModelResponse CerrarTicket(long ticketId, string usuario, string comentario)
+        {
+            try
+            {
+                if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(comentario) || comentario.Length > 300)
+                {
+                    return new ModelResponse
+                    {
+                        IsSuccess = false,
+                        Message = "El comentario de cierre es requerido (máx 300 caracteres)."
+                    };
+                }
+
+                return _dbWrapper.CerrarTicket(ticketId, usuario, comentario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en CerrarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en TicketService.CerrarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al cerrar el ticket." };
+            }
+        }
+
+        public ModelResponse RetomarTicket(long ticketId, string usuario)
+        {
+            try
+            {
+                if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                return _dbWrapper.RetomarTicket(ticketId, usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en RetomarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en TicketService.RetomarTicket para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al retomar el ticket." };
+            }
+        }
+
+        public ModelResponse<List<UsuarioDTO>> ObtenerUsuariosArea(long areaId, string usuario)
+        {
+            try
+            {
+                if (areaId <= 0) { throw new ArgumentException("El ID del área es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                return _dbWrapper.ObtenerUsuariosArea(areaId, usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ObtenerUsuariosArea para usuario {Usuario}", usuario);
+                return new ModelResponse<List<UsuarioDTO>> { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en TicketService.ObtenerUsuariosArea para usuario {Usuario}", usuario);
+                return new ModelResponse<List<UsuarioDTO>>
+                {
+                    IsSuccess = false,
+                    Message = "Ocurrió un error al obtener los usuarios del área."
                 };
             }
         }

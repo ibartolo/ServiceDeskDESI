@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
@@ -76,6 +77,31 @@ namespace ServiceDeskDESIMVC.Services
         public async Task<ModelResponse<List<TicketAsignacionDTO>>> ObtenerTicketAsignaciones(long ticketId)
         {
             return await _httpClient.ObtenerTicketAsignaciones(ticketId);
+        }
+
+        public async Task<ModelResponse> ResolverTicket(long ticketId, string comentario)
+        {
+            return await _httpClient.ResolverTicket(ticketId, comentario);
+        }
+
+        public async Task<ModelResponse> RechazarTicket(long ticketId, string comentario)
+        {
+            return await _httpClient.RechazarTicket(ticketId, comentario);
+        }
+
+        public async Task<ModelResponse> CerrarTicket(long ticketId, string comentario)
+        {
+            return await _httpClient.CerrarTicket(ticketId, comentario);
+        }
+
+        public async Task<ModelResponse> RetomarTicket(long ticketId)
+        {
+            return await _httpClient.RetomarTicket(ticketId);
+        }
+
+        public async Task<ModelResponse<List<UsuarioDTO>>> ObtenerUsuariosArea(long areaId)
+        {
+            return await _httpClient.ObtenerUsuariosArea(areaId);
         }
 
         public async Task<object> ObtenerPermisosParaTicket()
