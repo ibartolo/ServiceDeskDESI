@@ -23,7 +23,7 @@
 | Hecho — `bugs-bd` | Bugs de BD que rompen flujos: rol sin `PuedeAtenderTickets`, typo `nvarchaR`, `@@IDENTITY`, JOIN muerto en `ObtenerEmpresas`, `Estatus` comentado (D6, D10, D11, D12, D13) | ALTO | 2 |
 | Hecho — `RolPaginaAccion` único; `ValidarAccesoPagina`/`UsuarioPagina` legacy eliminado | Dos sistemas de permisos en conflicto: `RolPaginaAccion` vs `UsuarioPagina` (D7) | ALTO | 2 |
 | Hecho — `mapeo-reflection` (E3+W10) + `fk-escalares` (E2) | Mapeo por reflection frágil + FKs como navegación vs `*Id` + `TicketEstatus.Id` int/long (W10, E2, E3) | ALTO | 2 |
-| Pendiente | Contrato de respuesta sin tipar: `ModelResponse.Response object`, `IsSuccess=true` por defecto (E8) | ALTO | 2 |
+| Hecho — `modelresponse-tipado` | Contrato de respuesta sin tipar: `ModelResponse.Response object`, `IsSuccess=true` por defecto (E8) | ALTO | 2 |
 | Pendiente | CSRF / verbos HTTP ausentes / `[FromBody]` (WebApi) dentro de MVC (M13, M14) | ALTO | 2 |
 | Hecho — `entidades-faltantes` | FKs sin entidad (`RolPaginaAccion`, `UsuarioRol`, `TokenRecuperacion`) + `Compania` vs `Empresa` (E4, E10, D17) | MEDIO | 3 |
 | Parcial — `Estatus` borrados listo; nullabilidad (E5) y `throw ex` (W9) pendientes | Robustez de datos: NULLabilidad no reflejada en POCOs, `throw ex` resetea stack, `ObtenerUsuarios` devuelve borrados (E5, W9, D13) | MEDIO | 3 |
@@ -35,7 +35,7 @@
 
 > **Estado**: **Hecho** = implementado (se indica el cambio SDD). **Parcial** = avance parcial (se indica lo que falta). **Pendiente** = sin iniciar.
 >
-> Cambios SDD ya cerrados: `autorizacion-e2e`, `tenant-isolation`, `sesion-expiracion`, `bugs-bd`, `mapeo-reflection`, `fk-escalares`, `entidades-faltantes`.
+> Cambios SDD ya cerrados: `autorizacion-e2e`, `tenant-isolation`, `sesion-expiracion`, `bugs-bd`, `mapeo-reflection`, `fk-escalares`, `entidades-faltantes`, `modelresponse-tipado`.
 
 ---
 
