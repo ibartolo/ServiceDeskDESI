@@ -118,5 +118,29 @@ namespace ServiceDeskDESIWebApi.Services
                 };
             }
         }
+
+        public ModelResponse<List<CategoriaResponsableDTO>> ObtenerTodosLosResponsables(string usuario)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                return _dbWrapper.ObtenerTodosLosResponsables(usuario);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ObtenerTodosLosResponsables para usuario {Usuario}", usuario);
+                return new ModelResponse<List<CategoriaResponsableDTO>> { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en CategoriaResponsableService.ObtenerTodosLosResponsables para usuario {Usuario}", usuario);
+                return new ModelResponse<List<CategoriaResponsableDTO>>
+                {
+                    IsSuccess = false,
+                    Message = "Ocurrió un error al obtener los responsables."
+                };
+            }
+        }
     }
 }

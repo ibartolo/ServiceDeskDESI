@@ -161,5 +161,33 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+        public ModelResponse<List<CategoriaResponsableDTO>> ObtenerTodosLosResponsables(string usuario)
+        {
+            var modelResponse = new ModelResponse<List<CategoriaResponsableDTO>>();
+
+            try
+            {
+                var responsables = GetObjects("ObtenerTodosLosResponsables", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Usuario", usuario) },
+                    new Func<IDataReader, CategoriaResponsableDTO>((reader) =>
+                    {
+                        var cr = LlenarEntidad<CategoriaResponsableDTO>(reader);
+                        return cr;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = responsables.ToList();
+                modelResponse.Message = "Responsables obtenidos correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener todos los responsables para usuario {Usuario}", usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener los responsables";
+            }
+
+            return modelResponse;
+        }
     }
 }

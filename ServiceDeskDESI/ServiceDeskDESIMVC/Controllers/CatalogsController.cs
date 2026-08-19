@@ -907,6 +907,12 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        public async Task<string> ConsultarTodosLosResponsables()
+        {
+            var response = await _categoriaResponsableService.ObtenerTodosLosResponsables();
+            return JsonConvert.SerializeObject(response);
+        }
+
         [Permiso("Responsables por Categoría", "Crear")]
         public async Task<string> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {

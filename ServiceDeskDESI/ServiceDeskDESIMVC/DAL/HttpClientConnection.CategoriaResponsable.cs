@@ -22,6 +22,11 @@ namespace ServiceDeskDESIMVC.DAL
             return await RequestAsync<List<CategoriaResponsableDTO>>($"api/Catalogs/CategoriaResponsable/Usuario/{usuarioId}", HttpMethod.Get, null, token.Token.access_token);
         }
 
+        public async Task<ModelResponse<List<CategoriaResponsableDTO>>> ObtenerTodosLosResponsables()
+        {
+            return await RequestAsync<List<CategoriaResponsableDTO>>($"api/Catalogs/CategoriaResponsable/List", HttpMethod.Get, null, token.Token.access_token);
+        }
+
         public async Task<ModelResponse<CategoriaResponsable>> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
             MappingColumSecurity(categoriaResponsable);

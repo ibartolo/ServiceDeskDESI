@@ -132,6 +132,18 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         /// <summary>
+        /// Obtiene todos los responsables de categoría de la empresa del usuario autenticado
+        /// </summary>
+        /// <returns>Lista de responsables con categoría, área y usuario</returns>
+        [HttpGet, Route("CategoriaResponsable/List")]
+        public ModelResponse<List<CategoriaResponsableDTO>> ObtenerTodosLosResponsables()
+        {
+            var usuario = User.Identity.Name;
+            var result = _categoriaResponsableService.ObtenerTodosLosResponsables(usuario);
+            return result;
+        }
+
+        /// <summary>
         /// Guarda o actualiza un responsable de categoría
         /// </summary>
         /// <param name="categoriaResponsable">Objeto CategoriaResponsable</param>
