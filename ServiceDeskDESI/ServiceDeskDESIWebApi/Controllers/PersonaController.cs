@@ -52,7 +52,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="persona">Objeto persona con los datos</param>
         /// <returns>Persona guardada con su ID actualizado</returns>
-        [Permiso("People")]
+        [Permiso("Personas")]
         [HttpPost, Route("Guardar")]
         public ModelResponse<Persona> GuardarOActualizarPersona(Persona persona)
         {
@@ -66,7 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="persona">Persona a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
-        [Permiso("People", "Eliminar")]
+        [Permiso("Personas", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarPersona(Persona persona)
         {

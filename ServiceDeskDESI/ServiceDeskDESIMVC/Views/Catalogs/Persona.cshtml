@@ -80,6 +80,8 @@
             </div>
         </div>
     </form>
+
+    @Html.Partial("_AsignarActivoPersona")
 </div>
 
 <script>
@@ -155,6 +157,7 @@
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
                         var html = '<div class="d-flex gap-3">';
+                        html += '<button type="button" class="btn btn-sm btn-outline-info" title="Activos" onclick="AbrirActivosPersona(' + data + ')"><i class="fas fa-laptop"></i></button>';
                         if (permisosGlobal && permisosGlobal.PuedeEditar) {
                             html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarPersona(' + data + ')"><i class="fas fa-edit"></i></button>';
                         }
@@ -310,5 +313,20 @@
         });
 
         return false;
+    }
+
+    function AbrirActivosPersona(id) {
+        var row = $('#tblPersona').DataTable().rows().data().toArray().find(function (r) { return r.Id === id; });
+        if (row) {
+            $("#personaNombreActivo").text(row.Nombre + ' ' + row.Apellido);
+        } else {
+            $("#personaNombreActivo").text('---');
+        }
+        $("#personaIdActivo").val(id);
+        $("#tblActivosPersona tbody").empty();
+        $("#ddlActivoDisponible").empty().append('<option value="">Seleccione un activo</option>');
+        CargarActivosDisponibles();
+        CargarActivosPersona();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalAsignarActivo')).show();
     }
 </script>

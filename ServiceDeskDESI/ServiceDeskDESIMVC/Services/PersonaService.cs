@@ -47,7 +47,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "People");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Personas");
             }
             return null;
         }

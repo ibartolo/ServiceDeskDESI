@@ -17,7 +17,7 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                var puestos = GetObjects("ObtenerPuesto", CommandType.StoredProcedure,
+                var puestos = GetObjects("ObtenerPuestos", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, Puesto>((reader) =>
                     {

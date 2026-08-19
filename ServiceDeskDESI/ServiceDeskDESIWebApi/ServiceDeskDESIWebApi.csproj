@@ -221,6 +221,7 @@
     <Compile Include="Controllers\PaginaController.cs" />
     <Compile Include="Controllers\PermisosController.cs" />
     <Compile Include="Controllers\PersonaController.cs" />
+    <Compile Include="Controllers\PersonaActivoController.cs" />
     <Compile Include="Controllers\RelacionController.cs" />
     <Compile Include="Controllers\RolController.cs" />
     <Compile Include="Controllers\SucursalController.cs" />
@@ -243,6 +244,7 @@
     <Compile Include="DAL\DbWrapper.Paginas.cs" />
     <Compile Include="DAL\DbWrapper.Permisos.cs" />
     <Compile Include="DAL\DbWrapper.Persona.cs" />
+    <Compile Include="DAL\DbWrapper.PersonaActivo.cs" />
     <Compile Include="DAL\DbWrapper.Puesto.cs" />
     <Compile Include="DAL\DbWrapper.Relacion.cs" />
     <Compile Include="DAL\DbWrapper.Sucursal.cs" />
@@ -270,6 +272,7 @@
     <Compile Include="Services\SucursalService.cs" />
     <Compile Include="Services\TicketService.cs" />
     <Compile Include="Services\PersonaService.cs" />
+    <Compile Include="Services\PersonaActivoService.cs" />
     <Compile Include="Services\PuestoService.cs" />
     <Compile Include="Services\TipoActivoService.cs" />
   </ItemGroup>

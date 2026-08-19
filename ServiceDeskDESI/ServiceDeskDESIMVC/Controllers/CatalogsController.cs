@@ -35,6 +35,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly RolService _rolService;
         private readonly PuestoService _puestoService;
         private readonly PersonaService _personaService;
+        private readonly PersonaActivoService _personaActivoService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
@@ -51,6 +52,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _rolService = new RolService(httpClientConnection);
             _puestoService = new PuestoService(httpClientConnection);
             _personaService = new PersonaService(httpClientConnection);
+            _personaActivoService = new PersonaActivoService(httpClientConnection);
 
         }
 
@@ -114,7 +116,7 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Permisos = permisos;
             return View(compania);
         }
-        public async Task<ActionResult> Tipped (long id = 0)
+        public async Task<ActionResult> Puesto(long id = 0)
         {
            var permisos = await _puestoService.ObtenerPermisosParaPuesto();
             if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
@@ -137,7 +139,7 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Permisos = permisos;
             return View(puesto);
         }
-        public  async Task <ActionResult> People(long id = 0)
+        public async Task<ActionResult> Persona(long id = 0)
         {
             var permisos = await _personaService.ObtenerPermisosParaPersona();
             if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
@@ -157,6 +159,13 @@ namespace ServiceDeskDESIMVC.Controllers
                     ViewBag.ErrorMessage = "No se encontró la persona.";
                 }
             }
+            // Cargar puestos para el dropdown
+            var puestosResponse = await _puestoService.ConsultarTodosLosPuestos();
+            if (puestosResponse.IsSuccess && puestosResponse.Response != null)
+            {
+                ViewBag.Puestos = new SelectList(puestosResponse.Response, "Id", "Nombre");
+            }
+
             ViewBag.Permisos = permisos;
             return View(persona);
         }
@@ -743,14 +752,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
-        [Permiso("Tipped")]
+        [Permiso("Puestos")]
         public async Task<string> GuardarOActualizarPuesto(Puesto p)
         {
             var response = await _puestoService.GuardarOActualizarPuesto(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
-        [Permiso("Tipped", "Eliminar")]
+        [Permiso("Puestos", "Eliminar")]
         public async Task<string> EliminarPuesto(Puesto p)
         {
             var response = await _puestoService.EliminarPuesto(p);
@@ -770,17 +779,49 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
-        [Permiso("People")]
+        [Permiso("Personas")]
         public async Task<string> GuardarOActualizarPersona(Persona p)
         {
             var response = await _personaService.GuardarOActualizarPersona(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
-        [Permiso("People", "Eliminar")]
+        [Permiso("Personas", "Eliminar")]
         public async Task<string> EliminarPersona(Persona p)
         {
             var response = await _personaService.EliminarPersona(p);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        #endregion
+
+        #region Persona Activo
+        [System.Web.Mvc.HttpGet]
+        public async Task<string> ObtenerActivosPorPersona(long personaId)
+        {
+            var response = await _personaActivoService.ObtenerActivosPorPersona(personaId);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpGet]
+        public async Task<string> ObtenerActivosDisponibles()
+        {
+            var response = await _personaActivoService.ObtenerActivosDisponibles();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        [Permiso("Personas", "Editar")]
+        public async Task<string> AsignarActivoPersona(long personaId, long activoId)
+        {
+            var response = await _personaActivoService.AsignarActivoPersona(personaId, activoId);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        [Permiso("Personas", "Editar")]
+        public async Task<string> DesvincularActivoPersona(long personaActivoId)
+        {
+            var response = await _personaActivoService.DesvincularActivoPersona(personaActivoId);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         #endregion

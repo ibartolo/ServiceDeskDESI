@@ -57,6 +57,8 @@
     <Compile Include="Catalogos\Modelo.cs" />
     <Compile Include="Catalogos\ModeloDTO.cs" />
     <Compile Include="Catalogos\Persona.cs" />
+    <Compile Include="Catalogos\PersonaActivo.cs" />
+    <Compile Include="Catalogos\PersonaActivoDTO.cs" />
     <Compile Include="Catalogos\PersonaDTO.cs" />
     <Compile Include="Catalogos\Puesto.cs" />
     <Compile Include="Catalogos\TicketEstatus.cs" />
