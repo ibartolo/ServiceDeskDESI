@@ -65,6 +65,11 @@ namespace ServiceDeskDESIMVC.DAL
             return await RequestAsync<List<Rol>>($"api/Rol/Usuario/{usuarioId}", HttpMethod.Get, null, token.Token.access_token);
         }
 
+        public async Task<ModelResponse<List<UsuarioRol>>> ObtenerUsuarioRolesPorUsuario(long usuarioId)
+        {
+            return await RequestAsync<List<UsuarioRol>>($"api/Rol/UsuarioRoles/{usuarioId}", HttpMethod.Get, null, token.Token.access_token);
+        }
+
         public async Task<ModelResponse> EliminarRolUsuario(long usuarioRolId)
         {
             var request = new

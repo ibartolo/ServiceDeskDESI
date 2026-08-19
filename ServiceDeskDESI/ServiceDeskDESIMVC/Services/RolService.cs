@@ -51,6 +51,11 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.ObtenerRolesPorUsuario(usuarioId);
         }
 
+        public async Task<ModelResponse<List<UsuarioRol>>> ObtenerUsuarioRolesPorUsuario(long usuarioId)
+        {
+            return await _httpClient.ObtenerUsuarioRolesPorUsuario(usuarioId);
+        }
+
         public async Task<ModelResponse> EliminarRolUsuario(long usuarioRolId)
         {
             return await _httpClient.EliminarRolUsuario(usuarioRolId);

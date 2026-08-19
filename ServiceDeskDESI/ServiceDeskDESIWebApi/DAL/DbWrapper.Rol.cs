@@ -277,5 +277,69 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+        /// <summary>
+        /// Obtiene los roles asignados a un usuario por su ID (no por username).
+        /// Usa el SP ObtenerRolesPorUsuarioId para respetar el usuario objetivo.
+        /// </summary>
+        public ModelResponse<List<Rol>> ObtenerRolesPorUsuarioId(long usuarioId)
+        {
+            var modelResponse = new ModelResponse<List<Rol>>();
+
+            try
+            {
+                var roles = GetObjects("ObtenerRolesPorUsuarioId", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@UsuarioId", usuarioId) },
+                    new Func<IDataReader, Rol>((reader) =>
+                    {
+                        var rol = LlenarEntidad<Rol>(reader);
+                        return rol;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = roles.ToList();
+                modelResponse.Message = "Roles obtenidos correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener roles del usuario {UsuarioId}", usuarioId);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener los roles del usuario";
+            }
+
+            return modelResponse;
+        }
+
+        /// <summary>
+        /// Obtiene las filas UsuarioRol (junction) de un usuario, incluyendo el Id de cada fila.
+        /// Necesario para eliminar correctamente la asignación usuario-rol (EliminarRolUsuario espera UsuarioRol.Id).
+        /// </summary>
+        public ModelResponse<List<UsuarioRol>> ObtenerUsuarioRolesPorUsuario(long usuarioId)
+        {
+            var modelResponse = new ModelResponse<List<UsuarioRol>>();
+
+            try
+            {
+                var usuarioRoles = GetObjects("ObtenerUsuarioRolesPorUsuario", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@UsuarioId", usuarioId) },
+                    new Func<IDataReader, UsuarioRol>((reader) =>
+                    {
+                        var ur = LlenarEntidad<UsuarioRol>(reader);
+                        return ur;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = usuarioRoles.ToList();
+                modelResponse.Message = "Asignaciones usuario-rol obtenidas correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener las asignaciones usuario-rol del usuario {UsuarioId}", usuarioId);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener las asignaciones usuario-rol del usuario";
+            }
+
+            return modelResponse;
+        }
     }
 }

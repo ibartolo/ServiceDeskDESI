@@ -15,6 +15,6 @@ namespace ServiceDeskDESIEntities.Catalogos
         public long? MarcaId { get; set; }
         public long? ModeloId { get; set; }
         public string Notas { get; set; }
-        public DateTime FechaCompra { get; set; }
+        public DateTime? FechaCompra { get; set; }
   }
 }
