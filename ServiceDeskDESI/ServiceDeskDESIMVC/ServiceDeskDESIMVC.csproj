@@ -220,6 +220,9 @@
     <Content Include="Views\User\MyProfile.cshtml" />
     <Content Include="Views\Catalogs\Category.cshtml" />
     <Content Include="Views\Ticket\Index.cshtml" />
+    <Content Include="Views\Ticket\_CapturarTicket.cshtml" />
+    <Content Include="Views\Ticket\_ReasignarTicket.cshtml" />
+    <Content Include="Views\Ticket\_DetalleTicket.cshtml" />
     <Content Include="Views\Catalogs\TypeActive.cshtml" />
     <Content Include="Views\Catalogs\Model.cshtml" />
     <Content Include="Views\Catalogs\Mark.cshtml" />
