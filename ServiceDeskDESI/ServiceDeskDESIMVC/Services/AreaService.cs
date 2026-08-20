@@ -23,12 +23,12 @@ namespace ServiceDeskDESIMVC.Services
             var response = await _httpClient.ObtenerAreaPorId(id);
             if (response.IsSuccess && response.Response != null)
             {
-                return JsonConvert.DeserializeObject<Area>(response.Response.ToString());
+                return response.Response;
             }
             return null;
         }
 
-        public async Task<ModelResponse> GuardarOActualizarArea(Area area)
+        public async Task<ModelResponse<Area>> GuardarOActualizarArea(Area area)
         {
             return await _httpClient.GuardarOActualizarArea(area);
         }
@@ -38,7 +38,7 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarArea(area);
         }
 
-        public async Task<ModelResponse> ConsultarTodasAreas()
+        public async Task<ModelResponse<List<Area>>> ConsultarTodasAreas()
         {
             return await _httpClient.ObtenerAreas();
         }
@@ -48,8 +48,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Áreas");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Áreas");
             }
             return null;
         }

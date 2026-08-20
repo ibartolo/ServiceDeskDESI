@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de activos</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerTodosLosActivos()
+        public ModelResponse<List<ActivoDTO>> ObtenerTodosLosActivos()
         {
             var usuario = User.Identity.Name;
             var result = _activoService.ObtenerTodosLosActivos(usuario);
@@ -39,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del activo</param>
         /// <returns>Activo encontrado</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerActivoPorId(long id)
+        public ModelResponse<ActivoDTO> ObtenerActivoPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _activoService.ObtenerActivoPorId(id, usuario);
@@ -51,8 +52,9 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="activo">Objeto activo con los datos</param>
         /// <returns>Activo guardado con su ID actualizado</returns>
+        [Permiso("Activos")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarActivo(Activo activo)
+        public ModelResponse<Activo> GuardarOActualizarActivo(Activo activo)
         {
             var usuario = User.Identity.Name;
             var result = _activoService.GuardarOActualizarActivo(activo, usuario);
@@ -64,6 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="activo">Activo a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Activos", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarActivo(Activo activo)
         {

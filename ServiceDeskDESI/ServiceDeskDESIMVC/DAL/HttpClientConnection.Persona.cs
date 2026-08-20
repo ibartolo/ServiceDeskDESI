@@ -13,38 +13,20 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodasLasPersonas()
+        public async Task<ModelResponse<List<PersonaDTO>>> ObtenerTodasLasPersonas()
         {
-            var result = await RequestAsync<object>($"api/Persona/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<PersonaDTO>>($"api/Persona/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerPersonaPorId(long id)
+        public async Task<ModelResponse<PersonaDTO>> ObtenerPersonaPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Persona/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<PersonaDTO>($"api/Persona/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarPersona(Persona persona)
+        public async Task<ModelResponse<Persona>> GuardarOActualizarPersona(Persona persona)
         {
             MappingColumSecurity(persona);
-            var result = await RequestAsync<object>($"api/Persona/Guardar", HttpMethod.Post, persona,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Persona>($"api/Persona/Guardar", HttpMethod.Post, persona, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarPersona(Persona persona)
@@ -55,6 +37,7 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return responseString;
                 }), token.Token.access_token);
+
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }

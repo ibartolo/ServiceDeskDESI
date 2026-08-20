@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodosLosPuestos(string usuario)
+        public ModelResponse<List<Puesto>> ObtenerTodosLosPuestos(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Puesto>>();
 
             try
             {
@@ -25,7 +26,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = puestos;
+                modelResponse.Response = puestos.ToList();
                 modelResponse.Message = "Puestos obtenidos correctamente";
             }
             catch (Exception ex)
@@ -38,9 +39,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerPuestoPorId(long id, string usuario)
+        public ModelResponse<Puesto> ObtenerPuestoPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Puesto>();
 
             try
             {
@@ -76,9 +77,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarPuesto(Puesto p, string usuario)
+        public ModelResponse<Puesto> GuardarOActualizarPuesto(Puesto p, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Puesto>();
 
             try
             {

@@ -15,11 +15,10 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Management;
 using System.Web.Mvc;
-using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
+using ServiceDeskDESIMVC.Filters;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
-    [Autenticated]
     public class CatalogsController : BaseController
     {
         TokenCookie token;
@@ -98,14 +97,14 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (id > 0)
             {
-                var response = await _companiaService.ObtenerCompaniaPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                var companiaResponse = await _companiaService.ObtenerCompaniaPorId(id);
+                if (companiaResponse != null)
                 {
-                    compania = JsonConvert.DeserializeObject<Compania>(response.Response.ToString());
+                    compania = companiaResponse;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró la compañía.";
                 }
             }
 
@@ -123,13 +122,13 @@ namespace ServiceDeskDESIMVC.Controllers
             if (id > 0)
             {
                 var response = await _puestoService.ObtenerPuestoPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                if (response != null)
                 {
-                    puesto = JsonConvert.DeserializeObject<Puesto>(response.Response.ToString());
+                    puesto = response;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró el puesto.";
                 }
             }
             ViewBag.Permisos = permisos;
@@ -146,13 +145,13 @@ namespace ServiceDeskDESIMVC.Controllers
             if (id > 0)
             {
                 var response = await _personaService.ObtenerPersonaPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                if (response != null)
                 {
-                    persona = JsonConvert.DeserializeObject<Persona>(response.Response.ToString());
+                    persona = response;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró la persona.";
                 }
             }
             ViewBag.Permisos = permisos;
@@ -175,13 +174,13 @@ namespace ServiceDeskDESIMVC.Controllers
             if (id > 0)
             {
                 var response = await _tipoActivoService.ObtenerTipoActivoPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                if (response != null)
                 {
-                    tipoActivo = JsonConvert.DeserializeObject<TipoActivo>(response.Response.ToString());
+                    tipoActivo = response;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró el tipo de activo.";
                 }
             }
 
@@ -206,13 +205,13 @@ namespace ServiceDeskDESIMVC.Controllers
             if (id > 0)
             {
                 var response = await _sucursalService.ObtenerSucursalPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                if (response != null)
                 {
-                    sucursal = JsonConvert.DeserializeObject<Sucursal>(response.Response.ToString());
+                    sucursal = response;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró la sucursal.";
                 }
             }
 
@@ -239,46 +238,46 @@ namespace ServiceDeskDESIMVC.Controllers
             var tipoactivoList = new List<TipoActivo>();
             if (tipoactivoResponse.IsSuccess && tipoactivoResponse.Response != null)
             {
-                ViewBag.TipoActivoss = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<TipoActivo>>(tipoactivoResponse.Response.ToString()), "Id", "Nombre");
-                tipoactivoList = JsonConvert.DeserializeObject<List<TipoActivo>>(tipoactivoResponse.Response.ToString());
+                ViewBag.TipoActivoss = MappingPropertiToDropDownList(tipoactivoResponse.Response, "Id", "Nombre");
+                tipoactivoList = tipoactivoResponse.Response;
             }
 
             var modeloResponse = await _modeloService.ConsultarTodosLosModelos();
             var modeloList = new List<Modelo>();
             if (modeloResponse.IsSuccess && modeloResponse.Response != null)
             {
-                ViewBag.Modelos = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Modelo>>(modeloResponse.Response.ToString()), "Id", "Nombre");
-                modeloList = JsonConvert.DeserializeObject<List<Modelo>>(modeloResponse.Response.ToString());
+                ViewBag.Modelos = MappingPropertiToDropDownList(modeloResponse.Response.Cast<Modelo>().ToList(), "Id", "Nombre");
+                modeloList = modeloResponse.Response.Cast<Modelo>().ToList();
             }
 
             var marcaResponse = await _marcaService.ConsultarTodosLasMarcas();
             var marcasList = new List<Marca>();
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
-                ViewBag.Marcass = MappingPropertiToDropDownList(JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString()), "Id", "Nombre");
-                marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
+                ViewBag.Marcass = MappingPropertiToDropDownList(marcaResponse.Response, "Id", "Nombre");
+                marcasList = marcaResponse.Response;
             }
 
             if (id > 0)
             {
-                var response = await _activoService.ObtenerActivoPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                var activoResponse = await _activoService.ObtenerActivoPorId(id);
+                if (activoResponse != null)
                 {
-                    activo = JsonConvert.DeserializeObject<Activo>(response.Response.ToString());
+                    activo = activoResponse;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró el activo.";
                 }
             }
 
             // Después de obtener el objeto activo, setea el valor seleccionado
             var selectListTipo = MappingPropertiToDropDownList(tipoactivoList, "Id", "Nombre");
-            if (activo.TipoActivo != null && activo.TipoActivo.Id > 0)
+            if (activo.TipoActivoId.HasValue && activo.TipoActivoId.Value > 0)
             {
                 foreach (var item in selectListTipo)
                 {
-                    if (item.Value == activo.TipoActivo.Id.ToString())
+                    if (item.Value == activo.TipoActivoId.Value.ToString())
                     {
                         item.Selected = true;
                         break;
@@ -288,11 +287,11 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.TipoActivoss = selectListTipo;
 
             var selectListModelo = MappingPropertiToDropDownList(modeloList, "Id", "Nombre");
-            if (activo.Modelo != null && activo.Modelo.Id > 0)
+            if (activo.ModeloId.HasValue && activo.ModeloId.Value > 0)
             {
                 foreach (var item in selectListModelo)
                 {
-                    if (item.Value == activo.Modelo.Id.ToString())
+                    if (item.Value == activo.ModeloId.Value.ToString())
                     {
                         item.Selected = true;
                         break;
@@ -302,11 +301,11 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Modelos = selectListModelo;
 
             var selectListMarca = MappingPropertiToDropDownList(marcasList, "Id", "Nombre");
-            if (activo.Marca != null && activo.Marca.Id > 0)
+            if (activo.MarcaId.HasValue && activo.MarcaId.Value > 0)
             {
                 foreach (var item in selectListMarca)
                 {
-                    if (item.Value == activo.Marca.Id.ToString())
+                    if (item.Value == activo.MarcaId.Value.ToString())
                     {
                         item.Selected = true;
                         break;
@@ -335,14 +334,14 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (id > 0)
             {
-                var response = await _modeloService.ObtenerModeloPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                var modeloResponse = await _modeloService.ObtenerModeloPorId(id);
+                if (modeloResponse != null)
                 {
-                    modelo = JsonConvert.DeserializeObject<Modelo>(response.Response.ToString());
+                    modelo = modeloResponse;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró el modelo.";
                 }
             }
 
@@ -352,14 +351,14 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (marcaResponse.IsSuccess && marcaResponse.Response != null)
             {
-                marcasList = JsonConvert.DeserializeObject<List<Marca>>(marcaResponse.Response.ToString());
+                marcasList = marcaResponse.Response;
                 // Asignar el DropDownList con el valor seleccionado si existe
                 var selectList = MappingPropertiToDropDownList(marcasList, "Id", "Nombre");
-                if (modelo.Marca != null && modelo.Marca.Id > 0)
+                if (modelo.MarcaId.HasValue && modelo.MarcaId.Value > 0)
                 {
                     foreach (var item in selectList)
                     {
-                        if (item.Value == modelo.Marca.Id.ToString())
+                        if (item.Value == modelo.MarcaId.Value.ToString())
                         {
                             item.Selected = true;
                             break;
@@ -390,14 +389,14 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (id > 0)
             {
-                var response = await _marcaService.ObtenerMarcaPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                var marcaResponse = await _marcaService.ObtenerMarcaPorId(id);
+                if (marcaResponse != null)
                 {
-                    marca = JsonConvert.DeserializeObject<Marca>(response.Response.ToString());
+                    marca = marcaResponse;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró la marca.";
                 }
             }
 
@@ -415,16 +414,11 @@ namespace ServiceDeskDESIMVC.Controllers
                 return RedirectToAction("Login", "Home");
             }
 
-            var usuario = new Usuario();
-            var response = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
-
-            if (response.IsSuccess && response.Response != null)
+            var usuario = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
+            if (usuario == null)
             {
-                usuario = JsonConvert.DeserializeObject<Usuario>(response.Response.ToString());
-            }
-            else
-            {
-                ViewBag.ErrorMessage = response.Message;
+                usuario = new Usuario();
+                ViewBag.ErrorMessage = "No se pudo obtener el usuario.";
             }
 
             // Cargar listas para los dropdowns
@@ -443,13 +437,6 @@ namespace ServiceDeskDESIMVC.Controllers
             return View(usuario);
         }
 
-        public class CambioContrasenaRequest
-        {
-            public long Id { get; set; }
-            public string ContrasenaActual { get; set; }
-            public string NuevaContrasena { get; set; }
-        }
-
         public async Task<ActionResult> Category(long id = 0)
         {
             // 1. Obtener permisos para la página "Categorías"
@@ -465,14 +452,14 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (id > 0)
             {
-                var response = await _categoriaService.ObtenerCategoriaPorId(id);
-                if (response.IsSuccess && response.Response != null)
+                var categoriaResponse = await _categoriaService.ObtenerCategoriaPorId(id);
+                if (categoriaResponse != null)
                 {
-                    categoria = JsonConvert.DeserializeObject<Categoria>(response.Response.ToString());
+                    categoria = categoriaResponse;
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = response.Message;
+                    ViewBag.ErrorMessage = "No se encontró la categoría.";
                 }
             }
 
@@ -486,15 +473,15 @@ namespace ServiceDeskDESIMVC.Controllers
             // Cargar categorías padres para el dropdown (solo categorías principales)
             if (ViewBag.Areas != null)
             {
-                var areaId = categoria.Area?.Id ?? 0;
+                var areaId = categoria.AreaId;
                 if (areaId > 0)
                 {
                     var categoriasResponse = await _categoriaService.ConsultarTodasCategorias();
                     if (categoriasResponse.IsSuccess && categoriasResponse.Response != null)
                     {
-                        var todasCategorias = JsonConvert.DeserializeObject<List<Categoria>>(categoriasResponse.Response.ToString());
-                        ViewBag.CategoriasPadre = todasCategorias
-                            .Where(x => x.CategoriaPadre == null && x.Area.Id == areaId)
+                        ViewBag.CategoriasPadre = categoriasResponse.Response
+                            .Where(x => x.CategoriaPadreId == null && x.AreaId == areaId)
+                            .Cast<Categoria>()
                             .ToList();
                     }
                 }
@@ -527,9 +514,9 @@ namespace ServiceDeskDESIMVC.Controllers
             if (categoriaId > 0)
             {
                 var categoriaResponse = await _categoriaService.ObtenerCategoriaPorId(categoriaId);
-                if (categoriaResponse.IsSuccess && categoriaResponse.Response != null)
+                if (categoriaResponse != null)
                 {
-                    model.Categoria = JsonConvert.DeserializeObject<Categoria>(categoriaResponse.Response.ToString());
+                    model.Categoria = categoriaResponse;
                 }
             }
 
@@ -538,9 +525,8 @@ namespace ServiceDeskDESIMVC.Controllers
             var categoriasResponse = await _categoriaService.ConsultarTodasCategorias();
             if (categoriasResponse.IsSuccess && categoriasResponse.Response != null)
             {
-                var todasCategorias = JsonConvert.DeserializeObject<List<Categoria>>(categoriasResponse.Response.ToString());
-                // Filtrar solo categorías padre (sin padre)
-                var categoriasPadre = todasCategorias.Where(c => c.CategoriaPadre == null).ToList();
+                    // Filtrar solo categorías padre (sin padre)
+                    var categoriasPadre = categoriasResponse.Response.Where(c => c.CategoriaPadreId == null).Cast<Categoria>().ToList();
                 ViewBag.Categorias = categoriasPadre;
             }
 
@@ -548,11 +534,10 @@ namespace ServiceDeskDESIMVC.Controllers
             var usuariosResponse = await _usuarioService.ConsultarTodosLosUsuarios();
             if (usuariosResponse.IsSuccess && usuariosResponse.Response != null)
             {
-                var usuarios = JsonConvert.DeserializeObject<List<Usuario>>(usuariosResponse.Response.ToString());
                 // Filtrar solo usuarios que pueden atender tickets (con rol PuedeAtenderTickets = true)
                 // Esto requiere que el usuario tenga la información del rol
                 // Por ahora asumimos que el servicio ya filtra
-                ViewBag.Usuarios = usuarios;
+                ViewBag.Usuarios = usuariosResponse.Response;
             }
 
             // Obtener responsables de la categoría si existe
@@ -561,7 +546,7 @@ namespace ServiceDeskDESIMVC.Controllers
                 var responsablesResponse = await _categoriaResponsableService.ObtenerResponsablesPorCategoria(categoriaId);
                 if (responsablesResponse.IsSuccess && responsablesResponse.Response != null)
                 {
-                    model.Responsables = JsonConvert.DeserializeObject<List<CategoriaResponsable>>(responsablesResponse.Response.ToString());
+                    model.Responsables = responsablesResponse.Response.Cast<CategoriaResponsable>().ToList();
                 }
             }
 
@@ -585,11 +570,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _areaService.ObtenerAreaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Áreas")]
         public async Task<string> GuardarOActualizarArea(Area a)
         {
             var response = await _areaService.GuardarOActualizarArea(a);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Áreas", "Eliminar")]
         public async Task<string> EliminarArea(Area a)
         {
             var response = await _areaService.EliminarArea(a);
@@ -598,6 +585,7 @@ namespace ServiceDeskDESIMVC.Controllers
         #endregion
 
         #region Mi Perfil
+        [Permiso("Mi Perfil", "Editar")]
         public async Task<string> GuardarPerfil()
         {
             var modelResponse = new ModelResponse();
@@ -613,8 +601,8 @@ namespace ServiceDeskDESIMVC.Controllers
                     Apellido = Request.Form["Apellido"],
                     Celular = Request.Form["Celular"],
                     RFC = Request.Form["RFC"],
-                    Sucursal = new Sucursal { Id = Convert.ToInt64(Request.Form["SucursalId"]) },
-                    Area = new Area { Id = Convert.ToInt64(Request.Form["AreaId"]) },
+                    SucursalId = Convert.ToInt64(Request.Form["SucursalId"]),
+                    AreaId = Convert.ToInt64(Request.Form["AreaId"]),
                     CreadoPor = Request.Form["CreadoPor"],
                     FechaCreacion = Convert.ToDateTime(Request.Form["FechaCreacion"]),
                     ModificadoPor = Request.Form["ModificadoPor"] ?? SessionHelper.GetSessionUser()?.UserName,
@@ -649,57 +637,10 @@ namespace ServiceDeskDESIMVC.Controllers
                 return JsonConvert.SerializeObject(modelResponse);
             }
         }
-        public async Task<string> CambiarContrasena(CambioContrasenaRequest request)
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var tokenCookie = SessionHelper.GetSessionUser();
-                if (tokenCookie == null || tokenCookie.UserID == 0)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "Sesión no válida";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Validar contraseña actual
-                var usuarioResponse = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
-
-                if (!usuarioResponse.IsSuccess || usuarioResponse.Response == null)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo obtener la información del usuario";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                var usuario = JsonConvert.DeserializeObject<Usuario>(usuarioResponse.Response.ToString());
-
-                if (usuario.Contrasena != request.ContrasenaActual)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "La contraseña actual es incorrecta";
-                    return JsonConvert.SerializeObject(modelResponse);
-                }
-
-                // Actualizar contraseña
-                usuario.Contrasena = request.NuevaContrasena;
-                usuario.ModificadoPor = tokenCookie.UserName;
-                usuario.FechaModificacion = DateTime.Now;
-
-                var response = await _usuarioService.ActualizarContrasena(usuario);
-                return JsonConvert.SerializeObject(response);
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al cambiar la contraseña";
-                return JsonConvert.SerializeObject(modelResponse);
-            }
-        }
         #endregion
 
         #region Categoria
+        [Permiso("Categorías")]
         public async Task<string> GuardarOActualizarCategoria(Categoria categoria)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -719,6 +660,7 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _categoriaService.GuardarOActualizarCategoria(categoria);
             return JsonConvert.SerializeObject(response);
         }
+        [Permiso("Categorías", "Eliminar")]
         public async Task<string> EliminarCategoria(Categoria categoria)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -747,11 +689,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _companiaService.ObtenerCompaniaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Compañías")]
         public async Task<string> GuardarOActualizarCompanias(Compania c)
         {
             var response = await _companiaService.GuardarOActualizarCompania(c);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Compañías", "Eliminar")]
         public async Task<string> EliminarCompanias(Compania c)
         {
             var response = await _companiaService.EliminarCompania(c);
@@ -770,11 +714,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _sucursalService.ObtenerSucursalPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Sucursales")]
         public async Task<string> GuardarActualizarSucursales(Sucursal s)
         {
             var response = await _sucursalService.GuardarOActualizarSucursal(s);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Sucursales", "Eliminar")]
         public async Task<string> EliminarSucurales(Sucursal s)
         {
             var response = await _sucursalService.EliminarSucursal(s);
@@ -794,12 +740,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Tipped")]
         public async Task<string> GuardarOActualizarPuesto(Puesto p)
         {
             var response = await _puestoService.GuardarOActualizarPuesto(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Tipped", "Eliminar")]
         public async Task<string> EliminarPuesto(Puesto p)
         {
             var response = await _puestoService.EliminarPuesto(p);
@@ -819,12 +767,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("People")]
         public async Task<string> GuardarOActualizarPersona(Persona p)
         {
             var response = await _personaService.GuardarOActualizarPersona(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("People", "Eliminar")]
         public async Task<string> EliminarPersona(Persona p)
         {
             var response = await _personaService.EliminarPersona(p);
@@ -843,11 +793,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _tipoActivoService.ObtenerTipoActivoPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Tipo Activo")]
         public async Task<string> GuardarOActualizarTipoActivo(TipoActivo t)
         {
             var response = await _tipoActivoService.GuardarOActualizarTipoActivo(t);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Tipo Activo", "Eliminar")]
         public async Task<string> EliminarTipoActivo(TipoActivo t)
         {
             var response = await _tipoActivoService.EliminarTipoActivo(t);
@@ -866,12 +818,14 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _modeloService.ObtenerModeloPorId(id);
             return JsonConvert.SerializeObject(response);
         }
+        [Permiso("Modelos")]
         public async Task<string> GuardarOActualizarModelos(Modelo m)
         {
             m.Estatus = true;
             var response = await _modeloService.GuardarOActualizarModelo(m);
             return JsonConvert.SerializeObject(response);
         }
+        [Permiso("Modelos", "Eliminar")]
         public async Task<string> EliminarModelos(Modelo m)
         {
             var response = await _modeloService.EliminarModelo(m);
@@ -880,8 +834,8 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> ConsultarModelosPorMarca(long marcaId)
         {
             var response = await httpClientConnection.ObtenerTodosLosModelos();
-            var listModels = JsonConvert.DeserializeObject<List<Modelo>>(response.Response.ToString());
-            var modelosPorMarca = listModels.Where(m => m.Marca.Id == marcaId).ToList();
+            var listModels = response.Response.Cast<Modelo>().ToList();
+            var modelosPorMarca = listModels.Where(m => m.MarcaId == marcaId).ToList();
             mr.Response = modelosPorMarca;
             mr.IsSuccess = true;
 
@@ -900,11 +854,13 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _marcaService.ObtenerMarcaPorId(id);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Marcas")]
         public async Task<string> GuardarOActualizarMarca(Marca m)
         {
             var response = await _marcaService.GuardarOActualizarMarca(m);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+        [Permiso("Marcas", "Eliminar")]
         public async Task<string> EliminarMarcas(Marca m)
         {
             var response = await _marcaService.EliminarMarca(m);
@@ -924,12 +880,14 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _activoService.ObtenerActivoPorId(id);
             return JsonConvert.SerializeObject(response);
         }
+        [Permiso("Activos")]
         public async Task<string> GuardarOActualizarActivos(Activo a)
         {
             var response = await _activoService.GuardarOActualizarActivo(a);
             return JsonConvert.SerializeObject(response);
 
         }
+        [Permiso("Activos", "Eliminar")]
         public async Task<string> EliminarActivos(Activo a)
         {
             var response = await _activoService.EliminarActivo(a);
@@ -949,6 +907,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Responsables por Categoría", "Crear")]
         public async Task<string> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -969,6 +928,7 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Responsables por Categoría", "Eliminar")]
         public async Task<string> EliminarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -986,23 +946,20 @@ namespace ServiceDeskDESIMVC.Controllers
 
             if (response.IsSuccess && response.Response != null)
             {
-                var usuarios = JsonConvert.DeserializeObject<List<Usuario>>(response.Response.ToString());
-
                 // Filtrar usuarios que pueden atender tickets
                 // Nota: Para esto necesitas que el objeto Usuario tenga la información del rol
                 // o necesitas obtener los roles de cada usuario
                 // Por ahora, filtramos por los usuarios que tengan roles que pueden atender
-                var usuariosFiltrados = new List<Usuario>();
+                var usuariosFiltrados = new List<UsuarioDTO>();
 
-                foreach (var usuario in usuarios)
+                foreach (var usuario in response.Response)
                 {
                     // Obtener roles del usuario
                     var rolesResponse = await _rolService.ObtenerRolesPorUsuario(usuario.Id);
                     if (rolesResponse.IsSuccess && rolesResponse.Response != null)
                     {
-                        var roles = JsonConvert.DeserializeObject<List<Rol>>(rolesResponse.Response.ToString());
                         // Verificar si alguno de sus roles permite atender tickets
-                        if (roles.Any(r => r.PuedeAtenderTickets))
+                        if (rolesResponse.Response.Any(r => r.PuedeAtenderTickets))
                         {
                             usuariosFiltrados.Add(usuario);
                         }

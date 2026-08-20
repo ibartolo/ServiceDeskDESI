@@ -1,4 +1,5 @@
 ﻿using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de permisos por página</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerPermisosPorUsuario()
+        public ModelResponse<List<PermisosViewModel>> ObtenerPermisosPorUsuario()
         {
             var usuario = User.Identity.Name;
             var result = _permisosService.ObtenerPermisosPorUsuario(usuario);
@@ -38,7 +39,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="request">Objeto con nombre de página y acción</param>
         /// <returns>True si tiene permiso, False en caso contrario</returns>
         [HttpPost, Route("Validar")]
-        public ModelResponse ValidarPermisoUsuario([FromBody] ValidarPermisoRequest request)
+        public ModelResponse<bool> ValidarPermisoUsuario([FromBody] ValidarPermisoRequest request)
         {
             var usuario = User.Identity.Name;
             var result = _permisosService.ValidarPermisoUsuario(usuario, request.NombrePagina, request.Accion);
@@ -50,7 +51,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de páginas</returns>
         [HttpGet, Route("Paginas")]
-        public ModelResponse ObtenerPaginas()
+        public ModelResponse<List<Pagina>> ObtenerPaginas()
         {
             var result = _permisosService.ObtenerPaginas();
             return result;
@@ -62,7 +63,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="rolId">ID del rol</param>
         /// <returns>Permisos del rol</returns>
         [HttpGet, Route("Rol/{rolId:long}")]
-        public ModelResponse ObtenerPermisosPorRol(long rolId)
+        public ModelResponse<List<RolPaginaAccionDTO>> ObtenerPermisosPorRol(long rolId)
         {
             var usuario = User.Identity.Name;
             var result = _permisosService.ObtenerPermisosPorRol(rolId, usuario);
@@ -74,6 +75,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="request">Objeto con los datos del permiso</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Permisos", "Editar")]
         [HttpPost, Route("Guardar")]
         public ModelResponse GuardarPermisosRol([FromBody] GuardarPermisosRequest request)
         {
@@ -97,6 +99,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="request">Objeto con RolId y lista de permisos</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Permisos", "Editar")]
         [HttpPost, Route("GuardarMasivo")]
         public ModelResponse GuardarPermisosRolMasivo([FromBody] GuardarPermisosMasivoRequest request)
         {

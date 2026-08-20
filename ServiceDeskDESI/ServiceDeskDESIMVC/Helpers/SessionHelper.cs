@@ -44,7 +44,7 @@ namespace ServiceDeskDESIMVC.Helpers
         {
             TokenCookie u = null;
 
-            if (HttpContext.Current.User != null && HttpContext.Current.User.Identity is FormsIdentity)
+            if (HttpContext.Current != null && HttpContext.Current.User != null && HttpContext.Current.User.Identity is FormsIdentity)
             {
                 FormsAuthenticationTicket ticket = ((FormsIdentity)HttpContext.Current.User.Identity).Ticket;
 

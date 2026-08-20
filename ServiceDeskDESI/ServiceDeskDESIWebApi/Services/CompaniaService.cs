@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
 using System;
+using System.Collections.Generic;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -15,7 +16,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerCompanias(string usuario)
+        public ModelResponse<List<Compania>> ObtenerCompanias(string usuario)
         {
             try
             {
@@ -26,16 +27,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerCompanias para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<Compania>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CompaniaService.ObtenerCompanias para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener las compañías." };
+                return new ModelResponse<List<Compania>> { IsSuccess = false, Message = "Ocurrió un error al obtener las compañías." };
             }
         }
 
-        public ModelResponse ObtenerCompaniaPorId(long id, string usuario)
+        public ModelResponse<Compania> ObtenerCompaniaPorId(long id, string usuario)
         {
             try
             {
@@ -47,16 +48,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerCompaniaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Compania> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CompaniaService.ObtenerCompaniaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener la compañía." };
+                return new ModelResponse<Compania> { IsSuccess = false, Message = "Ocurrió un error al obtener la compañía." };
             }
         }
 
-        public ModelResponse GuardarOActualizarCompania(Compania compania, string usuario)
+        public ModelResponse<Compania> GuardarOActualizarCompania(Compania compania, string usuario)
         {
             try
             {
@@ -73,12 +74,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarCompania para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Compania> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CompaniaService.GuardarOActualizarCompania para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar la compañía." };
+                return new ModelResponse<Compania> { IsSuccess = false, Message = "Ocurrió un error al guardar la compañía." };
             }
         }
 

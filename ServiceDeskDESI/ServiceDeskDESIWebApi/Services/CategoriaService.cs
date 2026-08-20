@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
 using System;
+using System.Collections.Generic;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -15,7 +16,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerCategorias(string usuario)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategorias(string usuario)
         {
             try
             {
@@ -26,12 +27,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerCategorias para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<CategoriaDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CategoriaService.ObtenerCategorias para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<CategoriaDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener las categorías."
@@ -39,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerCategoriasPorArea(long areaId, string usuario)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategoriasPorArea(long areaId, string usuario)
         {
             try
             {
@@ -51,12 +52,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerCategoriasPorArea para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<CategoriaDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CategoriaService.ObtenerCategoriasPorArea para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<CategoriaDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener las categorías por área."
@@ -64,7 +65,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerCategoriaPorId(long id, string usuario)
+        public ModelResponse<CategoriaDTO> ObtenerCategoriaPorId(long id, string usuario)
         {
             try
             {
@@ -76,12 +77,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerCategoriaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<CategoriaDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CategoriaService.ObtenerCategoriaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<CategoriaDTO>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener la categoría."
@@ -89,7 +90,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerCategoriasPorPadre(long categoriaPadreId, string usuario)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategoriasPorPadre(long categoriaPadreId, string usuario)
         {
             try
             {
@@ -101,12 +102,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerCategoriasPorPadre para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<CategoriaDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CategoriaService.ObtenerCategoriasPorPadre para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<CategoriaDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener las subcategorías."
@@ -114,15 +115,15 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse GuardarOActualizarCategoria(Categoria categoria, string usuario)
+        public ModelResponse<Categoria> GuardarOActualizarCategoria(Categoria categoria, string usuario)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(categoria.Nombre)) { throw new ArgumentException("El nombre de la categoría es requerido."); }
                 if (categoria.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
                 if (categoria.Descripcion != null && categoria.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
-                if (categoria.Area == null || categoria.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (categoria.CategoriaPadre != null && categoria.CategoriaPadre.Id == categoria.Id) { throw new ArgumentException("La categoría no puede ser padre de sí misma."); }
+                if (categoria.AreaId <= 0) { throw new ArgumentException("El área es requerida."); }
+                if (categoria.CategoriaPadreId != null && categoria.CategoriaPadreId == categoria.Id) { throw new ArgumentException("La categoría no puede ser padre de sí misma."); }
                 if (string.IsNullOrWhiteSpace(categoria.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -131,12 +132,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarCategoria para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Categoria> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en CategoriaService.GuardarOActualizarCategoria para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<Categoria>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al guardar la categoría."

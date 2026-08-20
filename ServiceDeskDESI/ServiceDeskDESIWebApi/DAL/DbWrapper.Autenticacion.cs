@@ -1,6 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,41 +13,25 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerUsuarios(string usuario)
+        public ModelResponse<List<UsuarioDTO>> ObtenerUsuarios(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<UsuarioDTO>>();
 
             try
             {
                 var usuarios = GetObjects("ObtenerUsuarios", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
-                    new Func<IDataReader, Usuario>((reader) =>
+                    new Func<IDataReader, UsuarioDTO>((reader) =>
                     {
-                        var u = LlenarEntidad<Usuario>(reader);
+                        var u = LlenarEntidad<UsuarioDTO>(reader);
 
-                        u.Sucursal = new Sucursal()
-                        {
-                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
-                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
-                        };
-
-                        u.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        u.Empresa = new Empresa()
-                        {
-                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
-                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
-                        };
+                        u.Contrasena = null;
 
                         return u;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = usuarios;
+                modelResponse.Response = usuarios.ToList();
                 modelResponse.Message = "Usuarios obtenidos correctamente";
             }
             catch (Exception ex)
@@ -59,9 +44,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerUsuarioPorId(long id, string usuario)
+        public ModelResponse<UsuarioDTO> ObtenerUsuarioPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioDTO>();
 
             try
             {
@@ -70,27 +55,11 @@ namespace ServiceDeskDESIWebApi.DAL
                         new SqlParameter("@Id", id),
                         new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Usuario>((reader) =>
+                    new Func<IDataReader, UsuarioDTO>((reader) =>
                     {
-                        var user = LlenarEntidad<Usuario>(reader);
+                        var user = LlenarEntidad<UsuarioDTO>(reader);
 
-                        user.Sucursal = new Sucursal()
-                        {
-                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
-                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
-                        };
-
-                        user.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        user.Empresa = new Empresa()
-                        {
-                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
-                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
-                        };
+                        user.Contrasena = null;
 
                         return user;
                     }));
@@ -116,37 +85,22 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerUsuarioPorNombreUsuario(string nombreUsuario)
+        public ModelResponse<UsuarioDTO> ObtenerUsuarioPorNombreUsuario(string nombreUsuario, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioDTO>();
 
             try
             {
                 var u = GetObject("ObtenerUsuarioPorNombreUsuario", CommandType.StoredProcedure,
                     new[] {
-                        new SqlParameter("@NombreUsuario", nombreUsuario)
+                        new SqlParameter("@NombreUsuario", nombreUsuario),
+                        new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Usuario>((reader) =>
+                    new Func<IDataReader, UsuarioDTO>((reader) =>
                     {
-                        var user = LlenarEntidad<Usuario>(reader);
+                        var user = LlenarEntidad<UsuarioDTO>(reader);
 
-                        user.Sucursal = new Sucursal()
-                        {
-                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
-                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
-                        };
-
-                        user.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        user.Empresa = new Empresa()
-                        {
-                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
-                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
-                        };
+                        user.Contrasena = null;
 
                         return user;
                     }));
@@ -172,35 +126,19 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerUsuarioPorCorreo(string correo)
+        public ModelResponse<UsuarioDTO> ObtenerUsuarioPorCorreo(string correo)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioDTO>();
 
             try
             {
                 var usuario = GetObject("ObtenerUsuarioPorCorreo", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Correo", correo) },
-                    new Func<IDataReader, Usuario>((reader) =>
+                    new Func<IDataReader, UsuarioDTO>((reader) =>
                     {
-                        var u = LlenarEntidad<Usuario>(reader);
+                        var u = LlenarEntidad<UsuarioDTO>(reader);
 
-                        u.Sucursal = new Sucursal()
-                        {
-                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
-                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"])
-                        };
-
-                        u.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        u.Empresa = new Empresa()
-                        {
-                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
-                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombre"])
-                        };
+                        u.Contrasena = null;
 
                         return u;
                     }));
@@ -219,9 +157,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarUsuario(Usuario u)
+        public ModelResponse<Usuario> GuardarOActualizarUsuario(Usuario u)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Usuario>();
 
             try
             {
@@ -240,11 +178,11 @@ namespace ServiceDeskDESIWebApi.DAL
                     u.ModificadoPor,
                     u.FechaModificacion,
                     u.Estatus,
-                    SucursalId = u.Sucursal.Id,
+                    u.SucursalId,
                     u.Firma,
                     u.RFC,
-                    AreaId = u.Area.Id,
-                    EmpresaId = u.Empresa.Id
+                    u.AreaId,
+                    u.EmpresaId
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
@@ -273,9 +211,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarUsuarioAdmin(Usuario usuario, string usuarioAdmin)
+        public ModelResponse<Usuario> GuardarOActualizarUsuarioAdmin(Usuario usuario, string usuarioAdmin)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Usuario>();
 
             try
             {
@@ -294,11 +232,11 @@ namespace ServiceDeskDESIWebApi.DAL
                     usuario.ModificadoPor,
                     usuario.FechaModificacion,
                     usuario.Estatus,
-                    SucursalId = usuario.Sucursal.Id,
+                    usuario.SucursalId,
                     usuario.Firma,
                     usuario.RFC,
-                    AreaId = usuario.Area.Id,
-                    EmpresaId = usuario.Empresa.Id,
+                    usuario.AreaId,
+                    usuario.EmpresaId,
                     UsuarioAdmin = usuarioAdmin
                 };
 
@@ -343,9 +281,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ActualizarPerfilUsuario(Usuario usuario, string usuarioAutenticado)
+        public ModelResponse<Usuario> ActualizarPerfilUsuario(Usuario usuario, string usuarioAutenticado)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Usuario>();
 
             try
             {
@@ -361,11 +299,11 @@ namespace ServiceDeskDESIWebApi.DAL
                     usuario.ModificadoPor,
                     usuario.FechaModificacion,
                     usuario.Estatus,
-                    SucursalId = usuario.Sucursal.Id,
+                    usuario.SucursalId,
                     usuario.Firma,
                     usuario.RFC,
-                    AreaId = usuario.Area.Id,
-                    EmpresaId = usuario.Empresa.Id,
+                    usuario.AreaId,
+                    usuario.EmpresaId,
                     Usuario = usuarioAutenticado
                 };
 
@@ -419,63 +357,33 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse AutenticarUsuario(string nombreUsuario, string contrasena)
+        public ModelResponse<UsuarioDTO> AutenticarUsuario(string nombreUsuario, string contrasena)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioDTO>();
 
             try
             {
                 var usuario = GetObject("AutenticarUsuario", CommandType.StoredProcedure,
                     new[] {
-                        new SqlParameter("@NombreUsuario", nombreUsuario),
-                        new SqlParameter("@Contrasena", contrasena)
+                        new SqlParameter("@NombreUsuario", nombreUsuario)
                     },
-                    new Func<IDataReader, Usuario>((reader) =>
+                    new Func<IDataReader, UsuarioDTO>((reader) =>
                     {
-                        var u = LlenarEntidad<Usuario>(reader);
-
-                        u.Sucursal = new Sucursal()
-                        {
-                            Id = MapearPorpiedades<long>(reader["SucursalId"]),
-                            Nombre = MapearPorpiedades<string>(reader["SucursalNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["SucursalDescripcion"]),
-                            Calle = MapearPorpiedades<string>(reader["Calle"]),
-                            Ciudad = MapearPorpiedades<string>(reader["Ciudad"]),
-                            Colonia = MapearPorpiedades<string>(reader["Colonia"]),
-                            CodigoPostal = MapearPorpiedades<string>(reader["CodigoPostal"])
-                        };
-
-                        u.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["AreaDescripcion"]),
-                            Correo = MapearPorpiedades<string>(reader["AreaCorreo"])
-                        };
-
-                        u.Empresa = new Empresa()
-                        {
-                            Id = MapearPorpiedades<long>(reader["EmpresaId"]),
-                            NombreComercial = MapearPorpiedades<string>(reader["EmpresaNombreComercial"]),
-                            RazonSocial = MapearPorpiedades<string>(reader["EmpresaRazonSocial"]),
-                            RFC = MapearPorpiedades<string>(reader["EmpresaRFC"]),
-                            Responsable = MapearPorpiedades<string>(reader["EmpresaResponsable"]),
-                            Direccion = MapearPorpiedades<string>(reader["EmpresaDireccion"]),
-                            Ciudad = MapearPorpiedades<string>(reader["EmpresaCiudad"]),
-                            Estado = MapearPorpiedades<string>(reader["EmpresaEstado"]),
-                            CodigoPostal = MapearPorpiedades<string>(reader["EmpresaCodigoPostal"]),
-                            Telefono = MapearPorpiedades<string>(reader["EmpresaTelefono"]),
-                            CorreoContacto = MapearPorpiedades<string>(reader["EmpresaCorreoContacto"]),
-                            FechaVigenciaInicio = MapearPorpiedades<DateTime>(reader["FechaVigenciaInicio"]),
-                            FechaVigenciaFin = MapearPorpiedades<DateTime>(reader["FechaVigenciaFin"]),
-                            EsPeriodoPrueba = MapearPorpiedades<bool>(reader["EsPeriodoPrueba"])
-                        };
-
+                        var u = LlenarEntidad<UsuarioDTO>(reader);
                         return u;
                     }));
 
-                if (usuario != null)
+                if (usuario != null && Cryptography.VerifyPassword(contrasena, usuario.Contrasena))
                 {
+                    // Enforce trial: si la empresa está en periodo de prueba y ya venció, se bloquea el acceso.
+                    if (usuario.EsPeriodoPrueba == true && usuario.FechaVigenciaFin.HasValue && usuario.FechaVigenciaFin.Value < DateTime.Now)
+                    {
+                        modelResponse.IsSuccess = false;
+                        modelResponse.Message = "El periodo de prueba de su empresa ha expirado. Contacte al administrador.";
+                        return modelResponse;
+                    }
+
+                    usuario.Contrasena = null; // no exponer el hash/ciphertext en la respuesta
                     modelResponse.IsSuccess = true;
                     modelResponse.Response = usuario;
                 }
@@ -524,29 +432,15 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerTokenRecuperacion(string token)
+        public ModelResponse<TokenRecuperacionDTO> ObtenerTokenRecuperacion(string token)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<TokenRecuperacionDTO>();
 
             try
             {
                 var result = GetObject("ObtenerTokenRecuperacion", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Token", token) },
-                    new Func<IDataReader, dynamic>((reader) =>
-                    {
-                        return new
-                        {
-                            Id = MapearPorpiedades<long>(reader["Id"]),
-                            UsuarioId = MapearPorpiedades<long>(reader["UsuarioId"]),
-                            Token = MapearPorpiedades<string>(reader["Token"]),
-                            FechaExpiracion = MapearPorpiedades<DateTime>(reader["FechaExpiracion"]),
-                            Usado = MapearPorpiedades<bool>(reader["Usado"]),
-                            Nombre = MapearPorpiedades<string>(reader["Nombre"]),
-                            Apellido = MapearPorpiedades<string>(reader["Apellido"]),
-                            Correo = MapearPorpiedades<string>(reader["Correo"]),
-                            NombreUsuario = MapearPorpiedades<string>(reader["NombreUsuario"])
-                        };
-                    }));
+                    new Func<IDataReader, TokenRecuperacionDTO>(r => LlenarEntidad<TokenRecuperacionDTO>(r)));
 
                 if (result == null)
                 {

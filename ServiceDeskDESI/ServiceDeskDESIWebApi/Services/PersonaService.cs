@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
 using System;
+using System.Collections.Generic;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -15,7 +16,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerTodasLasPersonas(string usuario)
+        public ModelResponse<List<PersonaDTO>> ObtenerTodasLasPersonas(string usuario)
         {
             try
             {
@@ -26,16 +27,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTodasLasPersonas para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<PersonaDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en PersonaService.ObtenerTodasLasPersonas para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener las personas." };
+                return new ModelResponse<List<PersonaDTO>> { IsSuccess = false, Message = "Ocurrió un error al obtener las personas." };
             }
         }
 
-        public ModelResponse ObtenerPersonaPorId(long id, string usuario)
+        public ModelResponse<PersonaDTO> ObtenerPersonaPorId(long id, string usuario)
         {
             try
             {
@@ -47,16 +48,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerPersonaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<PersonaDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en PersonaService.ObtenerPersonaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener la persona." };
+                return new ModelResponse<PersonaDTO> { IsSuccess = false, Message = "Ocurrió un error al obtener la persona." };
             }
         }
 
-        public ModelResponse GuardarOActualizarPersona(Persona persona, string usuario)
+        public ModelResponse<Persona> GuardarOActualizarPersona(Persona persona, string usuario)
         {
             try
             {
@@ -66,7 +67,7 @@ namespace ServiceDeskDESIWebApi.Services
                 if (persona.Apellido.Length > 250) { throw new ArgumentException("El apellido no puede exceder los 250 caracteres."); }
                 if (persona.Correo != null && persona.Correo.Length > 250) { throw new ArgumentException("El correo no puede exceder los 250 caracteres."); }
                 if (persona.Telefono != null && persona.Telefono.Length > 50) { throw new ArgumentException("El teléfono no puede exceder los 50 caracteres."); }
-                if (persona.Puesto == null || persona.Puesto.Id <= 0) { throw new ArgumentException("El puesto es requerido."); }
+                if (persona.PuestoId <= 0) { throw new ArgumentException("El puesto es requerido."); }
                 if (string.IsNullOrWhiteSpace(persona.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -75,12 +76,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarPersona para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Persona> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en PersonaService.GuardarOActualizarPersona para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar la persona." };
+                return new ModelResponse<Persona> { IsSuccess = false, Message = "Ocurrió un error al guardar la persona." };
             }
         }
 

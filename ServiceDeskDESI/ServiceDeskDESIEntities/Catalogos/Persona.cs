@@ -14,7 +14,7 @@ namespace ServiceDeskDESIEntities.Catalogos
 
         public string Correo { get; set; }
         public string Telefono { get; set; }
-        public Puesto Puesto { get; set; }
+        public long PuestoId { get; set; }
 
     }
 }

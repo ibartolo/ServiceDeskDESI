@@ -10,9 +10,9 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerPaginasPorUsuario(string usuario)
+        public ModelResponse<List<Pagina>> ObtenerPaginasPorUsuario(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Pagina>>();
 
             try
             {
@@ -25,7 +25,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = paginas;
+                modelResponse.Response = paginas.ToList();
                 modelResponse.Message = "Páginas obtenidas correctamente";
             }
             catch (Exception ex)
@@ -38,37 +38,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ValidarAccesoPagina(string usuario, string direccion)
+        public ModelResponse<Pagina> ObtenerPaginaPorNombre(string nombre)
         {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var resultado = ExecuteScalar("ValidarAccesoPagina", CommandType.StoredProcedure, new SqlParameter[]
-                {
-                    new SqlParameter("@Usuario", usuario),
-                    new SqlParameter("@Direccion", direccion)
-                });
-
-                var tieneAcceso = Convert.ToInt32(resultado) == 1;
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = tieneAcceso;
-                modelResponse.Message = tieneAcceso ? "Acceso permitido" : "Acceso denegado";
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error al validar acceso para usuario {Usuario} a {Direccion}", usuario, direccion);
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al validar el acceso";
-            }
-
-            return modelResponse;
-        }
-
-        public ModelResponse ObtenerPaginaPorNombre(string nombre)
-        {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Pagina>();
 
             try
             {
@@ -101,9 +73,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerPaginas()
+        public ModelResponse<List<Pagina>> ObtenerPaginas()
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Pagina>>();
 
             try
             {
@@ -115,7 +87,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = paginas;
+                modelResponse.Response = paginas.ToList();
                 modelResponse.Message = "Páginas obtenidas correctamente.";
             }
             catch (Exception ex)

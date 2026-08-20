@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de puestos</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerTodosLosPuestos()
+        public ModelResponse<List<Puesto>> ObtenerTodosLosPuestos()
         {
             var usuario = User.Identity.Name;
             var result = _puestoService.ObtenerTodosLosPuestos(usuario);
@@ -39,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del puesto</param>
         /// <returns>Puesto encontrado</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerPuestoPorId(long id)
+        public ModelResponse<Puesto> ObtenerPuestoPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _puestoService.ObtenerPuestoPorId(id, usuario);
@@ -51,8 +52,9 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="puesto">Objeto puesto con los datos</param>
         /// <returns>Puesto guardado con su ID actualizado</returns>
+        [Permiso("Tipped")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarPuesto(Puesto puesto)
+        public ModelResponse<Puesto> GuardarOActualizarPuesto(Puesto puesto)
         {
             var usuario = User.Identity.Name;
             var result = _puestoService.GuardarOActualizarPuesto(puesto, usuario);
@@ -64,6 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="puesto">Puesto a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Tipped", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarPuesto(Puesto puesto)
         {

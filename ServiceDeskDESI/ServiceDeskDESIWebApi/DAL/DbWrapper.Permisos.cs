@@ -161,9 +161,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerPermisosPorUsuario(string nombreUsuario)
+        public ModelResponse<List<PermisosViewModel>> ObtenerPermisosPorUsuario(string nombreUsuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<PermisosViewModel>>();
 
             try
             {
@@ -176,23 +176,10 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 var permisos = GetObjects("ObtenerPermisosPorUsuario", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@NombreUsuario", nombreUsuario) },
-                    new Func<IDataReader, dynamic>((reader) =>
-                    {
-                        return new
-                        {
-                            PaginaId = MapearPorpiedades<long>(reader["PaginaId"]),
-                            PaginaNombre = MapearPorpiedades<string>(reader["PaginaNombre"]),
-                            Direccion = MapearPorpiedades<string>(reader["Direccion"]),
-                            PuedeLeer = Convert.ToInt32(reader["PuedeLeer"]) == 1,
-                            PuedeCrear = Convert.ToInt32(reader["PuedeCrear"]) == 1,
-                            PuedeEditar = Convert.ToInt32(reader["PuedeEditar"]) == 1,
-                            PuedeEliminar = Convert.ToInt32(reader["PuedeEliminar"]) == 1,
-                            PuedeExportar = Convert.ToInt32(reader["PuedeExportar"]) == 1
-                        };
-                    }));
+                    new Func<IDataReader, PermisosViewModel>(r => LlenarEntidad<PermisosViewModel>(r)));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = permisos;
+                modelResponse.Response = permisos.ToList();
                 modelResponse.Message = "Permisos obtenidos correctamente.";
             }
             catch (Exception ex)
@@ -205,9 +192,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ValidarPermisoUsuario(long usuarioId, long paginaId, string accion)
+        public ModelResponse<bool> ValidarPermisoUsuario(long usuarioId, long paginaId, string accion)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<bool>();
 
             try
             {
@@ -250,9 +237,9 @@ namespace ServiceDeskDESIWebApi.DAL
         // DbWrapper.Permisos.cs - ObtenerPermisosPorRol y GuardarPermisosRol
         // =========================================
 
-        public ModelResponse ObtenerPermisosPorRol(long rolId, string usuario)
+        public ModelResponse<List<RolPaginaAccionDTO>> ObtenerPermisosPorRol(long rolId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<RolPaginaAccionDTO>>();
 
             try
             {
@@ -261,30 +248,10 @@ namespace ServiceDeskDESIWebApi.DAL
                 new SqlParameter("@RolId", rolId),
                 new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, dynamic>((reader) =>
-                    {
-                        return new
-                        {
-                            Id = MapearPorpiedades<long>(reader["Id"]),
-                            RolId = MapearPorpiedades<long>(reader["RolId"]),
-                            PaginaId = MapearPorpiedades<long>(reader["PaginaId"]),
-                            PaginaNombre = MapearPorpiedades<string>(reader["PaginaNombre"]),
-                            Direccion = MapearPorpiedades<string>(reader["Direccion"]),
-                            PuedeLeer = Convert.ToInt32(reader["PuedeLeer"]) == 1,
-                            PuedeCrear = Convert.ToInt32(reader["PuedeCrear"]) == 1,
-                            PuedeEditar = Convert.ToInt32(reader["PuedeEditar"]) == 1,
-                            PuedeEliminar = Convert.ToInt32(reader["PuedeEliminar"]) == 1,
-                            PuedeExportar = Convert.ToInt32(reader["PuedeExportar"]) == 1,
-                            CreadoPor = MapearPorpiedades<string>(reader["CreadoPor"]),
-                            FechaCreacion = MapearPorpiedades<DateTime>(reader["FechaCreacion"]),
-                            ModificadoPor = MapearPorpiedades<string>(reader["ModificadoPor"]),
-                            FechaModificacion = MapearPorpiedades<DateTime?>(reader["FechaModificacion"]),
-                            Estatus = MapearPorpiedades<bool>(reader["Estatus"])
-                        };
-                    }));
+                    new Func<IDataReader, RolPaginaAccionDTO>(r => LlenarEntidad<RolPaginaAccionDTO>(r)));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = permisos;
+                modelResponse.Response = permisos.ToList();
                 modelResponse.Message = "Permisos obtenidos correctamente.";
             }
             catch (Exception ex)
@@ -339,62 +306,58 @@ namespace ServiceDeskDESIWebApi.DAL
 
             try
             {
-                using (var scope = new System.Transactions.TransactionScope(
-                    System.Transactions.TransactionScopeOption.Required,
-                    new System.Transactions.TransactionOptions
-                    {
-                        IsolationLevel = System.Transactions.IsolationLevel.ReadCommitted,
-                        Timeout = TimeSpan.FromMinutes(2)
-                    }))
+                // Transacción sobre una única conexión (evita escalación a MSDTC).
+                BeginTransaction();
+
+                // 1. Eliminar permisos existentes
+                var resultadoEliminar = ExecuteScalar("EliminarPermisosRol", CommandType.StoredProcedure, new SqlParameter[]
                 {
-                    // 1. Eliminar permisos existentes
-                    var resultadoEliminar = ExecuteScalar("EliminarPermisosRol", CommandType.StoredProcedure, new SqlParameter[]
-                    {
-                new SqlParameter("@RolId", rolId),
-                new SqlParameter("@Usuario", usuario)
-                    });
+            new SqlParameter("@RolId", rolId),
+            new SqlParameter("@Usuario", usuario)
+                });
 
-                    if (Convert.ToInt32(resultadoEliminar) < 0)
-                    {
-                        modelResponse.IsSuccess = false;
-                        modelResponse.Message = "No tiene permisos para modificar este rol.";
-                        return modelResponse;
-                    }
+                if (Convert.ToInt32(resultadoEliminar) < 0)
+                {
+                    RollbackTransaction();
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para modificar este rol.";
+                    return modelResponse;
+                }
 
-                    // 2. Insertar nuevos permisos
-                    if (permisos != null && permisos.Any())
+                // 2. Insertar nuevos permisos
+                if (permisos != null && permisos.Any())
+                {
+                    foreach (var permiso in permisos)
                     {
-                        foreach (var permiso in permisos)
+                        var resultado = ExecuteScalar("GuardarPermisosRol", CommandType.StoredProcedure, new SqlParameter[]
                         {
-                            var resultado = ExecuteScalar("GuardarPermisosRol", CommandType.StoredProcedure, new SqlParameter[]
-                            {
-                        new SqlParameter("@RolId", rolId),
-                        new SqlParameter("@PaginaId", permiso.PaginaId),
-                        new SqlParameter("@PuedeLeer", permiso.PuedeLeer),
-                        new SqlParameter("@PuedeCrear", permiso.PuedeCrear),
-                        new SqlParameter("@PuedeEditar", permiso.PuedeEditar),
-                        new SqlParameter("@PuedeEliminar", permiso.PuedeEliminar),
-                        new SqlParameter("@PuedeExportar", permiso.PuedeExportar),
-                        new SqlParameter("@ModificadoPor", usuario),
-                        new SqlParameter("@Usuario", usuario)
-                            });
+                    new SqlParameter("@RolId", rolId),
+                    new SqlParameter("@PaginaId", permiso.PaginaId),
+                    new SqlParameter("@PuedeLeer", permiso.PuedeLeer),
+                    new SqlParameter("@PuedeCrear", permiso.PuedeCrear),
+                    new SqlParameter("@PuedeEditar", permiso.PuedeEditar),
+                    new SqlParameter("@PuedeEliminar", permiso.PuedeEliminar),
+                    new SqlParameter("@PuedeExportar", permiso.PuedeExportar),
+                    new SqlParameter("@ModificadoPor", usuario),
+                    new SqlParameter("@Usuario", usuario)
+                        });
 
-                            if (Convert.ToInt64(resultado) == 0)
-                            {
-                                throw new Exception($"Error al guardar permiso para página {permiso.PaginaId}");
-                            }
+                        if (Convert.ToInt64(resultado) == 0)
+                        {
+                            throw new Exception($"Error al guardar permiso para página {permiso.PaginaId}");
                         }
                     }
-
-                    // 3. Confirmar transacción
-                    scope.Complete();
-
-                    modelResponse.IsSuccess = true;
-                    modelResponse.Message = "Permisos guardados correctamente.";
                 }
+
+                // 3. Confirmar transacción
+                CommitTransaction();
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Message = "Permisos guardados correctamente.";
             }
             catch (Exception ex)
             {
+                RollbackTransaction();
                 Log.Error(ex, "Error al guardar permisos masivos para rol {RolId} y usuario {Usuario}", rolId, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar los permisos.";

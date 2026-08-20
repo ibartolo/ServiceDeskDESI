@@ -5,17 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
-    [Autenticated]
     public class PermissionsController : BaseController
     {
         private readonly PermisosService _permisosService;
-        public PermissionsController(PermisosService permisosService)
+        public PermissionsController()
         {
-            _permisosService = permisosService;
+            _permisosService = new PermisosService(httpClientConnection);
         }
         public async Task<string> ConsultarPermisosUsuario()
         {

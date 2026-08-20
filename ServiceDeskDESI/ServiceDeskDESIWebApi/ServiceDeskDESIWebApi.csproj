@@ -227,6 +227,7 @@
     <Compile Include="Controllers\PuestoController.cs" />
     <Compile Include="Controllers\TipoActivoController.cs" />
     <Compile Include="Controllers\UsuarioPaginaController.cs" />
+    <Compile Include="Filters\PermisoAttribute.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Activo.cs" />
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />

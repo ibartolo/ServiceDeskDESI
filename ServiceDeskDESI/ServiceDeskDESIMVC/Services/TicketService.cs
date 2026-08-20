@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIMVC.DAL;
@@ -17,17 +18,17 @@ namespace ServiceDeskDESIMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse> ObtenerTickets()
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTickets()
         {
             return await _httpClient.ObtenerTickets();
         }
 
-        public async Task<ModelResponse> ObtenerTicketPorId(long id)
+        public async Task<ModelResponse<TicketDTO>> ObtenerTicketPorId(long id)
         {
             return await _httpClient.ObtenerTicketPorId(id);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarTicket(Ticket ticket)
+        public async Task<ModelResponse<Ticket>> GuardarOActualizarTicket(Ticket ticket)
         {
             return await _httpClient.GuardarOActualizarTicket(ticket);
         }
@@ -37,27 +38,27 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarTicket(ticket);
         }
 
-        public async Task<ModelResponse> ObtenerTicketsPorArea(long areaId)
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTicketsPorArea(long areaId)
         {
             return await _httpClient.ObtenerTicketsPorArea(areaId);
         }
 
-        public async Task<ModelResponse> ObtenerTicketsPorUsuario(string creadoPor)
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTicketsPorUsuario(string creadoPor)
         {
             return await _httpClient.ObtenerTicketsPorUsuario(creadoPor);
         }
 
-        public async Task<ModelResponse> ObtenerTicketsPorUrgencia(int urgencia)
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTicketsPorUrgencia(int urgencia)
         {
             return await _httpClient.ObtenerTicketsPorUrgencia(urgencia);
         }
 
-        public async Task<ModelResponse> ObtenerTicketsPorEstatus(int ticketEstatusId)
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTicketsPorEstatus(int ticketEstatusId)
         {
             return await _httpClient.ObtenerTicketsPorEstatus(ticketEstatusId);
         }
 
-        public async Task<ModelResponse> ObtenerTicketEstatus()
+        public async Task<ModelResponse<List<TicketEstatus>>> ObtenerTicketEstatus()
         {
             return await _httpClient.ObtenerTicketEstatus();
         }
@@ -67,8 +68,7 @@ namespace ServiceDeskDESIMVC.Services
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();
             if (permisosResponse.IsSuccess && permisosResponse.Response != null)
             {
-                var listaPermisos = JsonConvert.DeserializeObject<List<PermisosViewModel>>(permisosResponse.Response.ToString());
-                return listaPermisos.FirstOrDefault(p => p.PaginaNombre == "Tickets");
+                return permisosResponse.Response.FirstOrDefault(p => p.PaginaNombre == "Tickets");
             }
             return null;
         }

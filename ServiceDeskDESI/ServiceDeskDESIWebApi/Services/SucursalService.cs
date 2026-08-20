@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
 using System;
+using System.Collections.Generic;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -15,7 +16,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerSucursales(string usuario)
+        public ModelResponse<List<Sucursal>> ObtenerSucursales(string usuario)
         {
             try
             {
@@ -26,12 +27,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerSucursales para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<Sucursal>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en SucursalService.ObtenerSucursales para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<Sucursal>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener las sucursales."
@@ -39,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerSucursalPorId(long id, string usuario)
+        public ModelResponse<Sucursal> ObtenerSucursalPorId(long id, string usuario)
         {
             try
             {
@@ -51,12 +52,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerSucursalPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Sucursal> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en SucursalService.ObtenerSucursalPorId para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<Sucursal>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener la sucursal."
@@ -64,7 +65,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse GuardarOActualizarSucursal(Sucursal sucursal, string usuario)
+        public ModelResponse<Sucursal> GuardarOActualizarSucursal(Sucursal sucursal, string usuario)
         {
             try
             {
@@ -83,12 +84,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarSucursal para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Sucursal> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en SucursalService.GuardarOActualizarSucursal para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<Sucursal>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al guardar la sucursal."

@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <returns>Lista de compañías</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerCompanias()
+        public ModelResponse<List<Compania>> ObtenerCompanias()
         {
             var usuario = User.Identity.Name;
             var result = _companiaService.ObtenerCompanias(usuario);
@@ -39,7 +40,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID de la compañía</param>
         /// <returns>Compañía encontrada</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerCompaniaPorId(long id)
+        public ModelResponse<Compania> ObtenerCompaniaPorId(long id)
         {
             var usuario = User.Identity.Name;
             var result = _companiaService.ObtenerCompaniaPorId(id, usuario);
@@ -51,8 +52,9 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="compania">Objeto compañía con los datos</param>
         /// <returns>Compañía guardada con su ID actualizado</returns>
+        [Permiso("Compañías")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarCompania(Compania compania)
+        public ModelResponse<Compania> GuardarOActualizarCompania(Compania compania)
         {
             var usuario = User.Identity.Name;
             var result = _companiaService.GuardarOActualizarCompania(compania, usuario);
@@ -64,6 +66,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="compania">Compañía a eliminar (debe incluir Id y ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Compañías", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarCompania(Compania compania)
         {

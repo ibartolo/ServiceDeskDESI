@@ -24,12 +24,6 @@ namespace ServiceDeskDESIMVC.Controllers
             httpClientConnection = new HttpClientConnection();
             mr = new ModelResponse();
             tokenCookie = SessionHelper.GetSessionUser();
-
-            if (tokenCookie?.Token?.ExpirationDate <= DateTime.Now)
-            {
-                SessionHelper.CloseSession();
-                Redirect("~/Home/Autenticacion");
-            }
         }
         public List<SelectListItem> MappingPropertiToDropDownList<T>(IEnumerable<T> items, string value, string title, string prefix = "")
         {

@@ -17,7 +17,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerModelos(string usuario)
+        public ModelResponse<List<ModeloDTO>> ObtenerModelos(string usuario)
         {
             try
             {
@@ -28,16 +28,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerModelos para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<ModeloDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ModeloService.ObtenerModelos para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los modelos." };
+                return new ModelResponse<List<ModeloDTO>> { IsSuccess = false, Message = "Ocurrió un error al obtener los modelos." };
             }
         }
 
-        public ModelResponse ObtenerModeloPorId(long id, string usuario)
+        public ModelResponse<ModeloDTO> ObtenerModeloPorId(long id, string usuario)
         {
             try
             {
@@ -49,16 +49,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerModeloPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<ModeloDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ModeloService.ObtenerModeloPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el modelo." };
+                return new ModelResponse<ModeloDTO> { IsSuccess = false, Message = "Ocurrió un error al obtener el modelo." };
             }
         }
 
-        public ModelResponse GuardarOActualizarModelo(Modelo modelo, string usuario)
+        public ModelResponse<Modelo> GuardarOActualizarModelo(Modelo modelo, string usuario)
         {
             try
             {
@@ -74,12 +74,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarModelo para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Modelo> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ModeloService.GuardarOActualizarModelo para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar el modelo." };
+                return new ModelResponse<Modelo> { IsSuccess = false, Message = "Ocurrió un error al guardar el modelo." };
             }
         }
 
@@ -105,7 +105,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerModelosPorMarcaId(long marcaId, string usuario)
+        public ModelResponse<List<Modelo>> ObtenerModelosPorMarcaId(long marcaId, string usuario)
         {
             try
             {
@@ -117,12 +117,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerModelosPorMarcaId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<Modelo>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en ModeloService.ObtenerModelosPorMarcaId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener los modelos por marca." };
+                return new ModelResponse<List<Modelo>> { IsSuccess = false, Message = "Ocurrió un error al obtener los modelos por marca." };
             }
         }
     }

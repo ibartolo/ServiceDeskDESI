@@ -1,4 +1,4 @@
-﻿﻿@model ServiceDeskDESIEntities.Autenticacion.Usuario
+﻿@model ServiceDeskDESIEntities.Autenticacion.Usuario
 @{
     ViewBag.Title = "Mi Perfil";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -6,15 +6,6 @@
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
-
-<!-- Modal para cambio de contraseña -->
-<div class="modal fade" id="modalChangePass" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content" id="partialChangePass">
-            <!-- Aquí se cargará la vista parcial -->
-        </div>
-    </div>
-</div>
 
 <div class="form-section">
     @if (ViewBag.ErrorMessage != null)
@@ -37,7 +28,7 @@
         @Html.HiddenFor(x => x.FechaModificacion)
         @Html.HiddenFor(x => x.Estatus)
         @Html.HiddenFor(x => x.Contrasena)
-        @Html.HiddenFor(x => x.Empresa.Id)
+        @Html.HiddenFor(x => x.EmpresaId)
 
         <div class="row">
             <div class="col-md-6">
@@ -88,13 +79,13 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Sucursal:</label>
-                    @Html.DropDownListFor(x => x.Sucursal.Id, new SelectList(ViewBag.Sucursales, "Id", "Nombre"), "Seleccione una sucursal", new { @class = "form-control" })
+                    @Html.DropDownListFor(x => x.SucursalId, new SelectList(ViewBag.Sucursales, "Id", "Nombre"), "Seleccione una sucursal", new { @class = "form-control" })
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Área:</label>
-                    @Html.DropDownListFor(x => x.Area.Id, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control" })
+                    @Html.DropDownListFor(x => x.AreaId, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control" })
                 </div>
             </div>
         </div>
@@ -127,16 +118,6 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <button type="button" class="btn btn-outline-info" onclick="AbrirModalCambioPass()">
-                        <i class="fas fa-key"></i> Cambiar contraseña
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="mb-3">
                     <input type="button" value="Guardar cambios" class="btn btn-success" onclick="GuardarPerfil()" />
                     <a href="/Home/Index" class="btn btn-warning">Cancelar</a>
                 </div>
@@ -147,11 +128,6 @@
 
 <script>
     var perfilTemp = '@Model.ImagenPerfil';
-    function AbrirModalCambioPass() {
-        $('#partialChangePass').empty().load('/User/PartialChangePass', function () {
-            $('#modalChangePass').modal('show');
-        });
-    }
 
     $(function () {
         $("#frmPerfil").validate({
@@ -222,8 +198,8 @@
             parameters.push({ Name: "Apellido", Value: $("#Apellido").val() });
             parameters.push({ Name: "Celular", Value: $("#Celular").val() });
             parameters.push({ Name: "RFC", Value: $("#RFC").val() });
-            parameters.push({ Name: "Sucursal.Id", Value: $("#Sucursal_Id").val() });
-            parameters.push({ Name: "Area.Id", Value: $("#Area_Id").val() });
+            parameters.push({ Name: "SucursalId", Value: $("#SucursalId").val() });
+            parameters.push({ Name: "AreaId", Value: $("#AreaId").val() });
             parameters.push({ Name: "CreadoPor", Value: $("#CreadoPor").val() });
             parameters.push({ Name: "FechaCreacion", Value: $("#FechaCreacion").val() });
             parameters.push({ Name: "ModificadoPor", Value: $("#ModificadoPor").val() });
@@ -232,7 +208,7 @@
             parameters.push({ Name: "Contrasena", Value: $("#Contrasena").val() });
             parameters.push({ Name: "NombreUsuario", Value: $("#NombreUsuario").val() });
             parameters.push({ Name: "Correo", Value: $("#Correo").val() });
-            parameters.push({ Name: "Empresa.Id", Value: $("#Empresa_Id").val() });
+            parameters.push({ Name: "EmpresaId", Value: $("#EmpresaId").val() });
             parameters.push({ Name: "ImagenPerfil", Value: perfilTemp });
 
 
@@ -285,131 +261,4 @@
             reader.readAsDataURL(file);
         }
     });
-
-
-
-    function actualizarRequisito(elemento, isValid) {
-        const $el = $(elemento);
-        if (isValid) {
-            $el.removeClass('invalid').addClass('valid');
-            $el.html('<i class="fas fa-check-circle"></i> ' + $el.text().substring(1));
-        } else {
-            $el.removeClass('valid').addClass('invalid');
-            $el.html('<i class="fas fa-circle"></i> ' + $el.text().substring(1));
-        }
-    }
-
-    function validarContrasena(contrasena) {
-        const tieneLongitud = contrasena.length >= 6;
-        const tieneMayuscula = /[A-Z]/.test(contrasena);
-        const tieneMinuscula = /[a-z]/.test(contrasena);
-        const tieneNumero = /[0-9]/.test(contrasena);
-        const tieneEspecial = /[!@@#$%^&*]/.test(contrasena);
-
-        actualizarRequisito('#reqLongitud', tieneLongitud);
-        actualizarRequisito('#reqMayuscula', tieneMayuscula);
-        actualizarRequisito('#reqMinuscula', tieneMinuscula);
-        actualizarRequisito('#reqNumero', tieneNumero);
-        actualizarRequisito('#reqEspecial', tieneEspecial);
-
-        return tieneLongitud && tieneMayuscula && tieneMinuscula && tieneNumero && tieneEspecial;
-    }
-
-    function GuardarNuevaContrasena() {
-        const contrasenaActual = $('#contrasenaActual').val();
-        const nuevaContrasena = $('#nuevaContrasena').val();
-        const confirmarContrasena = $('#confirmarContrasena').val();
-
-        if (!contrasenaActual) {
-            Swal.fire({
-                title: 'Error',
-                text: 'La contraseña actual es requerida',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-                background: 'white',
-                confirmButtonColor: '#4e73df'
-            });
-            return;
-        }
-
-        if (!nuevaContrasena) {
-            Swal.fire({
-                title: 'Error',
-                text: 'La nueva contraseña es requerida',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-                background: 'white',
-                confirmButtonColor: '#4e73df'
-            });
-            return;
-        }
-
-        if (!validarContrasena(nuevaContrasena)) {
-            Swal.fire({
-                title: 'Contraseña inválida',
-                text: 'La contraseña no cumple con los requisitos de seguridad',
-                icon: 'warning',
-                confirmButtonText: 'Entendido',
-                background: 'white',
-                confirmButtonColor: '#4e73df'
-            });
-            return;
-        }
-
-        if (nuevaContrasena !== confirmarContrasena) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Las contraseñas no coinciden',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-                background: 'white',
-                confirmButtonColor: '#4e73df'
-            });
-            return;
-        }
-
-        Swal.fire({
-            title: 'Actualizando...',
-            text: 'Por favor espere',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        var data = {
-            Id: $("#Id").val(),
-            ContrasenaActual: contrasenaActual,
-            NuevaContrasena: nuevaContrasena
-        };
-
-        PostMVC('/User/CambiarContrasena', data, function (response) {
-            Swal.close();
-
-            if (response.IsSuccess) {
-                Swal.fire({
-                    title: '¡Contraseña actualizada!',
-                    text: response.Message,
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                }).then(() => {
-                    $('#modalChangePass').modal('hide');
-                    $('#contrasenaActual').val('');
-                    $('#nuevaContrasena').val('');
-                    $('#confirmarContrasena').val('');
-                });
-            } else {
-                Swal.fire({
-                    title: 'Error',
-                    text: response.Message,
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-            }
-        });
-    }
 </script>

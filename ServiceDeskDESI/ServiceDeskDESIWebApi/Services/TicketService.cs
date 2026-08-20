@@ -4,6 +4,7 @@ using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIWebApi.DAL;
 using System;
+using System.Collections.Generic;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -16,7 +17,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerTickets(string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTickets(string usuario)
         {
             try
             {
@@ -27,12 +28,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTickets para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<TicketDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TicketService.ObtenerTickets para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<TicketDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener los tickets."
@@ -40,7 +41,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerTicketPorId(long id, string usuario)
+        public ModelResponse<TicketDTO> ObtenerTicketPorId(long id, string usuario)
         {
             try
             {
@@ -52,12 +53,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTicketPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<TicketDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TicketService.ObtenerTicketPorId para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<TicketDTO>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener el ticket."
@@ -65,17 +66,17 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse GuardarOActualizarTicket(Ticket ticket, string usuario)
+        public ModelResponse<Ticket> GuardarOActualizarTicket(Ticket ticket, string usuario)
         {
             try
             {
-                if (ticket.Area == null || ticket.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (ticket.Categoria == null || ticket.Categoria.Id <= 0) { throw new ArgumentException("La categoría es requerida."); }
+                if (ticket.AreaId <= 0) { throw new ArgumentException("El área es requerida."); }
+                if (ticket.CategoriaId <= 0) { throw new ArgumentException("La categoría es requerida."); }
                 if (ticket.Urgencia <= 0 || ticket.Urgencia > 4) { throw new ArgumentException("La urgencia debe ser un valor entre 1 y 4."); }
                 if (string.IsNullOrWhiteSpace(ticket.Titulo)) { throw new ArgumentException("El título es requerido."); }
                 if (ticket.Titulo.Length > 250) { throw new ArgumentException("El título no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(ticket.Descripcion)) { throw new ArgumentException("La descripción es requerida."); }
-                if (ticket.TicketEstatus == null || ticket.TicketEstatus.Id <= 0) { throw new ArgumentException("El estatus del ticket es requerido."); }
+                if (ticket.TicketEstatusId <= 0) { throw new ArgumentException("El estatus del ticket es requerido."); }
                 if (string.IsNullOrWhiteSpace(ticket.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -84,12 +85,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarTicket para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Ticket> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TicketService.GuardarOActualizarTicket para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<Ticket>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al guardar el ticket."
@@ -123,7 +124,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerTicketsPorArea(long areaId, string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorArea(long areaId, string usuario)
         {
             try
             {
@@ -135,12 +136,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTicketsPorArea para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<TicketDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TicketService.ObtenerTicketsPorArea para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<TicketDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener los tickets por área."
@@ -148,7 +149,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerTicketsPorUsuario(string creadoPor, string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorUsuario(string creadoPor, string usuario)
         {
             try
             {
@@ -160,12 +161,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTicketsPorUsuario para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<TicketDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TicketService.ObtenerTicketsPorUsuario para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<TicketDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener los tickets por usuario."
@@ -173,7 +174,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerTicketsPorUrgencia(int urgencia, string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorUrgencia(int urgencia, string usuario)
         {
             try
             {
@@ -185,12 +186,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTicketsPorUrgencia para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<TicketDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TicketService.ObtenerTicketsPorUrgencia para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<TicketDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener los tickets por urgencia."
@@ -198,7 +199,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerTicketsPorEstatus(int ticketEstatusId, string usuario)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorEstatus(int ticketEstatusId, string usuario)
         {
             try
             {
@@ -210,12 +211,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerTicketsPorEstatus para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<TicketDTO>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TicketService.ObtenerTicketsPorEstatus para usuario {Usuario}", usuario);
-                return new ModelResponse
+                return new ModelResponse<List<TicketDTO>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener los tickets por estatus."
@@ -223,7 +224,7 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
-        public ModelResponse ObtenerTicketEstatus()
+        public ModelResponse<List<TicketEstatus>> ObtenerTicketEstatus()
         {
             try
             {
@@ -232,7 +233,7 @@ namespace ServiceDeskDESIWebApi.Services
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en TicketService.ObtenerTicketEstatus");
-                return new ModelResponse
+                return new ModelResponse<List<TicketEstatus>>
                 {
                     IsSuccess = false,
                     Message = "Ocurrió un error al obtener los estatus de tickets."

@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerSucursales(string usuario)
+        public ModelResponse<List<Sucursal>> ObtenerSucursales(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Sucursal>>();
 
             try
             {
@@ -25,7 +26,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = sucursales;
+                modelResponse.Response = sucursales.ToList();
                 modelResponse.Message = "Sucursales obtenidas correctamente";
             }
             catch (Exception ex)
@@ -38,9 +39,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerSucursalPorId(long id, string usuario)
+        public ModelResponse<Sucursal> ObtenerSucursalPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Sucursal>();
 
             try
             {
@@ -76,9 +77,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarSucursal(Sucursal s, string usuario)
+        public ModelResponse<Sucursal> GuardarOActualizarSucursal(Sucursal s, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Sucursal>();
 
             try
             {
@@ -159,9 +160,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarNuevaSucursalParaEmpresa(Sucursal sucursal)
+        public ModelResponse<Sucursal> GuardarNuevaSucursalParaEmpresa(Sucursal sucursal, long empresaId)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Sucursal>();
 
             try
             {
@@ -174,7 +175,8 @@ namespace ServiceDeskDESIWebApi.DAL
                     sucursal.Colonia,
                     sucursal.CodigoPostal,
                     sucursal.CreadoPor,
-                    sucursal.FechaCreacion
+                    sucursal.FechaCreacion,
+                    EmpresaId = empresaId
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();

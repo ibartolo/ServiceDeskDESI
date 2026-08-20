@@ -10,25 +10,24 @@ using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
-    //MarcaId = m.Marca.Id,
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerModelos(string usuario)
+        public ModelResponse<List<ModeloDTO>> ObtenerModelos(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<ModeloDTO>>();
 
             try
             {
                 var modelos = GetObjects("ObtenerModelo", CommandType.StoredProcedure,
                     new[] { new SqlParameter("@Usuario", usuario) },
-                    new Func<IDataReader, Modelo>((reader) =>
+                    new Func<IDataReader, ModeloDTO>((reader) =>
                     {
-                        var modelo = LlenarEntidad<Modelo>(reader);
+                        var modelo = LlenarEntidad<ModeloDTO>(reader);
                         return modelo;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = modelos;
+                modelResponse.Response = modelos.ToList();
                 modelResponse.Message = "Modelos obtenidos correctamente";
             }
             catch (Exception ex)
@@ -41,9 +40,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerModeloPorId(long id, string usuario)
+        public ModelResponse<ModeloDTO> ObtenerModeloPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<ModeloDTO>();
 
             try
             {
@@ -52,18 +51,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 new SqlParameter("@Id", id),
                 new SqlParameter("@Usuario", usuario)
                     },
-                    new Func<IDataReader, Modelo>((reader) =>
+                    new Func<IDataReader, ModeloDTO>((reader) =>
                     {
-                        var m = LlenarEntidad<Modelo>(reader);
-
-                        // Mapear la marca que viene del JOIN
-                        m.Marca = new Marca()
-                        {
-                            Id = MapearPorpiedades<long>(reader["MarcaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
-                        };
-
+                        var m = LlenarEntidad<ModeloDTO>(reader);
                         return m;
                     }));
 
@@ -88,9 +78,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarModelo(Modelo m)
+        public ModelResponse<Modelo> GuardarOActualizarModelo(Modelo m)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Modelo>();
 
             try
             {
@@ -99,7 +89,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     m.Id,
                     m.Nombre,
                     m.Descripcion,
-                    MarcaId = m.Marca.Id,
+                    m.MarcaId,
                     m.CreadoPor,
                     m.FechaCreacion,
                     m.ModificadoPor,
@@ -168,9 +158,9 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerModelosPorMarcaId(long marcaId, string usuario)
+        public ModelResponse<List<Modelo>> ObtenerModelosPorMarcaId(long marcaId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Modelo>>();
 
             try
             {
@@ -186,7 +176,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = modelos;
+                modelResponse.Response = modelos.ToList();
                 modelResponse.Message = "Modelos obtenidos correctamente";
             }
             catch (Exception ex)

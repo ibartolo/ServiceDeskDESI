@@ -17,7 +17,7 @@ namespace ServiceDeskDESIWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse ObtenerAreas(string usuario)
+        public ModelResponse<List<Area>> ObtenerAreas(string usuario)
         {
             try
             {
@@ -28,16 +28,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerAreas para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<List<Area>> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AreaService.ObtenerAreas para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener las áreas." };
+                return new ModelResponse<List<Area>> { IsSuccess = false, Message = "Ocurrió un error al obtener las áreas." };
             }
         }
 
-        public ModelResponse ObtenerAreaPorId(long id, string usuario)
+        public ModelResponse<Area> ObtenerAreaPorId(long id, string usuario)
         {
             try
             {
@@ -49,16 +49,16 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en ObtenerAreaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Area> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AreaService.ObtenerAreaPorId para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al obtener el área." };
+                return new ModelResponse<Area> { IsSuccess = false, Message = "Ocurrió un error al obtener el área." };
             }
         }
 
-        public ModelResponse GuardarOActualizarArea(Area area, string usuario)
+        public ModelResponse<Area> GuardarOActualizarArea(Area area, string usuario)
         {
             try
             {
@@ -74,12 +74,12 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 Log.Warning(ex, "Error de validación en GuardarOActualizarArea para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+                return new ModelResponse<Area> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error en AreaService.GuardarOActualizarArea para usuario {Usuario}", usuario);
-                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar el área." };
+                return new ModelResponse<Area> { IsSuccess = false, Message = "Ocurrió un error al guardar el área." };
             }
         }
 

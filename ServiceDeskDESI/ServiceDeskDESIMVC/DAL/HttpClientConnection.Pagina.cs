@@ -12,33 +12,9 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerPaginasPorUsuario()
+        public async Task<ModelResponse<List<Pagina>>> ObtenerPaginasPorUsuario()
         {
-            var result = await RequestAsync<object>($"api/Pagina/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse> ValidarAccesoPagina(string direccion)
-        {
-            var request = new
-            {
-                Direccion = direccion
-            };
-
-            var result = await RequestAsync<object>($"api/Pagina/ValidarAcceso", HttpMethod.Post, request,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<Pagina>>($"api/Pagina/List", HttpMethod.Get, null, token.Token.access_token);
         }
     }
 }
