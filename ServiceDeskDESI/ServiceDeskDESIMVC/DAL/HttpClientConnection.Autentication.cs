@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Seguridad;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,9 @@ namespace ServiceDeskDESIMVC.DAL
         public async Task<ModelResponse<UsuarioDTO>> AutenticarUsuario(Usuario usuario)
         {
             // No necesita token porque es el login
-            return await RequestAsync<UsuarioDTO>($"api/Autentication/autenticar", HttpMethod.Post, usuario);
+            var result = await RequestAsync<UsuarioDTO>($"api/Autentication/autenticar", HttpMethod.Post, usuario);
+            Log.Information("AutenticarUsuario (MVC DAL) para {Usuario}: IsSuccess={IsSuccess}, Message={Message}", usuario.NombreUsuario, result?.IsSuccess, result?.Message);
+            return result;
         }
 
         public async Task<ModelResponse<Usuario>> ActualizarPerfilUsuario(Usuario usuario)

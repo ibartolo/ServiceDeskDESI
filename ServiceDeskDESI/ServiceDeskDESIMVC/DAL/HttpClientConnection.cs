@@ -42,7 +42,7 @@ namespace ServiceDeskDESIMVC.DAL
                         new KeyValuePair<string, string>("Password",pass),
                         new KeyValuePair<string, string>("client_id", ConfigurationManager.AppSettings["client_id"]),
                         new KeyValuePair<string, string>("client_secret", ConfigurationManager.AppSettings["client_secret"])
-                    }, "application/x-www-url-formencoded");
+                    }, "application/x-www-form-urlencoded");
         }
     }
 }

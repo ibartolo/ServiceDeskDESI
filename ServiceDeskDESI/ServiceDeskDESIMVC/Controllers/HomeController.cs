@@ -5,6 +5,7 @@ using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIMVC.DAL;
 using ServiceDeskDESIMVC.Helpers;
 using ServiceDeskDESIMVC.Services;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,6 +75,8 @@ namespace ServiceDeskDESIMVC.Controllers
         {
             var mr = new ModelResponse();
 
+            Log.Information("LogIn iniciado para usuario {Usuario}", user);
+
             try
             {
                 // 1. Autenticar primero para obtener el mensaje específico del backend
@@ -83,6 +86,7 @@ namespace ServiceDeskDESIMVC.Controllers
                     NombreUsuario = user,
                     Contrasena = pass
                 });
+                Log.Information("LogIn paso 1 (autenticar) para {Usuario}: IsSuccess={IsSuccess}, Message={Message}", user, response?.IsSuccess, response?.Message);
 
                 if (!response.IsSuccess || response.Response == null)
                 {
@@ -96,6 +100,7 @@ namespace ServiceDeskDESIMVC.Controllers
 
                 if (token == null)
                 {
+                    Log.Warning("LogIn paso 2 (token) FALLÓ para {Usuario}: token nulo", user);
                     mr.IsSuccess = false;
                     mr.Message = "Error de usuario o contraseña";
                     return JsonConvert.SerializeObject(mr);
@@ -118,9 +123,12 @@ namespace ServiceDeskDESIMVC.Controllers
                 };
 
                 SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
+
+                Log.Information("LogIn exitoso para {Usuario}", user);
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "LogIn error para {Usuario}", user);
                 mr.IsSuccess = false;
                 mr.Message = ex.Message;
             }

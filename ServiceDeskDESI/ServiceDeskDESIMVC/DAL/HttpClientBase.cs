@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using ServiceDeskDESIEntities.Seguridad;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -42,15 +43,16 @@ namespace ServiceDeskDESIMVC.DAL
             SetParametersHttpCliente(contentType, string.Empty);
             using (HttpResponseMessage httpResponseMessage = await httpClient.PostAsync(endPoint, new FormUrlEncodedContent(content)))
             {
+                var body = await httpResponseMessage.Content.ReadAsStringAsync();
+
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {
-                    using (var st = new StreamReader(await httpResponseMessage.Content.ReadAsStreamAsync()))
-                    {
-                        return JsonConvert.DeserializeObject<T>(await st.ReadToEndAsync());
-                    }
+                    Log.Information("TokenAsync OK: Endpoint={Endpoint}, StatusCode={StatusCode}", endPoint, (int)httpResponseMessage.StatusCode);
+                    return JsonConvert.DeserializeObject<T>(body);
                 }
                 else
                 {
+                    Log.Warning("TokenAsync FALLÓ: Endpoint={Endpoint}, StatusCode={StatusCode}, Body={Body}", endPoint, (int)httpResponseMessage.StatusCode, body);
                     return default(T);
                 }
             }
