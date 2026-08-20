@@ -56,8 +56,20 @@
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
+                    @*<label>Puesto</label>
+                    @Html.DropDownListFor(x => x.Puesto.Id, ViewBag.Puestos.Id, (IEnumerable<SelectListItem>)ViewBag.puesto, "Seleccione un Puesto", new { @class = "form-control", id = "ddlPuesto" })*@
                     <label>Puesto</label>
-                    @Html.DropDownListFor(x => x.PuestoId, ViewBag.Puestos as SelectList, "Seleccione un puesto", new { @class = "form-control" })
+                    <select id=" ddlPuesto" class="form-control">
+                        <option value="">Selecciones Un Puesto</option>
+                        @if (ViewBag.puesto != null)
+                        {
+                            foreach (var item in (List<SelectListItem>)ViewBag.puesto)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                    @Html.HiddenFor(x =>x.Puesto.Id)
                 </div>
             </div>
         </div>
@@ -66,16 +78,30 @@
                 <div class="mb-3">
                     @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
                     {
-                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarPersona()" />
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarPersona" />
                     }
-                    <a href="/Catalogs/Persona" class="btn btn-warning">Cancelar</a>
+                    <a href="/Catalogs/People" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-md-12 table-responsive">
                 <div class="mb-3">
-                    <table id="tblPersona"></table>
+                    <table id="tblPersona" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Correo</th>
+                                <th>Telefono</th>
+                                <th>Puesto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -84,6 +110,49 @@
 
 <script>
     var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+    var tablaPersonas;
+    var PuestoSelect = @(Model.Puesto?.Id ?? 0);
+    var personaId = @(Model.Id);
+
+    $(document).ready(function () {
+        InicializarDataTable();
+        ConsultarTodosLasPersonas();
+        $("#ddlPuesto").change(function () {
+            var puestoId = $(this).val();
+
+            if (puestoId) {
+                $("#ddlpuesto".html)('option value="">Cargando Puestos...</option>');
+                if (result.IsSuccess && result.Response) {
+                    var puestos = result.Response;
+                    if (puestos.length > 0) {
+                        puestos.forEach(function (p) {
+                            $("#ddlPuesto").append('<option value="' + p.Id + '">' + p.Nombre + '</option>');
+                        });
+
+                        // Seleccionar el puesto si estamos en modo edición
+                        if (puestoSelect > 0) {
+                            $("#ddlPuesto").val(puestoSelect);
+                            $("#PuestoId").val(puestoSelect);
+                        }
+                    } else {
+                        $("#ddlPuesto").append('<option value="">No hay puestos disponibles</option>');
+                    }
+                } else {
+                    $("#ddlPuesto").append('<option value="">Error al cargar puestos</option>');
+                    Swal.fire({
+                        title: 'Error',
+                        text: result.Message || 'No se pudieron cargar los puestos',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            }
+        });
+
+    });
+
 
     $(function () {
         $("#frmPersona").validate({
@@ -211,7 +280,7 @@
                         background: 'white',
                         iconColor: '#4e73df'
                     }).then(() => {
-                        window.location.href = '/Catalogs/Persona';
+                        window.location.href = '/Catalogs/People';
                     });
                 } else {
                     Swal.fire({
@@ -247,7 +316,7 @@
     }
 
     function EditarPersona(id) {
-        window.location.href = '/Catalogs/Persona/' + id;
+        window.location.href = '/Catalogs/People/' + id;
     }
 
     function EliminarPersona(event, id) {
