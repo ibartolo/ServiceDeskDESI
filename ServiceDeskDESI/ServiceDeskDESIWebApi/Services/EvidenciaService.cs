@@ -84,9 +84,9 @@ namespace ServiceDeskDESIWebApi.Services
                 long maxTamanoBytes = (long)config.MaxTamanoMB * 1024 * 1024;
 
                 // 3 y 4. Validar peso y extensión de cada archivo ANTES de escribir nada.
-                foreach (string key in files.AllKeys)
+                for (int i = 0; i < files.Count; i++)
                 {
-                    var file = files[key];
+                    var file = files[i];
                     if (file == null) continue;
 
                     var extensionLower = Path.GetExtension(file.FileName).TrimStart('.').ToLowerInvariant();
@@ -106,9 +106,9 @@ namespace ServiceDeskDESIWebApi.Services
 
                 try
                 {
-                    foreach (string key in files.AllKeys)
+                    for (int i = 0; i < files.Count; i++)
                     {
-                        var file = files[key];
+                        var file = files[i];
                         if (file == null) continue;
 
                         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();

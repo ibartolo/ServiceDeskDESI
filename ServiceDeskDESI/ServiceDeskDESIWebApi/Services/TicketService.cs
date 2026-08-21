@@ -149,9 +149,9 @@ namespace ServiceDeskDESIWebApi.Services
                 var archivos = new List<HttpPostedFile>();
                 if (files != null)
                 {
-                    foreach (string key in files.AllKeys)
+                    for (int i = 0; i < files.Count; i++)
                     {
-                        var f = files[key];
+                        var f = files[i];
                         if (f != null && f.ContentLength > 0) archivos.Add(f);
                     }
                 }

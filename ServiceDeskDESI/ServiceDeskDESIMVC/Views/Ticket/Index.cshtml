@@ -453,6 +453,7 @@
                     if (response.IsSuccess) {
                         ToastExito(response.Message);
                         RefrescarTabla();
+                        AbrirSubirEvidencia(id);
                     } else {
                         Swal.fire({
                             title: 'Error',
@@ -508,6 +509,7 @@
                     if (response.IsSuccess) {
                         ToastExito(response.Message);
                         RefrescarTabla();
+                        AbrirSubirEvidencia(id);
                     } else {
                         Swal.fire({
                             title: 'Error',

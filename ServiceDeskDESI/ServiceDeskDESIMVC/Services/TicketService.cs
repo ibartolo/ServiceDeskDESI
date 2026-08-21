@@ -67,9 +67,9 @@ namespace ServiceDeskDESIMVC.Services
 
                 if (files != null)
                 {
-                    foreach (string key in files.AllKeys)
+                    for (int i = 0; i < files.Count; i++)
                     {
-                        var file = files[key];
+                        var file = files[i];
                         if (file == null) continue;
 
                         byte[] bytes;
