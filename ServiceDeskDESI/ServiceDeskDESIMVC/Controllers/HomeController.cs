@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIMVC.DAL;
 using ServiceDeskDESIMVC.Helpers;
 using ServiceDeskDESIMVC.Services;
@@ -20,11 +21,15 @@ namespace ServiceDeskDESIMVC.Controllers
     {
         private readonly AutenticacionService _autenticacionService;
         private readonly EmpresaService _empresaService;
+        private readonly RolService _rolService;
+        private readonly DashboardService _dashboardService;
 
         public HomeController()
         {
             _autenticacionService = new AutenticacionService(httpClientConnection);
             _empresaService = new EmpresaService(httpClientConnection);
+            _rolService = new RolService(httpClientConnection);
+            _dashboardService = new DashboardService(httpClientConnection);
         }
 
         #region Views
@@ -32,8 +37,37 @@ namespace ServiceDeskDESIMVC.Controllers
         {
             return View();
         }
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
+            bool esAgente = false;
+            DashboardIndicadoresDTO indicadores = null;
+
+            try
+            {
+                var tokenCookie = SessionHelper.GetSessionUser();
+                if (tokenCookie != null && tokenCookie.UserID > 0)
+                {
+                    var rolesResponse = await _rolService.ObtenerRolesPorUsuario(tokenCookie.UserID);
+                    esAgente = rolesResponse.IsSuccess && rolesResponse.Response != null && rolesResponse.Response.Any(r => r.PuedeAtenderTickets);
+
+                    if (esAgente)
+                    {
+                        var indResponse = await _dashboardService.ObtenerIndicadores();
+                        if (indResponse.IsSuccess && indResponse.Response != null)
+                        {
+                            indicadores = indResponse.Response;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al cargar indicadores del dashboard");
+            }
+
+            ViewBag.EsAgente = esAgente;
+            ViewBag.Indicadores = indicadores;
+
             return View();
         }
         public ActionResult RecoverPassword(string id)
