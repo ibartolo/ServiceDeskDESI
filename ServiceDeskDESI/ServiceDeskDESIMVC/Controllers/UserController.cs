@@ -256,13 +256,14 @@ namespace ServiceDeskDESIMVC.Controllers
                 var rolId = HttpContext.Request.Form["RolId"];
                 if (!string.IsNullOrEmpty(rolId))
                 {
-                    // Eliminar roles existentes del usuario
-                    var rolesUsuarioResponse = await _rolService.ObtenerRolesPorUsuario(usuarioGuardado.Id);
-                    if (rolesUsuarioResponse.IsSuccess && rolesUsuarioResponse.Response != null)
+                    // Eliminar las asignaciones usuario-rol existentes del usuario.
+                    // Usar UsuarioRol.Id (fila junction), NO Rol.Id: EliminarRolUsuario espera UsuarioRol.Id.
+                    var usuarioRolesResponse = await _rolService.ObtenerUsuarioRolesPorUsuario(usuarioGuardado.Id);
+                    if (usuarioRolesResponse.IsSuccess && usuarioRolesResponse.Response != null)
                     {
-                        foreach (var rol in rolesUsuarioResponse.Response)
+                        foreach (var usuarioRol in usuarioRolesResponse.Response)
                         {
-                            await _rolService.EliminarRolUsuario(rol.Id);
+                            await _rolService.EliminarRolUsuario(usuarioRol.Id);
                         }
                     }
 

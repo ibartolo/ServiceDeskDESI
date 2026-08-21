@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
@@ -19,12 +20,18 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly TicketService _ticketService;
         private readonly AreaService _areaService;
         private readonly CategoriaService _categoriaService;
+        private readonly RolService _rolService;
+        private readonly UsuarioService _usuarioService;
+        private readonly EvidenciaService _evidenciaService;
 
         public TicketController()
         {
             _ticketService = new TicketService(httpClientConnection);
             _areaService = new AreaService(httpClientConnection);
             _categoriaService = new CategoriaService(httpClientConnection);
+            _rolService = new RolService(httpClientConnection);
+            _usuarioService = new UsuarioService(httpClientConnection);
+            _evidenciaService = new EvidenciaService(httpClientConnection);
         }
 
         public async Task<ActionResult> Index(long id = 0)
@@ -62,6 +69,9 @@ namespace ServiceDeskDESIMVC.Controllers
                 ViewBag.Estatus = estatusResponse.Response;
             }
 
+            // Cargar configuración de evidencias (límites y extensiones) para la vista.
+            ViewBag.EvidenciaConfig = await ObtenerEvidenciaConfig();
+
             if (id > 0)
             {
                 var response = await _ticketService.ObtenerTicketPorId(id);
@@ -89,32 +99,42 @@ namespace ServiceDeskDESIMVC.Controllers
             // Pasar permisos a la vista
             ViewBag.Permisos = permisos;
 
+            // Determinar si el usuario es agente (tiene un rol con PuedeAtenderTickets)
+            bool esAgente = false;
+            var tokenCookie = SessionHelper.GetSessionUser();
+            if (tokenCookie != null && tokenCookie.UserID > 0)
+            {
+                var rolesResponse = await _rolService.ObtenerRolesPorUsuario(tokenCookie.UserID);
+                esAgente = rolesResponse.IsSuccess && rolesResponse.Response != null && rolesResponse.Response.Any(r => r.PuedeAtenderTickets);
+            }
+            ViewBag.EsAgente = esAgente;
+
+            ViewBag.UsuarioActualId = tokenCookie.UserID;
+            ViewBag.UsuarioActualNombre = tokenCookie.UserName;
+            bool esResponsableArea = false;
+            var usuarioActual = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
+            if (usuarioActual != null && usuarioActual.AreaId.HasValue)
+            {
+                var areaActual = await _areaService.ObtenerAreaPorId(usuarioActual.AreaId.Value);
+                esResponsableArea = areaActual != null && areaActual.UsuarioResponsableId == tokenCookie.UserID;
+            }
+            ViewBag.EsResponsableArea = esResponsableArea;
+
             return View(ticket);
         }
 
         [Permiso("Tickets")]
         public async Task<string> GuardarOActualizarTicket(Ticket ticket)
         {
-            var tokenCookie = SessionHelper.GetSessionUser();
-
-            if (ticket.Id == 0)
-            {
-                ticket.CreadoPor = tokenCookie?.UserName ?? "system";
-                ticket.FechaCreacion = DateTime.Now;
-                // Por defecto, el estatus inicial es "Nuevo" (Id = 1)
-                if (ticket.TicketEstatusId == 0)
-                {
-                    ticket.TicketEstatusId = 1;
-                }
-            }
-            else
-            {
-                ticket.ModificadoPor = tokenCookie?.UserName ?? "system";
-                ticket.FechaModificacion = DateTime.Now;
-            }
-            ticket.Estatus = true;
-
             var response = await _ticketService.GuardarOActualizarTicket(ticket);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets")]
+        public async Task<string> GuardarTicketConEvidencias(Ticket ticket)
+        {
+            var response = await _ticketService.GuardarTicketConEvidencias(ticket, Request.Files);
             return JsonConvert.SerializeObject(response);
         }
 
@@ -176,42 +196,113 @@ namespace ServiceDeskDESIMVC.Controllers
 
         [HttpPost]
         [Permiso("Tickets", "Editar")]
-        public async Task<string> CambiarEstatusTicket(long ticketId, int nuevoEstatusId)
+        public async Task<string> TomarTicket(long ticketId, string comentario)
         {
-            var tokenCookie = SessionHelper.GetSessionUser();
-
-            var response = await _ticketService.ObtenerTicketPorId(ticketId);
-            if (!response.IsSuccess || response.Response == null)
-            {
-                return JsonConvert.SerializeObject(new ModelResponse
-                {
-                    IsSuccess = false,
-                    Message = "No se encontró el ticket"
-                });
-            }
-
-            var ticket = response.Response;
-            ticket.TicketEstatusId = nuevoEstatusId;
-            ticket.ModificadoPor = tokenCookie?.UserName ?? "system";
-            ticket.FechaModificacion = DateTime.Now;
-
-            var result = await _ticketService.GuardarOActualizarTicket(ticket);
-            return JsonConvert.SerializeObject(result);
+            var response = await _ticketService.TomarTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
         }
 
         [HttpPost]
         [Permiso("Tickets", "Editar")]
-        public async Task<string> AsignarTicketAgente(long ticketId, long agenteId)
+        public async Task<string> ResolverTicket(long ticketId, string comentario)
         {
-            // TODO: Implementar asignación de ticket a un agente
-            // Esta funcionalidad requiere que la tabla Ticket tenga un campo AgenteId
-            // Por ahora es un placeholder
-            var modelResponse = new ModelResponse
+            var response = await _ticketService.ResolverTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> CerrarTicket(long ticketId, string comentario)
+        {
+            var response = await _ticketService.CerrarTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> RechazarTicket(long ticketId, string comentario)
+        {
+            var response = await _ticketService.RechazarTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Editar")]
+        public async Task<string> RetomarTicket(long ticketId)
+        {
+            var response = await _ticketService.RetomarTicket(ticketId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Editar")]
+        public async Task<string> ReasignarTicket(long ticketId, long nuevoUsuarioId, string comentario)
+        {
+            var response = await _ticketService.ReasignarTicket(ticketId, nuevoUsuarioId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        public async Task<string> ObtenerUsuariosArea(long areaId)
+        {
+            var response = await _ticketService.ObtenerUsuariosArea(areaId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        public async Task<string> ObtenerTicketAsignaciones(long ticketId)
+        {
+            var response = await _ticketService.ObtenerTicketAsignaciones(ticketId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> SubirEvidencia(long ticketId)
+        {
+            var response = await _evidenciaService.GuardarEvidencias(ticketId, Request.Files);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> ObtenerEvidenciasPorTicket(long ticketId)
+        {
+            var response = await _evidenciaService.ObtenerEvidenciasPorTicket(ticketId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        [Permiso("Tickets", "Leer")]
+        public async Task<ActionResult> DescargarEvidencia(long id)
+        {
+            var dto = await _evidenciaService.ObtenerEvidenciaDescarga(id);
+
+            if (dto == null || dto.Contenido == null || dto.Contenido.Length == 0)
+                return HttpNotFound("Evidencia no encontrada.");
+
+            return File(dto.Contenido, dto.ContentType ?? "application/octet-stream", dto.NombreArchivo);
+        }
+
+        private async Task<EvidenciaConfigDTO> ObtenerEvidenciaConfig()
+        {
+            try
             {
-                IsSuccess = true,
-                Message = "Ticket asignado correctamente"
+                var response = await _evidenciaService.ObtenerConfiguracion();
+                if (response != null && response.IsSuccess && response.Response != null)
+                    return response.Response;
+            }
+            catch
+            {
+                // Si no se puede obtener la configuración (WebApi caída, etc.), usar defaults.
+            }
+
+            return new EvidenciaConfigDTO
+            {
+                MaxArchivos = 3,
+                MaxTamanoMB = 3,
+                ExtensionesPermitidas = new List<string> { "pdf", "jpg", "png" }
             };
-            return JsonConvert.SerializeObject(modelResponse);
         }
     }
 }

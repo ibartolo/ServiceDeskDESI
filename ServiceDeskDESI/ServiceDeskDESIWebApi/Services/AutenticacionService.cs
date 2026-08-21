@@ -230,10 +230,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.AutenticarUsuario para {NombreUsuario}", nombreUsuario);
+
                 if (string.IsNullOrWhiteSpace(nombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
 
-                return _dbWrapper.AutenticarUsuario(nombreUsuario, contrasena);
+                var result = _dbWrapper.AutenticarUsuario(nombreUsuario, contrasena);
+                Log.Information("AutenticacionService.AutenticarUsuario result para {NombreUsuario}: IsSuccess={IsSuccess}, Message={Message}", nombreUsuario, result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

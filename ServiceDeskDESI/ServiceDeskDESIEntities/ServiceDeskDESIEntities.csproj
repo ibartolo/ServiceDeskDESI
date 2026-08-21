@@ -57,6 +57,8 @@
     <Compile Include="Catalogos\Modelo.cs" />
     <Compile Include="Catalogos\ModeloDTO.cs" />
     <Compile Include="Catalogos\Persona.cs" />
+    <Compile Include="Catalogos\PersonaActivo.cs" />
+    <Compile Include="Catalogos\PersonaActivoDTO.cs" />
     <Compile Include="Catalogos\PersonaDTO.cs" />
     <Compile Include="Catalogos\Puesto.cs" />
     <Compile Include="Catalogos\TicketEstatus.cs" />
@@ -79,6 +81,11 @@
     <Compile Include="Seguridad\UsuarioRol.cs" />
     <Compile Include="Tickets\Ticket.cs" />
     <Compile Include="Tickets\TicketDTO.cs" />
+    <Compile Include="Tickets\TicketAsignacion.cs" />
+    <Compile Include="Tickets\TicketAsignacionDTO.cs" />
+    <Compile Include="Tickets\TicketEvidencia.cs" />
+    <Compile Include="Tickets\EvidenciaConfigDTO.cs" />
+    <Compile Include="Tickets\EvidenciaDescargaDTO.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -316,6 +316,19 @@
             return;
         }
 
+        // Validar que se haya seleccionado un rol
+        if (!$("#ddlRol").val()) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe seleccionar un rol',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+
         Swal.fire({
             title: 'Guardando...',
             text: 'Por favor espere',
@@ -336,6 +349,7 @@
             RFC: $("#RFC").val(),
             SucursalId: parseInt($("#ddlSucursal").val()),
             AreaId: parseInt($("#ddlArea").val()),
+            RolId: parseInt($("#ddlRol").val()),
             Firma: $("#Firma").val() || null,
             CreadoPor: $("#CreadoPor").val(),
             FechaCreacion: $("#FechaCreacion").val(),

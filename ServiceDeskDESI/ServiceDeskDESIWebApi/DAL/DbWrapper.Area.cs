@@ -89,6 +89,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     a.Nombre,
                     a.Descripcion,
                     a.Correo,
+                    a.UsuarioResponsableId,
                     a.CreadoPor,
                     a.FechaCreacion,
                     a.ModificadoPor,

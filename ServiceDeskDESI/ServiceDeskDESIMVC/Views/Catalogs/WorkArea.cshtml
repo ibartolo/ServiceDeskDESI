@@ -1,4 +1,4 @@
-﻿﻿@model ServiceDeskDESIEntities.Catalogos.Area
+﻿@model ServiceDeskDESIEntities.Catalogos.Area
 @{
     ViewBag.Title = "Area";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -45,6 +45,24 @@
                 <div class="mb-3">
                     <label>Correo:</label>
                     @Html.TextBoxFor(x => x.Correo, new { @class = "form-control", placeholder = "Correo del área" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Responsable del área:</label>
+                    <select id="ddlUsuarioResponsable" class="form-control">
+                        <option value="">-- Seleccione un responsable --</option>
+                        @if (ViewBag.UsuariosQuePuedenAtender != null)
+                        {
+                            foreach (var usuario in (List<ServiceDeskDESIEntities.Autenticacion.UsuarioDTO>)ViewBag.UsuariosQuePuedenAtender)
+                            {
+                                <option value="@usuario.Id" @(Model.UsuarioResponsableId == usuario.Id ? "selected" : "")>@usuario.Nombre @usuario.Apellido (@usuario.NombreUsuario)</option>
+                            }
+                        }
+                    </select>
+                    @Html.HiddenFor(x => x.UsuarioResponsableId)
                 </div>
             </div>
         </div>
@@ -170,6 +188,7 @@
                 Nombre: $("#Nombre").val(),
                 Descripcion: $("#Descripcion").val(),
                 Correo: $("#Correo").val(),
+                UsuarioResponsableId: $("#ddlUsuarioResponsable").val() ? parseInt($("#ddlUsuarioResponsable").val()) : null,
                 CreadoPor: $("#CreadoPor").val(),
                 FechaCreacion: new Date().toISOString(),
                 ModificadoPor: $("#ModificadoPor").val() || null,

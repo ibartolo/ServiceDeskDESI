@@ -37,27 +37,17 @@ namespace ServiceDeskDESIWebApi.App_Start
 
             //Log.Information("Inicializando aplicación Web API");
 
-            // Middleware OWIN temprano para CORS restrictivo (antes de OAuth para manejar preflight)
+            // Middleware OWIN para CORS abierto (solo pruebas): permite cualquier origen.
             app.Use(async (context, next) =>
             {
-                var allowedOrigins = new HashSet<string>(
-                    (ConfigurationManager.AppSettings["AllowedCorsOrigins"] ?? string.Empty)
-                        .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(o => o.Trim()),
-                    StringComparer.OrdinalIgnoreCase);
+                context.Response.Headers.Set("Access-Control-Allow-Origin", "*");
+                context.Response.Headers.Set("Access-Control-Allow-Headers", "Authorization, Content-Type");
+                context.Response.Headers.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
-                var origin = context.Request.Headers.Get("Origin");
-                if (!string.IsNullOrEmpty(origin) && allowedOrigins.Contains(origin))
+                if (string.Equals(context.Request.Method, "OPTIONS", StringComparison.OrdinalIgnoreCase))
                 {
-                    context.Response.Headers.Set("Access-Control-Allow-Origin", origin);
-                    context.Response.Headers.Set("Access-Control-Allow-Headers", "Authorization, Content-Type");
-                    context.Response.Headers.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-
-                    if (string.Equals(context.Request.Method, "OPTIONS", StringComparison.OrdinalIgnoreCase))
-                    {
-                        context.Response.StatusCode = 200;
-                        return;
-                    }
+                    context.Response.StatusCode = 200;
+                    return;
                 }
 
                 await next.Invoke();
@@ -178,6 +168,9 @@ namespace ServiceDeskDESIWebApi.App_Start
             var providedSecret = context.Parameters.Get("client_secret");
             var clientContexId = context.Parameters.Get("client_id");
 
+            Log.Information("ValidateClientAuthentication: providedClientId={ProvidedClientId}, expectedClientId={ExpectedClientId}, secretPresent={SecretPresent}, secretMatch={SecretMatch}",
+                clientContexId, clientId, !string.IsNullOrEmpty(providedSecret), string.Equals(providedSecret, clientSecret, StringComparison.Ordinal));
+
             if (string.Equals(clientContexId, clientId, StringComparison.Ordinal) &&
                 string.Equals(providedSecret, clientSecret, StringComparison.Ordinal))
             {
@@ -196,6 +189,7 @@ namespace ServiceDeskDESIWebApi.App_Start
             Log.Information("Username: {Username}", context.UserName);
 
             var user = new DAL.DbWrapper().AutenticarUsuario(context.UserName, context.Password);
+            Log.Information("GrantResourceOwnerCredentials: usuario={Usuario}, IsSuccess={IsSuccess}, Message={Message}", context.UserName, user?.IsSuccess, user?.Message);
 
             if (!(user != null && (user.IsSuccess && user.Response != null)))
             {

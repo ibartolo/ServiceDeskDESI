@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -110,6 +111,7 @@ namespace ServiceDeskDESIWebApi.Controllers
         [HttpPost, Route("autenticar")]
         public ModelResponse<UsuarioDTO> AutenticarUsuario(Usuario u)
         {
+            Log.Information("AutenticationController.AutenticarUsuario para {NombreUsuario}", u.NombreUsuario);
             var result = _autenticacionService.AutenticarUsuario(u.NombreUsuario, u.Contrasena);
             return result;
         }

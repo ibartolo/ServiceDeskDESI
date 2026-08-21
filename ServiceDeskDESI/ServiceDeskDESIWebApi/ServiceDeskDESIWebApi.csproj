@@ -199,6 +199,7 @@
   <ItemGroup>
     <Content Include="Global.asax" />
     <Content Include="Template\Template_AltaEmpresa.html" />
+    <Content Include="Template\Template_CambioEstatusTicket.html" />
     <Content Include="Template\Template_NuevoPass.html" />
     <Content Include="Template\Template_NuevoUsuario.html" />
     <Content Include="Template\Template_RecuperarEmail.html" />
@@ -215,11 +216,13 @@
     <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\CompaniaController.cs" />
     <Compile Include="Controllers\EmpresaController.cs" />
+    <Compile Include="Controllers\EvidenciaController.cs" />
     <Compile Include="Controllers\MarcaController.cs" />
     <Compile Include="Controllers\ModeloController.cs" />
     <Compile Include="Controllers\PaginaController.cs" />
     <Compile Include="Controllers\PermisosController.cs" />
     <Compile Include="Controllers\PersonaController.cs" />
+    <Compile Include="Controllers\PersonaActivoController.cs" />
     <Compile Include="Controllers\RelacionController.cs" />
     <Compile Include="Controllers\RolController.cs" />
     <Compile Include="Controllers\SucursalController.cs" />
@@ -237,11 +240,13 @@
     <Compile Include="DAL\DbWrapper.Compania.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Empresa.cs" />
+    <Compile Include="DAL\DbWrapper.Evidencia.cs" />
     <Compile Include="DAL\DbWrapper.Marca.cs" />
     <Compile Include="DAL\DbWrapper.Modelo.cs" />
     <Compile Include="DAL\DbWrapper.Paginas.cs" />
     <Compile Include="DAL\DbWrapper.Permisos.cs" />
     <Compile Include="DAL\DbWrapper.Persona.cs" />
+    <Compile Include="DAL\DbWrapper.PersonaActivo.cs" />
     <Compile Include="DAL\DbWrapper.Puesto.cs" />
     <Compile Include="DAL\DbWrapper.Relacion.cs" />
     <Compile Include="DAL\DbWrapper.Sucursal.cs" />
@@ -261,6 +266,7 @@
     <Compile Include="Services\CategoriaService.cs" />
     <Compile Include="Services\CompaniaService.cs" />
     <Compile Include="Services\EmpresaService.cs" />
+    <Compile Include="Services\EvidenciaService.cs" />
     <Compile Include="Services\MarcaService.cs" />
     <Compile Include="Services\ModeloService.cs" />
     <Compile Include="Services\PaginaService.cs" />
@@ -269,6 +275,7 @@
     <Compile Include="Services\SucursalService.cs" />
     <Compile Include="Services\TicketService.cs" />
     <Compile Include="Services\PersonaService.cs" />
+    <Compile Include="Services\PersonaActivoService.cs" />
     <Compile Include="Services\PuestoService.cs" />
     <Compile Include="Services\TipoActivoService.cs" />
   </ItemGroup>

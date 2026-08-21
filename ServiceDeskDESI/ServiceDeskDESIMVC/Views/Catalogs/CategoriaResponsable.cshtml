@@ -253,6 +253,8 @@
         disponibles: [],
         asignados: []
     };
+    // Registros originales de la BD (CategoriaResponsable.Id + UsuarioId) para sincronizar al guardar
+    var responsablesOriginales = [];
 
     $(document).ready(function () {
         InicializarTabla();
@@ -407,10 +409,12 @@
             if (result.IsSuccess && result.Response) {
                 var responsables = result.Response;
 
-                // Crear diccionario de responsables por usuarioId
+                // Crear diccionario de responsables por usuarioId (el DTO trae CategoriaResponsable.Id)
                 var responsablesDict = {};
+                responsablesOriginales = [];
                 responsables.forEach(function (r) {
                     responsablesDict[r.UsuarioId] = r;
+                    responsablesOriginales.push({ id: r.Id, usuarioId: r.UsuarioId });
                 });
 
                 // Separar usuarios disponibles y asignados
@@ -418,6 +422,7 @@
                     if (responsablesDict[usuario.Id]) {
                         responsablesByCategoria.asignados.push({
                             Id: usuario.Id,
+                            responsableId: responsablesDict[usuario.Id].Id,
                             Nombre: usuario.Nombre,
                             Apellido: usuario.Apellido,
                             NombreUsuario: usuario.NombreUsuario,
@@ -436,6 +441,7 @@
                 });
             } else {
                 // Si no hay responsables, todos los usuarios están disponibles
+                responsablesOriginales = [];
                 todosLosUsuarios.forEach(function (usuario) {
                     responsablesByCategoria.disponibles.push({
                         Id: usuario.Id,
@@ -663,7 +669,7 @@
             return;
         }
 
-        if (responsablesByCategoria.asignados.length === 0) {
+        if (responsablesByCategoria.asignados.length === 0 && responsablesOriginales.length === 0) {
             Swal.fire({
                 title: 'Advertencia',
                 text: 'No hay responsables asignados para guardar',
@@ -676,7 +682,7 @@
         // Mostrar confirmación antes de guardar
         Swal.fire({
             title: '¿Está seguro?',
-            text: 'Se guardarán los responsables asignados para esta categoría',
+            text: 'Se sincronizarán los responsables de esta categoría (se agregarán, actualizarán y eliminarán según corresponda)',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Sí, guardar',
@@ -694,52 +700,70 @@
                     }
                 });
 
-                // Construir la lista de responsables
-                var total = responsablesByCategoria.asignados.length;
+                var asignados = responsablesByCategoria.asignados;
+                var asignadosUsuarioIds = asignados.map(function (u) { return u.Id; });
+
+                // Operaciones de guardar/actualizar: cada responsable asignado (Id=0 crea, Id>0 actualiza)
+                var opsGuardar = asignados.map(function (usuario) {
+                    return {
+                        Id: usuario.responsableId || 0,
+                        CategoriaId: categoriaSeleccionadaId,
+                        UsuarioId: usuario.Id,
+                        EsPrincipal: usuario.EsPrincipal || false
+                    };
+                });
+
+                // Operaciones de eliminar: originales de BD que ya no están en asignados
+                var opsEliminar = responsablesOriginales
+                    .filter(function (orig) { return asignadosUsuarioIds.indexOf(orig.usuarioId) === -1; })
+                    .map(function (orig) {
+                        return { Id: orig.id };
+                    });
+
+                var totalOps = opsGuardar.length + opsEliminar.length;
                 var completados = 0;
                 var errores = [];
 
-                responsablesByCategoria.asignados.forEach(function (usuario) {
-                    var responsable = {
-                        CategoriaId: categoriaSeleccionadaId,
-                        UsuarioId: usuario.Id,
-                        EsPrincipal: usuario.EsPrincipal || false,
-                        CreadoPor: $("#CreadoPor").val() || "system",
-                        FechaCreacion: new Date().toISOString(),
-                        ModificadoPor: $("#ModificadoPor").val() || null,
-                        FechaModificacion: null,
-                        Estatus: true
-                    };
+                function finalizar() {
+                    Swal.close();
+                    if (errores.length > 0) {
+                        Swal.fire({
+                            title: 'Errores al guardar',
+                            text: 'Algunos responsables no se pudieron procesar: ' + errores.join(', '),
+                            icon: 'warning',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: 'Responsables guardados correctamente',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                }
 
-                    PostMVC('/Catalogs/GuardarOActualizarCategoriaResponsable', responsable, function (response) {
+                if (totalOps === 0) {
+                    finalizar();
+                    return;
+                }
+
+                opsGuardar.forEach(function (op) {
+                    PostMVC('/Catalogs/GuardarOActualizarCategoriaResponsable', op, function (response) {
                         completados++;
+                        if (!response.IsSuccess) { errores.push(response.Message); }
+                        if (completados === totalOps) { finalizar(); }
+                    });
+                });
 
-                        if (!response.IsSuccess) {
-                            errores.push(response.Message);
-                        }
-
-                        if (completados === total) {
-                            Swal.close();
-
-                            if (errores.length > 0) {
-                                Swal.fire({
-                                    title: 'Errores al guardar',
-                                    text: 'Algunos responsables no se pudieron guardar: ' + errores.join(', '),
-                                    icon: 'warning',
-                                    confirmButtonText: 'Aceptar'
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: '¡Éxito!',
-                                    text: 'Responsables guardados correctamente',
-                                    icon: 'success',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    window.location.reload();
-                                });
-                            }
-                        }
+                opsEliminar.forEach(function (op) {
+                    PostMVC('/Catalogs/EliminarCategoriaResponsable', op, function (response) {
+                        completados++;
+                        if (!response.IsSuccess) { errores.push(response.Message); }
+                        if (completados === totalOps) { finalizar(); }
                     });
                 });
             }

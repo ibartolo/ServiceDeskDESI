@@ -106,6 +106,19 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         /// <summary>
+        /// Obtiene las filas UsuarioRol (junction) de un usuario, incluyendo el Id de cada fila.
+        /// </summary>
+        /// <param name="usuarioId">ID del usuario</param>
+        /// <returns>Lista de asignaciones usuario-rol</returns>
+        [HttpGet, Route("UsuarioRoles/{usuarioId:long}")]
+        public ModelResponse<List<UsuarioRol>> ObtenerUsuarioRolesPorUsuario(long usuarioId)
+        {
+            var usuarioAutenticado = User.Identity.Name;
+            var result = _rolService.ObtenerUsuarioRolesPorUsuario(usuarioId, usuarioAutenticado);
+            return result;
+        }
+
+        /// <summary>
         /// Elimina un rol de un usuario (solo administradores)
         /// </summary>
         /// <param name="request">Objeto con UsuarioRolId</param>

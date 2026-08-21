@@ -107,7 +107,7 @@
         <div class="col-md-4">
             <div class="mb-3">
                 <label>Fecha de Compra</label>
-                @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", type = "date", @Value = Model.Id == 0 ? "" : Model.FechaCompra.ToString("yyyy-MM-dd") })
+                @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", type = "date", @Value = Model.Id == 0 ? "" : (Model.FechaCompra?.ToString("yyyy-MM-dd") ?? "") })
             </div>
         </div>
 
@@ -136,6 +136,7 @@
                                 <th>Marca</th>
                                 <th>Modelo</th>
                                 <th>Tipo</th>
+                                <th>Asignado a</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -283,6 +284,7 @@
                 { data: 'MarcaNombre', title: 'Marca', defaultContent: '---' },
                 { data: 'ModeloNombre', title: 'Modelo', defaultContent: '---' },
                 { data: 'TipoActivoNombre', title: 'Tipo', defaultContent: '---' },
+                { data: 'PersonaNombre', title: 'Asignado a', defaultContent: '---', render: function (data, type, row) { return row.PersonaNombre ? row.PersonaNombre + ' ' + (row.PersonaApellido || '') : '---'; } },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
                         var html = '<div class="d-flex gap-3">';

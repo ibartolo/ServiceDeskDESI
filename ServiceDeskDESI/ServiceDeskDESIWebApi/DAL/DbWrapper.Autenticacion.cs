@@ -373,11 +373,14 @@ namespace ServiceDeskDESIWebApi.DAL
                         return u;
                     }));
 
+                Log.Information("AutenticarUsuario (DbWrapper): usuario={NombreUsuario}, encontrado={Encontrado}", nombreUsuario, usuario != null);
+
                 if (usuario != null && Cryptography.VerifyPassword(contrasena, usuario.Contrasena))
                 {
                     // Enforce trial: si la empresa está en periodo de prueba y ya venció, se bloquea el acceso.
                     if (usuario.EsPeriodoPrueba == true && usuario.FechaVigenciaFin.HasValue && usuario.FechaVigenciaFin.Value < DateTime.Now)
                     {
+                        Log.Warning("AutenticarUsuario (DbWrapper): trial expirado para {NombreUsuario}", nombreUsuario);
                         modelResponse.IsSuccess = false;
                         modelResponse.Message = "El periodo de prueba de su empresa ha expirado. Contacte al administrador.";
                         return modelResponse;
@@ -386,9 +389,11 @@ namespace ServiceDeskDESIWebApi.DAL
                     usuario.Contrasena = null; // no exponer el hash/ciphertext en la respuesta
                     modelResponse.IsSuccess = true;
                     modelResponse.Response = usuario;
+                    Log.Information("AutenticarUsuario (DbWrapper): contraseña válida para {NombreUsuario}", nombreUsuario);
                 }
                 else
                 {
+                    Log.Warning("AutenticarUsuario (DbWrapper): usuario no encontrado o contraseña inválida para {NombreUsuario}", nombreUsuario);
                     modelResponse.IsSuccess = false;
                     modelResponse.Message = "Usuario o contraseña incorrectos.";
                 }

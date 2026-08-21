@@ -131,7 +131,7 @@ namespace ServiceDeskDESIWebApi.Services
                 if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuarioAutenticado)) { throw new ArgumentException("El usuario autenticado es requerido."); }
 
-                return _dbWrapper.ObtenerRolesPorUsuario(usuarioAutenticado);
+                return _dbWrapper.ObtenerRolesPorUsuarioId(usuarioId);
             }
             catch (ArgumentException ex)
             {
@@ -142,6 +142,27 @@ namespace ServiceDeskDESIWebApi.Services
             {
                 Log.Error(ex, "Error en RolService.ObtenerRolesPorUsuario para usuario {UsuarioId}", usuarioId);
                 return new ModelResponse<List<Rol>> { IsSuccess = false, Message = "Ocurrió un error al obtener los roles del usuario." };
+            }
+        }
+
+        public ModelResponse<List<UsuarioRol>> ObtenerUsuarioRolesPorUsuario(long usuarioId, string usuarioAutenticado)
+        {
+            try
+            {
+                if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuarioAutenticado)) { throw new ArgumentException("El usuario autenticado es requerido."); }
+
+                return _dbWrapper.ObtenerUsuarioRolesPorUsuario(usuarioId);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en ObtenerUsuarioRolesPorUsuario para usuario {UsuarioId}", usuarioId);
+                return new ModelResponse<List<UsuarioRol>> { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en RolService.ObtenerUsuarioRolesPorUsuario para usuario {UsuarioId}", usuarioId);
+                return new ModelResponse<List<UsuarioRol>> { IsSuccess = false, Message = "Ocurrió un error al obtener las asignaciones usuario-rol." };
             }
         }
 

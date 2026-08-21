@@ -35,6 +35,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly RolService _rolService;
         private readonly PuestoService _puestoService;
         private readonly PersonaService _personaService;
+        private readonly PersonaActivoService _personaActivoService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
@@ -51,6 +52,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _rolService = new RolService(httpClientConnection);
             _puestoService = new PuestoService(httpClientConnection);
             _personaService = new PersonaService(httpClientConnection);
+            _personaActivoService = new PersonaActivoService(httpClientConnection);
 
         }
 
@@ -77,7 +79,10 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
             }
 
-            // 4. Pasar permisos a la vista
+            // 4. Cargar usuarios que pueden atender tickets (para el dropdown "Responsable del área")
+            ViewBag.UsuariosQuePuedenAtender = await ObtenerUsuariosQuePuedenAtenderLista();
+
+            // 5. Pasar permisos a la vista
             ViewBag.Permisos = permisos;
 
             return View(area);
@@ -111,7 +116,7 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Permisos = permisos;
             return View(compania);
         }
-        public async Task<ActionResult> Tipped (long id = 0)
+        public async Task<ActionResult> Puesto(long id = 0)
         {
            var permisos = await _puestoService.ObtenerPermisosParaPuesto();
             if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
@@ -134,7 +139,7 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Permisos = permisos;
             return View(puesto);
         }
-        public  async Task <ActionResult> People(long id = 0)
+        public async Task<ActionResult> Persona(long id = 0)
         {
             var permisos = await _personaService.ObtenerPermisosParaPersona();
             if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
@@ -154,6 +159,13 @@ namespace ServiceDeskDESIMVC.Controllers
                     ViewBag.ErrorMessage = "No se encontró la persona.";
                 }
             }
+            // Cargar puestos para el dropdown
+            var puestosResponse = await _puestoService.ConsultarTodosLosPuestos();
+            if (puestosResponse.IsSuccess && puestosResponse.Response != null)
+            {
+                ViewBag.Puestos = new SelectList(puestosResponse.Response, "Id", "Nombre");
+            }
+
             ViewBag.Permisos = permisos;
             return View(persona);
         }
@@ -740,14 +752,14 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
-        [Permiso("Tipped")]
+        [Permiso("Puestos")]
         public async Task<string> GuardarOActualizarPuesto(Puesto p)
         {
             var response = await _puestoService.GuardarOActualizarPuesto(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
-        [Permiso("Tipped", "Eliminar")]
+        [Permiso("Puestos", "Eliminar")]
         public async Task<string> EliminarPuesto(Puesto p)
         {
             var response = await _puestoService.EliminarPuesto(p);
@@ -767,17 +779,49 @@ namespace ServiceDeskDESIMVC.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
-        [Permiso("People")]
+        [Permiso("Personas")]
         public async Task<string> GuardarOActualizarPersona(Persona p)
         {
             var response = await _personaService.GuardarOActualizarPersona(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
-        [Permiso("People", "Eliminar")]
+        [Permiso("Personas", "Eliminar")]
         public async Task<string> EliminarPersona(Persona p)
         {
             var response = await _personaService.EliminarPersona(p);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+        #endregion
+
+        #region Persona Activo
+        [System.Web.Mvc.HttpGet]
+        public async Task<string> ObtenerActivosPorPersona(long personaId)
+        {
+            var response = await _personaActivoService.ObtenerActivosPorPersona(personaId);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpGet]
+        public async Task<string> ObtenerActivosDisponibles()
+        {
+            var response = await _personaActivoService.ObtenerActivosDisponibles();
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        [Permiso("Personas", "Editar")]
+        public async Task<string> AsignarActivoPersona(long personaId, long activoId)
+        {
+            var response = await _personaActivoService.AsignarActivoPersona(personaId, activoId);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        [Permiso("Personas", "Editar")]
+        public async Task<string> DesvincularActivoPersona(long personaActivoId)
+        {
+            var response = await _personaActivoService.DesvincularActivoPersona(personaActivoId);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         #endregion
@@ -907,6 +951,12 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        public async Task<string> ConsultarTodosLosResponsables()
+        {
+            var response = await _categoriaResponsableService.ObtenerTodosLosResponsables();
+            return JsonConvert.SerializeObject(response);
+        }
+
         [Permiso("Responsables por Categoría", "Crear")]
         public async Task<string> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
@@ -942,34 +992,40 @@ namespace ServiceDeskDESIMVC.Controllers
 
         public async Task<string> ConsultarUsuariosQuePuedenAtender()
         {
-            var response = await _usuarioService.ConsultarTodosLosUsuarios();
+            var usuariosFiltrados = await ObtenerUsuariosQuePuedenAtenderLista();
+            var response = new ModelResponse<List<UsuarioDTO>>
+            {
+                IsSuccess = true,
+                Response = usuariosFiltrados,
+                Message = "Usuarios obtenidos correctamente"
+            };
+            return JsonConvert.SerializeObject(response);
+        }
 
+        /// <summary>
+        /// Devuelve los usuarios de la empresa que tienen al menos un rol con PuedeAtenderTickets = true.
+        /// </summary>
+        private async Task<List<UsuarioDTO>> ObtenerUsuariosQuePuedenAtenderLista()
+        {
+            var usuariosFiltrados = new List<UsuarioDTO>();
+
+            var response = await _usuarioService.ConsultarTodosLosUsuarios();
             if (response.IsSuccess && response.Response != null)
             {
-                // Filtrar usuarios que pueden atender tickets
-                // Nota: Para esto necesitas que el objeto Usuario tenga la información del rol
-                // o necesitas obtener los roles de cada usuario
-                // Por ahora, filtramos por los usuarios que tengan roles que pueden atender
-                var usuariosFiltrados = new List<UsuarioDTO>();
-
                 foreach (var usuario in response.Response)
                 {
-                    // Obtener roles del usuario
                     var rolesResponse = await _rolService.ObtenerRolesPorUsuario(usuario.Id);
                     if (rolesResponse.IsSuccess && rolesResponse.Response != null)
                     {
-                        // Verificar si alguno de sus roles permite atender tickets
                         if (rolesResponse.Response.Any(r => r.PuedeAtenderTickets))
                         {
                             usuariosFiltrados.Add(usuario);
                         }
                     }
                 }
-
-                response.Response = usuariosFiltrados;
             }
 
-            return JsonConvert.SerializeObject(response);
+            return usuariosFiltrados;
         }
 
         #endregion

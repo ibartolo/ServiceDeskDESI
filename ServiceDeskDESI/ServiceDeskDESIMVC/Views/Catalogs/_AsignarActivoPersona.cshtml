@@ -1,0 +1,187 @@
+﻿<div class="modal fade" id="modalAsignarActivo" tabindex="-1" aria-labelledby="modalAsignarActivoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAsignarActivoLabel"><i class="fas fa-laptop me-2"></i>Activos de <span id="personaNombreActivo"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="personaIdActivo" />
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label>Asignar activo</label>
+                            <select id="ddlActivoDisponible" class="form-control">
+                                <option value="">Seleccione un activo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label>Fecha inicial</label>
+                            <input type="date" id="fechaInicioActivo" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly disabled />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary" onclick="AsignarActivo()">Asignar</button>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <h6>Activos asignados</h6>
+                <div class="table-responsive">
+                    <table id="tblActivosPersona" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Activo</th>
+                                <th>Serial</th>
+                                <th>Fecha inicial</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function CargarActivosDisponibles() {
+        GetMVC('/Catalogs/ObtenerActivosDisponibles', function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+            var ddl = $("#ddlActivoDisponible");
+            ddl.empty().append('<option value="">Seleccione un activo</option>');
+            if (result && result.IsSuccess && result.Response) {
+                result.Response.forEach(function (a) {
+                    if (a.Serial) {
+                        ddl.append('<option value="' + a.Id + '">' + a.Nombre + ' — ' + a.Serial + '</option>');
+                    } else {
+                        ddl.append('<option value="' + a.Id + '">' + a.Nombre + '</option>');
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: (result && result.Message) || 'No se pudieron cargar los activos disponibles',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+
+    function CargarActivosPersona() {
+        var personaId = $("#personaIdActivo").val();
+        if (!personaId) return;
+        GetMVC('/Catalogs/ObtenerActivosPorPersona?personaId=' + personaId, function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+            var tbody = $("#tblActivosPersona tbody");
+            tbody.empty();
+            if (result && result.IsSuccess && result.Response && result.Response.length > 0) {
+                result.Response.forEach(function (pa) {
+                    var fecha = pa.FechaInicio ? new Date(pa.FechaInicio).toLocaleDateString() : '---';
+                    var row = '<tr>';
+                    row += '<td>' + (pa.ActivoNombre || '---') + '</td>';
+                    row += '<td>' + (pa.ActivoSerial || '---') + '</td>';
+                    row += '<td>' + fecha + '</td>';
+                    row += '<td><button type="button" class="btn btn-sm btn-outline-danger" title="Desvincular" onclick="DesvincularActivo(' + pa.Id + ')"><i class="fas fa-unlink"></i></button></td>';
+                    row += '</tr>';
+                    tbody.append(row);
+                });
+            } else {
+                tbody.append('<tr><td colspan="4" class="text-center">Sin activos asignados</td></tr>');
+            }
+        });
+    }
+
+    function AsignarActivo() {
+        var activoId = $("#ddlActivoDisponible").val();
+        if (!activoId) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe seleccionar un activo',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+        var personaId = $("#personaIdActivo").val();
+        PostMVC('/Catalogs/AsignarActivoPersona', { personaId: personaId, activoId: activoId }, function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+            if (result && result.IsSuccess) {
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: result.Message || 'Activo asignado correctamente',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: 'white',
+                    iconColor: '#4e73df'
+                });
+                CargarActivosDisponibles();
+                CargarActivosPersona();
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: (result && result.Message) || 'No se pudo asignar el activo',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+
+    function DesvincularActivo(personaActivoId) {
+        Swal.fire({
+            title: '¿Desvincular este activo?',
+            text: 'La fecha de término se establecerá automáticamente.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, desvincular',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#4e73df',
+            cancelButtonColor: '#858796',
+            background: 'white'
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                PostMVC('/Catalogs/DesvincularActivoPersona', { personaActivoId: personaActivoId }, function (response) {
+                    var r = typeof response === 'string' ? JSON.parse(response) : response;
+                    if (r && r.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: r.Message || 'Activo desvinculado correctamente',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        });
+                        CargarActivosDisponibles();
+                        CargarActivosPersona();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: (r && r.Message) || 'No se pudo desvincular el activo',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>

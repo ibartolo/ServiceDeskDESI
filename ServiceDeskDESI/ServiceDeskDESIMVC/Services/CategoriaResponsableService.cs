@@ -27,6 +27,11 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.ObtenerCategoriasPorResponsable(usuarioId);
         }
 
+        public async Task<ModelResponse<List<CategoriaResponsableDTO>>> ObtenerTodosLosResponsables()
+        {
+            return await _httpClient.ObtenerTodosLosResponsables();
+        }
+
         public async Task<ModelResponse<CategoriaResponsable>> GuardarOActualizarCategoriaResponsable(CategoriaResponsable categoriaResponsable)
         {
             return await _httpClient.GuardarOActualizarCategoriaResponsable(categoriaResponsable);
