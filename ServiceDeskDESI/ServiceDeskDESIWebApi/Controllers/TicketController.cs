@@ -6,9 +6,11 @@ using ServiceDeskDESIWebApi.Filters;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
@@ -61,6 +63,22 @@ namespace ServiceDeskDESIWebApi.Controllers
             var usuario = User.Identity.Name;
             var result = _ticketService.GuardarOActualizarTicket(ticket, usuario);
             return result;
+        }
+
+        /// <summary>
+        /// Guarda el ticket y sus evidencias (anexos) en una sola operación transaccional.
+        /// Recibe multipart/form-data: campos del ticket + archivos (Request.Files).
+        /// </summary>
+        [Permiso("Tickets", "Crear")]
+        [HttpPost, Route("GuardarConEvidencias")]
+        public ModelResponse<Ticket> GuardarConEvidencias()
+        {
+            var usuario = User.Identity.Name;
+            var empresaId = ObtenerEmpresaIdDesdeClaim();
+            var ticket = LeerTicketDesdeForm(HttpContext.Current.Request.Form);
+            var files = HttpContext.Current.Request.Files;
+
+            return _ticketService.GuardarTicketConEvidencias(ticket, files, usuario, empresaId);
         }
 
         /// <summary>
@@ -232,6 +250,43 @@ namespace ServiceDeskDESIWebApi.Controllers
             var usuario = User.Identity.Name;
             var result = _ticketService.ObtenerUsuariosArea(areaId, usuario);
             return result;
+        }
+
+        /// <summary>
+        /// Reconstruye un objeto Ticket a partir de los campos de un formulario multipart.
+        /// </summary>
+        private Ticket LeerTicketDesdeForm(NameValueCollection form)
+        {
+            var ticket = new Ticket
+            {
+                Titulo = form["Titulo"],
+                Descripcion = form["Descripcion"],
+                CreadoPor = form["CreadoPor"],
+                ModificadoPor = form["ModificadoPor"],
+                Estatus = string.Equals(form["Estatus"], "true", StringComparison.OrdinalIgnoreCase)
+            };
+
+            long id, areaId, categoriaId;
+            if (long.TryParse(form["Id"], out id)) ticket.Id = id;
+            if (long.TryParse(form["AreaId"], out areaId)) ticket.AreaId = areaId;
+            if (long.TryParse(form["CategoriaId"], out categoriaId)) ticket.CategoriaId = categoriaId;
+
+            long subcategoriaId;
+            if (long.TryParse(form["SubcategoriaId"], out subcategoriaId) && subcategoriaId > 0)
+                ticket.SubcategoriaId = subcategoriaId;
+
+            int urgencia, ticketEstatusId;
+            if (int.TryParse(form["Urgencia"], out urgencia)) ticket.Urgencia = urgencia;
+            if (int.TryParse(form["TicketEstatusId"], out ticketEstatusId)) ticket.TicketEstatusId = ticketEstatusId;
+
+            DateTime fechaCreacion;
+            if (DateTime.TryParse(form["FechaCreacion"], out fechaCreacion)) ticket.FechaCreacion = fechaCreacion;
+            else ticket.FechaCreacion = DateTime.Now;
+
+            DateTime fechaModificacion;
+            if (DateTime.TryParse(form["FechaModificacion"], out fechaModificacion)) ticket.FechaModificacion = fechaModificacion;
+
+            return ticket;
         }
     }
 

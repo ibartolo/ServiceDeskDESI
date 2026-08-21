@@ -83,6 +83,9 @@
     <Compile Include="Tickets\TicketDTO.cs" />
     <Compile Include="Tickets\TicketAsignacion.cs" />
     <Compile Include="Tickets\TicketAsignacionDTO.cs" />
+    <Compile Include="Tickets\TicketEvidencia.cs" />
+    <Compile Include="Tickets\EvidenciaConfigDTO.cs" />
+    <Compile Include="Tickets\EvidenciaDescargaDTO.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

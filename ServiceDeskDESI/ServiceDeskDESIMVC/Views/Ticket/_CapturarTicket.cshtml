@@ -75,6 +75,16 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label>Evidencias:</label>
+                                <input type="file" id="inputEvidenciasCaptura" multiple accept=".pdf,.jpg,.jpeg,.png" class="form-control" />
+                                <small class="text-muted">Máximo 3 archivos (PDF, JPG o PNG), 3 MB cada uno.</small>
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -140,6 +150,13 @@
         $("#modalCapturarTicket").on("shown.bs.modal", function () {
             LimpiarCaptura();
         });
+
+        // Validación de evidencias al seleccionar archivos
+        $("#inputEvidenciasCaptura").change(function () {
+            if (!ValidarArchivosEvidencia(this.files)) {
+                $(this).val('');
+            }
+        });
     });
 
     function LimpiarCaptura() {
@@ -183,6 +200,18 @@
             return;
         }
 
+        // Capturar archivos seleccionados ANTES de limpiar el formulario
+        var archivos = [];
+        var inputEvidencias = document.getElementById('inputEvidenciasCaptura');
+        if (inputEvidencias && inputEvidencias.files && inputEvidencias.files.length > 0) {
+            archivos = Array.prototype.slice.call(inputEvidencias.files);
+        }
+
+        // Validación client-side de evidencias (tope, peso, extensión)
+        if (!ValidarArchivosEvidencia(archivos)) {
+            return;
+        }
+
         Swal.fire({
             title: 'Guardando...',
             text: 'Por favor espere',
@@ -192,21 +221,26 @@
             }
         });
 
-        var ticket = {
-            Id: 0,
-            AreaId: parseInt(areaId),
-            CategoriaId: parseInt(categoriaId),
-            SubcategoriaId: parseInt(subcategoriaId),
-            Urgencia: parseInt(urgencia),
-            Titulo: titulo,
-            Descripcion: descripcion,
-            TicketEstatusId: 1
-        };
+        // Un solo request: ticket + evidencias juntos (transaccional).
+        var parameters = [
+            { Name: 'Id', Value: 0 },
+            { Name: 'AreaId', Value: areaId },
+            { Name: 'CategoriaId', Value: categoriaId },
+            { Name: 'SubcategoriaId', Value: subcategoriaId },
+            { Name: 'Urgencia', Value: urgencia },
+            { Name: 'Titulo', Value: titulo },
+            { Name: 'Descripcion', Value: descripcion },
+            { Name: 'TicketEstatusId', Value: 1 }
+        ];
 
-        PostMVC('/Ticket/GuardarOActualizarTicket', ticket, function (response) {
+        for (var i = 0; i < archivos.length; i++) {
+            parameters.push({ Name: 'archivos', Value: archivos[i] });
+        }
+
+        PostFileMVC('/Ticket/GuardarTicketConEvidencias', parameters, function (response) {
             Swal.close();
 
-            if (response.IsSuccess) {
+            if (response && response.IsSuccess) {
                 bootstrap.Modal.getInstance(document.getElementById('modalCapturarTicket')).hide();
                 LimpiarCaptura();
 
@@ -228,7 +262,7 @@
             } else {
                 Swal.fire({
                     title: 'Error',
-                    text: response.Message,
+                    text: (response && response.Message) ? response.Message : 'No se pudo guardar el ticket.',
                     icon: 'error',
                     confirmButtonText: 'Aceptar',
                     background: 'white',

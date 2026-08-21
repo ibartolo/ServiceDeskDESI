@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIEntities.Tickets;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -144,6 +145,69 @@ namespace ServiceDeskDESIMVC.DAL
                 {
                     return b;
                 }
+            }
+        }
+        public async Task<ModelResponse<T>> SendMultipartAsync<T>(string endPoint, MultipartFormDataContent content, string token = "")
+        {
+            // Configurar Accept + Authorization; el Content-Type multipart lo fija el propio content.
+            SetParametersHttpCliente("application/json", token);
+
+            try
+            {
+                using (var responseMessage = await httpClient.PostAsync(endPoint, content))
+                {
+                    var stringContent = await responseMessage.Content.ReadAsStringAsync();
+
+                    if (responseMessage.IsSuccessStatusCode)
+                    {
+                        return JsonConvert.DeserializeObject<ModelResponse<T>>(stringContent);
+                    }
+
+                    Log.Warning("SendMultipartAsync FALLÓ: Endpoint={Endpoint}, StatusCode={StatusCode}, Body={Body}", endPoint, (int)responseMessage.StatusCode, stringContent);
+                    return new ModelResponse<T>
+                    {
+                        IsSuccess = false,
+                        Message = $"Error {(int)responseMessage.StatusCode} ({responseMessage.ReasonPhrase}) al consumir {endPoint}.",
+                        Response = default(T)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "SendMultipartAsync EXCEPCIÓN: Endpoint={Endpoint}, Inner={Inner}", endPoint, ex.InnerException != null ? ex.InnerException.Message : "(sin inner)");
+                return new ModelResponse<T>
+                {
+                    IsSuccess = false,
+                    Message = $"No se pudo enviar la solicitud a {endPoint}: {ex.Message}",
+                    Response = default(T)
+                };
+            }
+        }
+        public async Task<EvidenciaDescargaDTO> RequestFileAsync(string endPoint, string token = "")
+        {
+            SetParametersHttpCliente("application/json", token);
+
+            using (var responseMessage = await httpClient.GetAsync(endPoint))
+            {
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    var dto = new EvidenciaDescargaDTO
+                    {
+                        Contenido = await responseMessage.Content.ReadAsByteArrayAsync(),
+                        ContentType = responseMessage.Content.Headers.ContentType?.MediaType ?? "application/octet-stream"
+                    };
+
+                    var disposition = responseMessage.Content.Headers.ContentDisposition;
+                    if (disposition != null && !string.IsNullOrWhiteSpace(disposition.FileName))
+                    {
+                        dto.NombreArchivo = disposition.FileName.Trim('"');
+                    }
+
+                    return dto;
+                }
+
+                Log.Warning("RequestFileAsync FALLÓ: Endpoint={Endpoint}, StatusCode={StatusCode}", endPoint, (int)responseMessage.StatusCode);
+                return new EvidenciaDescargaDTO { Contenido = null };
             }
         }
         private void SetParametersHttpCliente(string contentType, string token)

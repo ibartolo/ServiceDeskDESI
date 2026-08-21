@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -31,6 +32,15 @@ namespace ServiceDeskDESIMVC.DAL
             }
 
             return o;
+        }
+
+        /// <summary>
+        /// Transporte puro: envía un contenido multipart ya construido por la capa de servicios
+        /// y deserializa la respuesta. El HttpClient no conoce la estructura de los datos.
+        /// </summary>
+        public async Task<ModelResponse<T>> PostMultipartAsync<T>(string endpoint, MultipartFormDataContent content)
+        {
+            return await SendMultipartAsync<T>(endpoint, content, token.Token.access_token);
         }
         public async Task<Token> GetToken(string user, string pass)
         {

@@ -81,6 +81,12 @@
     var usuarioActualIdGlobal = @Html.Raw(JsonConvert.SerializeObject(ViewBag.UsuarioActualId ?? 0));
     var esResponsableAreaGlobal = @Html.Raw(JsonConvert.SerializeObject(ViewBag.EsResponsableArea ?? false));
 
+    // Configuración de evidencias (límites y extensiones) para validación client-side
+    var evidenciaConfig = @Html.Raw(JsonConvert.SerializeObject(ViewBag.EvidenciaConfig)) || { MaxArchivos: 3, MaxTamanoMB: 3, ExtensionesPermitidas: ["pdf", "jpg", "png"] };
+
+    // Id del ticket actualmente abierto en el detalle (para subir evidencias desde el detalle)
+    var ticketDetalleActualId = 0;
+
     var tablaTicket;
 
     $(document).ready(function () {
@@ -276,6 +282,83 @@
             timerProgressBar: true,
             background: 'white',
             iconColor: '#4e73df'
+        });
+    }
+
+    function ObtenerExtensionArchivo(nombre) {
+        if (!nombre || nombre.lastIndexOf('.') === -1) return '';
+        return nombre.substring(nombre.lastIndexOf('.') + 1).toLowerCase();
+    }
+
+    function ValidarArchivosEvidencia(files) {
+        if (!files || files.length === 0) return true;
+
+        var maxArchivos = evidenciaConfig.MaxArchivos || 3;
+        var maxTamanoMB = evidenciaConfig.MaxTamanoMB || 3;
+        var extensiones = evidenciaConfig.ExtensionesPermitidas || ["pdf", "jpg", "png"];
+
+        if (files.length > maxArchivos) {
+            Swal.fire({ title: 'Error', text: 'No puede adjuntar más de ' + maxArchivos + ' archivos a este ticket.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return false;
+        }
+
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+
+            if (file.size > maxTamanoMB * 1024 * 1024) {
+                Swal.fire({ title: 'Error', text: 'El archivo "' + file.name + '" supera el tamaño máximo de ' + maxTamanoMB + ' MB.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+                return false;
+            }
+
+            var ext = ObtenerExtensionArchivo(file.name);
+            if (extensiones.indexOf(ext) === -1) {
+                Swal.fire({ title: 'Error', text: 'Extensión no permitida. Solo se aceptan: ' + extensiones.join(', ') + '.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function SubirEvidencias(ticketId, files, onSuccess) {
+        if (!files || files.length === 0) {
+            if (typeof onSuccess === 'function') onSuccess();
+            return;
+        }
+
+        Swal.fire({
+            title: 'Subiendo evidencias...',
+            text: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        var parameters = [{ Name: 'ticketId', Value: ticketId }];
+        for (var i = 0; i < files.length; i++) {
+            parameters.push({ Name: 'archivos', Value: files[i] });
+        }
+
+        PostFileMVC('/Ticket/SubirEvidencia', parameters, function (response) {
+            Swal.close();
+
+            if (response && response.IsSuccess) {
+                if (typeof onSuccess === 'function') {
+                    onSuccess(response);
+                } else {
+                    ToastExito(response.Message || 'Evidencias subidas correctamente.');
+                }
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: (response && response.Message) ? response.Message : 'No se pudieron subir las evidencias.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
         });
     }
 
@@ -565,6 +648,12 @@
 
         if (typeof CargarHistorial === 'function') {
             CargarHistorial(id);
+        }
+
+        ticketDetalleActualId = id;
+
+        if (typeof CargarEvidencias === 'function') {
+            CargarEvidencias(id);
         }
 
         bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetalleTicket')).show();

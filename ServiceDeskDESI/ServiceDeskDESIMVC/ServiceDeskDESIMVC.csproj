@@ -166,6 +166,7 @@
     <Compile Include="DAL\HttpClientConnection.Compania.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
     <Compile Include="DAL\HttpClientConnection.Empresa.cs" />
+    <Compile Include="DAL\HttpClientConnection.Evidencia.cs" />
     <Compile Include="DAL\HttpClientConnection.Marca.cs" />
     <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
     <Compile Include="DAL\HttpClientConnection.Permisos.cs" />
@@ -193,6 +194,7 @@
     <Compile Include="Services\CategoriaService.cs" />
     <Compile Include="Services\CompaniaService.cs" />
     <Compile Include="Services\EmpresaService.cs" />
+    <Compile Include="Services\EvidenciaService.cs" />
     <Compile Include="Services\MarcaService.cs" />
     <Compile Include="Services\ModeloService.cs" />
     <Compile Include="Services\PermisosService.cs" />

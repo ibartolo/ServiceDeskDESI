@@ -22,6 +22,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly CategoriaService _categoriaService;
         private readonly RolService _rolService;
         private readonly UsuarioService _usuarioService;
+        private readonly EvidenciaService _evidenciaService;
 
         public TicketController()
         {
@@ -30,6 +31,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _categoriaService = new CategoriaService(httpClientConnection);
             _rolService = new RolService(httpClientConnection);
             _usuarioService = new UsuarioService(httpClientConnection);
+            _evidenciaService = new EvidenciaService(httpClientConnection);
         }
 
         public async Task<ActionResult> Index(long id = 0)
@@ -66,6 +68,9 @@ namespace ServiceDeskDESIMVC.Controllers
             {
                 ViewBag.Estatus = estatusResponse.Response;
             }
+
+            // Cargar configuración de evidencias (límites y extensiones) para la vista.
+            ViewBag.EvidenciaConfig = await ObtenerEvidenciaConfig();
 
             if (id > 0)
             {
@@ -121,26 +126,15 @@ namespace ServiceDeskDESIMVC.Controllers
         [Permiso("Tickets")]
         public async Task<string> GuardarOActualizarTicket(Ticket ticket)
         {
-            var tokenCookie = SessionHelper.GetSessionUser();
-
-            if (ticket.Id == 0)
-            {
-                ticket.CreadoPor = tokenCookie?.UserName ?? "system";
-                ticket.FechaCreacion = DateTime.Now;
-                // Por defecto, el estatus inicial es "Nuevo" (Id = 1)
-                if (ticket.TicketEstatusId == 0)
-                {
-                    ticket.TicketEstatusId = 1;
-                }
-            }
-            else
-            {
-                ticket.ModificadoPor = tokenCookie?.UserName ?? "system";
-                ticket.FechaModificacion = DateTime.Now;
-            }
-            ticket.Estatus = true;
-
             var response = await _ticketService.GuardarOActualizarTicket(ticket);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets")]
+        public async Task<string> GuardarTicketConEvidencias(Ticket ticket)
+        {
+            var response = await _ticketService.GuardarTicketConEvidencias(ticket, Request.Files);
             return JsonConvert.SerializeObject(response);
         }
 
@@ -260,6 +254,55 @@ namespace ServiceDeskDESIMVC.Controllers
         {
             var response = await _ticketService.ObtenerTicketAsignaciones(ticketId);
             return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> SubirEvidencia(long ticketId)
+        {
+            var response = await _evidenciaService.GuardarEvidencias(ticketId, Request.Files);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> ObtenerEvidenciasPorTicket(long ticketId)
+        {
+            var response = await _evidenciaService.ObtenerEvidenciasPorTicket(ticketId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        [Permiso("Tickets", "Leer")]
+        public async Task<ActionResult> DescargarEvidencia(long id)
+        {
+            var dto = await _evidenciaService.ObtenerEvidenciaDescarga(id);
+
+            if (dto == null || dto.Contenido == null || dto.Contenido.Length == 0)
+                return HttpNotFound("Evidencia no encontrada.");
+
+            return File(dto.Contenido, dto.ContentType ?? "application/octet-stream", dto.NombreArchivo);
+        }
+
+        private async Task<EvidenciaConfigDTO> ObtenerEvidenciaConfig()
+        {
+            try
+            {
+                var response = await _evidenciaService.ObtenerConfiguracion();
+                if (response != null && response.IsSuccess && response.Response != null)
+                    return response.Response;
+            }
+            catch
+            {
+                // Si no se puede obtener la configuración (WebApi caída, etc.), usar defaults.
+            }
+
+            return new EvidenciaConfigDTO
+            {
+                MaxArchivos = 3,
+                MaxTamanoMB = 3,
+                ExtensionesPermitidas = new List<string> { "pdf", "jpg", "png" }
+            };
         }
     }
 }

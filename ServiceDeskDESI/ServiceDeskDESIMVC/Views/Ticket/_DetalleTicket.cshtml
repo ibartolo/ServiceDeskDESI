@@ -56,6 +56,24 @@
                         </tbody>
                     </table>
                 </div>
+
+                <hr />
+
+                <h6><i class="fas fa-paperclip me-2"></i>Evidencias</h6>
+
+                <div class="row mb-2">
+                    <div class="col-md-9">
+                        <input type="file" id="inputEvidenciasDetalle" multiple accept=".pdf,.jpg,.jpeg,.png" class="form-control" />
+                        <small class="text-muted">Máximo 3 archivos (PDF, JPG o PNG), 3 MB cada uno.</small>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-primary w-100" onclick="SubirEvidenciasDetalle()">
+                            <i class="fas fa-upload me-1"></i>Subir
+                        </button>
+                    </div>
+                </div>
+
+                <div id="listaEvidencias"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -114,6 +132,67 @@
             } else {
                 historialTable.clear().rows.add(data).draw();
             }
+        });
+    }
+
+    $("#inputEvidenciasDetalle").change(function () {
+        if (!ValidarArchivosEvidencia(this.files)) {
+            $(this).val('');
+        }
+    });
+
+    function CargarEvidencias(ticketId) {
+        GetMVC('/Ticket/ObtenerEvidenciasPorTicket?ticketId=' + ticketId, function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+            var data = (result.IsSuccess && result.Response) ? result.Response : [];
+
+            var html = '';
+
+            if (!data || data.length === 0) {
+                html = '<p class="text-muted mb-0">Sin evidencias.</p>';
+            } else {
+                html = '<ul class="list-group">';
+                data.forEach(function (e) {
+                    var fecha = e.FechaSubida ? new Date(e.FechaSubida).toLocaleString() : '';
+                    html += '<li class="list-group-item d-flex justify-content-between align-items-center">' +
+                        '<span><i class="fas fa-file me-2"></i>' + e.NombreArchivo +
+                        (fecha ? ' <small class="text-muted">(' + fecha + ')</small>' : '') +
+                        '</span>' +
+                        '<a class="btn btn-sm btn-outline-primary" href="/Ticket/DescargarEvidencia?id=' + e.Id + '">' +
+                        '<i class="fas fa-download me-1"></i>Descargar</a>' +
+                        '</li>';
+                });
+                html += '</ul>';
+            }
+
+            $("#listaEvidencias").html(html);
+        });
+    }
+
+    function SubirEvidenciasDetalle() {
+        var input = document.getElementById('inputEvidenciasDetalle');
+
+        if (!input || !input.files || input.files.length === 0) {
+            Swal.fire({ title: 'Error', text: 'Debe seleccionar al menos un archivo.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+
+        if (!ticketDetalleActualId || ticketDetalleActualId <= 0) {
+            Swal.fire({ title: 'Error', text: 'No se ha seleccionado un ticket.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+
+        var files = Array.prototype.slice.call(input.files);
+
+        if (!ValidarArchivosEvidencia(files)) {
+            input.value = '';
+            return;
+        }
+
+        SubirEvidencias(ticketDetalleActualId, files, function () {
+            input.value = '';
+            CargarEvidencias(ticketDetalleActualId);
+            ToastExito('Evidencias subidas correctamente.');
         });
     }
 </script>
