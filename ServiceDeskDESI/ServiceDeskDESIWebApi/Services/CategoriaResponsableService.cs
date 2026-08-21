@@ -20,10 +20,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaResponsableService.ObtenerResponsablesPorCategoria para CategoriaId {CategoriaId} usuario {Usuario}", categoriaId, usuario);
+
                 if (categoriaId <= 0) { throw new ArgumentException("El ID de la categoría es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerResponsablesPorCategoria(categoriaId, usuario);
+                var result = _dbWrapper.ObtenerResponsablesPorCategoria(categoriaId, usuario);
+                Log.Information("CategoriaResponsableService.ObtenerResponsablesPorCategoria RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -45,10 +49,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaResponsableService.ObtenerCategoriasPorResponsable para UsuarioId {UsuarioId} usuario {Usuario}", usuarioId, usuario);
+
                 if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerCategoriasPorResponsable(usuarioId, usuario);
+                var result = _dbWrapper.ObtenerCategoriasPorResponsable(usuarioId, usuario);
+                Log.Information("CategoriaResponsableService.ObtenerCategoriasPorResponsable RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -70,12 +78,16 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaResponsableService.GuardarOActualizarCategoriaResponsable para usuario {Usuario}", usuario);
+
                 if (categoriaResponsable.CategoriaId <= 0) { throw new ArgumentException("La categoría es requerida."); }
                 if (categoriaResponsable.UsuarioId <= 0) { throw new ArgumentException("El usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(categoriaResponsable.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarCategoriaResponsable(categoriaResponsable, usuario);
+                var result = _dbWrapper.GuardarOActualizarCategoriaResponsable(categoriaResponsable, usuario);
+                Log.Information("CategoriaResponsableService.GuardarOActualizarCategoriaResponsable RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -97,11 +109,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaResponsableService.EliminarCategoriaResponsable para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del responsable es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarCategoriaResponsable(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarCategoriaResponsable(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("CategoriaResponsableService.EliminarCategoriaResponsable RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -123,9 +139,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaResponsableService.ObtenerTodosLosResponsables para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTodosLosResponsables(usuario);
+                var result = _dbWrapper.ObtenerTodosLosResponsables(usuario);
+                Log.Information("CategoriaResponsableService.ObtenerTodosLosResponsables RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

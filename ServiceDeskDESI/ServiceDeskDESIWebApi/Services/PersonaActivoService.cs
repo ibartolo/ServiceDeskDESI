@@ -20,10 +20,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PersonaActivoService.ObtenerActivosPorPersona para PersonaId {PersonaId} usuario {Usuario}", personaId, usuario);
+
                 if (personaId <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerActivosPorPersona(personaId, usuario);
+                var result = _dbWrapper.ObtenerActivosPorPersona(personaId, usuario);
+                Log.Information("PersonaActivoService.ObtenerActivosPorPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -41,9 +45,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PersonaActivoService.ObtenerActivosDisponibles para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerActivosDisponibles(usuario);
+                var result = _dbWrapper.ObtenerActivosDisponibles(usuario);
+                Log.Information("PersonaActivoService.ObtenerActivosDisponibles RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -61,11 +69,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PersonaActivoService.AsignarActivoPersona para PersonaId {PersonaId} ActivoId {ActivoId} usuario {Usuario}", personaId, activoId, usuario);
+
                 if (personaId <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (activoId <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.AsignarActivoPersona(personaId, activoId, usuario);
+                var result = _dbWrapper.AsignarActivoPersona(personaId, activoId, usuario);
+                Log.Information("PersonaActivoService.AsignarActivoPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -83,10 +95,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PersonaActivoService.DesvincularActivoPersona para PersonaActivoId {PersonaActivoId} usuario {Usuario}", personaActivoId, usuario);
+
                 if (personaActivoId <= 0) { throw new ArgumentException("El ID de la asignación es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.DesvincularActivoPersona(personaActivoId, usuario);
+                var result = _dbWrapper.DesvincularActivoPersona(personaActivoId, usuario);
+                Log.Information("PersonaActivoService.DesvincularActivoPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

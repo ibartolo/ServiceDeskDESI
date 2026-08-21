@@ -19,9 +19,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PaginaService.ObtenerPaginasPorUsuario para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerPaginasPorUsuario(usuario);
+                var result = _dbWrapper.ObtenerPaginasPorUsuario(usuario);
+                Log.Information("PaginaService.ObtenerPaginasPorUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -39,9 +43,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PaginaService.ObtenerPaginaPorNombre para Nombre {Nombre}", nombre);
+
                 if (string.IsNullOrWhiteSpace(nombre)) { throw new ArgumentException("El nombre de la página es requerido."); }
 
-                return _dbWrapper.ObtenerPaginaPorNombre(nombre);
+                var result = _dbWrapper.ObtenerPaginaPorNombre(nombre);
+                Log.Information("PaginaService.ObtenerPaginaPorNombre RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -59,7 +67,11 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
-                return _dbWrapper.ObtenerPaginas();
+                Log.Information("PaginaService.ObtenerPaginas");
+
+                var result = _dbWrapper.ObtenerPaginas();
+                Log.Information("PaginaService.ObtenerPaginas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (Exception ex)
             {

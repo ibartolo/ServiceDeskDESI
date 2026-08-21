@@ -20,9 +20,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CompaniaService.ObtenerCompanias para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerCompanias(usuario);
+                var result = _dbWrapper.ObtenerCompanias(usuario);
+                Log.Information("CompaniaService.ObtenerCompanias RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -40,10 +44,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CompaniaService.ObtenerCompaniaPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la compañía es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerCompaniaPorId(id, usuario);
+                var result = _dbWrapper.ObtenerCompaniaPorId(id, usuario);
+                Log.Information("CompaniaService.ObtenerCompaniaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -61,6 +69,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CompaniaService.GuardarOActualizarCompania para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(compania.Nombre)) { throw new ArgumentException("El nombre de la compañía es requerido."); }
                 if (compania.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
                 if (compania.Acronimo != null && compania.Acronimo.Length > 50) { throw new ArgumentException("El acrónimo no puede exceder los 50 caracteres."); }
@@ -69,7 +79,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(compania.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarCompania(compania, usuario);
+                var result = _dbWrapper.GuardarOActualizarCompania(compania, usuario);
+                Log.Information("CompaniaService.GuardarOActualizarCompania RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -87,11 +99,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CompaniaService.EliminarCompania para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la compañía es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarCompania(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarCompania(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("CompaniaService.EliminarCompania RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

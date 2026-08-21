@@ -23,9 +23,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.ObtenerUsuarios para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerUsuarios(usuario);
+                var result = _dbWrapper.ObtenerUsuarios(usuario);
+                Log.Information("AutenticacionService.ObtenerUsuarios RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -43,10 +47,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.ObtenerUsuarioPorId para id {Id} y usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerUsuarioPorId(id, usuario);
+                var result = _dbWrapper.ObtenerUsuarioPorId(id, usuario);
+                Log.Information("AutenticacionService.ObtenerUsuarioPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -64,9 +72,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.ObtenerUsuarioPorNombreUsuario para usuario {Usuario}", nombreUsuario);
+
                 if (string.IsNullOrWhiteSpace(nombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerUsuarioPorNombreUsuario(nombreUsuario, nombreUsuario);
+                var result = _dbWrapper.ObtenerUsuarioPorNombreUsuario(nombreUsuario, nombreUsuario);
+                Log.Information("AutenticacionService.ObtenerUsuarioPorNombreUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -84,9 +96,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.ObtenerUsuarioPorCorreo para correo {Correo}", correo);
+
                 if (string.IsNullOrWhiteSpace(correo)) { throw new ArgumentException("El correo es requerido."); }
 
-                return _dbWrapper.ObtenerUsuarioPorCorreo(correo);
+                var result = _dbWrapper.ObtenerUsuarioPorCorreo(correo);
+                Log.Information("AutenticacionService.ObtenerUsuarioPorCorreo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -104,6 +120,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.GuardarOActualizarUsuario para usuario {Usuario}", usuario?.NombreUsuario);
+
                 if (string.IsNullOrWhiteSpace(usuario.NombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (usuario.NombreUsuario.Length > 25) { throw new ArgumentException("El nombre de usuario no puede exceder los 25 caracteres."); }
                 if (string.IsNullOrWhiteSpace(usuario.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
@@ -119,7 +137,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if ((usuario.EmpresaId ?? 0) <= 0) { throw new ArgumentException("La empresa es requerida."); }
                 if (string.IsNullOrWhiteSpace(usuario.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarUsuario(usuario);
+                var result = _dbWrapper.GuardarOActualizarUsuario(usuario);
+                Log.Information("AutenticacionService.GuardarOActualizarUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -137,6 +157,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.GuardarOActualizarUsuarioAdmin para usuario {Usuario} por admin {UsuarioAdmin}", usuario?.NombreUsuario, usuarioAdmin);
+
                 if (string.IsNullOrWhiteSpace(usuario.NombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (usuario.NombreUsuario.Length > 25) { throw new ArgumentException("El nombre de usuario no puede exceder los 25 caracteres."); }
                 if (usuario.Id <= 0 && string.IsNullOrWhiteSpace(usuario.Contrasena)) { throw new ArgumentException("La contraseña es requerida."); }
@@ -158,7 +180,9 @@ namespace ServiceDeskDESIWebApi.Services
                     usuario.Contrasena = Cryptography.HashPassword(usuario.Contrasena);
                 }
 
-                return _dbWrapper.GuardarOActualizarUsuarioAdmin(usuario, usuarioAdmin);
+                var result = _dbWrapper.GuardarOActualizarUsuarioAdmin(usuario, usuarioAdmin);
+                Log.Information("AutenticacionService.GuardarOActualizarUsuarioAdmin RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -176,6 +200,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.ActualizarPerfilUsuario para usuario {Usuario} por {UsuarioAutenticado}", usuario?.NombreUsuario, usuarioAutenticado);
+
                 if (usuario.Id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario.NombreUsuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (usuario.NombreUsuario.Length > 25) { throw new ArgumentException("El nombre de usuario no puede exceder los 25 caracteres."); }
@@ -191,7 +217,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(usuario.ModificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuarioAutenticado)) { throw new ArgumentException("El usuario autenticado es requerido."); }
 
-                return _dbWrapper.ActualizarPerfilUsuario(usuario, usuarioAutenticado);
+                var result = _dbWrapper.ActualizarPerfilUsuario(usuario, usuarioAutenticado);
+                Log.Information("AutenticacionService.ActualizarPerfilUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -209,10 +237,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.EliminarUsuario para id {Id}", id);
+
                 if (id <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
 
-                return _dbWrapper.EliminarUsuario(id, modificadoPor, fechaModificacion);
+                var result = _dbWrapper.EliminarUsuario(id, modificadoPor, fechaModificacion);
+                Log.Information("AutenticacionService.EliminarUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -255,12 +287,16 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.InsertarTokenRecuperacion para usuario Id {UsuarioId}", usuarioId);
+
                 if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(token)) { throw new ArgumentException("El token es requerido."); }
                 if (fechaExpiracion <= DateTime.Now) { throw new ArgumentException("La fecha de expiración debe ser mayor a la fecha actual."); }
                 if (string.IsNullOrWhiteSpace(creadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
 
-                return _dbWrapper.InsertarTokenRecuperacion(usuarioId, token, fechaExpiracion, creadoPor);
+                var result = _dbWrapper.InsertarTokenRecuperacion(usuarioId, token, fechaExpiracion, creadoPor);
+                Log.Information("AutenticacionService.InsertarTokenRecuperacion RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -278,18 +314,22 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.ObtenerTokenRecuperacion para token (valor omitido por seguridad)");
+
                 if (string.IsNullOrWhiteSpace(token)) { throw new ArgumentException("El token es requerido."); }
 
-                return _dbWrapper.ObtenerTokenRecuperacion(token);
+                var result = _dbWrapper.ObtenerTokenRecuperacion(token);
+                Log.Information("AutenticacionService.ObtenerTokenRecuperacion RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
-                Log.Warning(ex, "Error de validación en ObtenerTokenRecuperacion para token {Token}", token);
+                Log.Warning(ex, "Error de validación en ObtenerTokenRecuperacion (token omitido por seguridad)");
                 return new ModelResponse<TokenRecuperacionDTO> { IsSuccess = false, Message = ex.Message };
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error en AutenticacionService.ObtenerTokenRecuperacion para token {Token}", token);
+                Log.Error(ex, "Error en AutenticacionService.ObtenerTokenRecuperacion (token omitido por seguridad)");
                 return new ModelResponse<TokenRecuperacionDTO> { IsSuccess = false, Message = "Ocurrió un error al obtener el token." };
             }
         }
@@ -298,10 +338,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AutenticacionService.ActualizarTokenUsado para token Id {Id}", id);
+
                 if (id <= 0) { throw new ArgumentException("El ID del token es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
 
-                return _dbWrapper.ActualizarTokenUsado(id, modificadoPor);
+                var result = _dbWrapper.ActualizarTokenUsado(id, modificadoPor);
+                Log.Information("AutenticacionService.ActualizarTokenUsado RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -321,6 +365,8 @@ namespace ServiceDeskDESIWebApi.Services
 
             try
             {
+                Log.Information("AutenticacionService.ValidarRecetearContrasenia para correo {Correo}", correo);
+
                 if (string.IsNullOrWhiteSpace(correo)) { throw new ArgumentException("El correo es requerido."); }
 
                 var userResponse = _dbWrapper.ObtenerUsuarioPorCorreo(correo);
@@ -329,6 +375,7 @@ namespace ServiceDeskDESIWebApi.Services
                 {
                     modelResponse.IsSuccess = false;
                     modelResponse.Message = "La información proporcionada no es correcta";
+                    Log.Information("AutenticacionService.ValidarRecetearContrasenia RESULTADO: IsSuccess={IsSuccess}, Message={Message}", modelResponse.IsSuccess, modelResponse.Message);
                     return modelResponse;
                 }
 
@@ -346,6 +393,7 @@ namespace ServiceDeskDESIWebApi.Services
                 {
                     modelResponse.IsSuccess = false;
                     modelResponse.Message = "Error al generar la solicitud de recuperación";
+                    Log.Information("AutenticacionService.ValidarRecetearContrasenia RESULTADO: IsSuccess={IsSuccess}, Message={Message}", modelResponse.IsSuccess, modelResponse.Message);
                     return modelResponse;
                 }
 
@@ -382,6 +430,7 @@ namespace ServiceDeskDESIWebApi.Services
                 modelResponse.Message = "Ocurrió un error al procesar la solicitud";
             }
 
+            Log.Information("AutenticacionService.ValidarRecetearContrasenia RESULTADO: IsSuccess={IsSuccess}, Message={Message}", modelResponse.IsSuccess, modelResponse.Message);
             return modelResponse;
         }
 
@@ -391,6 +440,8 @@ namespace ServiceDeskDESIWebApi.Services
 
             try
             {
+                Log.Information("AutenticacionService.RestablecerContrasenia para token (valor omitido por seguridad)");
+
                 if (string.IsNullOrWhiteSpace(token)) { throw new ArgumentException("El token es requerido."); }
                 if (string.IsNullOrWhiteSpace(nuevaContrasena)) { throw new ArgumentException("La nueva contraseña es requerida."); }
                 if (nuevaContrasena.Length < 6) { throw new ArgumentException("La contraseña debe tener al menos 6 caracteres."); }
@@ -402,6 +453,7 @@ namespace ServiceDeskDESIWebApi.Services
                 {
                     modelResponse.IsSuccess = false;
                     modelResponse.Message = "El enlace de recuperación no es válido o ha expirado";
+                    Log.Information("AutenticacionService.RestablecerContrasenia RESULTADO: IsSuccess={IsSuccess}, Message={Message}", modelResponse.IsSuccess, modelResponse.Message);
                     return modelResponse;
                 }
 
@@ -422,6 +474,7 @@ namespace ServiceDeskDESIWebApi.Services
                 {
                     modelResponse.IsSuccess = false;
                     modelResponse.Message = updateResponse.Message;
+                    Log.Information("AutenticacionService.RestablecerContrasenia RESULTADO: IsSuccess={IsSuccess}, Message={Message}", modelResponse.IsSuccess, modelResponse.Message);
                     return modelResponse;
                 }
 
@@ -433,17 +486,18 @@ namespace ServiceDeskDESIWebApi.Services
             }
             catch (ArgumentException ex)
             {
-                Log.Warning(ex, "Error de validación en RestablecerContrasenia para token {Token}", token);
+                Log.Warning(ex, "Error de validación en RestablecerContrasenia (token omitido por seguridad)");
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error en AutenticacionService.RestablecerContrasenia para token {Token}", token);
+                Log.Error(ex, "Error en AutenticacionService.RestablecerContrasenia (token omitido por seguridad)");
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al procesar la solicitud";
             }
 
+            Log.Information("AutenticacionService.RestablecerContrasenia RESULTADO: IsSuccess={IsSuccess}, Message={Message}", modelResponse.IsSuccess, modelResponse.Message);
             return modelResponse;
         }
 

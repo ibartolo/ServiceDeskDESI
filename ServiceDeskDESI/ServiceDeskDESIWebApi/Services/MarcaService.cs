@@ -22,9 +22,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("MarcaService.ObtenerMarcas para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerMarcas(usuario);
+                var result = _dbWrapper.ObtenerMarcas(usuario);
+                Log.Information("MarcaService.ObtenerMarcas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -42,10 +46,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("MarcaService.ObtenerMarcaPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la marca es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerMarcaPorId(id, usuario);
+                var result = _dbWrapper.ObtenerMarcaPorId(id, usuario);
+                Log.Information("MarcaService.ObtenerMarcaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -63,13 +71,17 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("MarcaService.GuardarOActualizarMarca para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(marca.Nombre)) { throw new ArgumentException("El nombre de la marca es requerido."); }
                 if (marca.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
                 if (marca.Descripcion != null && marca.Descripcion.Length > 250) { throw new ArgumentException("La descripción no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(marca.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarMarca(marca);
+                var result = _dbWrapper.GuardarOActualizarMarca(marca);
+                Log.Information("MarcaService.GuardarOActualizarMarca RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -87,11 +99,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("MarcaService.EliminarMarca para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la marca es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarMarca(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarMarca(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("MarcaService.EliminarMarca RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

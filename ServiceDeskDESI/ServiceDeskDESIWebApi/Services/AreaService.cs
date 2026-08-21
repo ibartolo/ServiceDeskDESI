@@ -21,9 +21,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AreaService.ObtenerAreas para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerAreas(usuario);
+                var result = _dbWrapper.ObtenerAreas(usuario);
+                Log.Information("AreaService.ObtenerAreas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -41,10 +45,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AreaService.ObtenerAreaPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerAreaPorId(id, usuario);
+                var result = _dbWrapper.ObtenerAreaPorId(id, usuario);
+                Log.Information("AreaService.ObtenerAreaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -62,6 +70,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AreaService.GuardarOActualizarArea para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(area.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
                 if (area.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
                 if (area.Descripcion != null && area.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
@@ -69,7 +79,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(area.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarArea(area);
+                var result = _dbWrapper.GuardarOActualizarArea(area);
+                Log.Information("AreaService.GuardarOActualizarArea RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -87,11 +99,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("AreaService.EliminarArea para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarArea(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarArea(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("AreaService.EliminarArea RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

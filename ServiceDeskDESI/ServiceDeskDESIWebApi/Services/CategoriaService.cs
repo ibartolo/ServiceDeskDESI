@@ -20,9 +20,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaService.ObtenerCategorias para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerCategorias(usuario);
+                var result = _dbWrapper.ObtenerCategorias(usuario);
+                Log.Information("CategoriaService.ObtenerCategorias RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -44,10 +48,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaService.ObtenerCategoriasPorArea para AreaId {AreaId} usuario {Usuario}", areaId, usuario);
+
                 if (areaId <= 0) { throw new ArgumentException("El ID del área es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerCategoriasPorArea(areaId, usuario);
+                var result = _dbWrapper.ObtenerCategoriasPorArea(areaId, usuario);
+                Log.Information("CategoriaService.ObtenerCategoriasPorArea RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -69,10 +77,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaService.ObtenerCategoriaPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la categoría es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerCategoriaPorId(id, usuario);
+                var result = _dbWrapper.ObtenerCategoriaPorId(id, usuario);
+                Log.Information("CategoriaService.ObtenerCategoriaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -94,10 +106,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaService.ObtenerCategoriasPorPadre para CategoriaPadreId {CategoriaPadreId} usuario {Usuario}", categoriaPadreId, usuario);
+
                 if (categoriaPadreId <= 0) { throw new ArgumentException("El ID de la categoría padre es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerCategoriasPorPadre(categoriaPadreId, usuario);
+                var result = _dbWrapper.ObtenerCategoriasPorPadre(categoriaPadreId, usuario);
+                Log.Information("CategoriaService.ObtenerCategoriasPorPadre RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -119,6 +135,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaService.GuardarOActualizarCategoria para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(categoria.Nombre)) { throw new ArgumentException("El nombre de la categoría es requerido."); }
                 if (categoria.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
                 if (categoria.Descripcion != null && categoria.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
@@ -127,7 +145,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(categoria.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarCategoria(categoria, usuario);
+                var result = _dbWrapper.GuardarOActualizarCategoria(categoria, usuario);
+                Log.Information("CategoriaService.GuardarOActualizarCategoria RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -149,11 +169,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("CategoriaService.EliminarCategoria para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la categoría es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarCategoria(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarCategoria(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("CategoriaService.EliminarCategoria RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

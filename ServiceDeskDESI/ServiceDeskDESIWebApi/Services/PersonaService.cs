@@ -20,9 +20,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PersonaService.ObtenerTodasLasPersonas para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTodasLasPersonas(usuario);
+                var result = _dbWrapper.ObtenerTodasLasPersonas(usuario);
+                Log.Information("PersonaService.ObtenerTodasLasPersonas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -40,10 +44,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PersonaService.ObtenerPersonaPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerPersonaPorId(id, usuario);
+                var result = _dbWrapper.ObtenerPersonaPorId(id, usuario);
+                Log.Information("PersonaService.ObtenerPersonaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -61,6 +69,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PersonaService.GuardarOActualizarPersona para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(persona.Nombre)) { throw new ArgumentException("El nombre de la persona es requerido."); }
                 if (persona.Nombre.Length > 150) { throw new ArgumentException("El nombre no puede exceder los 150 caracteres."); }
                 if (string.IsNullOrWhiteSpace(persona.Apellido)) { throw new ArgumentException("El apellido de la persona es requerido."); }
@@ -71,7 +81,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(persona.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarPersona(persona, usuario);
+                var result = _dbWrapper.GuardarOActualizarPersona(persona, usuario);
+                Log.Information("PersonaService.GuardarOActualizarPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -89,11 +101,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PersonaService.EliminarPersona para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarPersona(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarPersona(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("PersonaService.EliminarPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

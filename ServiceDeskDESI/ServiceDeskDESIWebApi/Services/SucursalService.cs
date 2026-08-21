@@ -20,9 +20,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("SucursalService.ObtenerSucursales para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerSucursales(usuario);
+                var result = _dbWrapper.ObtenerSucursales(usuario);
+                Log.Information("SucursalService.ObtenerSucursales RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -44,10 +48,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("SucursalService.ObtenerSucursalPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la sucursal es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerSucursalPorId(id, usuario);
+                var result = _dbWrapper.ObtenerSucursalPorId(id, usuario);
+                Log.Information("SucursalService.ObtenerSucursalPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -69,6 +77,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("SucursalService.GuardarOActualizarSucursal para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(sucursal.Nombre)) { throw new ArgumentException("El nombre de la sucursal es requerido."); }
                 if (sucursal.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
                 if (sucursal.Descripcion != null && sucursal.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
@@ -79,7 +89,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(sucursal.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarSucursal(sucursal, usuario);
+                var result = _dbWrapper.GuardarOActualizarSucursal(sucursal, usuario);
+                Log.Information("SucursalService.GuardarOActualizarSucursal RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -101,11 +113,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("SucursalService.EliminarSucursal para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la sucursal es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarSucursal(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarSucursal(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("SucursalService.EliminarSucursal RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

@@ -22,9 +22,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PermisosService.ObtenerPermisosPorUsuario para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerPermisosPorUsuario(usuario);
+                var result = _dbWrapper.ObtenerPermisosPorUsuario(usuario);
+                Log.Information("PermisosService.ObtenerPermisosPorUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -42,6 +46,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PermisosService.ValidarPermisoUsuario para usuario {Usuario}, página {NombrePagina}, acción {Accion}", usuario, nombrePagina, accion);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(nombrePagina)) { throw new ArgumentException("El nombre de la página es requerido."); }
                 if (string.IsNullOrWhiteSpace(accion)) { throw new ArgumentException("La acción es requerida."); }
@@ -62,7 +68,9 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var pagina = (Pagina)paginaResponse.Response;
 
-                return _dbWrapper.ValidarPermisoUsuario(usuarioObj.Id, pagina.Id, accion);
+                var result = _dbWrapper.ValidarPermisoUsuario(usuarioObj.Id, pagina.Id, accion);
+                Log.Information("PermisosService.ValidarPermisoUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -82,7 +90,11 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
-                return _dbWrapper.ObtenerPaginas();
+                Log.Information("PermisosService.ObtenerPaginas");
+
+                var result = _dbWrapper.ObtenerPaginas();
+                Log.Information("PermisosService.ObtenerPaginas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (Exception ex)
             {
@@ -95,10 +107,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PermisosService.ObtenerPermisosPorRol para RolId {RolId} usuario {Usuario}", rolId, usuario);
+
                 if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerPermisosPorRol(rolId, usuario);
+                var result = _dbWrapper.ObtenerPermisosPorRol(rolId, usuario);
+                Log.Information("PermisosService.ObtenerPermisosPorRol RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -117,6 +133,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PermisosService.GuardarPermisosRol para RolId {RolId}, PaginaId {PaginaId}, usuario {Usuario}", rolId, paginaId, usuario);
+
                 if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
                 if (paginaId <= 0) { throw new ArgumentException("El ID de la página es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -145,8 +163,10 @@ namespace ServiceDeskDESIWebApi.Services
                     throw new ArgumentException("No tiene permisos de administrador para modificar permisos.");
                 }
 
-                return _dbWrapper.GuardarPermisosRol(rolId, paginaId, puedeLeer, puedeCrear, puedeEditar,
+                var result = _dbWrapper.GuardarPermisosRol(rolId, paginaId, puedeLeer, puedeCrear, puedeEditar,
                     puedeEliminar, puedeExportar, modificadoPor, usuario);
+                Log.Information("PermisosService.GuardarPermisosRol RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -166,6 +186,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PermisosService.GuardarPermisosRolMasivo para RolId {RolId} usuario {Usuario}", rolId, usuario);
+
                 // Validaciones
                 if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
@@ -184,7 +206,9 @@ namespace ServiceDeskDESIWebApi.Services
                     }
                 }
 
-                return _dbWrapper.GuardarPermisosRolMasivo(rolId, permisos, usuario);
+                var result = _dbWrapper.GuardarPermisosRolMasivo(rolId, permisos, usuario);
+                Log.Information("PermisosService.GuardarPermisosRolMasivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
