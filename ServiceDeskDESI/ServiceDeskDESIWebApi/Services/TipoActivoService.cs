@@ -20,9 +20,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TipoActivoService.ObtenerTodosLosTipoActivos para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTodosLosTipoActivos(usuario);
+                var result = _dbWrapper.ObtenerTodosLosTipoActivos(usuario);
+                Log.Information("TipoActivoService.ObtenerTodosLosTipoActivos RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -40,10 +44,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TipoActivoService.ObtenerTipoActivoPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del tipo de activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTipoActivoPorId(id, usuario);
+                var result = _dbWrapper.ObtenerTipoActivoPorId(id, usuario);
+                Log.Information("TipoActivoService.ObtenerTipoActivoPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -61,13 +69,17 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TipoActivoService.GuardarOActualizarTipoActivo para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(tipoActivo.Nombre)) { throw new ArgumentException("El nombre del tipo de activo es requerido."); }
                 if (tipoActivo.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
                 if (tipoActivo.Descripcion != null && tipoActivo.Descripcion.Length > 250) { throw new ArgumentException("La descripción no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(tipoActivo.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarTipoActivo(tipoActivo, usuario);
+                var result = _dbWrapper.GuardarOActualizarTipoActivo(tipoActivo, usuario);
+                Log.Information("TipoActivoService.GuardarOActualizarTipoActivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -85,11 +97,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TipoActivoService.EliminarTipoActivo para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del tipo de activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarTipoActivo(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarTipoActivo(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("TipoActivoService.EliminarTipoActivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

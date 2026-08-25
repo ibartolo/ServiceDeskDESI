@@ -1,0 +1,18 @@
+change: foliador-tickets
+status: in-progress
+artifact_store: openspec
+execution_mode: interactive
+phases:
+  explore: done
+  propose: done
+  specs: pending
+  design: pending
+  tasks: pending
+  apply: pending
+  verify: pending
+  archive: pending
+decisions:
+  backfill: none
+  folio_nullable: true
+  folio_scope: per-empresa
+  folio_format: "T-{Consecutivo:00000}"

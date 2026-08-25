@@ -20,9 +20,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PuestoService.ObtenerTodosLosPuestos para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTodosLosPuestos(usuario);
+                var result = _dbWrapper.ObtenerTodosLosPuestos(usuario);
+                Log.Information("PuestoService.ObtenerTodosLosPuestos RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -40,10 +44,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PuestoService.ObtenerPuestoPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del puesto es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerPuestoPorId(id, usuario);
+                var result = _dbWrapper.ObtenerPuestoPorId(id, usuario);
+                Log.Information("PuestoService.ObtenerPuestoPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -61,13 +69,17 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PuestoService.GuardarOActualizarPuesto para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(puesto.Nombre)) { throw new ArgumentException("El nombre del puesto es requerido."); }
                 if (puesto.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
                 if (puesto.Descripcion != null && puesto.Descripcion.Length > 250) { throw new ArgumentException("La descripción no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(puesto.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarPuesto(puesto, usuario);
+                var result = _dbWrapper.GuardarOActualizarPuesto(puesto, usuario);
+                Log.Information("PuestoService.GuardarOActualizarPuesto RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -85,11 +97,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("PuestoService.EliminarPuesto para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del puesto es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarPuesto(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarPuesto(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("PuestoService.EliminarPuesto RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

@@ -10,6 +10,9 @@
                     <dt class="col-sm-3">Título:</dt>
                     <dd class="col-sm-9" id="detTitulo">---</dd>
 
+                    <dt class="col-sm-3">Folio:</dt>
+                    <dd class="col-sm-9" id="detFolio">---</dd>
+
                     <dt class="col-sm-3">Área:</dt>
                     <dd class="col-sm-9" id="detArea">---</dd>
 
@@ -61,22 +64,31 @@
 
                 <h6><i class="fas fa-paperclip me-2"></i>Evidencias</h6>
 
-                <div class="row mb-2">
-                    <div class="col-md-9">
-                        <input type="file" id="inputEvidenciasDetalle" multiple accept=".pdf,.jpg,.jpeg,.png" class="form-control" />
-                        <small class="text-muted">Máximo 3 archivos (PDF, JPG o PNG), 3 MB cada uno.</small>
-                    </div>
-                    <div class="col-md-3">
-                        <button type="button" class="btn btn-primary w-100" onclick="SubirEvidenciasDetalle()">
-                            <i class="fas fa-upload me-1"></i>Subir
-                        </button>
-                    </div>
-                </div>
-
                 <div id="listaEvidencias"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSubirEvidencia" tabindex="-1" aria-labelledby="modalSubirEvidenciaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalSubirEvidenciaLabel"><i class="fas fa-upload me-2"></i>Subir evidencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="file" id="inputEvidenciasModal" multiple accept=".pdf,.jpg,.jpeg,.png" class="form-control" />
+                <small class="text-muted">Máximo 3 archivos (PDF, JPG o PNG), 3 MB cada uno.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="SubirEvidenciaDesdeModal()">
+                    <i class="fas fa-upload me-1"></i>Subir
+                </button>
             </div>
         </div>
     </div>
@@ -135,7 +147,7 @@
         });
     }
 
-    $("#inputEvidenciasDetalle").change(function () {
+    $("#inputEvidenciasModal").change(function () {
         if (!ValidarArchivosEvidencia(this.files)) {
             $(this).val('');
         }
@@ -169,15 +181,24 @@
         });
     }
 
-    function SubirEvidenciasDetalle() {
-        var input = document.getElementById('inputEvidenciasDetalle');
+    var ticketIdSubirEvidencia = 0;
+
+    function AbrirSubirEvidencia(ticketId) {
+        ticketIdSubirEvidencia = ticketId;
+        var input = document.getElementById('inputEvidenciasModal');
+        if (input) input.value = '';
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSubirEvidencia')).show();
+    }
+
+    function SubirEvidenciaDesdeModal() {
+        var input = document.getElementById('inputEvidenciasModal');
 
         if (!input || !input.files || input.files.length === 0) {
             Swal.fire({ title: 'Error', text: 'Debe seleccionar al menos un archivo.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
             return;
         }
 
-        if (!ticketDetalleActualId || ticketDetalleActualId <= 0) {
+        if (!ticketIdSubirEvidencia || ticketIdSubirEvidencia <= 0) {
             Swal.fire({ title: 'Error', text: 'No se ha seleccionado un ticket.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
             return;
         }
@@ -189,9 +210,10 @@
             return;
         }
 
-        SubirEvidencias(ticketDetalleActualId, files, function () {
+        SubirEvidencias(ticketIdSubirEvidencia, files, function () {
             input.value = '';
-            CargarEvidencias(ticketDetalleActualId);
+            bootstrap.Modal.getInstance(document.getElementById('modalSubirEvidencia')).hide();
+            CargarEvidencias(ticketIdSubirEvidencia);
             ToastExito('Evidencias subidas correctamente.');
         });
     }

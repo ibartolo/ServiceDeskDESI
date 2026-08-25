@@ -20,9 +20,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("ActivoService.ObtenerTodosLosActivos para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTodosLosActivos(usuario);
+                var result = _dbWrapper.ObtenerTodosLosActivos(usuario);
+                Log.Information("ActivoService.ObtenerTodosLosActivos RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -40,10 +44,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("ActivoService.ObtenerActivoPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerActivoPorId(id, usuario);
+                var result = _dbWrapper.ObtenerActivoPorId(id, usuario);
+                Log.Information("ActivoService.ObtenerActivoPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -61,6 +69,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("ActivoService.GuardarOActualizarActivo para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(activo.Nombre)) { throw new ArgumentException("El nombre del activo es requerido."); }
                 if (activo.Nombre.Length > 50) { throw new ArgumentException("El nombre no puede exceder los 50 caracteres."); }
                 if (activo.Descripcion != null && activo.Descripcion.Length > 250) { throw new ArgumentException("La descripción no puede exceder los 250 caracteres."); }
@@ -72,7 +82,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(activo.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarActivo(activo, usuario);
+                var result = _dbWrapper.GuardarOActualizarActivo(activo, usuario);
+                Log.Information("ActivoService.GuardarOActualizarActivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -90,11 +102,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("ActivoService.EliminarActivo para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarActivo(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarActivo(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("ActivoService.EliminarActivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

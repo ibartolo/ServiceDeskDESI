@@ -53,6 +53,8 @@
     <Compile Include="Catalogos\CategoriaResponsableDTO.cs" />
     <Compile Include="Catalogos\Compania.cs" />
     <Compile Include="Catalogos\Empresa.cs" />
+    <Compile Include="Catalogos\Foliador.cs" />
+    <Compile Include="Catalogos\FoliadorDTO.cs" />
     <Compile Include="Catalogos\Marca.cs" />
     <Compile Include="Catalogos\Modelo.cs" />
     <Compile Include="Catalogos\ModeloDTO.cs" />
@@ -86,6 +88,7 @@
     <Compile Include="Tickets\TicketEvidencia.cs" />
     <Compile Include="Tickets\EvidenciaConfigDTO.cs" />
     <Compile Include="Tickets\EvidenciaDescargaDTO.cs" />
+    <Compile Include="Tickets\DashboardIndicadoresDTO.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

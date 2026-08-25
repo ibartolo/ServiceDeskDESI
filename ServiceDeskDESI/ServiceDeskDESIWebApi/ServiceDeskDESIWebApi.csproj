@@ -217,6 +217,8 @@
     <Compile Include="Controllers\CompaniaController.cs" />
     <Compile Include="Controllers\EmpresaController.cs" />
     <Compile Include="Controllers\EvidenciaController.cs" />
+    <Compile Include="Controllers\FoliadorController.cs" />
+    <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\MarcaController.cs" />
     <Compile Include="Controllers\ModeloController.cs" />
     <Compile Include="Controllers\PaginaController.cs" />
@@ -241,6 +243,8 @@
     <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Empresa.cs" />
     <Compile Include="DAL\DbWrapper.Evidencia.cs" />
+    <Compile Include="DAL\DbWrapper.Foliador.cs" />
+    <Compile Include="DAL\DbWrapper.Dashboard.cs" />
     <Compile Include="DAL\DbWrapper.Marca.cs" />
     <Compile Include="DAL\DbWrapper.Modelo.cs" />
     <Compile Include="DAL\DbWrapper.Paginas.cs" />
@@ -267,6 +271,8 @@
     <Compile Include="Services\CompaniaService.cs" />
     <Compile Include="Services\EmpresaService.cs" />
     <Compile Include="Services\EvidenciaService.cs" />
+    <Compile Include="Services\FoliadorService.cs" />
+    <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Services\MarcaService.cs" />
     <Compile Include="Services\ModeloService.cs" />
     <Compile Include="Services\PaginaService.cs" />

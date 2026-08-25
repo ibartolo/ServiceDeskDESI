@@ -23,10 +23,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("EmpresaService.ObtenerEmpresaPorId para id {Id} y usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerEmpresaPorId(id, usuario);
+                var result = _dbWrapper.ObtenerEmpresaPorId(id, usuario);
+                Log.Information("EmpresaService.ObtenerEmpresaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -48,9 +52,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("EmpresaService.ObtenerEmpresaPorRFC para RFC {RFC}", rfc);
+
                 if (string.IsNullOrWhiteSpace(rfc)) { throw new ArgumentException("El RFC es requerido."); }
 
-                return _dbWrapper.ObtenerEmpresaPorRFC(rfc);
+                var result = _dbWrapper.ObtenerEmpresaPorRFC(rfc);
+                Log.Information("EmpresaService.ObtenerEmpresaPorRFC RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -72,6 +80,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("EmpresaService.GuardarOActualizarEmpresa para usuario {Usuario} y RFC {RFC}", usuario, empresa?.RFC);
+
                 if (string.IsNullOrWhiteSpace(empresa.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
                 if (empresa.NombreComercial.Length > 250) { throw new ArgumentException("El nombre comercial no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(empresa.RazonSocial)) { throw new ArgumentException("La razón social es requerida."); }
@@ -91,7 +101,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(empresa.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.GuardarOActualizarEmpresa(empresa, usuario);
+                var result = _dbWrapper.GuardarOActualizarEmpresa(empresa, usuario);
+                Log.Information("EmpresaService.GuardarOActualizarEmpresa RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -113,6 +125,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("EmpresaService.GuardarNuevaEmpresa para RFC {RFC} y nombre comercial {NombreComercial}", empresa?.RFC, empresa?.NombreComercial);
+
                 if (string.IsNullOrWhiteSpace(empresa.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
                 if (empresa.NombreComercial.Length > 250) { throw new ArgumentException("El nombre comercial no puede exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(empresa.RazonSocial)) { throw new ArgumentException("La razón social es requerida."); }
@@ -133,7 +147,9 @@ namespace ServiceDeskDESIWebApi.Services
                 if (empresa.FechaVigenciaFin == DateTime.MinValue) { throw new ArgumentException("La fecha de vigencia fin es requerida."); }
                 if (string.IsNullOrWhiteSpace(empresa.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
 
-                return _dbWrapper.GuardarNuevaEmpresa(empresa);
+                var result = _dbWrapper.GuardarNuevaEmpresa(empresa);
+                Log.Information("EmpresaService.GuardarNuevaEmpresa RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -220,11 +236,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("EmpresaService.EliminarEmpresa para id {Id} por usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarEmpresa(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarEmpresa(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("EmpresaService.EliminarEmpresa RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

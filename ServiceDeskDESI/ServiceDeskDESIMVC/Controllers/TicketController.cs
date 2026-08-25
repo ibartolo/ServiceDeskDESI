@@ -23,6 +23,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly RolService _rolService;
         private readonly UsuarioService _usuarioService;
         private readonly EvidenciaService _evidenciaService;
+        private readonly FoliadorService _foliadorService;
 
         public TicketController()
         {
@@ -32,6 +33,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _rolService = new RolService(httpClientConnection);
             _usuarioService = new UsuarioService(httpClientConnection);
             _evidenciaService = new EvidenciaService(httpClientConnection);
+            _foliadorService = new FoliadorService(httpClientConnection);
         }
 
         public async Task<ActionResult> Index(long id = 0)
@@ -184,6 +186,13 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> ObtenerSubcategoriasPorCategoria(long categoriaId)
         {
             var response = await _categoriaService.ObtenerCategoriasPorPadre(categoriaId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        public async Task<string> ConsultarFoliador()
+        {
+            var response = await _foliadorService.ConsultarFolioSiguiente();
             return JsonConvert.SerializeObject(response);
         }
 

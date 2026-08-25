@@ -59,6 +59,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("EvidenciaService.GuardarEvidencias para TicketId {TicketId} usuario {Usuario}, EmpresaId {EmpresaId}", ticketId, usuario, empresaId);
+
                 if (ticketId <= 0)
                     return new ModelResponse<List<TicketEvidencia>> { IsSuccess = false, Message = "TicketId requerido." };
 
@@ -82,9 +84,9 @@ namespace ServiceDeskDESIWebApi.Services
                 long maxTamanoBytes = (long)config.MaxTamanoMB * 1024 * 1024;
 
                 // 3 y 4. Validar peso y extensión de cada archivo ANTES de escribir nada.
-                foreach (string key in files.AllKeys)
+                for (int i = 0; i < files.Count; i++)
                 {
-                    var file = files[key];
+                    var file = files[i];
                     if (file == null) continue;
 
                     var extensionLower = Path.GetExtension(file.FileName).TrimStart('.').ToLowerInvariant();
@@ -104,9 +106,9 @@ namespace ServiceDeskDESIWebApi.Services
 
                 try
                 {
-                    foreach (string key in files.AllKeys)
+                    for (int i = 0; i < files.Count; i++)
                     {
-                        var file = files[key];
+                        var file = files[i];
                         if (file == null) continue;
 
                         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
@@ -172,12 +174,14 @@ namespace ServiceDeskDESIWebApi.Services
                     };
                 }
 
-                return new ModelResponse<List<TicketEvidencia>>
+                var result = new ModelResponse<List<TicketEvidencia>>
                 {
                     IsSuccess = true,
                     Response = guardadas,
                     Message = "Evidencias guardadas correctamente."
                 };
+                Log.Information("EvidenciaService.GuardarEvidencias RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (Exception ex)
             {
@@ -194,17 +198,21 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("EvidenciaService.ObtenerEvidenciasPorTicket para TicketId {TicketId} usuario {Usuario}", ticketId, usuario);
+
                 if (ticketId <= 0) throw new ArgumentException("El ID del ticket es requerido.");
                 if (string.IsNullOrWhiteSpace(usuario)) throw new ArgumentException("El nombre de usuario es requerido.");
 
                 var evidencias = _dbWrapper.ObtenerEvidenciasPorTicket(ticketId, usuario);
 
-                return new ModelResponse<List<TicketEvidencia>>
+                var result = new ModelResponse<List<TicketEvidencia>>
                 {
                     IsSuccess = true,
                     Response = evidencias,
                     Message = "Evidencias obtenidas correctamente."
                 };
+                Log.Information("EvidenciaService.ObtenerEvidenciasPorTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -226,6 +234,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("EvidenciaService.ObtenerEvidenciaParaDescarga para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) throw new ArgumentException("El ID de la evidencia es requerido.");
                 if (string.IsNullOrWhiteSpace(usuario)) throw new ArgumentException("El nombre de usuario es requerido.");
 
@@ -244,12 +254,14 @@ namespace ServiceDeskDESIWebApi.Services
                     Contenido = File.ReadAllBytes(rutaAbsoluta)
                 };
 
-                return new ModelResponse<EvidenciaDescargaDTO>
+                var result = new ModelResponse<EvidenciaDescargaDTO>
                 {
                     IsSuccess = true,
                     Response = dto,
                     Message = "Evidencia obtenida correctamente."
                 };
+                Log.Information("EvidenciaService.ObtenerEvidenciaParaDescarga RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

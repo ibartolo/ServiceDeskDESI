@@ -27,9 +27,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ObtenerTickets para usuario {Usuario}", usuario);
+
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTickets(usuario);
+                var result = _dbWrapper.ObtenerTickets(usuario);
+                Log.Information("TicketService.ObtenerTickets RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -51,10 +55,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ObtenerTicketPorId para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTicketPorId(id, usuario);
+                var result = _dbWrapper.ObtenerTicketPorId(id, usuario);
+                Log.Information("TicketService.ObtenerTicketPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -76,6 +84,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.GuardarOActualizarTicket para usuario {Usuario}", usuario);
+
                 if (ticket.AreaId <= 0) { throw new ArgumentException("El área es requerida."); }
                 if (ticket.CategoriaId <= 0) { throw new ArgumentException("La categoría es requerida."); }
                 if (ticket.Urgencia <= 0 || ticket.Urgencia > 4) { throw new ArgumentException("La urgencia debe ser un valor entre 1 y 4."); }
@@ -89,7 +99,43 @@ namespace ServiceDeskDESIWebApi.Services
                 // Valor autoritativo del servidor: el ticket guardado siempre queda activo.
                 ticket.Estatus = true;
 
-                return _dbWrapper.GuardarOActualizarTicket(ticket, usuario);
+                ModelResponse<Ticket> result;
+
+                if (ticket.Id <= 0)
+                {
+                    // CREACIÓN: generar el folio dentro de la transacción (atómicamente con el insert).
+                    // Se comparte la MISMA instancia de DbWrapper (conexión/transacción ambiental).
+                    _dbWrapper.BeginTransaction();
+                    try
+                    {
+                        var foliadorService = new FoliadorService(_dbWrapper);
+                        var consecutivo = foliadorService.ActualizarConsecutivo("Ticket", usuario);
+                        ticket.Folio = FoliadorService.FormatearFolio(consecutivo);
+                        Log.Information("TicketService.GuardarOActualizarTicket: folio generado {Folio} para usuario {Usuario}", ticket.Folio, usuario);
+
+                        result = _dbWrapper.GuardarOActualizarTicket(ticket, usuario);
+                        if (!result.IsSuccess || result.Response == null)
+                        {
+                            _dbWrapper.RollbackTransaction();
+                            return result;
+                        }
+
+                        _dbWrapper.CommitTransaction();
+                    }
+                    catch
+                    {
+                        _dbWrapper.RollbackTransaction();
+                        throw;
+                    }
+                }
+                else
+                {
+                    // ACTUALIZACIÓN: se conserva el folio existente (no se regenera).
+                    result = _dbWrapper.GuardarOActualizarTicket(ticket, usuario);
+                }
+
+                Log.Information("TicketService.GuardarOActualizarTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -116,6 +162,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.GuardarTicketConEvidencias para usuario {Usuario}, EmpresaId {EmpresaId}", usuario, empresaId);
+
                 // Validaciones de ticket (espejo de GuardarOActualizarTicket).
                 if (ticket == null) { throw new ArgumentException("El ticket es requerido."); }
                 if (ticket.AreaId <= 0) { throw new ArgumentException("El área es requerida."); }
@@ -135,9 +183,9 @@ namespace ServiceDeskDESIWebApi.Services
                 var archivos = new List<HttpPostedFile>();
                 if (files != null)
                 {
-                    foreach (string key in files.AllKeys)
+                    for (int i = 0; i < files.Count; i++)
                     {
-                        var f = files[key];
+                        var f = files[i];
                         if (f != null && f.ContentLength > 0) archivos.Add(f);
                     }
                 }
@@ -167,6 +215,13 @@ namespace ServiceDeskDESIWebApi.Services
                 _dbWrapper.BeginTransaction();
                 try
                 {
+                    // Generar el folio dentro de la transacción (atómicamente con el insert).
+                    // Se comparte la MISMA instancia de DbWrapper (conexión/transacción ambiental).
+                    var foliadorService = new FoliadorService(_dbWrapper);
+                    var consecutivo = foliadorService.ActualizarConsecutivo("Ticket", usuario);
+                    ticket.Folio = FoliadorService.FormatearFolio(consecutivo);
+                    Log.Information("TicketService.GuardarTicketConEvidencias: folio generado {Folio} para usuario {Usuario}", ticket.Folio, usuario);
+
                     var ticketResp = _dbWrapper.GuardarOActualizarTicket(ticket, usuario);
                     if (!ticketResp.IsSuccess || ticketResp.Response == null)
                     {
@@ -228,12 +283,14 @@ namespace ServiceDeskDESIWebApi.Services
                     };
                 }
 
-                return new ModelResponse<Ticket>
+                var result = new ModelResponse<Ticket>
                 {
                     IsSuccess = true,
                     Response = ticket,
                     Message = "Ticket guardado correctamente."
                 };
+                Log.Information("TicketService.GuardarTicketConEvidencias RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -251,11 +308,15 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.EliminarTicket para Id {Id} usuario {Usuario}", id, usuario);
+
                 if (id <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.EliminarTicket(id, modificadoPor, fechaModificacion, usuario);
+                var result = _dbWrapper.EliminarTicket(id, modificadoPor, fechaModificacion, usuario);
+                Log.Information("TicketService.EliminarTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -277,10 +338,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ObtenerTicketsPorArea para AreaId {AreaId} usuario {Usuario}", areaId, usuario);
+
                 if (areaId <= 0) { throw new ArgumentException("El ID del área es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTicketsPorArea(areaId, usuario);
+                var result = _dbWrapper.ObtenerTicketsPorArea(areaId, usuario);
+                Log.Information("TicketService.ObtenerTicketsPorArea RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -302,10 +367,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ObtenerTicketsPorUsuario para CreadoPor {CreadoPor} usuario {Usuario}", creadoPor, usuario);
+
                 if (string.IsNullOrWhiteSpace(creadoPor)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTicketsPorUsuario(creadoPor, usuario);
+                var result = _dbWrapper.ObtenerTicketsPorUsuario(creadoPor, usuario);
+                Log.Information("TicketService.ObtenerTicketsPorUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -327,10 +396,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ObtenerTicketsPorUrgencia para Urgencia {Urgencia} usuario {Usuario}", urgencia, usuario);
+
                 if (urgencia <= 0 || urgencia > 4) { throw new ArgumentException("La urgencia debe ser un valor entre 1 y 4."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTicketsPorUrgencia(urgencia, usuario);
+                var result = _dbWrapper.ObtenerTicketsPorUrgencia(urgencia, usuario);
+                Log.Information("TicketService.ObtenerTicketsPorUrgencia RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -352,10 +425,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ObtenerTicketsPorEstatus para TicketEstatusId {TicketEstatusId} usuario {Usuario}", ticketEstatusId, usuario);
+
                 if (ticketEstatusId <= 0) { throw new ArgumentException("El ID del estatus es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerTicketsPorEstatus(ticketEstatusId, usuario);
+                var result = _dbWrapper.ObtenerTicketsPorEstatus(ticketEstatusId, usuario);
+                Log.Information("TicketService.ObtenerTicketsPorEstatus RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -377,7 +454,11 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
-                return _dbWrapper.ObtenerTicketEstatus();
+                Log.Information("TicketService.ObtenerTicketEstatus");
+
+                var result = _dbWrapper.ObtenerTicketEstatus();
+                Log.Information("TicketService.ObtenerTicketEstatus RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (Exception ex)
             {
@@ -394,10 +475,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.TomarTicket para TicketId {TicketId} usuario {Usuario}", ticketId, usuario);
+
                 if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.TomarTicket(ticketId, usuario, comentario);
+                var result = _dbWrapper.TomarTicket(ticketId, usuario, comentario);
+                Log.Information("TicketService.TomarTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -415,6 +500,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ReasignarTicket para TicketId {TicketId}, NuevoUsuarioId {NuevoUsuarioId}, usuario {Usuario}", ticketId, nuevoUsuarioId, usuario);
+
                 if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
                 if (nuevoUsuarioId <= 0) { throw new ArgumentException("El nuevo agente es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
@@ -427,7 +514,9 @@ namespace ServiceDeskDESIWebApi.Services
                     };
                 }
 
-                return _dbWrapper.ReasignarTicket(ticketId, nuevoUsuarioId, usuario, comentario);
+                var result = _dbWrapper.ReasignarTicket(ticketId, nuevoUsuarioId, usuario, comentario);
+                Log.Information("TicketService.ReasignarTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -445,9 +534,13 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ObtenerTicketAsignaciones para TicketId {TicketId}", ticketId);
+
                 if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
 
-                return _dbWrapper.ObtenerTicketAsignaciones(ticketId);
+                var result = _dbWrapper.ObtenerTicketAsignaciones(ticketId);
+                Log.Information("TicketService.ObtenerTicketAsignaciones RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -469,6 +562,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ResolverTicket para TicketId {TicketId} usuario {Usuario}", ticketId, usuario);
+
                 if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(comentario) || comentario.Length > 300)
@@ -480,7 +575,9 @@ namespace ServiceDeskDESIWebApi.Services
                     };
                 }
 
-                return _dbWrapper.ResolverTicket(ticketId, usuario, comentario);
+                var result = _dbWrapper.ResolverTicket(ticketId, usuario, comentario);
+                Log.Information("TicketService.ResolverTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -498,6 +595,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.RechazarTicket para TicketId {TicketId} usuario {Usuario}", ticketId, usuario);
+
                 if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(comentario) || comentario.Length > 300)
@@ -509,7 +608,9 @@ namespace ServiceDeskDESIWebApi.Services
                     };
                 }
 
-                return _dbWrapper.RechazarTicket(ticketId, usuario, comentario);
+                var result = _dbWrapper.RechazarTicket(ticketId, usuario, comentario);
+                Log.Information("TicketService.RechazarTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -527,6 +628,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.CerrarTicket para TicketId {TicketId} usuario {Usuario}", ticketId, usuario);
+
                 if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(comentario) || comentario.Length > 300)
@@ -538,7 +641,9 @@ namespace ServiceDeskDESIWebApi.Services
                     };
                 }
 
-                return _dbWrapper.CerrarTicket(ticketId, usuario, comentario);
+                var result = _dbWrapper.CerrarTicket(ticketId, usuario, comentario);
+                Log.Information("TicketService.CerrarTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -556,10 +661,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.RetomarTicket para TicketId {TicketId} usuario {Usuario}", ticketId, usuario);
+
                 if (ticketId <= 0) { throw new ArgumentException("El ID del ticket es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.RetomarTicket(ticketId, usuario);
+                var result = _dbWrapper.RetomarTicket(ticketId, usuario);
+                Log.Information("TicketService.RetomarTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {
@@ -577,10 +686,14 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("TicketService.ObtenerUsuariosArea para AreaId {AreaId} usuario {Usuario}", areaId, usuario);
+
                 if (areaId <= 0) { throw new ArgumentException("El ID del área es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
-                return _dbWrapper.ObtenerUsuariosArea(areaId, usuario);
+                var result = _dbWrapper.ObtenerUsuariosArea(areaId, usuario);
+                Log.Information("TicketService.ObtenerUsuariosArea RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
             }
             catch (ArgumentException ex)
             {

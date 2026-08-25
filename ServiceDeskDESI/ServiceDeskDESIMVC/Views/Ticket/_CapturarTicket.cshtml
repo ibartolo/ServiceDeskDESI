@@ -15,6 +15,14 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
+                                <label>Folio:</label>
+                                <input type="text" id="Folio" name="Folio" class="form-control" placeholder="Se generará al guardar" readonly disabled />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
                                 <label>Área:</label>
                                 <select id="ddlArea" name="AreaId" class="form-control">
                                     <option value="">Seleccione un área</option>
@@ -149,6 +157,7 @@
         // Reset al abrir el modal
         $("#modalCapturarTicket").on("shown.bs.modal", function () {
             LimpiarCaptura();
+            CargarFolioPreview();
         });
 
         // Validación de evidencias al seleccionar archivos
@@ -165,6 +174,15 @@
         }
         $("#ddlCategoria").empty().append('<option value="">Seleccione una categoría</option>');
         $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
+    }
+
+    function CargarFolioPreview() {
+        GetMVC('/Ticket/ConsultarFoliador', function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+            if (result && result.IsSuccess && result.Response && result.Response.FolioSiguiente) {
+                $("#Folio").val(result.Response.FolioSiguiente);
+            }
+        });
     }
 
     function GuardarTicket() {

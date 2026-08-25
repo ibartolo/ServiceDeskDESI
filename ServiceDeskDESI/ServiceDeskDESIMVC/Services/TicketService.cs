@@ -64,12 +64,13 @@ namespace ServiceDeskDESIMVC.Services
                 form.Add(new StringContent(ticket.ModificadoPor ?? string.Empty), "ModificadoPor");
                 form.Add(new StringContent(ticket.FechaModificacion.HasValue ? ticket.FechaModificacion.Value.ToString("o") : string.Empty), "FechaModificacion");
                 form.Add(new StringContent(ticket.Estatus.ToString()), "Estatus");
+                form.Add(new StringContent(ticket.Folio ?? string.Empty), "Folio");
 
                 if (files != null)
                 {
-                    foreach (string key in files.AllKeys)
+                    for (int i = 0; i < files.Count; i++)
                     {
-                        var file = files[key];
+                        var file = files[i];
                         if (file == null) continue;
 
                         byte[] bytes;

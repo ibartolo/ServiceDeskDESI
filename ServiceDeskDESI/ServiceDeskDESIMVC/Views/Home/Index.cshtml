@@ -2,41 +2,46 @@
 @{
     ViewBag.Title = "Inicio";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var esAgente = ViewBag.EsAgente != null && (bool)ViewBag.EsAgente;
+    var ind = ViewBag.Indicadores as ServiceDeskDESIEntities.Tickets.DashboardIndicadoresDTO;
 }
 
 <h2 class="page-title">Dashboard Service Desk DESI</h2>
 
-<!-- Tarjetas estadísticas -->
-<div class="row">
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card primary">
-            <div class="stat-number">145</div>
-            <div class="stat-title">Tickets Activos</div>
-            <small class="text-success">+12% vs ayer</small>
+@if (esAgente)
+{
+    <!-- Tarjetas estadísticas -->
+    <div class="row">
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card primary">
+                <div class="stat-number">@(ind != null ? ind.ActivosSemana : 0)</div>
+                <div class="stat-title">Tickets Activos (semana)</div>
+                <small class="text-muted">Creados esta semana</small>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card success">
+                <div class="stat-number">@(ind != null ? ind.ResueltosSemana : 0)</div>
+                <div class="stat-title">Resueltos (semana)</div>
+                <small class="text-muted">Resueltos esta semana</small>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card warning">
+                <div class="stat-number">@(ind != null ? ind.Trabajando : 0)</div>
+                <div class="stat-title">Trabajando</div>
+                <small class="text-muted">Asignados a mí</small>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card info">
+                <div class="stat-number">@(ind != null ? ind.CerradosSemana : 0)</div>
+                <div class="stat-title">Cerrados (semana)</div>
+                <small class="text-muted">Cerrados esta semana</small>
+            </div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card success">
-            <div class="stat-number">89</div>
-            <div class="stat-title">Resueltos Hoy</div>
-            <small class="text-success">+5% vs ayer</small>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card warning">
-            <div class="stat-number">23</div>
-            <div class="stat-title">Pendientes</div>
-            <small class="text-danger">-3% vs ayer</small>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card info">
-            <div class="stat-number">12</div>
-            <div class="stat-title">Agentes</div>
-            <small>Disponibles: 8</small>
-        </div>
-    </div>
-</div>
+}
 
 <!-- ========================================= -->
 <!-- SECCIÓN DE FORMULARIOS DE CAPTURA -->

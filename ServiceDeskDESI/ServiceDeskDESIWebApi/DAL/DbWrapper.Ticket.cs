@@ -101,6 +101,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     t.ModificadoPor,
                     t.FechaModificacion,
                     t.Estatus,
+                    t.Folio,
                     Usuario = usuario
                 };
 
