@@ -263,7 +263,8 @@ namespace ServiceDeskDESIWebApi.Controllers
                 Descripcion = form["Descripcion"],
                 CreadoPor = form["CreadoPor"],
                 ModificadoPor = form["ModificadoPor"],
-                Estatus = string.Equals(form["Estatus"], "true", StringComparison.OrdinalIgnoreCase)
+                Estatus = string.Equals(form["Estatus"], "true", StringComparison.OrdinalIgnoreCase),
+                Folio = form["Folio"]
             };
 
             long id, areaId, categoriaId;

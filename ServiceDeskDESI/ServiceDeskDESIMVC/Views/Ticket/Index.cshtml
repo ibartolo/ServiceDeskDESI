@@ -52,6 +52,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Título</th>
+                            <th>Folio</th>
                             <th>Área</th>
                             <th>Categoría</th>
                             <th>Subcategoría</th>
@@ -112,6 +113,7 @@
             columns: [
                 { data: 'Id', title: 'ID', visible: false },
                 { data: 'Titulo', title: 'Título' },
+                { data: 'Folio', title: 'Folio', defaultContent: '---' },
                 { data: 'AreaNombre', title: 'Área' },
                 { data: 'CategoriaNombre', title: 'Categoría' },
                 { data: 'SubcategoriaNombre', title: 'Subcategoría', defaultContent: '---' },
@@ -636,6 +638,7 @@
         }
 
         $("#detTitulo").text(row.Titulo || '---');
+        $("#detFolio").text(row.Folio || '---');
         $("#detArea").text(row.AreaNombre || '---');
         $("#detCategoria").text(row.CategoriaNombre || '---');
         $("#detSubcategoria").text(row.SubcategoriaNombre || '---');

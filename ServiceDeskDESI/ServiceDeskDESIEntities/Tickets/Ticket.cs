@@ -16,5 +16,6 @@ namespace ServiceDeskDESIEntities.Tickets
         public string Titulo { get; set; }
         public string Descripcion { get; set; }
         public int TicketEstatusId { get; set; }
+        public string Folio { get; set; }
     }
 }

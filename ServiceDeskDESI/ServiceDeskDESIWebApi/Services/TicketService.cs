@@ -99,7 +99,41 @@ namespace ServiceDeskDESIWebApi.Services
                 // Valor autoritativo del servidor: el ticket guardado siempre queda activo.
                 ticket.Estatus = true;
 
-                var result = _dbWrapper.GuardarOActualizarTicket(ticket, usuario);
+                ModelResponse<Ticket> result;
+
+                if (ticket.Id <= 0)
+                {
+                    // CREACIÓN: generar el folio dentro de la transacción (atómicamente con el insert).
+                    // Se comparte la MISMA instancia de DbWrapper (conexión/transacción ambiental).
+                    _dbWrapper.BeginTransaction();
+                    try
+                    {
+                        var foliadorService = new FoliadorService(_dbWrapper);
+                        var consecutivo = foliadorService.ActualizarConsecutivo("Ticket", usuario);
+                        ticket.Folio = FoliadorService.FormatearFolio(consecutivo);
+                        Log.Information("TicketService.GuardarOActualizarTicket: folio generado {Folio} para usuario {Usuario}", ticket.Folio, usuario);
+
+                        result = _dbWrapper.GuardarOActualizarTicket(ticket, usuario);
+                        if (!result.IsSuccess || result.Response == null)
+                        {
+                            _dbWrapper.RollbackTransaction();
+                            return result;
+                        }
+
+                        _dbWrapper.CommitTransaction();
+                    }
+                    catch
+                    {
+                        _dbWrapper.RollbackTransaction();
+                        throw;
+                    }
+                }
+                else
+                {
+                    // ACTUALIZACIÓN: se conserva el folio existente (no se regenera).
+                    result = _dbWrapper.GuardarOActualizarTicket(ticket, usuario);
+                }
+
                 Log.Information("TicketService.GuardarOActualizarTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
                 return result;
             }
@@ -181,6 +215,13 @@ namespace ServiceDeskDESIWebApi.Services
                 _dbWrapper.BeginTransaction();
                 try
                 {
+                    // Generar el folio dentro de la transacción (atómicamente con el insert).
+                    // Se comparte la MISMA instancia de DbWrapper (conexión/transacción ambiental).
+                    var foliadorService = new FoliadorService(_dbWrapper);
+                    var consecutivo = foliadorService.ActualizarConsecutivo("Ticket", usuario);
+                    ticket.Folio = FoliadorService.FormatearFolio(consecutivo);
+                    Log.Information("TicketService.GuardarTicketConEvidencias: folio generado {Folio} para usuario {Usuario}", ticket.Folio, usuario);
+
                     var ticketResp = _dbWrapper.GuardarOActualizarTicket(ticket, usuario);
                     if (!ticketResp.IsSuccess || ticketResp.Response == null)
                     {
