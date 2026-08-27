@@ -32,19 +32,19 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Nombre</label>
-                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre", disabled = estaVinculada ? "disabled" : null })
+                    @Html.TextBoxFor(x => x.Nombre, estaVinculada ? (object)new { @class = "form-control", placeholder = "Nombre", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Nombre" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Apellido</label>
-                    @Html.TextBoxFor(x => x.Apellido, new { @class = "form-control", placeholder = "Apellido", disabled = estaVinculada ? "disabled" : null })
+                    @Html.TextBoxFor(x => x.Apellido, estaVinculada ? (object)new { @class = "form-control", placeholder = "Apellido", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Apellido" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Correo</label>
-                    @Html.TextBoxFor(x => x.Correo, new { @class = "form-control", placeholder = "Correo electrónico", disabled = estaVinculada ? "disabled" : null })
+                    @Html.TextBoxFor(x => x.Correo, estaVinculada ? (object)new { @class = "form-control", placeholder = "Correo electrónico", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Correo electrónico" })
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Teléfono</label>
-                    @Html.TextBoxFor(x => x.Telefono, new { @class = "form-control", placeholder = "Teléfono", disabled = estaVinculada ? "disabled" : null })
+                    @Html.TextBoxFor(x => x.Telefono, estaVinculada ? (object)new { @class = "form-control", placeholder = "Teléfono", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Teléfono" })
                 </div>
             </div>
             <div class="col-md-4">
@@ -75,7 +75,7 @@
                     {
                         <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarPersona()" />
                     }
-                    @if (Model.Id > 0 && permisos != null && permisos.PuedeEditar)
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && !estaVinculada && permisos.PuedeEditar)))
                     {
                         <button type="button" id="btnSincronizar" class="btn btn-outline-primary" title="Sincronizar con usuario" onclick="AbrirSincronizarUsuario()">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -139,6 +139,8 @@
     var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
     var personaUsuarioId = @(Model.UsuarioId ?? 0);
     var personaNombreUsuarioVinculado = @Html.Raw(JsonConvert.SerializeObject(Model.NombreUsuarioVinculado ?? ""));
+    var personaSincronizadoUsuarioId = 0;   // usuario elegido en el modal para una persona nueva (aún no guardada)
+    var usuariosDisponibles = [];           // caché de usuarios listados en el modal de sincronización
 
     $(function () {
         $("#frmPersona").validate({
@@ -238,10 +240,10 @@
 
     function GuardarActualizarPersona() {
         if ($("#frmPersona").valid()) {
-            if (personaUsuarioId > 0) {
+            if (personaUsuarioId > 0 || personaSincronizadoUsuarioId > 0) {
                 Swal.fire({
                     title: 'Advertencia',
-                    text: 'Los datos (Nombre, Apellido, Correo y Teléfono) están sincronizados con el usuario y se sobreescribirán al guardar. El puesto se conserva.',
+                    text: 'Al guardar, la persona quedará vinculada al usuario seleccionado. Los datos (Nombre, Apellido, Correo y Teléfono) se sincronizarán con los del usuario y no podrá modificarlos. El puesto se conserva.',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Continuar',
@@ -287,17 +289,49 @@
             Swal.close();
 
             if (response.IsSuccess) {
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: response.Message,
-                    icon: 'success',
-                    timer: 1500,
-                    showConfirmButton: false,
-                    background: 'white',
-                    iconColor: '#4e73df'
-                }).then(() => {
-                    window.location.href = '/Catalogs/Persona';
-                });
+                var nuevoId = response.Response ? response.Response.Id : 0;
+
+                if (personaSincronizadoUsuarioId > 0 && nuevoId > 0) {
+                    // Vínculo pendiente (persona nueva o en edición): persistir al guardar
+                    PostMVC('/Catalogs/VincularPersonaUsuario', { personaId: nuevoId, usuarioId: personaSincronizadoUsuarioId }, function (respVincular) {
+                        Swal.close();
+                        var res = typeof respVincular === 'string' ? JSON.parse(respVincular) : respVincular;
+                        if (res && res.IsSuccess) {
+                            Swal.fire({
+                                title: '¡Éxito!',
+                                text: res.Message,
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false,
+                                background: 'white',
+                                iconColor: '#4e73df'
+                            }).then(() => {
+                                window.location.href = '/Catalogs/Persona';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: (res && res.Message) || 'La persona se guardó, pero no se pudo vincular al usuario.',
+                                icon: 'error',
+                                confirmButtonText: 'Aceptar',
+                                background: 'white',
+                                confirmButtonColor: '#4e73df'
+                            });
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    }).then(() => {
+                        window.location.href = '/Catalogs/Persona';
+                    });
+                }
             } else {
                 Swal.fire({
                     title: 'Error',
@@ -414,18 +448,6 @@
     // ===== Sincronizar Persona <-> Usuario =====
 
     function AbrirSincronizarUsuario() {
-        var personaId = $("#Id").val();
-        if (!personaId || personaId == 0) {
-            Swal.fire({
-                title: 'Aviso',
-                text: 'Primero guarde la persona antes de sincronizar.',
-                icon: 'info',
-                confirmButtonText: 'Aceptar',
-                background: 'white',
-                confirmButtonColor: '#4e73df'
-            });
-            return;
-        }
         CargarUsuariosSincronizar();
         bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSincronizarUsuario')).show();
     }
@@ -436,7 +458,14 @@
         GetMVC("/User/ConsultarTodosLosUsuarios", function (r) {
             var result = typeof r === 'string' ? JSON.parse(r) : r;
             if (result && result.IsSuccess && result.Response) {
-                result.Response.forEach(function (u) {
+                usuariosDisponibles = result.Response.filter(function (u) {
+                    return u.PersonaId == null || u.PersonaId === 0;
+                });
+                if (usuariosDisponibles.length === 0) {
+                    tbody.append('<tr><td colspan="5" class="text-center">No hay usuarios disponibles para sincronizar</td></tr>');
+                    return;
+                }
+                usuariosDisponibles.forEach(function (u) {
                     var row = '<tr>';
                     row += '<td>' + (u.NombreUsuario || '') + '</td>';
                     row += '<td>' + (u.Nombre || '') + '</td>';
@@ -453,10 +482,14 @@
     }
 
     function ConfirmarSincronizar(usuarioId) {
-        var personaId = $("#Id").val();
+        var usuario = null;
+        for (var i = 0; i < usuariosDisponibles.length; i++) {
+            if (usuariosDisponibles[i].Id === usuarioId) { usuario = usuariosDisponibles[i]; break; }
+        }
+
         Swal.fire({
             title: '¿Sincronizar con este usuario?',
-            text: 'Los datos de la persona (Nombre, Apellido, Correo y Teléfono) se sobreescribirán con los datos del usuario.',
+            text: 'Se copiarán los datos del usuario (Nombre, Apellido, Correo y Teléfono) a la persona y se bloquearán los campos. Al guardar, la persona quedará vinculada a este usuario. Si cancela o sale sin guardar, no se vinculará nada.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, sincronizar',
@@ -465,51 +498,40 @@
             cancelButtonColor: '#858796',
             background: 'white'
         }).then(function (result) {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'Sincronizando...',
-                    text: 'Por favor espere',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                PostMVC('/Catalogs/VincularPersonaUsuario', { personaId: personaId, usuarioId: usuarioId }, function (resp) {
-                    Swal.close();
-                    var res = typeof resp === 'string' ? JSON.parse(resp) : resp;
-                    if (res && res.IsSuccess) {
-                        Swal.fire({
-                            title: '¡Éxito!',
-                            text: res.Message,
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false,
-                            background: 'white',
-                            iconColor: '#4e73df'
-                        }).then(function () {
-                            window.location.href = '/Catalogs/Persona/' + personaId;
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error',
-                            text: (res && res.Message) || 'No se pudo sincronizar la persona.',
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                            background: 'white',
-                            confirmButtonColor: '#4e73df'
-                        });
-                    }
-                });
+            if (!result.isConfirmed) { return; }
+
+            // Copiar datos y bloquear inputs. El vínculo NO se persiste aquí: se aplica al guardar.
+            if (usuario) {
+                $("#Nombre").val(usuario.Nombre || '');
+                $("#Apellido").val(usuario.Apellido || '');
+                $("#Correo").val(usuario.Correo || '');
+                $("#Telefono").val(usuario.Celular || '');
+                $("#usuarioVinculado").val(usuario.NombreUsuario || '');
             }
+            personaSincronizadoUsuarioId = usuarioId;
+            AplicarBloqueoSincronizado();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSincronizarUsuario')).hide();
+
+            Swal.fire({
+                title: 'Usuario seleccionado',
+                text: 'Datos copiados y campos bloqueados. Guarde la persona para completar la vinculación.',
+                icon: 'success',
+                timer: 2500,
+                showConfirmButton: false,
+                background: 'white',
+                iconColor: '#4e73df'
+            });
         });
     }
 
     function AplicarBloqueoSincronizado() {
-        if (personaUsuarioId > 0) {
+        if (personaUsuarioId > 0 || personaSincronizadoUsuarioId > 0) {
             $("#Nombre").prop("disabled", true);
             $("#Apellido").prop("disabled", true);
             $("#Correo").prop("disabled", true);
             $("#Telefono").prop("disabled", true);
+        }
+        if (personaNombreUsuarioVinculado && personaNombreUsuarioVinculado !== "") {
             $("#usuarioVinculado").val(personaNombreUsuarioVinculado);
         }
     }

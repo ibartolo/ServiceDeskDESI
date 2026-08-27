@@ -24,7 +24,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="mb-3 d-flex align-items-end">
-                            <button type="button" class="btn btn-primary" onclick="AsignarActivo()">Asignar</button>
+                            <button type="button" id="btnAsignarActivo" class="btn btn-primary" onclick="AsignarActivo()">Asignar</button>
                         </div>
                     </div>
                 </div>
@@ -92,7 +92,7 @@
                     row += '<td>' + (pa.ActivoNombre || '---') + '</td>';
                     row += '<td>' + (pa.ActivoSerial || '---') + '</td>';
                     row += '<td>' + fecha + '</td>';
-                    row += '<td><button type="button" class="btn btn-sm btn-outline-danger" title="Desvincular" onclick="DesvincularActivo(' + pa.Id + ')"><i class="fas fa-unlink"></i></button></td>';
+                    row += '<td><button type="button" class="btn btn-sm btn-outline-danger" title="Desvincular" onclick="DesvincularActivo(this, ' + pa.Id + ')"><i class="fas fa-unlink"></i></button></td>';
                     row += '</tr>';
                     tbody.append(row);
                 });
@@ -116,7 +116,10 @@
             return;
         }
         var personaId = $("#personaIdActivo").val();
+        var btn = $("#btnAsignarActivo");
+        btn.prop("disabled", true);
         PostMVC('/Catalogs/AsignarActivoPersona', { personaId: personaId, activoId: activoId }, function (response) {
+            btn.prop("disabled", false);
             var result = typeof response === 'string' ? JSON.parse(response) : response;
             if (result && result.IsSuccess) {
                 Swal.fire({
@@ -143,7 +146,7 @@
         });
     }
 
-    function DesvincularActivo(personaActivoId) {
+    function DesvincularActivo(btn, personaActivoId) {
         Swal.fire({
             title: '¿Iniciar desvinculación de este activo?',
             text: 'Se enviará un correo al usuario vinculado para que confirme la desvinculación.',
@@ -156,7 +159,9 @@
             background: 'white'
         }).then(function (result) {
             if (result.isConfirmed) {
+                $(btn).prop("disabled", true);
                 PostMVC('/Catalogs/IniciarDesvinculacion', { personaActivoId: personaActivoId }, function (response) {
+                    $(btn).prop("disabled", false);
                     var r = typeof response === 'string' ? JSON.parse(response) : response;
                     if (r && r.IsSuccess) {
                         Swal.fire({
