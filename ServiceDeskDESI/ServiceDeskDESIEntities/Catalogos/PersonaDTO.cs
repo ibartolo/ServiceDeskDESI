@@ -4,5 +4,7 @@ namespace ServiceDeskDESIEntities.Catalogos
     {
         public string PuestoNombre { get; set; }
         public string PuestoDescripcion { get; set; }
+        public long? UsuarioId { get; set; }
+        public string NombreUsuarioVinculado { get; set; }
     }
 }

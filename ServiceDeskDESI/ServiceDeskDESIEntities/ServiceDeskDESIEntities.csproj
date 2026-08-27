@@ -47,6 +47,8 @@
     <Compile Include="Catalogos\Activo.cs" />
     <Compile Include="Catalogos\ActivoDTO.cs" />
     <Compile Include="Catalogos\Area.cs" />
+    <Compile Include="Catalogos\AsignacionActivoDetalleDTO.cs" />
+    <Compile Include="Catalogos\BitacoraCorreo.cs" />
     <Compile Include="Catalogos\Categoria.cs" />
     <Compile Include="Catalogos\CategoriaDTO.cs" />
     <Compile Include="Catalogos\CategoriaResponsable.cs" />

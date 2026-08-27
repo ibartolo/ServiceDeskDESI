@@ -155,3 +155,106 @@ BEGIN
     ORDER BY a.Nombre;
 END
 GO
+
+-- ============================================================
+-- Extensión aditiva: notificación, confirmación de recepción y bitácora.
+-- NO re-DROP/CREA los 5 SPs existentes. Los 3 SPs nuevos usan DROP/CREATE.
+-- ============================================================
+
+-- 8. Columnas nuevas en PersonaActivo (FechaConfirmacion, TokenConfirmacion)
+IF NOT EXISTS (SELECT 1 FROM sys.columns
+               WHERE object_id = OBJECT_ID(N'dbo.PersonaActivo') AND name = N'FechaConfirmacion')
+    ALTER TABLE dbo.PersonaActivo ADD FechaConfirmacion DATETIME NULL;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns
+               WHERE object_id = OBJECT_ID(N'dbo.PersonaActivo') AND name = N'TokenConfirmacion')
+    ALTER TABLE dbo.PersonaActivo ADD TokenConfirmacion UNIQUEIDENTIFIER NULL;
+GO
+
+-- 9. Índice NO único para lookup por token de confirmación (múltiples NULL permitidos)
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+               WHERE name = N'IX_PersonaActivo_TokenConfirmacion'
+                 AND object_id = OBJECT_ID(N'dbo.PersonaActivo'))
+    CREATE INDEX IX_PersonaActivo_TokenConfirmacion ON dbo.PersonaActivo (TokenConfirmacion);
+GO
+
+-- 10. Tabla BitacoraCorreo (append-only, soft reference a PersonaActivoId, SIN FK)
+IF OBJECT_ID(N'dbo.BitacoraCorreo', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.BitacoraCorreo (
+        Id            BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        TipoCorreo    NVARCHAR(50)  NOT NULL,
+        Destinatario  NVARCHAR(250) NOT NULL,
+        Asunto        NVARCHAR(250) NOT NULL,
+        Estado        NVARCHAR(20)  NOT NULL,          -- 'Enviado' | 'Fallido'
+        Error         NVARCHAR(MAX) NULL,
+        FechaEnvio    DATETIME      NOT NULL,
+        ReferenciaId  BIGINT        NULL               -- soft reference → PersonaActivoId
+    );
+END
+GO
+
+-- 11. SP GenerarTokenConfirmacion (persiste el token GUID generado en C#)
+IF OBJECT_ID(N'dbo.GenerarTokenConfirmacion', N'P') IS NOT NULL DROP PROCEDURE dbo.GenerarTokenConfirmacion;
+GO
+CREATE PROCEDURE [dbo].[GenerarTokenConfirmacion]
+(
+    @PersonaActivoId   BIGINT,
+    @TokenConfirmacion UNIQUEIDENTIFIER
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE PersonaActivo
+    SET TokenConfirmacion = @TokenConfirmacion
+    WHERE Id = @PersonaActivoId AND FechaFin IS NULL;
+    SELECT @@ROWCOUNT;   -- 1 = ok; 0 = fila inexistente o ya desvinculada
+END
+GO
+
+-- 12. SP ConfirmarRecepcionActivo (tri-estado idempotente, anónimo, sin @Usuario)
+IF OBJECT_ID(N'dbo.ConfirmarRecepcionActivo', N'P') IS NOT NULL DROP PROCEDURE dbo.ConfirmarRecepcionActivo;
+GO
+CREATE PROCEDURE [dbo].[ConfirmarRecepcionActivo]
+(
+    @TokenConfirmacion UNIQUEIDENTIFIER
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF NOT EXISTS (SELECT 1 FROM PersonaActivo WHERE TokenConfirmacion = @TokenConfirmacion)
+        BEGIN SELECT 0; RETURN; END   -- token desconocido
+
+    IF EXISTS (SELECT 1 FROM PersonaActivo
+               WHERE TokenConfirmacion = @TokenConfirmacion AND FechaConfirmacion IS NOT NULL)
+        BEGIN SELECT 2; RETURN; END   -- ya confirmado (idempotente, sin cambio)
+
+    UPDATE PersonaActivo
+    SET FechaConfirmacion = GETDATE()
+    WHERE TokenConfirmacion = @TokenConfirmacion AND FechaConfirmacion IS NULL;
+
+    SELECT 1;                         -- confirmado ahora
+END
+GO
+
+-- 13. SP RegistrarBitacoraCorreo (INSERT append-only)
+IF OBJECT_ID(N'dbo.RegistrarBitacoraCorreo', N'P') IS NOT NULL DROP PROCEDURE dbo.RegistrarBitacoraCorreo;
+GO
+CREATE PROCEDURE [dbo].[RegistrarBitacoraCorreo]
+(
+    @TipoCorreo   NVARCHAR(50),
+    @Destinatario NVARCHAR(250),
+    @Asunto       NVARCHAR(250),
+    @Estado       NVARCHAR(20),
+    @Error        NVARCHAR(MAX) = NULL,
+    @ReferenciaId BIGINT        = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO BitacoraCorreo (TipoCorreo, Destinatario, Asunto, Estado, Error, FechaEnvio, ReferenciaId)
+    VALUES (@TipoCorreo, @Destinatario, @Asunto, @Estado, @Error, GETDATE(), @ReferenciaId);
+    SELECT SCOPE_IDENTITY();
+END
+GO

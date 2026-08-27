@@ -158,5 +158,78 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+        public ModelResponse VincularPersonaUsuario(long personaId, long usuarioId, string usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("VincularPersonaUsuario", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@PersonaId", personaId),
+                    new SqlParameter("@UsuarioId", usuarioId),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong == -3)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "La persona ya está vinculada a otro usuario.";
+                    return modelResponse;
+                }
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo vincular la persona al usuario. Verifique los datos.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Persona vinculada al usuario correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al vincular persona {PersonaId} al usuario {UsuarioId} para usuario {Usuario}", personaId, usuarioId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al vincular la persona al usuario.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse DesvincularPersonaUsuario(long personaId, string usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("DesvincularPersonaUsuario", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@PersonaId", personaId),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                modelResponse.IsSuccess = (resultadoLong > 0);
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = modelResponse.IsSuccess
+                    ? "Persona desvinculada del usuario correctamente."
+                    : "No se pudo desvincular la persona del usuario.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al desvincular persona {PersonaId} del usuario para usuario {Usuario}", personaId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al desvincular la persona del usuario.";
+            }
+
+            return modelResponse;
+        }
     }
 }

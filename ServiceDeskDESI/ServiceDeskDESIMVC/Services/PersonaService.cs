@@ -37,6 +37,16 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarPersona(persona);
         }
 
+        public async Task<ModelResponse> VincularPersonaUsuario(long personaId, long usuarioId)
+        {
+            return await _httpClient.VincularPersonaUsuario(personaId, usuarioId);
+        }
+
+        public async Task<ModelResponse> DesvincularPersonaUsuario(long personaId)
+        {
+            return await _httpClient.DesvincularPersonaUsuario(personaId);
+        }
+
         public async Task<ModelResponse<List<PersonaDTO>>> ConsultarTodasLasPersonas()
         {
             return await _httpClient.ObtenerTodasLasPersonas();

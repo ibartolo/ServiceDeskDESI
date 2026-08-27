@@ -223,6 +223,7 @@
     <Content Include="Views\Compania\AltaEdicion.cshtml" />
     <Content Include="Views\Catalogs\Company.cshtml" />
     <Content Include="Views\Home\RecoverPassword.cshtml" />
+    <Content Include="Views\Home\ConfirmarRecepcion.cshtml" />
     <Content Include="Views\User\MyProfile.cshtml" />
     <Content Include="Views\Catalogs\Category.cshtml" />
     <Content Include="Views\Ticket\Index.cshtml" />
@@ -237,6 +238,8 @@
     <Content Include="Views\Home\NewCompany.cshtml" />
     <Content Include="Views\User\Users.cshtml" />
     <Content Include="Views\Home\MenusUser.cshtml" />
+    <Content Include="Views\Home\MisActivos.cshtml" />
+    <Content Include="Views\Home\VerAsignacion.cshtml" />
     <Content Include="Views\Home\AccesoDenegado.cshtml" />
     <Content Include="Views\Security\Role.cshtml" />
     <Content Include="Views\Security\Permisos.cshtml" />

@@ -23,6 +23,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly EmpresaService _empresaService;
         private readonly RolService _rolService;
         private readonly DashboardService _dashboardService;
+        private readonly PersonaActivoService _personaActivoService;
 
         public HomeController()
         {
@@ -30,6 +31,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _empresaService = new EmpresaService(httpClientConnection);
             _rolService = new RolService(httpClientConnection);
             _dashboardService = new DashboardService(httpClientConnection);
+            _personaActivoService = new PersonaActivoService(httpClientConnection);
         }
 
         #region Views
@@ -75,6 +77,66 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Token = id;
             return View();
         }
+        [HttpGet]
+        public async Task<ActionResult> VerAsignacion(string token, string accion = null)
+        {
+            // Página anónima (standalone). Si el token no es un GUID válido, se muestra el mensaje limpio.
+            if (!Guid.TryParse(token, out Guid tokenGuid))
+            {
+                ViewBag.ErrorMessage = "El enlace de asignación no es válido o ha sido alterado.";
+                ViewBag.Detalle = null;
+                ViewBag.Accion = null;
+                ViewBag.Token = token;
+                return View();
+            }
+
+            var detalleResponse = await _personaActivoService.AsignacionPorToken(tokenGuid);
+
+            ViewBag.Detalle = detalleResponse != null ? detalleResponse.Response : null;
+            ViewBag.Accion = string.Equals(accion, "desvincular", StringComparison.OrdinalIgnoreCase) ? "desvincular" : "aceptar";
+            ViewBag.Token = token;
+            ViewBag.ErrorMessage = (detalleResponse == null || !detalleResponse.IsSuccess)
+                ? (detalleResponse?.Message ?? "El enlace de asignación no es válido o ha sido alterado.")
+                : null;
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> AceptarAsignacion(string token)
+        {
+            if (!Guid.TryParse(token, out Guid tokenGuid))
+            {
+                return Json(new ModelResponse { IsSuccess = false, Message = "El enlace de asignación no es válido o ha sido alterado." });
+            }
+
+            var result = await _personaActivoService.ConfirmarRecepcion(tokenGuid);
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> DesvincularAsignacion(string token)
+        {
+            if (!Guid.TryParse(token, out Guid tokenGuid))
+            {
+                return Json(new ModelResponse { IsSuccess = false, Message = "El enlace de desvinculación no es válido o ha sido alterado." });
+            }
+
+            var result = await _personaActivoService.DesvincularConfirmacion(tokenGuid);
+            return Json(result);
+        }
+
+        public ActionResult MisActivos()
+        {
+            return View();
+        }
+
+        public async Task<string> ObtenerMisActivos()
+        {
+            var response = await _personaActivoService.MisActivos();
+            return JsonConvert.SerializeObject(response);
+        }
+
         public ActionResult NewCompany()
         {
             return View();
