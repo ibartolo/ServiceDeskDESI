@@ -1,5 +1,8 @@
-﻿using ServiceDeskDESIEntities.Seguridad;
+﻿using ServiceDeskDESIEntities.Catalogos;
+using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
+using ServiceDeskDESIWebApi.Filters;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +12,26 @@ using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [RoutePrefix("api/Ticket")]
     public class TicketController : BaseController
     {
+        private readonly TicketService _ticketService;
+
+        public TicketController()
+        {
+            _ticketService = new TicketService();
+        }
+
         /// <summary>
-        /// Obtiene todos los tickets
+        /// Obtiene todos los tickets de la empresa del usuario autenticado
         /// </summary>
         /// <returns>Lista de tickets</returns>
-        [HttpGet, Route("Lista")]
-        public ModelResponse ObtenerTickets()
+        [HttpGet, Route("List")]
+        public ModelResponse<List<TicketDTO>> ObtenerTickets()
         {
-            var result = dbWrapper.ObtenerTickets();
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ObtenerTickets(usuario);
             return result;
         }
 
@@ -30,9 +41,10 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del ticket</param>
         /// <returns>Ticket encontrado</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerTicketPorId(long id)
+        public ModelResponse<TicketDTO> ObtenerTicketPorId(long id)
         {
-            var result = dbWrapper.ObtenerTicketPorId(id);
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ObtenerTicketPorId(id, usuario);
             return result;
         }
 
@@ -41,23 +53,27 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="ticket">Objeto ticket con los datos</param>
         /// <returns>Ticket guardado con su ID actualizado</returns>
-        [HttpPost, Route("")]
-        public ModelResponse GuardarOActualizarTicket(Ticket ticket)
+        [Permiso("Tickets")]
+        [HttpPost, Route("Guardar")]
+        public ModelResponse<Ticket> GuardarOActualizarTicket(Ticket ticket)
         {
-            var result = dbWrapper.GuardarOActualizarTicket(ticket);
+            var usuario = User.Identity.Name;
+            var result = _ticketService.GuardarOActualizarTicket(ticket, usuario);
             return result;
         }
 
         /// <summary>
         /// Elimina lógicamente un ticket
         /// </summary>
-        /// <param name="ticket">Ticket a eliminar (debe incluir Id y ModificadoPor)</param>
+        /// <param name="ticket">Ticket a eliminar (debe incluir Id, ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
-        [HttpDelete, Route("")]
+        [Permiso("Tickets", "Eliminar")]
+        [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarTicket(Ticket ticket)
         {
+            var usuario = User.Identity.Name;
             ticket.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarTicket(ticket.Id, ticket.ModificadoPor, ticket.FechaModificacion.Value);
+            var result = _ticketService.EliminarTicket(ticket.Id, ticket.ModificadoPor, ticket.FechaModificacion.Value, usuario);
             return result;
         }
 
@@ -67,9 +83,10 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="areaId">ID del área</param>
         /// <returns>Lista de tickets del área</returns>
         [HttpGet, Route("Area/{areaId:long}")]
-        public ModelResponse ObtenerTicketsPorArea(long areaId)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorArea(long areaId)
         {
-            var result = dbWrapper.ObtenerTicketsPorArea(areaId);
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ObtenerTicketsPorArea(areaId, usuario);
             return result;
         }
 
@@ -79,9 +96,10 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="creadoPor">Nombre de usuario</param>
         /// <returns>Lista de tickets del usuario</returns>
         [HttpGet, Route("Usuario/{creadoPor}")]
-        public ModelResponse ObtenerTicketsPorUsuario(string creadoPor)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorUsuario(string creadoPor)
         {
-            var result = dbWrapper.ObtenerTicketsPorUsuario(creadoPor);
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ObtenerTicketsPorUsuario(creadoPor, usuario);
             return result;
         }
 
@@ -91,9 +109,34 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="urgencia">Nivel de urgencia (1=Baja, 2=Media, 3=Alta, 4=Crítica)</param>
         /// <returns>Lista de tickets con esa urgencia</returns>
         [HttpGet, Route("Urgencia/{urgencia:int}")]
-        public ModelResponse ObtenerTicketsPorUrgencia(int urgencia)
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorUrgencia(int urgencia)
         {
-            var result = dbWrapper.ObtenerTicketsPorUrgencia(urgencia);
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ObtenerTicketsPorUrgencia(urgencia, usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene tickets por estatus
+        /// </summary>
+        /// <param name="ticketEstatusId">ID del estatus del ticket</param>
+        /// <returns>Lista de tickets con ese estatus</returns>
+        [HttpGet, Route("Estatus/{ticketEstatusId:int}")]
+        public ModelResponse<List<TicketDTO>> ObtenerTicketsPorEstatus(int ticketEstatusId)
+        {
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ObtenerTicketsPorEstatus(ticketEstatusId, usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene todos los estatus de tickets
+        /// </summary>
+        /// <returns>Lista de estatus</returns>
+        [HttpGet, Route("Estatus/List")]
+        public ModelResponse<List<TicketEstatus>> ObtenerTicketEstatus()
+        {
+            var result = _ticketService.ObtenerTicketEstatus();
             return result;
         }
     }

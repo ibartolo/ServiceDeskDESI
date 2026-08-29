@@ -1,7 +1,8 @@
-﻿﻿@model ServiceDeskDESIEntities.Tickets.Ticket
+﻿@model ServiceDeskDESIEntities.Tickets.Ticket
 @{
     ViewBag.Title = "Tickets";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
@@ -28,12 +29,13 @@
         @Html.HiddenFor(x => x.ModificadoPor)
         @Html.HiddenFor(x => x.FechaModificacion)
         @Html.HiddenFor(x => x.Estatus)
+        @Html.HiddenFor(x => x.TicketEstatusId)
 
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Área:</label>
-                    @Html.DropDownListFor(x => x.Area.Id, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
+                    @Html.DropDownListFor(x => x.AreaId, new SelectList(ViewBag.Areas, "Id", "Nombre"), "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
                 </div>
             </div>
             <div class="col-md-4">
@@ -42,7 +44,7 @@
                     <select id="ddlCategoria" class="form-control">
                         <option value="">Seleccione una categoría</option>
                     </select>
-                    @Html.HiddenFor(x => x.Categoria.Id)
+                    @Html.HiddenFor(x => x.CategoriaId)
                 </div>
             </div>
             <div class="col-md-4">
@@ -51,7 +53,7 @@
                     <select id="ddlSubcategoria" class="form-control">
                         <option value="">Seleccione una subcategoría</option>
                     </select>
-                    @Html.HiddenFor(x => x.Subcategoria.Id)
+                    @Html.HiddenFor(x => x.SubcategoriaId)
                 </div>
             </div>
         </div>
@@ -70,7 +72,13 @@
                     @Html.HiddenFor(x => x.Urgencia)
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Estatus:</label>
+                    @Html.DropDownListFor(x => x.TicketEstatusId, new SelectList(ViewBag.Estatus, "Id", "Nombre"), "Seleccione un estatus", new { @class = "form-control", id = "ddlEstatus" })
+                </div>
+            </div>
+            <div class="col-md-4">
                 <div class="mb-3">
                     <label>Título:</label>
                     @Html.TextBoxFor(x => x.Titulo, new { @class = "form-control", placeholder = "Título del ticket" })
@@ -90,7 +98,10 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarTicket()" />
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarTicket()" />
+                    }
                     <a href="/Ticket/Index" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -117,6 +128,7 @@
                                 <th>Categoría</th>
                                 <th>Subcategoría</th>
                                 <th>Urgencia</th>
+                                <th>Estatus</th>
                                 <th>Fecha Creación</th>
                                 <th>Acciones</th>
                             </tr>
@@ -131,6 +143,9 @@
 </div>
 
 <script>
+    // Pasar permisos a JavaScript
+    var permisosGlobal = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(permisos));
+
     var tablaTicket;
 
     $(function () {
@@ -195,8 +210,8 @@
             // Limpiar categorías y subcategorías
             $("#ddlCategoria").empty().append('<option value="">Seleccione una categoría</option>');
             $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
-            $("#Categoria_Id").val('');
-            $("#Subcategoria_Id").val('');
+            $("#CategoriaId").val('');
+            $("#SubcategoriaId").val('');
 
             if (areaId) {
                 // Primera llamada: obtener todas las categorías por área
@@ -224,7 +239,7 @@
 
             // Limpiar subcategorías
             $("#ddlSubcategoria").empty().append('<option value="">Seleccione una subcategoría</option>');
-            $("#Subcategoria_Id").val('');
+            $("#SubcategoriaId").val('');
 
             if (categoriaId) {
                 // Segunda llamada: obtener subcategorías por categoría padre
@@ -247,9 +262,9 @@
             columns: [
                 { data: 'Id', title: 'ID', visible: false },
                 { data: 'Titulo', title: 'Título' },
-                { data: 'Area.Nombre', title: 'Área' },
-                { data: 'Categoria.Nombre', title: 'Categoría' },
-                { data: 'Subcategoria.Nombre', title: 'Subcategoría', defaultContent: '---' },
+                { data: 'AreaNombre', title: 'Área' },
+                { data: 'CategoriaNombre', title: 'Categoría' },
+                { data: 'SubcategoriaNombre', title: 'Subcategoría', defaultContent: '---' },
                 {
                     data: 'Urgencia',
                     title: 'Urgencia',
@@ -261,6 +276,17 @@
                             case 4: return '<span class="badge bg-danger">Crítica</span>';
                             default: return '---';
                         }
+                    }
+                },
+                {
+                    data: 'EstatusNombre',
+                    title: 'Estatus',
+                    defaultContent: '---',
+                    render: function (data, type, row) {
+                        if (row.EstatusColor) {
+                            return '<span class="badge" style="background-color: ' + row.EstatusColor + '; color: white;">' + row.EstatusNombre + '</span>';
+                        }
+                        return data || '---';
                     }
                 },
                 {
@@ -276,52 +302,25 @@
                 },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarTicket(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarTicket(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
+                        var html = '<div class="d-flex gap-3">';
+
+                        // Botón Editar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarTicket(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+
+                        // Botón Eliminar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarTicket(' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+
+                        html += '</div>';
+                        return html;
                     }
                 }
             ],
             language: {
                 url: "/Content/datatables/i18n/es-ES.json"
-            }
-        });
-    }
-
-    function CargarCategoriasPorArea(areaId) {
-        GetMVC("/Ticket/ObtenerCategoriasPorArea/" + areaId, function (response) {
-            var result = typeof response === 'string' ? JSON.parse(response) : response;
-            if (result.IsSuccess && result.Response) {
-                var categorias = result.Response;
-                var ddl = $("#ddlCategoria");
-                ddl.empty();
-                ddl.append('<option value="">Seleccione una categoría</option>');
-
-                // Filtrar solo categorías principales (sin padre)
-                var principales = categorias.filter(function (c) {
-                    return c.CategoriaPadre === null;
-                });
-
-                principales.forEach(function (c) {
-                    ddl.append('<option value="' + c.Id + '">' + c.Nombre + '</option>');
-                });
-            }
-        });
-    }
-
-    function CargarSubcategorias(categoriaId) {
-        GetMVC("/Ticket/ObtenerSubcategoriasPorCategoria?categoriaId=" + categoriaId, function (response) {
-            var result = typeof response === 'string' ? JSON.parse(response) : response;
-            if (result.IsSuccess && result.Response) {
-                var subcategorias = result.Response;
-                var ddl = $("#ddlSubcategoria");
-                ddl.empty();
-                ddl.append('<option value="">Seleccione una subcategoría</option>');
-
-                subcategorias.forEach(function (s) {
-                    ddl.append('<option value="' + s.Id + '">' + s.Nombre + '</option>');
-                });
             }
         });
     }
@@ -424,6 +423,19 @@
                 return;
             }
 
+            // Validar estatus
+            if (!$("#ddlEstatus").val()) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Debe seleccionar un estatus',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+                return;
+            }
+
             Swal.fire({
                 title: 'Guardando...',
                 text: 'Por favor espere',
@@ -435,12 +447,13 @@
 
             var ticket = {
                 Id: $("#Id").val() || 0,
-                Area: { Id: parseInt($("#ddlArea").val()) },
-                Categoria: { Id: parseInt($("#ddlCategoria").val()) },
-                Subcategoria: { Id: parseInt($("#ddlSubcategoria").val()) },
+                AreaId: parseInt($("#ddlArea").val()),
+                CategoriaId: parseInt($("#ddlCategoria").val()),
+                SubcategoriaId: parseInt($("#ddlSubcategoria").val()),
                 Urgencia: parseInt($("#ddlUrgencia").val()),
                 Titulo: $("#Titulo").val(),
                 Descripcion: $("#Descripcion").val(),
+                TicketEstatusId: parseInt($("#ddlEstatus").val()),
                 CreadoPor: $("#CreadoPor").val(),
                 FechaCreacion: $("#FechaCreacion").val(),
                 ModificadoPor: $("#ModificadoPor").val() || null,

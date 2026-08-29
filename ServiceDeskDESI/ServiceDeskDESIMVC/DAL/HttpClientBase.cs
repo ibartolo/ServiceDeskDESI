@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -56,8 +57,9 @@ namespace ServiceDeskDESIMVC.DAL
         }
         public async Task<T> RequestAsync<T>(string endPoint, HttpMethod method, T content, Func<string, T> func, string token = "", string contentType = "application/json") where T : class
         {
-            if (!token.Equals(string.Empty))
-                SetParametersHttpCliente(contentType, token);
+            // Siempre configurar headers: limpia cualquier Authorization residual de una
+            // llamada previa en la misma instancia de HttpClient (evita fugas de token).
+            SetParametersHttpCliente(contentType, token);
 
             using (var r = new HttpRequestMessage()
             {
@@ -67,24 +69,60 @@ namespace ServiceDeskDESIMVC.DAL
             })
             using (var responseMessage = await httpClient.SendAsync(r))
             {
+                var stringContent = await responseMessage.Content.ReadAsStringAsync();
+
                 if (responseMessage.IsSuccessStatusCode)
                 {
-                    var stringContent = await responseMessage.Content.ReadAsStringAsync();
-
                     return func?.Invoke(stringContent);
                 }
-                else
+
+                // Respuesta no exitosa: devolver un ModelResponse de error en lugar de null,
+                // para que los DAL no lancen NullReferenceException (result.ToString()).
+                var error = new
                 {
-                    return default(T);
+                    IsSuccess = false,
+                    Message = $"Error {(int)responseMessage.StatusCode} ({responseMessage.ReasonPhrase}) al consumir {endPoint}.",
+                    Response = (object)null
+                };
+                return func?.Invoke(JsonConvert.SerializeObject(error));
+            }
+        }
+        public async Task<ModelResponse<TResponse>> RequestAsync<TResponse>(string endPoint, HttpMethod method, object content, string token = "", string contentType = "application/json")
+        {
+            // Siempre configurar headers: limpia cualquier Authorization residual de una
+            // llamada previa en la misma instancia de HttpClient (evita fugas de token).
+            SetParametersHttpCliente(contentType, token);
+
+            using (var r = new HttpRequestMessage()
+            {
+                Content = content != null ? new StringContent(JsonConvert.SerializeObject(content), Encoding.UTF8, contentType) : null,
+                Method = method,
+                RequestUri = new Uri(httpClient.BaseAddress, endPoint)
+            })
+            using (var responseMessage = await httpClient.SendAsync(r))
+            {
+                var stringContent = await responseMessage.Content.ReadAsStringAsync();
+
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    return JsonConvert.DeserializeObject<ModelResponse<TResponse>>(stringContent);
                 }
+
+                // Respuesta no exitosa: devolver un ModelResponse<TResponse> de error en lugar de null,
+                // para que los DAL no lancen NullReferenceException.
+                return new ModelResponse<TResponse>
+                {
+                    IsSuccess = false,
+                    Message = $"Error {(int)responseMessage.StatusCode} ({responseMessage.ReasonPhrase}) al consumir {endPoint}.",
+                    Response = default(TResponse)
+                };
             }
         }
         public async Task<byte[]> RequestAsyncByteArray(string endPoint, HttpMethod method, object content, string token = "", string contentType = "application/json")
         {
             byte[] b = null;
 
-            if (!token.Equals(string.Empty))
-                SetParametersHttpCliente(contentType, token);
+            SetParametersHttpCliente(contentType, token);
 
             using (var r = new HttpRequestMessage()
             {

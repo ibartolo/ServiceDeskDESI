@@ -1,5 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,43 +15,66 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Empresas")]
     public class EmpresaController : BaseController
     {
-        [AllowAnonymous]
-        [HttpGet, Route("List/{empresaId:long}")]
-        public ModelResponse ObtenerEmpresas(long empresaId)
+        private readonly EmpresaService _empresaService;
+
+        public EmpresaController()
         {
-            var result = dbWrapper.ObtenerTodasLasEmpresas(empresaId);
+            _empresaService = new EmpresaService();
+        }
+
+        [HttpGet, Route("{id:long}")]
+        public ModelResponse<Empresa> ObtenerEmpresasPorId(long id)
+        {
+            var usuario = User.Identity.Name;
+            var result = _empresaService.ObtenerEmpresaPorId(id, usuario);
             return result;
         }
-        [HttpGet, Route("{id:long}/{empresaId:long}")]
-        public ModelResponse ObtenerEmpresasPorId(long id,long empresaId)
+
+        [Permiso("Compañías")]
+        [HttpPost, Route("Guardar")]
+        public ModelResponse<Empresa> GuardarOActualizarEmpresa(Empresa e)
         {
-            var result = dbWrapper.ObtenerEmpresasPorId(id,empresaId);
+            var usuario = User.Identity.Name;
+            var result = _empresaService.GuardarOActualizarEmpresa(e, usuario);
             return result;
         }
-        [HttpPost, Route("RFC")]
-        public ModelResponse ObtenerEmpresasPorRFC(Empresa empresa)
-        {
-            var result = dbWrapper.ObtenerEmpresaPorRFC(empresa.RFC);
-            return result;
-        }
-        [HttpPost, Route("Guardar/{empresaId:long}")]
-        public ModelResponse GuardarOActualizarEmpresas(Empresa e,long empresaId)
-        {
-            var result = dbWrapper.GuardarOActualizarEmpresas(e,empresaId);
-            return result;
-        }
-        [AllowAnonymous]
+
+        [Permiso("Compañías", "Crear")]
         [HttpPost, Route("Nueva")]
-        public ModelResponse GuardarNuevaEmpresas(Empresa e)
+        public ModelResponse<Empresa> GuardarNuevaEmpresa(Empresa e)
         {
-            var result = dbWrapper.GuardarNuevaEmpresaConDatosIniciales(e);
+            var result = _empresaService.GuardarNuevaEmpresa(e);
             return result;
         }
-        [HttpDelete, Route("Eliminar/{empresaId:long}")]
-        public ModelResponse EliminarEmpresas(Empresa e, long empresaId)
+
+        [Permiso("Compañías", "Crear")]
+        [HttpPost, Route("NuevaCompleta")]
+        public ModelResponse<Empresa> GuardarNuevaEmpresaCompleta(Empresa e)
         {
+            var result = _empresaService.GuardarNuevaEmpresaConDatosIniciales(e);
+            return result;
+        }
+
+        /// <summary>
+        /// Registro de empresa pre-login (anónimo). Valida campos y unicidad server-side y
+        /// crea la empresa con sus datos iniciales (sucursal, área, usuario admin, roles y permisos).
+        /// </summary>
+        /// <param name="e">Objeto empresa con los datos de registro</param>
+        /// <returns>Resultado del registro</returns>
+        [AllowAnonymous]
+        [HttpPost, Route("Registrar")]
+        public ModelResponse<Empresa> Registrar(Empresa e)
+        {
+            return _empresaService.RegistrarEmpresa(e);
+        }
+
+        [Permiso("Compañías", "Eliminar")]
+        [HttpDelete, Route("Eliminar")]
+        public ModelResponse EliminarEmpresa(Empresa e)
+        {
+            var usuario = User.Identity.Name;
             e.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarEmpresa(e.Id, e.ModificadoPor, e.FechaModificacion.Value,empresaId);
+            var result = _empresaService.EliminarEmpresa(e.Id, e.ModificadoPor, e.FechaModificacion.Value, usuario);
             return result;
         }
     }

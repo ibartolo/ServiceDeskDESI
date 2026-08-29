@@ -12,52 +12,33 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task  <ModelResponse> ObtenerTodosLosActivos ()
+        public async Task<ModelResponse<List<ActivoDTO>>> ObtenerTodosLosActivos()
         {
-            var result = await RequestAsync<object>($"api/Activos/List", HttpMethod.Get, null,
-                 new Func<string, string>((responseString) =>
-                 {
-                     return responseString;
-                 }),
-                 token.Token.access_token);
-            var modelresponse =JsonConvert.DeserializeObject <ModelResponse>(result.ToString());
-            return modelresponse;
+            return await RequestAsync<List<ActivoDTO>>($"api/Activo/List", HttpMethod.Get, null, token.Token.access_token);
         }
-        public async Task<ModelResponse> GuardarActualizarActivos(Activo a)
+
+        public async Task<ModelResponse<ActivoDTO>> ObtenerActivoPorId(long id)
         {
-            MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/Activos", HttpMethod.Post, a,
-                 new Func<string, string>((responseString) =>
-                 {
-                     return responseString;
-                 }),
-                 token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelresponse;
+            return await RequestAsync<ActivoDTO>($"api/Activo/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
-        public async Task<ModelResponse> ObtenerActivoPorId(long id)
+
+        public async Task<ModelResponse<Activo>> GuardarOActualizarActivo(Activo activo)
         {
-            var result = await RequestAsync<object>($"api/Activos/{id}", HttpMethod.Get, null,
-                 new Func<string, string>((responseString) =>
-                 {
-                     return responseString;
-                 }),
-                 token.Token.access_token);
-            var modelreponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelreponse;
+            MappingColumSecurity(activo);
+            return await RequestAsync<Activo>($"api/Activo/Guardar", HttpMethod.Post, activo, token.Token.access_token);
         }
-        public async Task<ModelResponse> EliminarActivos(Activo a)
+
+        public async Task<ModelResponse> EliminarActivo(Activo activo)
         {
-            MappingColumSecurity(a);
-            var result = await RequestAsync<object>($"api/Activos", HttpMethod.Delete, a,
+            MappingColumSecurity(activo);
+            var result = await RequestAsync<object>($"api/Activo/Eliminar", HttpMethod.Delete, activo,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
-                }),
-                 token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelresponse;
-        }
+                }), token.Token.access_token);
 
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
     }
 }

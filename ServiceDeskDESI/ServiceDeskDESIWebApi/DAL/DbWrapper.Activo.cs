@@ -1,136 +1,58 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using Serilog;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodosLosActivos(long empresaId)
+        public ModelResponse<List<ActivoDTO>> ObtenerTodosLosActivos(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<ActivoDTO>>();
 
             try
             {
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
                 var activos = GetObjects("ObtenerActivos", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@EmpresaId", empresaId) },
-                    new Func<IDataReader, Activo>((reader) =>
+                    new[] { new SqlParameter("@Usuario", usuario) },
+                    new Func<IDataReader, ActivoDTO>((reader) =>
                     {
-                        var activo = LlenarEntidad<Activo>(reader);
-
-                        activo.TipoActivo = new TipoActivo()
-                        {
-                            Id = MapearPorpiedades<long>(reader["TipoActivoId"]),
-                            Nombre = MapearPorpiedades<string>(reader["TipoActivoNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["TipoActivoDescripcion"])
-                        };
-
-                        activo.Marca = new Marca()
-                        {
-                            Id = MapearPorpiedades<long>(reader["MarcaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
-                        };
-
-                        activo.Modelo = new Modelo()
-                        {
-                            Id = MapearPorpiedades<long>(reader["ModeloId"]),
-                            Nombre = MapearPorpiedades<string>(reader["ModeloNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["ModeloDescripcion"])
-                        };
-
+                        var activo = LlenarEntidad<ActivoDTO>(reader);
                         return activo;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = activos;
+                modelResponse.Response = activos.ToList();
                 modelResponse.Message = "Activos obtenidos correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener activos para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener las activos";
+                modelResponse.Message = "Ocurrió un error al obtener los activos";
             }
 
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarActivo(Activo a)
+        public ModelResponse<ActivoDTO> ObtenerActivoPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
-            try
-            {
-                // Validaciones
-
-                var parametros = ObtenerParametrosSQL(a).ToArray();
-                var activoId = ExecuteScalar("GuardarOActualizarActivo", CommandType.StoredProcedure, parametros);
-                a.Id = Convert.ToInt64(activoId);
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = a;
-                modelResponse.Message = "Activos Guardados Correctamente";
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-                modelResponse.Response = null;
-            }
-
-            return modelResponse;
-        }
-
-        public ModelResponse ObtenerActivoPorId(long id, long empresaId)
-        {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<ActivoDTO>();
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
                 var activo = GetObject("ObtenerActivoPorId", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id),
-                     new SqlParameter("@EmpresaId", empresaId)
+                    new[] {
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
                     },
-
-                    new Func<IDataReader, Activo>((reader) =>
+                    new Func<IDataReader, ActivoDTO>((reader) =>
                     {
-                        var a = LlenarEntidad<Activo>(reader);
-
-                        a.TipoActivo = new TipoActivo()
-                        {
-                            Id = MapearPorpiedades<long>(reader["TipoActivoId"]),
-                            Nombre = MapearPorpiedades<string>(reader["TipoActivoNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["TipoActivoDescripcion"])
-                        };
-
-                        a.Marca = new Marca()
-                        {
-                            Id = MapearPorpiedades<long>(reader["MarcaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["MarcaNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["MarcaDescripcion"])
-                        };
-
-                        a.Modelo = new Modelo()
-                        {
-                            Id = MapearPorpiedades<long>(reader["ModeloId"]),
-                            Nombre = MapearPorpiedades<string>(reader["ModeloNombre"]),
-                            Descripcion = MapearPorpiedades<string>(reader["ModeloDescripcion"])
-                        };
-
+                        var a = LlenarEntidad<ActivoDTO>(reader);
                         return a;
                     }));
 
@@ -145,13 +67,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = activo;
                 modelResponse.Message = "Activo obtenido correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener activo {Id} para usuario {Usuario}", id, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener el activo";
             }
@@ -159,41 +77,88 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse EliminarActivo(long id, string modificadoPor, DateTime fechaModificacion, long empresaId)
+        public ModelResponse<Activo> GuardarOActualizarActivo(Activo a, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Activo>();
+
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del Modelo es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El activo modificador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
-                var result =  ExecuteNonQuery("EliminarActivo", CommandType.StoredProcedure, new SqlParameter[]
+                var parametrosObj = new
                 {
-                    new SqlParameter("@Id", id),
-                    new SqlParameter("@ModificadoPor", modificadoPor),
-                    new SqlParameter("@FechaModificacion", fechaModificacion)
-                });
-                if (Convert.ToInt64(result) == 0)
+                    a.Id,
+                    a.Nombre,
+                    a.Descripcion,
+                    a.TipoActivoId,
+                    a.Serial,
+                    a.MarcaId,
+                    a.ModeloId,
+                    a.Notas,
+                    a.FechaCompra,
+                    a.CreadoPor,
+                    a.FechaCreacion,
+                    a.ModificadoPor,
+                    a.FechaModificacion,
+                    a.Estatus,
+                    Usuario = usuario
+                };
+
+                var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
+                var activoId = ExecuteScalar("GuardarOActualizarActivo", CommandType.StoredProcedure, parametros);
+
+                if (Convert.ToInt64(activoId) == 0)
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No tiene permisos para eliminar este Activo.";
+                    modelResponse.Message = "No tiene permisos para realizar esta operación.";
                     return modelResponse;
                 }
 
-                  modelResponse.IsSuccess = true;
-                modelResponse.Message = "Activo eliminado correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
+                a.Id = Convert.ToInt64(activoId);
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = a;
+                modelResponse.Message = "Activo guardado correctamente";
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al guardar activo para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al eliminar la Activo";
+                modelResponse.Message = "Ocurrió un error al guardar el activo";
             }
+
+            return modelResponse;
+        }
+
+        public ModelResponse EliminarActivo(long id, string modificadoPor, DateTime fechaModificacion, string usuario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var result = ExecuteScalar("EliminarActivo", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                if (Convert.ToInt64(result) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para eliminar este activo.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Message = "Activo eliminado correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al eliminar activo {Id} para usuario {Usuario}", id, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al eliminar el activo";
+            }
+
             return modelResponse;
         }
     }

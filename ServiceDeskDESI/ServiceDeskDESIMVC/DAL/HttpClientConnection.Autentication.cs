@@ -12,17 +12,16 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> AutenticarUsuario(Usuario usuario)
+        public async Task<ModelResponse<UsuarioDTO>> AutenticarUsuario(Usuario usuario)
         {
-            var result = await RequestAsync<object>($"api/Autentication/autenticar", HttpMethod.Post, usuario,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                })); // No necesita token porque es el login
+            // No necesita token porque es el login
+            return await RequestAsync<UsuarioDTO>($"api/Autentication/autenticar", HttpMethod.Post, usuario);
+        }
 
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
+        public async Task<ModelResponse<Usuario>> ActualizarPerfilUsuario(Usuario usuario)
+        {
+            MappingColumSecurity(usuario);
+            return await RequestAsync<Usuario>($"api/Autentication/ActualizarPerfil", HttpMethod.Post, usuario, token.Token.access_token);
         }
 
         public async Task<ModelResponse> ValidarTokenRecuperacion(string token)
@@ -68,6 +67,12 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
 
             return modelResponse;
+        }
+
+        public async Task<ModelResponse<Usuario>> GuardarOActualizarUsuarioAdmin(Usuario usuario)
+        {
+            MappingColumSecurity(usuario);
+            return await RequestAsync<Usuario>($"api/Autentication/Admin/Usuario", HttpMethod.Post, usuario, token.Token.access_token);
         }
     }
 }
