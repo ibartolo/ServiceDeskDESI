@@ -24,6 +24,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly RolService _rolService;
         private readonly DashboardService _dashboardService;
         private readonly PersonaActivoService _personaActivoService;
+        private readonly AreaService _areaService;
 
         public HomeController()
         {
@@ -32,6 +33,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _rolService = new RolService(httpClientConnection);
             _dashboardService = new DashboardService(httpClientConnection);
             _personaActivoService = new PersonaActivoService(httpClientConnection);
+            _areaService = new AreaService(httpClientConnection);
         }
 
         #region Views
@@ -157,9 +159,68 @@ namespace ServiceDeskDESIMVC.Controllers
             return View();
         }
 
-        public ActionResult Configuration () { 
+        public async Task<ActionResult> Configuration () {
+
+            var tokenCookie = SessionHelper.GetSessionUser();
+
+            // Determinar si el usuario es jefe de departamento (responsable de al menos un área)
+            bool esJefeArea = false;
+            if (tokenCookie != null && tokenCookie.UserID > 0)
+            {
+                var areasResponse = await _areaService.ConsultarTodasAreas();
+                if (areasResponse.IsSuccess && areasResponse.Response != null)
+                {
+                    esJefeArea = areasResponse.Response.Any(a => a.UsuarioResponsableId == tokenCookie.UserID);
+                }
+            }
+
+            ViewBag.EsJefeArea = esJefeArea;
+
+            // Si es jefe, obtener la vigencia de la licencia de su empresa
+            if (esJefeArea && tokenCookie != null && tokenCookie.EmpresaID > 0)
+            {
+                var empresa = await _empresaService.ObtenerEmpresaPorId(tokenCookie.EmpresaID);
+                if (empresa != null)
+                {
+                    ViewBag.EmpresaNombre = empresa.NombreComercial;
+                    ViewBag.FechaVigenciaFin = empresa.FechaVigenciaFin;
+                    ViewBag.FechaVigenciaInicio = empresa.FechaVigenciaInicio;
+                    ViewBag.EsPeriodoPrueba = empresa.EsPeriodoPrueba;
+
+                    var diasRestantes = (empresa.FechaVigenciaFin.Date - DateTime.Now.Date).Days;
+                    ViewBag.DiasRestantes = diasRestantes > 0 ? diasRestantes : 0;
+                }
+            }
 
             return View();
+        }
+
+        /// <summary>
+        /// Guarda la preferencia de tema (light/dark) en una cookie propia del usuario
+        /// (no es la cookie de sesión). Expira en 1 año y se renueva cada vez que cambia el tema.
+        /// </summary>
+        [HttpPost]
+        public ActionResult GuardarTema(string tema)
+        {
+            if (tema != "light" && tema != "dark")
+            {
+                tema = "light";
+            }
+
+            var tokenCookie = SessionHelper.GetSessionUser();
+            var cookieName = tokenCookie != null && tokenCookie.UserID > 0
+                ? $"TemaUsuario_{tokenCookie.UserID}"
+                : "TemaUsuario";
+
+            var cookie = new HttpCookie(cookieName, tema)
+            {
+                Expires = DateTime.Now.AddYears(1), // cookie siempre viva: cada cambio renueva +1 año
+                HttpOnly = true,
+                Path = "/"
+            };
+            Response.Cookies.Add(cookie);
+
+            return Json(new { IsSuccess = true, Tema = tema });
         }
 
 

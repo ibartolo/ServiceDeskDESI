@@ -49,6 +49,15 @@ namespace ServiceDeskDESIMVC.Controllers
                 usuario = new Usuario();
                 ViewBag.ErrorMessage = "No se pudo obtener el usuario.";
             }
+            else
+            {
+                // Sincronizar la sesión con los datos frescos (imagen de perfil) para que el navbar (_Layout user-avatar) la muestre
+                if (tokenCookie.ProfileImage != usuario.ImagenPerfil)
+                {
+                    tokenCookie.ProfileImage = usuario.ImagenPerfil;
+                    SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
+                }
+            }
 
             // Cargar listas para los dropdowns
             var sucursalesResponse = await _sucursalService.ConsultarTodasSucursales();
@@ -102,6 +111,18 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
 
                 var response = await _autenticacionService.ActualizarPerfilUsuario(usuario);
+
+                // Refrescar la sesión con la nueva imagen para que el navbar (user-avatar del _Layout) la muestre de inmediato
+                if (response.IsSuccess)
+                {
+                    var tokenCookie = SessionHelper.GetSessionUser();
+                    if (tokenCookie != null)
+                    {
+                        tokenCookie.ProfileImage = usuario.ImagenPerfil;
+                        SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
+                    }
+                }
+
                 return JsonConvert.SerializeObject(response);
             }
             catch (Exception ex)

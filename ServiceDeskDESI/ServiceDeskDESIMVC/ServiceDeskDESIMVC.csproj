@@ -187,6 +187,7 @@
     <Compile Include="Helpers\FiltersHelper.cs" />
     <Compile Include="Filters\PermisoAttribute.cs" />
     <Compile Include="Helpers\SessionHelper.cs" />
+    <Compile Include="Helpers\ThemeHelper.cs" />
     <Compile Include="Models\CategoriaResponsableViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ActivoService.cs" />
