@@ -170,6 +170,7 @@
     <Compile Include="DAL\HttpClientConnection.Foliador.cs" />
     <Compile Include="DAL\HttpClientConnection.Dashboard.cs" />
     <Compile Include="DAL\HttpClientConnection.Marca.cs" />
+    <Compile Include="DAL\HttpClientConnection.Mantenimiento.cs" />
     <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
     <Compile Include="DAL\HttpClientConnection.Permisos.cs" />
     <Compile Include="DAL\HttpClientConnection.Persona.cs" />
@@ -201,6 +202,7 @@
     <Compile Include="Services\FoliadorService.cs" />
     <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Services\MarcaService.cs" />
+    <Compile Include="Services\MantenimientoService.cs" />
     <Compile Include="Services\ModeloService.cs" />
     <Compile Include="Services\PermisosService.cs" />
     <Compile Include="Services\RolService.cs" />
@@ -249,6 +251,7 @@
     <Content Include="Views\Catalogs\Puesto.cshtml" />
     <Content Include="Views\Catalogs\Persona.cshtml" />
     <Content Include="Views\Catalogs\_AsignarActivoPersona.cshtml" />
+    <Content Include="Views\Catalogs\_MantenimientoActivo.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

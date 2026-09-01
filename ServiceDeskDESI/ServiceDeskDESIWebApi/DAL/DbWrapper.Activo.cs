@@ -90,6 +90,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     a.Descripcion,
                     a.TipoActivoId,
                     a.Serial,
+                    a.SerieLocal,
                     a.MarcaId,
                     a.ModeloId,
                     a.Notas,
@@ -104,6 +105,13 @@ namespace ServiceDeskDESIWebApi.DAL
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
                 var activoId = ExecuteScalar("GuardarOActualizarActivo", CommandType.StoredProcedure, parametros);
+
+                if (Convert.ToInt64(activoId) == -2)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "Ya existe un activo con ese No. de Serie";
+                    return modelResponse;
+                }
 
                 if (Convert.ToInt64(activoId) == 0)
                 {

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿@{
+﻿@{
     ViewBag.Title = "Permisos por Rol";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var permisos = ViewBag.Permisos as PermisosViewModel;
@@ -256,6 +256,7 @@
         disponibles: [],
         asignadas: []
     };
+    var conteoByRol = {};
 
     $(document).ready(function () {
         InicializarTablaRoles();
@@ -386,8 +387,21 @@
                     });
                 });
                 tablaRoles.draw();
-                ActualizarBadges();
+                CargarConteoPaginas();
             }
+        });
+    }
+
+    function CargarConteoPaginas() {
+        GetMVC("/Security/ConsultarConteoPaginasPorRol", function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+            if (result.IsSuccess && result.Response) {
+                result.Response.forEach(function (c) {
+                    conteoByRol[c.RolId] = c.TotalPaginas;
+                });
+            }
+            ActualizarBadges();
         });
     }
 
@@ -561,9 +575,8 @@
             if (rolId === rolSeleccionadoId) {
                 count = paginasByRol.asignadas.length;
             } else {
-                // Para otros roles, necesitaríamos tener sus permisos en cache
-                // Por ahora, usamos 0 si no hay datos
-                count = 0;
+                // Para otros roles, usar el conteo total devuelto por el SP (sin N+1)
+                count = conteoByRol[rolId] || 0;
             }
 
             var cell = this.node().querySelector('.badge-paginas');

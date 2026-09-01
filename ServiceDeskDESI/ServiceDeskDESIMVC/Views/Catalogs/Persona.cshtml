@@ -4,6 +4,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var permisos = ViewBag.Permisos as PermisosViewModel;
     var estaVinculada = Model.UsuarioId.HasValue;
+    var bloqueoCampos = estaVinculada || (Model.Id > 0 && !permisos.PuedeEditar);
 }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
@@ -32,19 +33,19 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Nombre</label>
-                    @Html.TextBoxFor(x => x.Nombre, estaVinculada ? (object)new { @class = "form-control", placeholder = "Nombre", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Nombre" })
+                    @Html.TextBoxFor(x => x.Nombre, bloqueoCampos ? (object)new { @class = "form-control", placeholder = "Nombre", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Nombre" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Apellido</label>
-                    @Html.TextBoxFor(x => x.Apellido, estaVinculada ? (object)new { @class = "form-control", placeholder = "Apellido", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Apellido" })
+                    @Html.TextBoxFor(x => x.Apellido, bloqueoCampos ? (object)new { @class = "form-control", placeholder = "Apellido", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Apellido" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Correo</label>
-                    @Html.TextBoxFor(x => x.Correo, estaVinculada ? (object)new { @class = "form-control", placeholder = "Correo electrónico", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Correo electrónico" })
+                    @Html.TextBoxFor(x => x.Correo, bloqueoCampos ? (object)new { @class = "form-control", placeholder = "Correo electrónico", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Correo electrónico" })
                 </div>
             </div>
         </div>
@@ -52,7 +53,7 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Teléfono</label>
-                    @Html.TextBoxFor(x => x.Telefono, estaVinculada ? (object)new { @class = "form-control", placeholder = "Teléfono", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Teléfono" })
+                    @Html.TextBoxFor(x => x.Telefono, bloqueoCampos ? (object)new { @class = "form-control", placeholder = "Teléfono", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Teléfono" })
                 </div>
             </div>
             <div class="col-md-4">
@@ -138,6 +139,7 @@
 <script>
     var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
     var personaUsuarioId = @(Model.UsuarioId ?? 0);
+    var personaIdEdicion = @Model.Id;
     var personaNombreUsuarioVinculado = @Html.Raw(JsonConvert.SerializeObject(Model.NombreUsuarioVinculado ?? ""));
     var personaSincronizadoUsuarioId = 0;   // usuario elegido en el modal para una persona nueva (aún no guardada)
     var usuariosDisponibles = [];           // caché de usuarios listados en el modal de sincronización
@@ -525,7 +527,7 @@
     }
 
     function AplicarBloqueoSincronizado() {
-        if (personaUsuarioId > 0 || personaSincronizadoUsuarioId > 0) {
+        if (personaUsuarioId > 0 || personaSincronizadoUsuarioId > 0 || (personaIdEdicion > 0 && !permisosGlobal.PuedeEditar)) {
             $("#Nombre").prop("disabled", true);
             $("#Apellido").prop("disabled", true);
             $("#Correo").prop("disabled", true);

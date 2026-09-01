@@ -57,6 +57,7 @@
     <Compile Include="Catalogos\Empresa.cs" />
     <Compile Include="Catalogos\Foliador.cs" />
     <Compile Include="Catalogos\FoliadorDTO.cs" />
+    <Compile Include="Catalogos\Mantenimiento.cs" />
     <Compile Include="Catalogos\Marca.cs" />
     <Compile Include="Catalogos\Modelo.cs" />
     <Compile Include="Catalogos\ModeloDTO.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Seguridad\Rol.cs" />
     <Compile Include="Seguridad\RolPaginaAccion.cs" />
     <Compile Include="Seguridad\RolPaginaAccionDTO.cs" />
+    <Compile Include="Seguridad\RolConteoPaginasDTO.cs" />
     <Compile Include="Seguridad\Token.cs" />
     <Compile Include="Seguridad\TokenCookie.cs" />
     <Compile Include="Seguridad\TokenRecuperacion.cs" />

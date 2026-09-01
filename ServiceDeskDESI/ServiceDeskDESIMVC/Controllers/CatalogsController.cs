@@ -36,6 +36,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly PuestoService _puestoService;
         private readonly PersonaService _personaService;
         private readonly PersonaActivoService _personaActivoService;
+        private readonly MantenimientoService _mantenimientoService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
@@ -53,6 +54,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _puestoService = new PuestoService(httpClientConnection);
             _personaService = new PersonaService(httpClientConnection);
             _personaActivoService = new PersonaActivoService(httpClientConnection);
+            _mantenimientoService = new MantenimientoService(httpClientConnection);
 
         }
 
@@ -959,6 +961,23 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> EliminarActivos(Activo a)
         {
             var response = await _activoService.EliminarActivo(a);
+            return JsonConvert.SerializeObject(response);
+        }
+        #endregion
+
+        #region Mantenimiento
+        [System.Web.Mvc.HttpGet]
+        public async Task<string> ObtenerMantenimientosPorActivo(long activoId)
+        {
+            var response = await _mantenimientoService.ObtenerMantenimientosPorActivo(activoId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        [Permiso("Activos", "Editar")]
+        public async Task<string> GuardarMantenimiento(Mantenimiento m)
+        {
+            var response = await _mantenimientoService.GuardarMantenimiento(m);
             return JsonConvert.SerializeObject(response);
         }
         #endregion

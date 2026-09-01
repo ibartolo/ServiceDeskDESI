@@ -136,6 +136,15 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Catelogo de usuarios
         public async Task<ActionResult> Users(long id = 0)
         {
+            // 1. Obtener permisos para la página "Usuarios"
+            var permisos = await _usuarioService.ObtenerPermisosParaUsuario();
+
+            // 2. Validar permiso de lectura (D1)
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
             var usuario = new Usuario();
 
             // Cargar listas para los dropdowns
@@ -247,6 +256,9 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Roles = selectListRoles;
 
             ViewBag.EmpresaId = tokenCookie.EmpresaID;
+
+            // 3. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
 
             return View(usuario);
         }

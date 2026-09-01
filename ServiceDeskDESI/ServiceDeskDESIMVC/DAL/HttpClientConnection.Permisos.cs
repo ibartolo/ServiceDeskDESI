@@ -61,5 +61,10 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
+
+        public async Task<ModelResponse<List<RolConteoPaginasDTO>>> ObtenerConteoPaginasPorRol()
+        {
+            return await RequestAsync<List<RolConteoPaginasDTO>>($"api/Permisos/ConteoPaginasPorRol", HttpMethod.Get, null, token.Token.access_token);
+        }
     }
 }

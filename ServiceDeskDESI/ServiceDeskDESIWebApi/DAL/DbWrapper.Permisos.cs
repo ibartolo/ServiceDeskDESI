@@ -365,5 +365,33 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
+
+        public ModelResponse<List<RolConteoPaginasDTO>> ObtenerConteoPaginasPorRol()
+        {
+            var modelResponse = new ModelResponse<List<RolConteoPaginasDTO>>();
+
+            try
+            {
+                var conteo = GetObjects("ObtenerConteoPaginasPorRol", CommandType.StoredProcedure,
+                    Enumerable.Empty<SqlParameter>(),
+                    new Func<IDataReader, RolConteoPaginasDTO>((reader) =>
+                    {
+                        var c = LlenarEntidad<RolConteoPaginasDTO>(reader);
+                        return c;
+                    }));
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = conteo.ToList();
+                modelResponse.Message = "Conteo de páginas por rol obtenido correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener el conteo de páginas por rol");
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener el conteo de páginas.";
+            }
+
+            return modelResponse;
+        }
     }
 }

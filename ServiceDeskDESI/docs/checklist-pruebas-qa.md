@@ -9,6 +9,15 @@
 > documentada pero cuya implementación puede estar todavía en despliegue; confirmar
 > con el equipo de desarrollo antes de probar.
 
+> **Cambios recientes (2026-09-01):** los módulos 22–26 cubren el cambio
+> `mejoras-rol-activos-permisos` (bloqueo de edición de Usuarios/Personas por
+> permisos, No. de Serie único por empresa en Activos, campos `SerieLocal` y `Notas`
+> como textarea de 250, gestor de mantenimientos de Activos y correcciones en la
+> ventana de Permisos). **Importante:** la migración de este cambio
+> (`openspec/changes/archive/2026-09-01-mejoras-rol-activos-permisos/migration.sql`)
+> debe aplicarse a la base de datos ANTES de probar estos módulos; sin ella, los
+> casos de los módulos 22–25 fallarán por ausencia de columna/índice/tabla/SP.
+
 ---
 
 ## Resumen de cobertura
@@ -36,7 +45,12 @@
 | 19 | Mis Activos | 4 |
 | 20 | Confirmación de recepción de activo | 8 |
 | 21 | Correcciones de base de datos | 5 |
-| | **Total** | **~118** |
+| 22 | Bloqueo de edición de Usuarios y Personas por permisos | 6 |
+| 23 | No. de Serie único por empresa en Activos | 7 |
+| 24 | Campos nuevos del Activo: SerieLocal y Notas (textarea 250) | 5 |
+| 25 | Gestor de mantenimientos de Activos (modal) | 8 |
+| 26 | Correcciones en ventana de Permisos: contador de páginas y tema oscuro | 5 |
+| | **Total** | **~149** |
 
 ---
 
@@ -623,6 +637,443 @@ propia empresa**, nunca la de otras.
   - *Pre:* un usuario borrado (lógicamente).
   - *Pasos:* consultar el listado de usuarios.
   - *Esperado:* el usuario borrado no aparece.
+
+---
+
+## 22. Bloqueo de edición de Usuarios y Personas por permisos
+
+**Objetivo:** validar que la edición de Usuarios y Personas se bloquea (inputs
+deshabilitados) cuando el rol del usuario logueado no tiene la acción "Editar", que la
+creación de registros nuevos queda sujeta al permiso "Crear" y que todo se gobierna por
+el sistema de Permisos existente, SIN flag nuevo en la entidad `Rol`.
+
+- [ ] **PEU-01 — Edición permitida con rol que sí tiene "Editar"**
+  - *Objetivo:* validar que un usuario con la acción "Editar" en "Usuarios" puede modificar los inputs de un Usuario existente.
+  - *Pre:* existe un usuario "OperadorAdmin" cuyo rol tiene la acción "Editar" habilitada en la página "Usuarios"; existe un Usuario "U-10" (Id > 0) de la misma empresa.
+  - *Pasos:*
+    1. Iniciar sesión como "OperadorAdmin".
+    2. Ir al menú "Administración" → "Usuarios".
+    3. Abrir el Usuario "U-10" en modo edición (pulsar la fila o el botón "Editar").
+    4. Verificar que los campos (nombre de usuario, nombre, apellido, correo, teléfono, rol, etc.) están habilitados.
+    5. Modificar un campo (p. ej. el correo) y pulsar "Guardar".
+  - *Criterios de aceptación (Esperado):*
+    - Los inputs del formulario están habilitados (sin atributo `disabled`).
+    - El botón "Guardar" está activo y el cambio se persiste correctamente.
+    - No aparece ningún bloqueo ni mensaje de permiso.
+
+- [ ] **PEU-02 — Edición bloqueada sin "Editar" (Usuarios)**
+  - *Objetivo:* validar que un usuario sin la acción "Editar" en "Usuarios" ve los inputs DESHABILITADOS al abrir la edición de un Usuario existente.
+  - *Pre:* existe un usuario "Consultor" cuyo rol tiene "Leer" en "Usuarios" pero NO "Editar"; existe un Usuario "U-10" (Id > 0) de la misma empresa.
+  - *Pasos:*
+    1. Iniciar sesión como "Consultor".
+    2. Ir a "Administración" → "Usuarios".
+    3. Abrir el Usuario "U-10" en modo edición (Id > 0).
+    4. Intentar hacer clic y escribir en cada input del formulario (nombre de usuario, nombre, apellido, correo, teléfono, contraseña, rol, etc.).
+    5. Buscar y pulsar los botones de acción de guardado.
+  - *Criterios de aceptación (Esperado):*
+    - Todos los inputs del formulario aparecen `disabled` y no pueden modificarse.
+    - El botón de guardar/editar no permite persistir cambios (deshabilitado o sin efecto).
+    - No existe ninguna vía en la UI para alterar los datos del Usuario.
+
+- [ ] **PEU-03 — Edición bloqueada sin "Editar" (Personas)**
+  - *Objetivo:* validar que en el módulo Personas el bloqueo por permisos se aplica igual que en Usuarios (extiende el bloqueo previo por `estaVinculada`).
+  - *Pre:* existe un usuario "Consultor" cuyo rol tiene "Leer" en "Personas" pero NO "Editar"; existe una Persona "P-20" NO vinculada a un Usuario (estaVinculada = false, Id = 20).
+  - *Pasos:*
+    1. Iniciar sesión como "Consultor".
+    2. Ir al menú "Personal" → "Personas".
+    3. Abrir la Persona "P-20" en modo edición (Id > 0, no vinculada).
+    4. Intentar modificar los campos Nombre, Apellido, Correo y Teléfono.
+    5. Intentar guardar.
+  - *Criterios de aceptación (Esperado):*
+    - Los campos Nombre/Apellido/Correo/Teléfono quedan `disabled` aunque la Persona NO esté vinculada a un Usuario.
+    - No se puede persistir ningún cambio desde la UI.
+    - El comportamiento del vínculo existente se conserva (una Persona vinculada sigue bloqueada, ver PEU-05).
+
+- [ ] **PEU-04 — Creación permitida con "Crear" aunque falte "Editar"**
+  - *Objetivo:* validar que un rol con "Crear" pero sin "Editar" puede CREAR un Usuario/Persona nuevo (Id == 0, inputs habilitados) pero no puede editar existentes.
+  - *Pre:* existe un usuario "Capturista" cuyo rol tiene "Crear" en "Usuarios" y "Personas" pero NO "Editar".
+  - *Pasos:*
+    1. Iniciar sesión como "Capturista".
+    2. Ir a "Administración" → "Usuarios" (repetir después en "Personal" → "Personas").
+    3. Pulsar el botón "Nuevo"/"Crear" (abre un registro con Id == 0).
+    4. Verificar que los inputs del formulario vacío están HABILITADOS para captura.
+    5. Capturar los datos de un Usuario/Persona nuevo y pulsar "Guardar".
+    6. Abrir en edición un registro EXISTENTE (Id > 0) y comprobar el estado de los inputs.
+  - *Criterios de aceptación (Esperado):*
+    - En un registro nuevo (Id == 0) los inputs están editables y el guardado procede.
+    - El registro nuevo se crea correctamente y aparece en el listado.
+    - En un registro existente (Id > 0) los inputs están `disabled` y no se puede editar.
+    - Un usuario SIN "Crear" no puede registrar nuevos Usuarios/Personas (guardado bloqueado o denegado).
+
+- [ ] **PEU-05 — Sin "Leer" en Usuarios: acceso denegado**
+  - *Objetivo:* validar que un usuario sin el permiso "Leer" en "Usuarios" (o "Personas") no puede abrir la ventana (redirección/denegación de acceso).
+  - *Pre:* existe un usuario "SinAcceso" cuyo rol NO tiene "Leer" en la página "Usuarios" ni en "Personas".
+  - *Pasos:*
+    1. Iniciar sesión como "SinAcceso".
+    2. Intentar abrir "Administración" → "Usuarios".
+    3. Repetir el intento con "Personal" → "Personas".
+    4. Observar la respuesta de la aplicación.
+  - *Criterios de aceptación (Esperado):*
+    - La ventana NO se abre; el usuario es redirigido a una página de "Acceso Denegado" (o equivalente).
+    - No se muestra el formulario de Usuarios/Personas ni sus datos.
+    - El bloqueo proviene del servidor (no solo de ocultar el botón).
+
+- [ ] **PEU-06 — No existe flag nuevo en la ventana de Roles**
+  - *Objetivo:* validar que el bloqueo se gobierna por el sistema de Permisos y que NO se agregó ninguna casilla/flag de edición en la ventana de Roles.
+  - *Pre:* existe un usuario (p. ej. "Admin") con acceso a "Administración" → "Roles".
+  - *Pasos:*
+    1. Iniciar sesión como usuario con permiso sobre la página "Roles".
+    2. Abrir "Administración" → "Roles".
+    3. Revisar el formulario de alta/edición de un Rol (campos, casillas y checkboxes).
+    4. Buscar cualquier casilla tipo "Permitir modificar usuarios/personas" o similar.
+  - *Criterios de aceptación (Esperado):*
+    - La ventana de Roles NO muestra ninguna casilla nueva relacionada con la edición de Usuarios/Personas.
+    - No existe ningún flag nuevo en la entidad `Rol` ni en su SP de guardado.
+    - El control de la edición depende exclusivamente de las acciones "Leer"/"Crear"/"Editar" del sistema de Permisos.
+
+---
+
+## 23. No. de Serie único por empresa en Activos
+
+**Objetivo:** validar que el No. de Serie de un Activo es único por empresa entre
+activos VIGENTES (Estatus = 1) con serial no nulo; los seriales nulos se permiten y no
+colisionan, el soft-delete libera el serial y el duplicado se rechaza con el mensaje
+amigable "Ya existe un activo con ese No. de Serie".
+
+- [ ] **SUA-01 — Creación de activo con serial en la empresa A (correcta)**
+  - *Objetivo:* validar que un Activo nuevo se guarda correctamente con su No. de Serie.
+  - *Pre:* usuario de la empresa A con permiso de captura en Activos; no existe aún un activo vigente con el serial a usar.
+  - *Pasos:*
+    1. Iniciar sesión como usuario de la empresa A.
+    2. Ir a la ventana de Activos (catálogo).
+    3. Pulsar "Nuevo" y capturar los datos del activo, incluido el campo "No. de Serie" = "SN-001".
+    4. Pulsar "Guardar".
+  - *Criterios de aceptación (Esperado):*
+    - El activo se guarda con serial "SN-001" y aparece en el listado.
+    - No se muestra ningún error de duplicidad.
+    - Al consultar el activo se muestra el serial correctamente.
+
+- [ ] **SUA-02 — Duplicado en la misma empresa rechazado con mensaje amigable**
+  - *Objetivo:* validar que no se pueden crear DOS activos vigentes con el mismo serial en la MISMA empresa y que se muestra el mensaje amigable.
+  - *Pre:* la empresa A tiene un activo VIGENTE (Estatus = 1) con serial "SN-001".
+  - *Pasos:*
+    1. Iniciar sesión como usuario de la empresa A.
+    2. Ir a Activos → "Nuevo".
+    3. Capturar los datos del activo y poner "No. de Serie" = "SN-001" (el mismo del activo vigente existente).
+    4. Pulsar "Guardar".
+  - *Criterios de aceptación (Esperado):*
+    - El guardado se RECHAZA (no se crea la fila duplicada).
+    - Se muestra el mensaje "Ya existe un activo con ese No. de Serie" en la vista (vía Swal), no un error genérico.
+    - El listado sigue mostrando únicamente el activo original.
+
+- [ ] **SUA-03 — Edición que reutiliza el serial de otro activo vigente rechazada**
+  - *Objetivo:* validar que al EDITAR un activo y asignarle un serial ya usado por otro activo vigente de la misma empresa, el cambio se rechaza.
+  - *Pre:* la empresa A tiene dos activos vigentes: activo 1 con serial "SN-001" y activo 2 con serial "SN-002".
+  - *Pasos:*
+    1. Abrir el activo 2 en modo edición.
+    2. Cambiar su "No. de Serie" de "SN-002" a "SN-001".
+    3. Pulsar "Guardar".
+    4. Reabrir el activo 2 y revisar su serial.
+  - *Criterios de aceptación (Esperado):*
+    - El guardado se rechaza y el activo 2 conserva su serial original ("SN-002").
+    - Se muestra el mensaje amigable "Ya existe un activo con ese No. de Serie".
+    - No se persiste el cambio (al reabrir, el serial sigue siendo "SN-002").
+
+- [ ] **SUA-04 — Mismo serial en empresas DIFERENTES permitido**
+  - *Objetivo:* validar que la unicidad es POR EMPRESA (dos empresas pueden usar el mismo serial).
+  - *Pre:* la empresa A tiene un activo vigente con serial "SN-001"; existe un usuario de la empresa B.
+  - *Pasos:*
+    1. Iniciar sesión como usuario de la empresa B.
+    2. Ir a Activos → "Nuevo" y capturar "No. de Serie" = "SN-001".
+    3. Pulsar "Guardar".
+  - *Criterios de aceptación (Esperado):*
+    - El activo de la empresa B se guarda correctamente con serial "SN-001".
+    - No se muestra error de duplicidad.
+    - Al consultar los activos de la empresa A y de la empresa B, cada uno conserva su serial sin afectarse mutuamente.
+
+- [ ] **SUA-05 — Serial nulo o vacío permitido (se guarda como NULL)**
+  - *Objetivo:* validar que un activo SIN serial (nulo o cadena vacía) se guarda sin error y no colisiona con la regla de unicidad.
+  - *Pre:* la empresa A tiene un activo vigente con serial "SN-001".
+  - *Pasos:*
+    1. Crear un activo dejando el campo "No. de Serie" VACÍO y pulsar "Guardar".
+    2. Crear un SEGUNDO activo también sin serial y pulsar "Guardar".
+    3. (Opcional) en un tercer intento escribir espacios en blanco en el serial y guardar.
+  - *Criterios de aceptación (Esperado):*
+    - Los activos se guardan sin error; el serial queda como NULL (la cadena vacía se normaliza a NULL).
+    - No se muestra error de unicidad por falta de serial.
+    - Varios activos sin serial pueden coexistir en la misma empresa.
+
+- [ ] **SUA-06 — Soft-delete (Estatus = 0) libera el serial**
+  - *Objetivo:* validar que al eliminar lógicamente un activo, su serial queda disponible para otro activo de la misma empresa.
+  - *Pre:* la empresa A tiene un activo vigente con serial "SN-001".
+  - *Pasos:*
+    1. Eliminar (lógicamente, Estatus = 0) el activo de serial "SN-001".
+    2. Crear un activo NUEVO con "No. de Serie" = "SN-001".
+    3. Pulsar "Guardar".
+    4. Consultar el listado de activos vigentes.
+  - *Criterios de aceptación (Esperado):*
+    - El activo eliminado lógicamente deja de contar para la unicidad.
+    - El activo nuevo con serial "SN-001" se guarda correctamente.
+    - El activo eliminado NO aparece en los listados de vigentes.
+
+- [ ] **SUA-07 — Mensaje de duplicado visible en la vista (Swal)**
+  - *Objetivo:* validar que el error de serial duplicado se presenta como mensaje amigable en la interfaz, no como error genérico o de servidor.
+  - *Pre:* un intento de guardado que devuelve el código -2 (duplicado en la misma empresa).
+  - *Pasos:*
+    1. Intentar crear o editar un activo con un serial duplicado (como en SUA-02 o SUA-03).
+    2. Observar el mensaje que aparece en pantalla.
+  - *Criterios de aceptación (Esperado):*
+    - Aparece el texto exacto "Ya existe un activo con ese No. de Serie" en la vista (ventana emergente Swal).
+    - No se muestra un error técnico/genérico ni un código de error.
+    - La ventana permanece abierta con los datos capturados para que el usuario corrija el serial.
+
+---
+
+## 24. Campos nuevos del Activo: SerieLocal y Notas (textarea 250)
+
+**Objetivo:** validar el nuevo campo `SerieLocal` (texto libre, no obligatorio, no
+único) y la conversión del campo `Notas` existente a textarea con máximo 250 caracteres.
+
+- [ ] **CAM-01 — SerieLocal capturable y persistido**
+  - *Objetivo:* validar que SerieLocal se captura como texto libre (p. ej. "LAP-PR-001"), se guarda y se muestra al editar.
+  - *Pre:* usuario con permiso de captura/edición de Activos; formulario de Activo disponible.
+  - *Pasos:*
+    1. Pulsar "Nuevo" en la ventana de Activos.
+    2. En el campo "Serie Local" capturar "LAP-PR-001".
+    3. Completar los datos obligatorios del activo y pulsar "Guardar".
+    4. Abrir el activo de nuevo en modo edición.
+  - *Criterios de aceptación (Esperado):*
+    - El activo se guarda con SerieLocal = "LAP-PR-001".
+    - Al reabrir el activo, el campo "Serie Local" muestra "LAP-PR-001".
+    - El valor persiste en la base de datos (se mantiene tras guardar y consultar).
+
+- [ ] **CAM-02 — SerieLocal NO obligatorio (puede quedar vacío)**
+  - *Objetivo:* validar que SerieLocal no es un campo obligatorio.
+  - *Pre:* formulario de Activo disponible.
+  - *Pasos:*
+    1. Crear un activo dejando el campo "Serie Local" VACÍO.
+    2. Completar el resto de datos y pulsar "Guardar".
+  - *Criterios de aceptación (Esperado):*
+    - El activo se guarda sin error.
+    - SerieLocal queda NULL (vacío) en el registro.
+    - No existe validación que exija capturar SerieLocal.
+
+- [ ] **CAM-03 — SerieLocal no único**
+  - *Objetivo:* validar que dos activos de la misma empresa pueden tener el mismo SerieLocal.
+  - *Pre:* existe un activo A con SerieLocal = "LAP-PR-001".
+  - *Pasos:*
+    1. Crear un activo B con SerieLocal = "LAP-PR-001" (igual que el activo A).
+    2. Pulsar "Guardar".
+  - *Criterios de aceptación (Esperado):*
+    - El activo B se guarda correctamente.
+    - No se muestra ningún error de unicidad por SerieLocal.
+    - Ambos activos coexisten con el mismo SerieLocal en el listado.
+
+- [ ] **CAM-04 — Notas como textarea con máximo 250 caracteres**
+  - *Objetivo:* validar que Notas se muestra como textarea y que el máximo es 250 caracteres (maxlength + guardado respeta el límite).
+  - *Pre:* formulario de Activo con el campo "Notas".
+  - *Pasos:*
+    1. Abrir un Activo en modo edición.
+    2. Verificar que el campo "Notas" es un área de texto (textarea), no una caja de una línea.
+    3. Intentar escribir o pegar más de 250 caracteres en "Notas" (p. ej. 251+).
+    4. Guardar con un texto de 250 caracteres.
+  - *Criterios de aceptación (Esperado):*
+    - El campo "Notas" se renderiza como textarea (área multilínea).
+    - El navegador impide exceder 250 caracteres (maxlength) y la validación de jquery.validate la refuerza.
+    - Si se guarda con 250 caracteres, el valor se persiste completo.
+
+- [ ] **CAM-05 — Notas acepta texto largo multilínea**
+  - *Objetivo:* validar que Notas acepta texto largo de varias líneas (hasta 250 caracteres).
+  - *Pre:* formulario de Activo.
+  - *Pasos:*
+    1. En el campo "Notas" escribir un texto de varias líneas (con saltos de línea) de hasta 250 caracteres.
+    2. Pulsar "Guardar".
+    3. Reabrir el activo en modo edición.
+  - *Criterios de aceptación (Esperado):*
+    - El texto completo (con saltos de línea) se guarda sin recortarse.
+    - Al reabrir el activo, las Notas se muestran completas en el textarea con las líneas conservadas.
+    - No hay error al persistir el texto multilínea.
+
+---
+
+## 25. Gestor de mantenimientos de Activos (modal)
+
+**Objetivo:** validar el registro y consulta (histórico) de mantenimientos por activo
+vía modal: la fecha es automática (visible en un input deshabilitado), el comentario es
+obligatorio, el historial se ordena de más reciente a más antiguo y respeta el
+multi-tenant y los permisos.
+
+- [ ] **MTA-01 — Botón "Mantenimientos" por fila (visible según permiso de lectura)**
+  - *Objetivo:* validar que el listado de Activos expone el botón "Mantenimientos" por fila cuando el usuario tiene permiso de lectura en Activos.
+  - *Pre:* usuario con rol que tiene "Leer" en "Activos".
+  - *Pasos:*
+    1. Iniciar sesión como usuario con "Leer" en Activos.
+    2. Ir a la ventana de Activos.
+    3. Revisar las filas del listado y localizar el botón "Mantenimientos".
+  - *Criterios de aceptación (Esperado):*
+    - Cada fila muestra el botón "Mantenimientos".
+    - El botón está visible cuando el usuario puede leer Activos; con un rol sin "Leer", la opción no aparece.
+    - Pulsar el botón abre el modal de mantenimientos.
+
+- [ ] **MTA-02 — Apertura del modal: Fecha deshabilitada con la fecha actual y Comentario editable**
+  - *Objetivo:* validar que el modal muestra el campo Fecha en un input DESHABILITADO (solo lectura) con la fecha actual del sistema y el campo Comentario editable.
+  - *Pre:* existe un activo en el listado; usuario con "Leer" en Activos.
+  - *Pasos:*
+    1. Pulsar el botón "Mantenimientos" de una fila.
+    2. Observar el modal que se abre.
+    3. Revisar el campo de fecha y el campo de comentario.
+  - *Criterios de aceptación (Esperado):*
+    - El modal se abre con un campo "Fecha" en un input `disabled` (solo lectura) que muestra la fecha actual del sistema.
+    - El usuario NO puede modificar el campo Fecha.
+    - El campo "Comentario" está habilitado y es editable.
+    - El modal carga el historial existente del activo (si lo hay).
+
+- [ ] **MTA-03 — Guardar mantenimiento con comentario: aparece en el historial con fecha automática**
+  - *Objetivo:* validar que al guardar un comentario, el mantenimiento aparece en el historial del modal con la fecha automática que se mostraba deshabilitada.
+  - *Pre:* modal de mantenimiento abierto para un activo.
+  - *Pasos:*
+    1. Escribir el comentario "Cambio de disco SSD" en el campo Comentario.
+    2. Anotar la fecha mostrada en el campo Fecha (deshabilitado).
+    3. Pulsar "Guardar".
+    4. Revisar el historial del modal.
+  - *Criterios de aceptación (Esperado):*
+    - El mantenimiento se registra y aparece en el historial.
+    - La fecha del registro coincide con la fecha que se mostraba en el campo deshabilitado (fecha/hora actual del sistema).
+    - El comentario "Cambio de disco SSD" se muestra en la fila del historial.
+
+- [ ] **MTA-04 — Historial ordenado de más reciente a más antiguo (Fecha DESC)**
+  - *Objetivo:* validar que el historial de mantenimientos se ordena por fecha descendente.
+  - *Pre:* un activo con al menos 3 mantenimientos registrados en fechas distintas (p. ej. día 1, día 3 y día 2).
+  - *Pasos:*
+    1. Abrir el modal "Mantenimientos" del activo.
+    2. Revisar el orden de las filas del historial.
+  - *Criterios de aceptación (Esperado):*
+    - El historial se lista de más reciente a más antiguo (día 3, día 2, día 1).
+    - La fila más reciente aparece primero.
+    - No se listan registros sin fecha (los que tienen Fecha NULL quedan excluidos).
+
+- [ ] **MTA-05 — Comentario persistido y visible al volver a abrir el modal**
+  - *Objetivo:* validar que los mantenimientos guardados persisten y siguen visibles al cerrar y reabrir el modal.
+  - *Pre:* un activo con al menos un mantenimiento guardado.
+  - *Pasos:*
+    1. Abrir el modal "Mantenimientos" del activo.
+    2. Guardar un mantenimiento con comentario.
+    3. Cerrar el modal.
+    4. Volver a abrir el modal del mismo activo.
+  - *Criterios de aceptación (Esperado):*
+    - El comentario guardado sigue visible en el historial tras reabrir el modal.
+    - El mantenimiento no se pierde (persistido en la base de datos).
+    - El historial muestra todos los registros previos.
+
+- [ ] **MTA-06 — Guardar con comentario vacío: validación (campo obligatorio)**
+  - *Objetivo:* validar que el comentario es obligatorio y no se puede guardar un mantenimiento sin comentario.
+  - *Pre:* modal de mantenimiento abierto.
+  - *Pasos:*
+    1. Dejar el campo "Comentario" VACÍO.
+    2. Pulsar "Guardar".
+  - *Criterios de aceptación (Esperado):*
+    - El guardado se rechaza por validación (el comentario es obligatorio).
+    - Se muestra una indicación de campo obligatorio (mensaje/estilo de validación).
+    - No se inserta ningún mantenimiento sin comentario en el historial.
+
+- [ ] **MTA-07 — Sin permiso de "Editar" en Activos no se puede guardar**
+  - *Objetivo:* validar que un usuario sin la acción "Editar" en Activos no puede registrar mantenimientos (botón deshabilitado o rechazo del servidor).
+  - *Pre:* usuario con "Leer" en Activos pero SIN "Editar".
+  - *Pasos:*
+    1. Iniciar sesión como el usuario sin "Editar" en Activos.
+    2. Abrir el modal "Mantenimientos" de un activo.
+    3. Escribir un comentario y pulsar "Guardar".
+  - *Criterios de aceptación (Esperado):*
+    - El botón de guardar está deshabilitado, o la operación es rechazada por el servidor (403 / Acceso Denegado).
+    - No se inserta ningún mantenimiento.
+    - El usuario solo puede consultar el historial.
+
+- [ ] **MTA-08 — Aislamiento multi-empresa de los mantenimientos**
+  - *Objetivo:* validar que los mantenimientos de un activo de la empresa A no aparecen para un usuario de la empresa B (si el tester puede probar multi-empresa).
+  - *Pre:* dos empresas A y B; el activo X pertenece a la empresa A y tiene mantenimientos registrados.
+  - *Pasos:*
+    1. Iniciar sesión como usuario de la empresa B.
+    2. Abrir el modal "Mantenimientos" del activo correspondiente a la empresa B.
+    3. Revisar el historial y (si es accesible) intentar consultar el del activo de la empresa A.
+  - *Criterios de aceptación (Esperado):*
+    - El historial de los activos de la empresa B solo muestra mantenimientos de la empresa B.
+    - Los mantenimientos del activo de la empresa A NO aparecen para el usuario de la empresa B.
+    - Cada usuario solo ve y registra mantenimientos de activos de su propia empresa.
+
+---
+
+## 26. Correcciones en ventana de Permisos: contador de páginas y tema oscuro
+
+**Objetivo:** validar las dos correcciones de la ventana de Permisos: (1) la columna
+"Páginas Asignadas" muestra el conteo REAL por rol al cargar (sin N+1 y sin datos del
+rol seleccionado) y (2) el chooser de asignación de páginas/acciones se ve
+correctamente en tema oscuro.
+
+- [ ] **PER-01 — Carga inicial: conteo real de páginas por rol**
+  - *Objetivo:* validar que al abrir la ventana de Permisos por PRIMERA vez, la columna "Páginas Asignadas" muestra el conteo REAL de cada rol (no ceros ni los datos del rol seleccionado).
+  - *Pre:* al menos 2 roles con distinto número de páginas asignadas (p. ej. Admin con 10 y Consultor con 3); usuario con permiso sobre la página "Permisos".
+  - *Pasos:*
+    1. Iniciar sesión como usuario con permiso sobre la página "Permisos".
+    2. Abrir "Administración" → "Permisos".
+    3. Observar la columna "Páginas Asignadas" de la tabla de roles ANTES de seleccionar ningún rol.
+  - *Criterios de aceptación (Esperado):*
+    - Cada fila de rol muestra su conteo REAL de páginas asignadas (Admin = 10, Consultor = 3), no ceros.
+    - Ninguna fila muestra los datos del rol seleccionado (no se "contamina" un conteo con el de otro rol).
+    - Los valores coinciden con el número de páginas realmente asignadas a cada rol en el chooser.
+
+- [ ] **PER-02 — Cambiar de rol no altera los conteos de las demás filas**
+  - *Objetivo:* validar que al seleccionar un rol diferente, los conteos de las demás filas NO cambian incorrectamente.
+  - *Pre:* ventana de Permisos abierta con varios roles.
+  - *Pasos:*
+    1. Observar los conteos de todas las filas de roles.
+    2. Seleccionar el rol "Admin".
+    3. Seleccionar después el rol "Consultor".
+    4. Volver a revisar la columna "Páginas Asignadas" de todas las filas.
+  - *Criterios de aceptación (Esperado):*
+    - Al cambiar el rol seleccionado, los conteos de las demás filas permanecen iguales.
+    - No se propagan los datos del rol seleccionado a otras filas.
+    - Cada fila conserva su propio conteo en todo momento.
+
+- [ ] **PER-03 — Conteo del rol seleccionado refleja en vivo las páginas asignadas**
+  - *Objetivo:* validar la consistencia entre la fila del rol seleccionado y el chooser (al asignar/quitar páginas, el conteo se actualiza en vivo).
+  - *Pre:* ventana de Permisos abierta con un rol seleccionado.
+  - *Pasos:*
+    1. Seleccionar un rol y anotar su conteo en "Páginas Asignadas".
+    2. En el chooser, asignar una página adicional (moverla de "Disponibles" a "Asignadas").
+    3. Quitar una página (moverla de "Asignadas" a "Disponibles").
+    4. Verificar el conteo de la fila del rol seleccionado tras cada cambio.
+  - *Criterios de aceptación (Esperado):*
+    - Al asignar una página, el conteo de la fila del rol seleccionado aumenta en 1.
+    - Al quitar una página, el conteo disminuye en 1.
+    - El conteo de la fila coincide siempre con el número de páginas en la columna "Asignadas" del chooser.
+    - Las demás filas NO se ven afectadas por estos cambios.
+
+- [ ] **PER-04 — Tema oscuro: el chooser se ve correctamente en oscuro**
+  - *Objetivo:* validar que con el tema oscuro activado, el chooser de asignación de páginas/acciones (columnas disponibles/asignadas, badges y checkboxes) se ve correctamente, sin fondos claros ni texto ilegible.
+  - *Pre:* usuario con permiso sobre "Permisos"; la aplicación permite activar el tema oscuro.
+  - *Pasos:*
+    1. Activar el tema oscuro de la aplicación.
+    2. Abrir "Administración" → "Permisos".
+    3. Seleccionar un rol para mostrar el chooser.
+    4. Revisar visualmente: columnas "Disponibles"/"Asignadas", ítems del chooser, nombres, badges de "Páginas Asignadas" y checkboxes de acciones.
+  - *Criterios de aceptación (Esperado):*
+    - Las columnas e ítems del chooser usan fondos oscuros coherentes con el tema (sin fondos claros hardcodeados visibles).
+    - El texto de los ítems, nombres y badges es legible (contraste suficiente) sobre el fondo oscuro.
+    - Los checkboxes y badges se distinguen correctamente.
+    - No hay zonas blancas/claras fuera de lugar ni texto ilegible.
+
+- [ ] **PER-05 — Cambiar entre tema claro y oscuro: el chooser se ve bien en ambos**
+  - *Objetivo:* validar que al alternar entre tema claro y oscuro, el chooser se renderiza correctamente en ambos estados.
+  - *Pre:* ventana de Permisos abierta.
+  - *Pasos:*
+    1. Con el tema claro activo, abrir el chooser de un rol y verificar su apariencia.
+    2. Cambiar al tema oscuro y volver a revisar el chooser.
+    3. Cambiar de vuelta al tema claro y revisar de nuevo.
+  - *Criterios de aceptación (Esperado):*
+    - En tema claro el chooser se ve como antes (fondo claro, texto legible).
+    - En tema oscuro el chooser aplica los estilos oscuros (sin fondos claros ni texto ilegible).
+    - Alternar el tema no rompe el layout ni deja estilos mezclados.
+    - El chooser se ve correctamente en ambos temas sin necesidad de recargar la página.
 
 ---
 

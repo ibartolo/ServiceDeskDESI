@@ -894,3 +894,49 @@ body.dark-theme table.dataTable thead .dt-ordering-asc .dt-column-order:before,
 body.dark-theme table.dataTable thead .dt-ordering-desc .dt-column-order:after {
     color: var(--primary-light);
 }
+
+/* Overrides del chooser de permisos (Ítem 7) */
+body.dark-theme .chooser-column {
+    background: #1e1e2e;
+    border-color: #3a3a52;
+}
+
+body.dark-theme .chooser-item {
+    background: #232334;
+    border-color: #3a3a52;
+}
+
+    body.dark-theme .chooser-item:hover {
+        border-color: var(--primary);
+    }
+
+body.dark-theme .item-nombre {
+    color: #e4e6ef;
+}
+
+body.dark-theme .item-direccion,
+body.dark-theme .empty-message,
+body.dark-theme .text-muted-small {
+    color: #9aa0b5;
+}
+
+body.dark-theme .badge-paginas {
+    background: var(--primary);
+    color: #fff;
+}
+
+body.dark-theme .chooser-item.disponible {
+    border-left-color: #9aa0b5;
+}
+
+body.dark-theme .chooser-item.asignada {
+    border-left-color: var(--primary);
+}
+
+body.dark-theme .permisos-checkboxes {
+    color: #d5d7e3;
+}
+
+    body.dark-theme .permisos-checkboxes input[type="checkbox"] {
+        accent-color: var(--primary);
+    }

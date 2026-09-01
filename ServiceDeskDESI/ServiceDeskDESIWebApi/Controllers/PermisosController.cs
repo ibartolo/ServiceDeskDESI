@@ -107,5 +107,16 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = _permisosService.GuardarPermisosRolMasivo(request.RolId, request.Permisos, usuario);
             return result;
         }
+
+        /// <summary>
+        /// Obtiene el conteo de páginas asignadas por rol (una sola query agrupada).
+        /// </summary>
+        [Permiso("Permisos", "Leer")]
+        [HttpGet, Route("ConteoPaginasPorRol")]
+        public ModelResponse<List<RolConteoPaginasDTO>> ObtenerConteoPaginasPorRol()
+        {
+            var result = _permisosService.ObtenerConteoPaginasPorRol();
+            return result;
+        }
     }
 }

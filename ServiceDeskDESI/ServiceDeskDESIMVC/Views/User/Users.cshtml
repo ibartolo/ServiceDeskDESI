@@ -2,6 +2,8 @@
 @{
     ViewBag.Title = "Usuarios";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
+    var soloLectura = (Model.Id > 0 && permisos != null && !permisos.PuedeEditar);
 }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
@@ -33,13 +35,13 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Nombre(s):</label>
-                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre(s)", id = "txtNombre", onblur = "SugerirUsername()" })
+                    @Html.TextBoxFor(x => x.Nombre, soloLectura ? (object)new { @class = "form-control", placeholder = "Nombre(s)", id = "txtNombre", onblur = "SugerirUsername()", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Nombre(s)", id = "txtNombre", onblur = "SugerirUsername()" })
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Apellidos:</label>
-                    @Html.TextBoxFor(x => x.Apellido, new { @class = "form-control", placeholder = "Apellidos", id = "txtApellido", onblur = "SugerirUsername()" })
+                    @Html.TextBoxFor(x => x.Apellido, soloLectura ? (object)new { @class = "form-control", placeholder = "Apellidos", id = "txtApellido", onblur = "SugerirUsername()", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Apellidos", id = "txtApellido", onblur = "SugerirUsername()" })
                 </div>
             </div>
         </div>
@@ -49,13 +51,13 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Nombre de usuario:</label>
-                    @Html.TextBoxFor(x => x.NombreUsuario, new { @class = "form-control", placeholder = "Nombre de usuario", id = "txtNombreUsuario" })
+                    @Html.TextBoxFor(x => x.NombreUsuario, soloLectura ? (object)new { @class = "form-control", placeholder = "Nombre de usuario", id = "txtNombreUsuario", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Nombre de usuario", id = "txtNombreUsuario" })
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Correo electrónico:</label>
-                    @Html.TextBoxFor(x => x.Correo, new { @class = "form-control", placeholder = "Correo electrónico" })
+                    @Html.TextBoxFor(x => x.Correo, soloLectura ? (object)new { @class = "form-control", placeholder = "Correo electrónico", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Correo electrónico" })
                 </div>
             </div>
         </div>
@@ -65,19 +67,19 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Contraseña (solo para nuevos usuarios):</label>
-                    @Html.TextBoxFor(x => x.Contrasena, new { @class = "form-control", placeholder = "Contraseña", type = "password" })
+                    @Html.TextBoxFor(x => x.Contrasena, soloLectura ? (object)new { @class = "form-control", placeholder = "Contraseña", type = "password", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Contraseña", type = "password" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Teléfono celular:</label>
-                    @Html.TextBoxFor(x => x.Celular, new { @class = "form-control", placeholder = "Teléfono celular" })
+                    @Html.TextBoxFor(x => x.Celular, soloLectura ? (object)new { @class = "form-control", placeholder = "Teléfono celular", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Teléfono celular" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>RFC:</label>
-                    @Html.TextBoxFor(x => x.RFC, new { @class = "form-control", placeholder = "RFC" })
+                    @Html.TextBoxFor(x => x.RFC, soloLectura ? (object)new { @class = "form-control", placeholder = "RFC", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "RFC" })
                 </div>
             </div>
         </div>
@@ -87,19 +89,19 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Sucursal:</label>
-                    @Html.DropDownListFor(x => x.SucursalId, (IEnumerable<SelectListItem>)ViewBag.Sucursales, "Seleccione una sucursal", new { @class = "form-control", id = "ddlSucursal" })
+                    @Html.DropDownListFor(x => x.SucursalId, (IEnumerable<SelectListItem>)ViewBag.Sucursales, "Seleccione una sucursal", soloLectura ? (object)new { @class = "form-control", id = "ddlSucursal", disabled = "disabled" } : (object)new { @class = "form-control", id = "ddlSucursal" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Área:</label>
-                    @Html.DropDownListFor(x => x.AreaId, (IEnumerable<SelectListItem>)ViewBag.Areas, "Seleccione un área", new { @class = "form-control", id = "ddlArea" })
+                    @Html.DropDownListFor(x => x.AreaId, (IEnumerable<SelectListItem>)ViewBag.Areas, "Seleccione un área", soloLectura ? (object)new { @class = "form-control", id = "ddlArea", disabled = "disabled" } : (object)new { @class = "form-control", id = "ddlArea" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Rol:</label>
-                    @Html.DropDownList("RolId", (IEnumerable<SelectListItem>)ViewBag.Roles, "Seleccione un rol", new { @class = "form-control", id = "ddlRol" })
+                    @Html.DropDownList("RolId", (IEnumerable<SelectListItem>)ViewBag.Roles, "Seleccione un rol", soloLectura ? (object)new { @class = "form-control", id = "ddlRol", disabled = "disabled" } : (object)new { @class = "form-control", id = "ddlRol" })
                 </div>
             </div>
         </div>
@@ -108,7 +110,10 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarUsuario()" />
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarUsuario()" />
+                    }
                     <a href="/User/Users" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -140,6 +145,9 @@
 </div>
 
 <script>
+    // Pasar permisos a JavaScript para controlar los botones y los inputs en el DataTable
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+
     var tablaUsuario;
 
     $(document).ready(function () {
@@ -160,10 +168,15 @@
                 { data: 'AreaNombre', title: 'Área', defaultContent: '---' },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarUsuario(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarUsuario(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
+                        var html = '<div class="d-flex gap-3">';
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarUsuario(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarUsuario(' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+                        html += '</div>';
+                        return html;
                     }
                 }
             ],

@@ -44,7 +44,7 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Nombre</label>
-                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Activo" })
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Laptop DELL" })
                 </div>
             </div>
             <div class="col-md-8">
@@ -58,14 +58,20 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-3">
-                    <label>Serial</label>
-                    @Html.TextBoxFor(x => x.Serial, new { @class = "form-control", placeholder = "Serial del Activo" })
+                    <label>No. Serial</label>
+                    @Html.TextBoxFor(x => x.Serial, new { @class = "form-control", placeholder = "5CD2154XYZ" })
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-4">
                 <div class="mb-3">
-                    <label>Notas</label>
-                    @Html.TextBoxFor(x => x.Notas, new { @class = "form-control", placeholder = "Notas de Activo" })
+                    <label>Serie interna</label>
+                    @Html.TextBoxFor(x => x.SerieLocal, new { @class = "form-control", placeholder = "LAP-CDMX-0002" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Fecha de Compra</label>
+                    @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", type = "date", @Value = Model.Id == 0 ? "" : (Model.FechaCompra?.ToString("yyyy-MM-dd") ?? "") })
                 </div>
             </div>
         </div>
@@ -104,12 +110,15 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="mb-3">
-                <label>Fecha de Compra</label>
-                @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", type = "date", @Value = Model.Id == 0 ? "" : (Model.FechaCompra?.ToString("yyyy-MM-dd") ?? "") })
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Notas</label>
+                    @Html.TextAreaFor(x => x.Notas, new { @class = "form-control", placeholder = "Notas de Activo", rows = 3 })
+                </div>
             </div>
         </div>
+
 
         <div class="row">
             <div class="col-md-12">
@@ -147,6 +156,7 @@
             </div>
         </div>
     </form>
+    @Html.Partial("_MantenimientoActivo")
 </div>
 
 <script>
@@ -246,6 +256,9 @@
                 },
                 "FechaCompra": {
                     required: true
+                },
+                "Notas": {
+                    maxlength: 250
                 }
             },
             messages: {
@@ -258,6 +271,9 @@
                 },
                 "FechaCompra": {
                     required: "El campo 'Fecha de Compra' es requerido."
+                },
+                "Notas": {
+                    maxlength: "Las notas no pueden superar los 250 caracteres."
                 }
             },
             errorElement: "span",
@@ -288,6 +304,11 @@
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
                         var html = '<div class="d-flex gap-3">';
+
+                        // Botón Mantenimientos - solo si tiene permiso de lectura (reutiliza "Activos")
+                        if (permisosGlobal && permisosGlobal.PuedeLeer) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-info" title="Mantenimientos" onclick="AbrirMantenimientos(' + data + ')"><i class="fas fa-tools"></i></button>';
+                        }
 
                         // Botón Editar - solo si tiene permiso
                         if (permisosGlobal && permisosGlobal.PuedeEditar) {
@@ -384,6 +405,7 @@
                 Nombre: $("#Nombre").val(),
                 Descripcion: $("#Descripcion").val(),
                 Serial: $("#Serial").val(),
+                SerieLocal: $("#SerieLocal").val(),
                 Notas: $("#Notas").val(),
                 FechaCompra: $("#FechaCompra").val(),
                 TipoActivoId: parseInt($("#ddlTipoActivo").val()),
