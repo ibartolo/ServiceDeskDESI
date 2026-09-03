@@ -167,7 +167,7 @@
     <!-- ========================================= -->
     <!--<script src="~/Scripts/Comun/Calendario.js"></script>-->
 </head>
-<body>
+<body class="@(ServiceDeskDESIMVC.Helpers.ThemeHelper.GetTemaClase(Request, ServiceDeskDESIMVC.Helpers.SessionHelper.GetSessionUser()))">
     <div class="wrapper">
         <!-- ========================================= -->
         <!-- SIDEBAR - Service Desk DESI -->
@@ -193,7 +193,7 @@
                     <div class="user-avatar">
                         @{
                             var usuario = ServiceDeskDESIMVC.Helpers.SessionHelper.GetSessionUser();
-                            if (!string.IsNullOrEmpty(usuario.ProfileImage) && System.IO.File.Exists(Server.MapPath(usuario.ProfileImage)))
+                            if (!string.IsNullOrEmpty(usuario.ProfileImage) && System.IO.File.Exists(Server.MapPath("~" + usuario.ProfileImage)))
                             {
                                 <img src="@usuario.ProfileImage" alt="Foto de perfil" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
                             }
@@ -209,7 +209,7 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/User/MyProfile"><i class="fas fa-user me-2"></i> Perfil</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Configuración</a></li>
+                            <li><a class="dropdown-item" href="/Home/Configuration"><i class="fas fa-cog me-2"></i> Configuración</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/Home/LogOut"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a></li>
                         </ul>

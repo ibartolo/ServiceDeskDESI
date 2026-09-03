@@ -28,6 +28,7 @@ namespace ServiceDeskDESIMVC.App_Start
                 "Home.Autentication",
                 "Home.LogIn",
                 "Home.RecoverPassword",
+                "Home.VerAsignacion",
                 "Home.ValidarToken",
                 "Home.RestablecerContrasenia",
                 "Home.ValidarRecetearContrasenia",

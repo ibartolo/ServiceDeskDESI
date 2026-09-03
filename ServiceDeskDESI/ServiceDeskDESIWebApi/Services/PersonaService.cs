@@ -122,5 +122,56 @@ namespace ServiceDeskDESIWebApi.Services
                 return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al eliminar la persona." };
             }
         }
+
+        public ModelResponse VincularPersonaUsuario(long personaId, long usuarioId, string usuario)
+        {
+            try
+            {
+                Log.Information("PersonaService.VincularPersonaUsuario para PersonaId {PersonaId} UsuarioId {UsuarioId} usuario {Usuario}", personaId, usuarioId, usuario);
+
+                if (personaId <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
+                if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                var result = _dbWrapper.VincularPersonaUsuario(personaId, usuarioId, usuario);
+                Log.Information("PersonaService.VincularPersonaUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en VincularPersonaUsuario para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en PersonaService.VincularPersonaUsuario para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al vincular la persona al usuario." };
+            }
+        }
+
+        public ModelResponse DesvincularPersonaUsuario(long personaId, string usuario)
+        {
+            try
+            {
+                Log.Information("PersonaService.DesvincularPersonaUsuario para PersonaId {PersonaId} usuario {Usuario}", personaId, usuario);
+
+                if (personaId <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+
+                var result = _dbWrapper.DesvincularPersonaUsuario(personaId, usuario);
+                Log.Information("PersonaService.DesvincularPersonaUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en DesvincularPersonaUsuario para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en PersonaService.DesvincularPersonaUsuario para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al desvincular la persona del usuario." };
+            }
+        }
     }
 }

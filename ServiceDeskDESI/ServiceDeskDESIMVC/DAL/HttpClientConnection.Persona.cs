@@ -41,5 +41,40 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
+
+        public async Task<ModelResponse> VincularPersonaUsuario(long personaId, long usuarioId)
+        {
+            var request = new
+            {
+                PersonaId = personaId,
+                UsuarioId = usuarioId
+            };
+
+            var result = await RequestAsync<object>($"api/Persona/VincularUsuario", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> DesvincularPersonaUsuario(long personaId)
+        {
+            var request = new
+            {
+                PersonaId = personaId
+            };
+
+            var result = await RequestAsync<object>($"api/Persona/DesvincularUsuario", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
     }
 }

@@ -49,6 +49,15 @@ namespace ServiceDeskDESIMVC.Controllers
                 usuario = new Usuario();
                 ViewBag.ErrorMessage = "No se pudo obtener el usuario.";
             }
+            else
+            {
+                // Sincronizar la sesión con los datos frescos (imagen de perfil) para que el navbar (_Layout user-avatar) la muestre
+                if (tokenCookie.ProfileImage != usuario.ImagenPerfil)
+                {
+                    tokenCookie.ProfileImage = usuario.ImagenPerfil;
+                    SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
+                }
+            }
 
             // Cargar listas para los dropdowns
             var sucursalesResponse = await _sucursalService.ConsultarTodasSucursales();
@@ -102,6 +111,18 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
 
                 var response = await _autenticacionService.ActualizarPerfilUsuario(usuario);
+
+                // Refrescar la sesión con la nueva imagen para que el navbar (user-avatar del _Layout) la muestre de inmediato
+                if (response.IsSuccess)
+                {
+                    var tokenCookie = SessionHelper.GetSessionUser();
+                    if (tokenCookie != null)
+                    {
+                        tokenCookie.ProfileImage = usuario.ImagenPerfil;
+                        SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
+                    }
+                }
+
                 return JsonConvert.SerializeObject(response);
             }
             catch (Exception ex)
@@ -115,6 +136,15 @@ namespace ServiceDeskDESIMVC.Controllers
         #region Catelogo de usuarios
         public async Task<ActionResult> Users(long id = 0)
         {
+            // 1. Obtener permisos para la página "Usuarios"
+            var permisos = await _usuarioService.ObtenerPermisosParaUsuario();
+
+            // 2. Validar permiso de lectura (D1)
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
             var usuario = new Usuario();
 
             // Cargar listas para los dropdowns
@@ -226,6 +256,9 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Roles = selectListRoles;
 
             ViewBag.EmpresaId = tokenCookie.EmpresaID;
+
+            // 3. Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
 
             return View(usuario);
         }

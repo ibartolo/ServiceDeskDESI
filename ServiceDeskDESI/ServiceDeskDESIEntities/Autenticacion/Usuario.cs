@@ -21,5 +21,6 @@ namespace ServiceDeskDESIEntities.Autenticacion
         public string RFC { get; set; }
         public long? AreaId { get; set; }
         public long? EmpresaId { get; set; }
+        public long? PersonaId { get; set; }
     }
 }

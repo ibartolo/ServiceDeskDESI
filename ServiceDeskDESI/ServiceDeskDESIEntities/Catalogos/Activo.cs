@@ -12,6 +12,7 @@ namespace ServiceDeskDESIEntities.Catalogos
         public string Descripcion { get; set; }
         public long? TipoActivoId { get; set; }
         public string Serial { get; set; }
+        public string SerieLocal { get; set; }
         public long? MarcaId { get; set; }
         public long? ModeloId { get; set; }
         public string Notas { get; set; }

@@ -14,15 +14,20 @@ namespace ServiceDeskDESIWebApi.DAL
 
         public DbWrapper()
         {
-            // Cadena de conexión "sConSql": se resuelve con prioridad desde la variable de
-            // entorno (producción) y, si no está definida, desde la entrada <connectionStrings>
-            // del Web.config (respaldo local). Ambas deben llamarse "sConSql".
-            const string conexionKey = "sConSql";
-            SQLConnectionString =
-                System.Environment.GetEnvironmentVariable(conexionKey)
-                ?? System.Configuration.ConfigurationManager.ConnectionStrings[conexionKey]?.ConnectionString
-                ?? throw new InvalidOperationException(
-                    $"No se encontró la cadena de conexión '{conexionKey}' (variable de entorno ni Web.config).");
+            // 1) Variable de entorno del hosting (SmarterASP: Advanced Tools > Pool Manager > Environment Variables).
+            //    En produccion toma prioridad y evita exponer la contrasena en el web.config publicado.
+            var conexionDesdeEntorno = Environment.GetEnvironmentVariable("sConSql");
+            var conexionDesdeConfig = System.Configuration.ConfigurationManager.ConnectionStrings["cCon"]?.ConnectionString;
+
+            SQLConnectionString = !string.IsNullOrWhiteSpace(conexionDesdeEntorno)
+                ? conexionDesdeEntorno
+                : conexionDesdeConfig;
+
+            if (string.IsNullOrWhiteSpace(SQLConnectionString))
+                throw new InvalidOperationException(
+                    "Cadena de conexión no configurada. Defina la variable de entorno 'sConSql' en el hosting " +
+                    "(Advanced Tools > Pool Manager > Environment Variables) o en la seccion <connectionStrings> del web.config.");
+
             SQLCommandTimeOut = TimeSpan.FromSeconds(15);
         }
         public T MapearPorpiedades<T>(object item)

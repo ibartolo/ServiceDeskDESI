@@ -203,6 +203,8 @@
     <Content Include="Template\Template_NuevoPass.html" />
     <Content Include="Template\Template_NuevoUsuario.html" />
     <Content Include="Template\Template_RecuperarEmail.html" />
+    <Content Include="Template\Template_AsignacionActivo.html" />
+    <Content Include="Template\Template_DesvinculacionActivo.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +222,7 @@
     <Compile Include="Controllers\FoliadorController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\MarcaController.cs" />
+    <Compile Include="Controllers\MantenimientoController.cs" />
     <Compile Include="Controllers\ModeloController.cs" />
     <Compile Include="Controllers\PaginaController.cs" />
     <Compile Include="Controllers\PermisosController.cs" />
@@ -246,6 +249,7 @@
     <Compile Include="DAL\DbWrapper.Foliador.cs" />
     <Compile Include="DAL\DbWrapper.Dashboard.cs" />
     <Compile Include="DAL\DbWrapper.Marca.cs" />
+    <Compile Include="DAL\DbWrapper.Mantenimiento.cs" />
     <Compile Include="DAL\DbWrapper.Modelo.cs" />
     <Compile Include="DAL\DbWrapper.Paginas.cs" />
     <Compile Include="DAL\DbWrapper.Permisos.cs" />
@@ -274,6 +278,7 @@
     <Compile Include="Services\FoliadorService.cs" />
     <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Services\MarcaService.cs" />
+    <Compile Include="Services\MantenimientoService.cs" />
     <Compile Include="Services\ModeloService.cs" />
     <Compile Include="Services\PaginaService.cs" />
     <Compile Include="Services\PermisosService.cs" />

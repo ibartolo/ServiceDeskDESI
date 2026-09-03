@@ -75,6 +75,41 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = _personaService.EliminarPersona(persona.Id, persona.ModificadoPor, persona.FechaModificacion.Value, usuario);
             return result;
         }
+
+        /// <summary>
+        /// Vincula una Persona a un Usuario existente (sincroniza datos de la Persona desde el Usuario).
+        /// </summary>
+        [Permiso("Personas", "Editar")]
+        [HttpPost, Route("VincularUsuario")]
+        public ModelResponse VincularPersonaUsuario([FromBody] VincularUsuarioRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _personaService.VincularPersonaUsuario(request.PersonaId, request.UsuarioId, usuario);
+            return result;
+        }
+
+        /// <summary>
+        /// Desvincula la Persona de su Usuario (Usuarios.PersonaId = NULL).
+        /// </summary>
+        [Permiso("Personas", "Editar")]
+        [HttpPost, Route("DesvincularUsuario")]
+        public ModelResponse DesvincularPersonaUsuario([FromBody] DesvincularUsuarioRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _personaService.DesvincularPersonaUsuario(request.PersonaId, usuario);
+            return result;
+        }
+    }
+
+    public class VincularUsuarioRequest
+    {
+        public long PersonaId { get; set; }
+        public long UsuarioId { get; set; }
+    }
+
+    public class DesvincularUsuarioRequest
+    {
+        public long PersonaId { get; set; }
     }
 }
     

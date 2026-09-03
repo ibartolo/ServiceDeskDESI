@@ -22,6 +22,16 @@ namespace ServiceDeskDESIMVC.DAL
             return await RequestAsync<List<Activo>>($"api/PersonaActivo/Disponibles", HttpMethod.Get, null, token.Token.access_token);
         }
 
+        public async Task<ModelResponse<List<PersonaActivoDTO>>> MisActivos()
+        {
+            return await RequestAsync<List<PersonaActivoDTO>>($"api/PersonaActivo/MisActivos", HttpMethod.Get, null, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse<AsignacionActivoDetalleDTO>> AsignacionPorToken(Guid token)
+        {
+            return await RequestAsync<AsignacionActivoDetalleDTO>($"api/PersonaActivo/AsignacionPorToken/{token}", HttpMethod.Get, null, string.Empty);
+        }
+
         public async Task<ModelResponse> AsignarActivoPersona(long personaId, long activoId)
         {
             var request = new
@@ -48,6 +58,51 @@ namespace ServiceDeskDESIMVC.DAL
             };
 
             var result = await RequestAsync<object>($"api/PersonaActivo/Desvincular", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> IniciarDesvinculacion(long personaActivoId)
+        {
+            var request = new
+            {
+                PersonaActivoId = personaActivoId
+            };
+
+            var result = await RequestAsync<object>($"api/PersonaActivo/IniciarDesvinculacion", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> ConfirmarRecepcion(Guid tokenGuid)
+        {
+            var request = new { Token = tokenGuid };
+
+            var result = await RequestAsync<object>($"api/PersonaActivo/confirmarRecepcion", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> DesvincularConfirmacion(Guid tokenGuid)
+        {
+            var request = new { Token = tokenGuid };
+
+            var result = await RequestAsync<object>($"api/PersonaActivo/desvincularConfirmacion", HttpMethod.Post, request,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

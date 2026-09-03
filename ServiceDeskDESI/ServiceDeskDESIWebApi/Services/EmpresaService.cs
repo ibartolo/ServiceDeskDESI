@@ -271,6 +271,7 @@ namespace ServiceDeskDESIWebApi.Services
             Area areaGuardada = null;
             Usuario usuarioAdmin = null;
             long rolAdminId = 0;
+            long rolUsuarioId = 0;
             long usuarioAdminId = 0;
             string contrasenaTemporal = null;
 
@@ -473,9 +474,62 @@ namespace ServiceDeskDESIWebApi.Services
                         {
                             rolAdminId = ((Rol)rolResponse.Response).Id;
                         }
+
+                        if (rol.Nombre == "Usuario")
+                        {
+                            rolUsuarioId = ((Rol)rolResponse.Response).Id;
+                        }
                     }
 
                     Log.Information("✅ PASO 5/8 - Roles base creados exitosamente para empresa {EmpresaId}", empresaGuardada.Id);
+
+                    // =========================================
+                    // PASO 5.1: ASIGNAR PÁGINA "MIS ACTIVOS" AL ROL "USUARIO"
+                    // (provisioning de la página Mis Activos para el rol "Usuario" recién creado)
+                    // =========================================
+                    Log.Information("PASO 5.1/8 - Asignando página 'Mis Activos' al rol 'Usuario'...");
+
+                    if (rolUsuarioId > 0)
+                    {
+                        var paginasResponseMisActivos = _dbWrapper.ObtenerPaginas();
+                        if (paginasResponseMisActivos.IsSuccess && paginasResponseMisActivos.Response != null)
+                        {
+                            var paginaMisActivos = ((List<Pagina>)paginasResponseMisActivos.Response)
+                                .FirstOrDefault(p => p.Nombre == "MisActivos");
+
+                            if (paginaMisActivos != null)
+                            {
+                                var insertMisActivosResponse = _dbWrapper.InsertarRolPaginaAccion(
+                                    rolUsuarioId,
+                                    paginaMisActivos.Id,
+                                    true,  // PuedeLeer
+                                    false, // PuedeCrear
+                                    false, // PuedeEditar
+                                    false, // PuedeEliminar
+                                    false, // PuedeExportar
+                                    usernameAdmin,
+                                    usernameAdmin
+                                );
+
+                                if (insertMisActivosResponse.IsSuccess)
+                                {
+                                    Log.Information("✅ PASO 5.1/8 - Página 'Mis Activos' asignada al rol 'Usuario' ({RolId})", rolUsuarioId);
+                                }
+                                else
+                                {
+                                    Log.Warning("⚠️ No se pudo asignar la página 'Mis Activos' al rol 'Usuario': {Error}", insertMisActivosResponse.Message);
+                                }
+                            }
+                            else
+                            {
+                                Log.Warning("⚠️ No se encontró la página 'Mis Activos' (aplicar migration.sql del change vinculacion-persona-usuario).");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Log.Warning("⚠️ No se encontró el rol 'Usuario' creado; no se asignó la página 'Mis Activos'.");
+                    }
 
                     // =========================================
                     // PASO 6: ASIGNAR ROL "ADMINISTRADOR" AL USUARIO
