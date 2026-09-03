@@ -35,34 +35,6 @@ namespace ServiceDeskDESIWebApi.Helpers
                 if (!string.IsNullOrEmpty(attachment))
                     mail.Attachments.Add(new Attachment(attachment));
 
-                //var paraApi = new List<To>();
-
-                //foreach (var p in para)
-                //{
-                //    paraApi.Add(new To()
-                //    {
-                //        email = p
-                //    });
-                //}
-
-                //var emailApi = new SendEmail()
-                //{
-                //    from = new From()
-                //    {
-                //        email = de,
-                //    },
-                //    to = paraApi,
-                //    subject = asunto,
-                //    html_part = mensaje,
-                //    text_part_auto = true,
-                //};
-
-                //HttpClientBase httpClientBase = new HttpClientBase("https://lpcorp.ipzmarketing.com/api/v1");
-                //var xxx = httpClientBase.RequestAsync<string>(@"/send_emails", System.Net.Http.HttpMethod.Post, Newtonsoft.Json.JsonConvert.SerializeObject(emailApi), new Func<string, string>((strigsResponse) =>
-                //{
-                //    return strigsResponse;
-                //}), "9_BmSBGbcshBsWas9MR3sKq4FsXYcbYpP2k78ECf").Result;
-
                 using (var smtp = new SmtpClient(smtpURL))
                 {
 
@@ -70,7 +42,6 @@ namespace ServiceDeskDESIWebApi.Helpers
                     smtp.Port = puerto;       // porta para SSL
                     smtp.DeliveryMethod = SmtpDeliveryMethod.Network; // modo de envio
                     smtp.UseDefaultCredentials = false; // vamos utilizar credencias especificas
-                    //smtp.TargetName = "STARTTLS/smtp.office365.com";
 
                     // seu usuário e senha para autenticação
                     smtp.Credentials = new NetworkCredential(de, pass);
