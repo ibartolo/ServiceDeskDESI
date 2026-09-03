@@ -88,5 +88,21 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return listParameters;
         }
+
+        /// <summary>
+        /// Indica si ya existe un usuario con ese NombreUsuario (búsqueda global, sin filtro
+        /// de empresa). Se usa para garantizar usuarios únicos al registrar una nueva empresa.
+        /// </summary>
+        public bool ExisteNombreUsuario(string nombreUsuario)
+        {
+            if (string.IsNullOrWhiteSpace(nombreUsuario)) return false;
+
+            object resultado = ExecuteScalar(
+                "SELECT COUNT(1) FROM Usuarios WHERE NombreUsuario = @NombreUsuario",
+                CommandType.Text,
+                new[] { new SqlParameter("@NombreUsuario", nombreUsuario) });
+
+            return Convert.ToInt32(resultado) > 0;
+        }
     }
 }
