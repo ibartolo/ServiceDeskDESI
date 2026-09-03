@@ -1,4 +1,4 @@
-﻿﻿@model List<ServiceDeskDESIEntities.Seguridad.Pagina>
+﻿@model List<ServiceDeskDESIEntities.Seguridad.Pagina>
 
 <div class="sidebar-header">
     <i class="fas fa-headset" style="font-size: 3rem; color: white;"></i>
@@ -20,7 +20,7 @@
             <li class="">
                 <a href="#" class="has-arrow">
                     <i class="fas @menu.Logo"></i>
-                    <span class="menu-text">@menu.Nombre</span>
+                    <span class="menu-text">@(menu.NombreVisible ?? menu.Nombre)</span>
                 </a>
                 <ul>
                     @foreach (var sub in subMenus)
@@ -31,7 +31,7 @@
                                 {
                                     <i class="fas @sub.Logo"></i>
                                 }
-                                <span class="menu-text">@sub.Nombre</span>
+                                <span class="menu-text">@(sub.NombreVisible ?? sub.Nombre)</span>
                             </a>
                         </li>
                     }
@@ -43,7 +43,7 @@
             <li>
                 <a href="@menu.Direccion">
                     <i class="fas @menu.Logo"></i>
-                    <span class="menu-text">@menu.Nombre</span>
+                    <span class="menu-text">@(menu.NombreVisible ?? menu.Nombre)</span>
                 </a>
             </li>
         }

@@ -134,6 +134,13 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [Permiso("Permisos", "Leer")]
+        public async Task<string> ConsultarConteoPaginasPorRol()
+        {
+            var response = await _permisosService.ObtenerConteoPaginasPorRol();
+            return JsonConvert.SerializeObject(response);
+        }
+
         [Permiso("Permisos", "Editar")]
         public async Task<string> GuardarPermisosRol(GuardarPermisosRequest request)
         {

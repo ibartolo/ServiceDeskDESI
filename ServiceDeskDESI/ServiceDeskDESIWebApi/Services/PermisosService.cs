@@ -221,5 +221,22 @@ namespace ServiceDeskDESIWebApi.Services
                 return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al guardar los permisos." };
             }
         }
+
+        public ModelResponse<List<RolConteoPaginasDTO>> ObtenerConteoPaginasPorRol()
+        {
+            try
+            {
+                Log.Information("PermisosService.ObtenerConteoPaginasPorRol");
+
+                var result = _dbWrapper.ObtenerConteoPaginasPorRol();
+                Log.Information("PermisosService.ObtenerConteoPaginasPorRol RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en ObtenerConteoPaginasPorRol");
+                return new ModelResponse<List<RolConteoPaginasDTO>> { IsSuccess = false, Message = "Ocurrió un error al obtener el conteo de páginas." };
+            }
+        }
     }
 }

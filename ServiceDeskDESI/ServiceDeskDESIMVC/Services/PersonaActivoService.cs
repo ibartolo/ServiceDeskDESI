@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIMVC.DAL;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -26,6 +27,16 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.ObtenerActivosDisponibles();
         }
 
+        public async Task<ModelResponse<List<PersonaActivoDTO>>> MisActivos()
+        {
+            return await _httpClient.MisActivos();
+        }
+
+        public async Task<ModelResponse<AsignacionActivoDetalleDTO>> AsignacionPorToken(Guid token)
+        {
+            return await _httpClient.AsignacionPorToken(token);
+        }
+
         public async Task<ModelResponse> AsignarActivoPersona(long personaId, long activoId)
         {
             return await _httpClient.AsignarActivoPersona(personaId, activoId);
@@ -34,6 +45,21 @@ namespace ServiceDeskDESIMVC.Services
         public async Task<ModelResponse> DesvincularActivoPersona(long personaActivoId)
         {
             return await _httpClient.DesvincularActivoPersona(personaActivoId);
+        }
+
+        public async Task<ModelResponse> IniciarDesvinculacion(long personaActivoId)
+        {
+            return await _httpClient.IniciarDesvinculacion(personaActivoId);
+        }
+
+        public async Task<ModelResponse> ConfirmarRecepcion(Guid token)
+        {
+            return await _httpClient.ConfirmarRecepcion(token);
+        }
+
+        public async Task<ModelResponse> DesvincularConfirmacion(Guid token)
+        {
+            return await _httpClient.DesvincularConfirmacion(token);
         }
     }
 }

@@ -78,6 +78,7 @@ namespace ServiceDeskDESIWebApi.Services
                 if ((activo.MarcaId ?? 0) <= 0) { throw new ArgumentException("La marca es requerida."); }
                 if ((activo.ModeloId ?? 0) <= 0) { throw new ArgumentException("El modelo es requerido."); }
                 if (activo.Serial != null && activo.Serial.Length > 50) { throw new ArgumentException("El serial no puede exceder los 50 caracteres."); }
+                if (activo.SerieLocal != null && activo.SerieLocal.Length > 100) { throw new ArgumentException("La serie local no puede exceder los 100 caracteres."); }
                 if (activo.Notas != null && activo.Notas.Length > 250) { throw new ArgumentException("Las notas no pueden exceder los 250 caracteres."); }
                 if (string.IsNullOrWhiteSpace(activo.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }

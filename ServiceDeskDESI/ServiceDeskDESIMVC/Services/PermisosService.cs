@@ -76,5 +76,10 @@ namespace ServiceDeskDESIMVC.Services
             }
             return null;
         }
+
+        public async Task<ModelResponse<List<RolConteoPaginasDTO>>> ObtenerConteoPaginasPorRol()
+        {
+            return await _httpClient.ObtenerConteoPaginasPorRol();
+        }
     }
 }

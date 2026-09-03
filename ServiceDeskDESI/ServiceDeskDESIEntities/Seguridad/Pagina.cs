@@ -5,6 +5,7 @@ namespace ServiceDeskDESIEntities.Seguridad
     public class Pagina : BaseObject
     {
         public string Nombre { get; set; }
+        public string NombreVisible { get; set; }
         public string Descripcion { get; set; }
         public string Tipo { get; set; } // Menu, SubMenu
         public string Direccion { get; set; }

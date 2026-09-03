@@ -36,6 +36,7 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly PuestoService _puestoService;
         private readonly PersonaService _personaService;
         private readonly PersonaActivoService _personaActivoService;
+        private readonly MantenimientoService _mantenimientoService;
         public CatalogsController() : base()
         {
             token = SessionHelper.GetSessionUser();
@@ -53,6 +54,7 @@ namespace ServiceDeskDESIMVC.Controllers
             _puestoService = new PuestoService(httpClientConnection);
             _personaService = new PersonaService(httpClientConnection);
             _personaActivoService = new PersonaActivoService(httpClientConnection);
+            _mantenimientoService = new MantenimientoService(httpClientConnection);
 
         }
 
@@ -146,7 +148,7 @@ namespace ServiceDeskDESIMVC.Controllers
             {
                 return RedirectToAction("AccesoDenegado", "Home");
             }
-            var persona = new Persona();
+            var persona = new PersonaDTO();
             if (id > 0)
             {
                 var response = await _personaService.ObtenerPersonaPorId(id);
@@ -792,6 +794,22 @@ namespace ServiceDeskDESIMVC.Controllers
             var response = await _personaService.EliminarPersona(p);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
+
+        [System.Web.Mvc.HttpPost]
+        [Permiso("Personas", "Editar")]
+        public async Task<string> VincularPersonaUsuario(long personaId, long usuarioId)
+        {
+            var response = await _personaService.VincularPersonaUsuario(personaId, usuarioId);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        [Permiso("Personas", "Editar")]
+        public async Task<string> DesvincularPersonaUsuario(long personaId)
+        {
+            var response = await _personaService.DesvincularPersonaUsuario(personaId);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
         #endregion
 
         #region Persona Activo
@@ -822,6 +840,14 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> DesvincularActivoPersona(long personaActivoId)
         {
             var response = await _personaActivoService.DesvincularActivoPersona(personaActivoId);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        [Permiso("Personas", "Editar")]
+        public async Task<string> IniciarDesvinculacion(long personaActivoId)
+        {
+            var response = await _personaActivoService.IniciarDesvinculacion(personaActivoId);
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
         #endregion
@@ -935,6 +961,23 @@ namespace ServiceDeskDESIMVC.Controllers
         public async Task<string> EliminarActivos(Activo a)
         {
             var response = await _activoService.EliminarActivo(a);
+            return JsonConvert.SerializeObject(response);
+        }
+        #endregion
+
+        #region Mantenimiento
+        [System.Web.Mvc.HttpGet]
+        public async Task<string> ObtenerMantenimientosPorActivo(long activoId)
+        {
+            var response = await _mantenimientoService.ObtenerMantenimientosPorActivo(activoId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        [Permiso("Activos", "Editar")]
+        public async Task<string> GuardarMantenimiento(Mantenimiento m)
+        {
+            var response = await _mantenimientoService.GuardarMantenimiento(m);
             return JsonConvert.SerializeObject(response);
         }
         #endregion

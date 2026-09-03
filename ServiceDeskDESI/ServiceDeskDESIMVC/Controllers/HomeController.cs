@@ -23,6 +23,8 @@ namespace ServiceDeskDESIMVC.Controllers
         private readonly EmpresaService _empresaService;
         private readonly RolService _rolService;
         private readonly DashboardService _dashboardService;
+        private readonly PersonaActivoService _personaActivoService;
+        private readonly AreaService _areaService;
 
         public HomeController()
         {
@@ -30,6 +32,8 @@ namespace ServiceDeskDESIMVC.Controllers
             _empresaService = new EmpresaService(httpClientConnection);
             _rolService = new RolService(httpClientConnection);
             _dashboardService = new DashboardService(httpClientConnection);
+            _personaActivoService = new PersonaActivoService(httpClientConnection);
+            _areaService = new AreaService(httpClientConnection);
         }
 
         #region Views
@@ -75,6 +79,66 @@ namespace ServiceDeskDESIMVC.Controllers
             ViewBag.Token = id;
             return View();
         }
+        [HttpGet]
+        public async Task<ActionResult> VerAsignacion(string token, string accion = null)
+        {
+            // Página anónima (standalone). Si el token no es un GUID válido, se muestra el mensaje limpio.
+            if (!Guid.TryParse(token, out Guid tokenGuid))
+            {
+                ViewBag.ErrorMessage = "El enlace de asignación no es válido o ha sido alterado.";
+                ViewBag.Detalle = null;
+                ViewBag.Accion = null;
+                ViewBag.Token = token;
+                return View();
+            }
+
+            var detalleResponse = await _personaActivoService.AsignacionPorToken(tokenGuid);
+
+            ViewBag.Detalle = detalleResponse != null ? detalleResponse.Response : null;
+            ViewBag.Accion = string.Equals(accion, "desvincular", StringComparison.OrdinalIgnoreCase) ? "desvincular" : "aceptar";
+            ViewBag.Token = token;
+            ViewBag.ErrorMessage = (detalleResponse == null || !detalleResponse.IsSuccess)
+                ? (detalleResponse?.Message ?? "El enlace de asignación no es válido o ha sido alterado.")
+                : null;
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> AceptarAsignacion(string token)
+        {
+            if (!Guid.TryParse(token, out Guid tokenGuid))
+            {
+                return Json(new ModelResponse { IsSuccess = false, Message = "El enlace de asignación no es válido o ha sido alterado." });
+            }
+
+            var result = await _personaActivoService.ConfirmarRecepcion(tokenGuid);
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> DesvincularAsignacion(string token)
+        {
+            if (!Guid.TryParse(token, out Guid tokenGuid))
+            {
+                return Json(new ModelResponse { IsSuccess = false, Message = "El enlace de desvinculación no es válido o ha sido alterado." });
+            }
+
+            var result = await _personaActivoService.DesvincularConfirmacion(tokenGuid);
+            return Json(result);
+        }
+
+        public ActionResult MisActivos()
+        {
+            return View();
+        }
+
+        public async Task<string> ObtenerMisActivos()
+        {
+            var response = await _personaActivoService.MisActivos();
+            return JsonConvert.SerializeObject(response);
+        }
+
         public ActionResult NewCompany()
         {
             return View();
@@ -95,9 +159,68 @@ namespace ServiceDeskDESIMVC.Controllers
             return View();
         }
 
-        public ActionResult Configuration () { 
+        public async Task<ActionResult> Configuration () {
+
+            var tokenCookie = SessionHelper.GetSessionUser();
+
+            // Determinar si el usuario es jefe de departamento (responsable de al menos un área)
+            bool esJefeArea = false;
+            if (tokenCookie != null && tokenCookie.UserID > 0)
+            {
+                var areasResponse = await _areaService.ConsultarTodasAreas();
+                if (areasResponse.IsSuccess && areasResponse.Response != null)
+                {
+                    esJefeArea = areasResponse.Response.Any(a => a.UsuarioResponsableId == tokenCookie.UserID);
+                }
+            }
+
+            ViewBag.EsJefeArea = esJefeArea;
+
+            // Si es jefe, obtener la vigencia de la licencia de su empresa
+            if (esJefeArea && tokenCookie != null && tokenCookie.EmpresaID > 0)
+            {
+                var empresa = await _empresaService.ObtenerEmpresaPorId(tokenCookie.EmpresaID);
+                if (empresa != null)
+                {
+                    ViewBag.EmpresaNombre = empresa.NombreComercial;
+                    ViewBag.FechaVigenciaFin = empresa.FechaVigenciaFin;
+                    ViewBag.FechaVigenciaInicio = empresa.FechaVigenciaInicio;
+                    ViewBag.EsPeriodoPrueba = empresa.EsPeriodoPrueba;
+
+                    var diasRestantes = (empresa.FechaVigenciaFin.Date - DateTime.Now.Date).Days;
+                    ViewBag.DiasRestantes = diasRestantes > 0 ? diasRestantes : 0;
+                }
+            }
 
             return View();
+        }
+
+        /// <summary>
+        /// Guarda la preferencia de tema (light/dark) en una cookie propia del usuario
+        /// (no es la cookie de sesión). Expira en 1 año y se renueva cada vez que cambia el tema.
+        /// </summary>
+        [HttpPost]
+        public ActionResult GuardarTema(string tema)
+        {
+            if (tema != "light" && tema != "dark")
+            {
+                tema = "light";
+            }
+
+            var tokenCookie = SessionHelper.GetSessionUser();
+            var cookieName = tokenCookie != null && tokenCookie.UserID > 0
+                ? $"TemaUsuario_{tokenCookie.UserID}"
+                : "TemaUsuario";
+
+            var cookie = new HttpCookie(cookieName, tema)
+            {
+                Expires = DateTime.Now.AddYears(1), // cookie siempre viva: cada cambio renueva +1 año
+                HttpOnly = true,
+                Path = "/"
+            };
+            Response.Cookies.Add(cookie);
+
+            return Json(new { IsSuccess = true, Tema = tema });
         }
 
 
