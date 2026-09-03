@@ -14,7 +14,15 @@ namespace ServiceDeskDESIWebApi.DAL
 
         public DbWrapper()
         {
-            SQLConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings["cCon"].ToString();
+            // Cadena de conexión "sConSql": se resuelve con prioridad desde la variable de
+            // entorno (producción) y, si no está definida, desde la entrada <connectionStrings>
+            // del Web.config (respaldo local). Ambas deben llamarse "sConSql".
+            const string conexionKey = "sConSql";
+            SQLConnectionString =
+                System.Environment.GetEnvironmentVariable(conexionKey)
+                ?? System.Configuration.ConfigurationManager.ConnectionStrings[conexionKey]?.ConnectionString
+                ?? throw new InvalidOperationException(
+                    $"No se encontró la cadena de conexión '{conexionKey}' (variable de entorno ni Web.config).");
             SQLCommandTimeOut = TimeSpan.FromSeconds(15);
         }
         public T MapearPorpiedades<T>(object item)
