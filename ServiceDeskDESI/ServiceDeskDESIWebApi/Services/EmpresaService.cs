@@ -6,7 +6,9 @@ using ServiceDeskDESIWebApi.DAL;
 using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 
 namespace ServiceDeskDESIWebApi.Services
 {
@@ -335,8 +337,8 @@ namespace ServiceDeskDESIWebApi.Services
                     Log.Information("✅ PASO 1/8 - Empresa guardada exitosamente. Id: {EmpresaId}, Nombre: {NombreEmpresa}",
                         empresaGuardada.Id, empresaGuardada.NombreComercial);
 
-                    var usernameAdmin = $"admin_{empresaGuardada.Id}";
-                    Log.Debug("Username administrador generado: {Username}", usernameAdmin);
+                    var usernameAdmin = GenerarUsernameAdminUnico(empresa.Responsable);
+                    Log.Debug("Username administrador generado a partir del responsable: {Username}", usernameAdmin);
 
                     // =========================================
                     // PASO 2: GUARDAR SUCURSAL
@@ -681,6 +683,69 @@ namespace ServiceDeskDESIWebApi.Services
             }
 
             return modelResponse;
+        }
+
+        /// <summary>
+        /// Genera el nombre de usuario del administrador a partir del "Responsable" registrado:
+        /// normaliza (minúsculas, sin acentos, sin caracteres especiales) y arma
+        /// primer nombre + apellido (paterno), omitiendo segundos nombres y apellido materno.
+        /// Garantiza unicidad global agregando un sufijo numérico si ya existe.
+        /// </summary>
+        private string GenerarUsernameAdminUnico(string responsable)
+        {
+            string baseUsuario = NormalizarNombreResponsable(responsable);
+            if (string.IsNullOrWhiteSpace(baseUsuario))
+                return $"admin{DateTime.Now:yyyyMMddHHmmss}";
+
+            string candidato = baseUsuario;
+            int sufijo = 1;
+            while (_dbWrapper.ExisteNombreUsuario(candidato))
+            {
+                sufijo++;
+                candidato = AjustarLargoConSufijo(baseUsuario, sufijo);
+            }
+            return candidato;
+        }
+
+        private string NormalizarNombreResponsable(string responsable)
+        {
+            if (string.IsNullOrWhiteSpace(responsable)) return null;
+
+            // 1) Quitar acentos/marcas diacríticas (á->a, é->e, ñ->n ...)
+            var formaD = responsable.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+            foreach (var c in formaD)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    sb.Append(char.IsLetterOrDigit(c) ? c : ' ');
+            }
+            var sinAcentos = sb.ToString().Normalize(NormalizationForm.FormC).ToLowerInvariant();
+
+            // 2) Separar en tokens (por espacios)
+            var tokens = sinAcentos.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length == 0) return null;
+
+            // 3) Regla: nombre + apellido (paterno). Omite segundos nombres y apellido materno.
+            //    "Ivan Francisco Bartolo Castro" -> ivanbartolo | "Juan Pérez López" -> juanperez
+            string baseNombre;
+            if (tokens.Length == 1)
+                baseNombre = tokens[0];
+            else
+            {
+                int idxApellido = tokens.Length == 2 ? 1 : tokens.Length - 2;
+                baseNombre = tokens[0] + tokens[idxApellido];
+            }
+
+            // 4) Dejar margen (<=20) para que el sufijo numérico quepa en nvarchar(25)
+            return baseNombre.Length > 20 ? baseNombre.Substring(0, 20) : baseNombre;
+        }
+
+        private string AjustarLargoConSufijo(string baseUsuario, int sufijo)
+        {
+            string sufijoStr = sufijo.ToString();
+            int maxBase = 25 - sufijoStr.Length;
+            string b = baseUsuario.Length > maxBase ? baseUsuario.Substring(0, maxBase) : baseUsuario;
+            return b + sufijoStr;
         }
 
         private bool EnviarCorreoBienvenida(Empresa empresa, string usuario, string contrasenaTemporal)
