@@ -58,25 +58,34 @@
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    <Reference Include="Serilog, Version=4.3.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.4.3.1\lib\net471\Serilog.dll</HintPath>
     </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    <Reference Include="Serilog.Sinks.File, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Sinks.File.7.0.0\lib\net471\Serilog.Sinks.File.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=8.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.8.0.1\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.6.0.0\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    <Reference Include="System.Numerics.Vectors, Version=4.1.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
-    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.6.3\lib\net462\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -138,13 +147,18 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\PermissionsController.cs" />
+    <Compile Include="Controllers\SecurityController.cs" />
     <Compile Include="Controllers\TicketController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
+    <Compile Include="DAL\HttpClientConnection.CategoriaResponsable.cs" />
+    <Compile Include="DAL\HttpClientConnection.Pagina.cs" />
     <Compile Include="DAL\HttpClientConnection.Activo.cs" />
     <Compile Include="DAL\HttpClientConnection.Autentication.cs" />
     <Compile Include="DAL\HttpClientConnection.Area.cs" />
@@ -152,8 +166,16 @@
     <Compile Include="DAL\HttpClientConnection.Compania.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
     <Compile Include="DAL\HttpClientConnection.Empresa.cs" />
+    <Compile Include="DAL\HttpClientConnection.Evidencia.cs" />
+    <Compile Include="DAL\HttpClientConnection.Foliador.cs" />
+    <Compile Include="DAL\HttpClientConnection.Dashboard.cs" />
     <Compile Include="DAL\HttpClientConnection.Marca.cs" />
     <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
+    <Compile Include="DAL\HttpClientConnection.Permisos.cs" />
+    <Compile Include="DAL\HttpClientConnection.Persona.cs" />
+    <Compile Include="DAL\HttpClientConnection.PersonaActivo.cs" />
+    <Compile Include="DAL\HttpClientConnection.Puesto.cs" />
+    <Compile Include="DAL\HttpClientConnection.Rol.cs" />
     <Compile Include="DAL\HttpClientConnection.Sucursal.cs" />
     <Compile Include="DAL\HttpClientConnection.Ticket.cs" />
     <Compile Include="DAL\HttpClientConnection.TipoActivo.cs" />
@@ -163,8 +185,31 @@
     </Compile>
     <Compile Include="Helpers\Cryptography.cs" />
     <Compile Include="Helpers\FiltersHelper.cs" />
+    <Compile Include="Filters\PermisoAttribute.cs" />
     <Compile Include="Helpers\SessionHelper.cs" />
+    <Compile Include="Models\CategoriaResponsableViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ActivoService.cs" />
+    <Compile Include="Services\AreaService.cs" />
+    <Compile Include="Services\AutenticacionService.cs" />
+    <Compile Include="Services\CategoriaResponsableService.cs" />
+    <Compile Include="Services\CategoriaService.cs" />
+    <Compile Include="Services\CompaniaService.cs" />
+    <Compile Include="Services\EmpresaService.cs" />
+    <Compile Include="Services\EvidenciaService.cs" />
+    <Compile Include="Services\FoliadorService.cs" />
+    <Compile Include="Services\DashboardService.cs" />
+    <Compile Include="Services\MarcaService.cs" />
+    <Compile Include="Services\ModeloService.cs" />
+    <Compile Include="Services\PermisosService.cs" />
+    <Compile Include="Services\RolService.cs" />
+    <Compile Include="Services\SucursalService.cs" />
+    <Compile Include="Services\TicketService.cs" />
+    <Compile Include="Services\PuestoService.cs" />
+    <Compile Include="Services\PersonaService.cs" />
+    <Compile Include="Services\PersonaActivoService.cs" />
+    <Compile Include="Services\TipoActivoService.cs" />
+    <Compile Include="Services\UsuarioService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
@@ -179,15 +224,27 @@
     <Content Include="Views\Catalogs\Company.cshtml" />
     <Content Include="Views\Home\RecoverPassword.cshtml" />
     <Content Include="Views\User\MyProfile.cshtml" />
-    <Content Include="Views\User\PartialChangePass.cshtml" />
     <Content Include="Views\Catalogs\Category.cshtml" />
     <Content Include="Views\Ticket\Index.cshtml" />
+    <Content Include="Views\Ticket\_CapturarTicket.cshtml" />
+    <Content Include="Views\Ticket\_ReasignarTicket.cshtml" />
+    <Content Include="Views\Ticket\_DetalleTicket.cshtml" />
     <Content Include="Views\Catalogs\TypeActive.cshtml" />
     <Content Include="Views\Catalogs\Model.cshtml" />
     <Content Include="Views\Catalogs\Mark.cshtml" />
     <Content Include="Views\Catalogs\Active.cshtml" />
     <Content Include="Views\Catalogs\Branch.cshtml" />
     <Content Include="Views\Home\NewCompany.cshtml" />
+    <Content Include="Views\User\Users.cshtml" />
+    <Content Include="Views\Home\MenusUser.cshtml" />
+    <Content Include="Views\Home\AccesoDenegado.cshtml" />
+    <Content Include="Views\Security\Role.cshtml" />
+    <Content Include="Views\Security\Permisos.cshtml" />
+    <Content Include="Views\Home\Configuration.cshtml" />
+    <Content Include="Views\Catalogs\CategoriaResponsable.cshtml" />
+    <Content Include="Views\Catalogs\Puesto.cshtml" />
+    <Content Include="Views\Catalogs\Persona.cshtml" />
+    <Content Include="Views\Catalogs\_AsignarActivoPersona.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -197,7 +254,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
+    <Folder Include="Views\Permissions\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceDeskDESIEntities\ServiceDeskDESIEntities.csproj">

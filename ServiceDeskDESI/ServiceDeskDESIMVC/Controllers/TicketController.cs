@@ -1,52 +1,91 @@
 ﻿using Newtonsoft.Json;
+using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
+using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIMVC.Helpers;
+using ServiceDeskDESIMVC.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using static ServiceDeskDESIMVC.Helpers.FiltersHelper;
+using ServiceDeskDESIMVC.Filters;
 
 namespace ServiceDeskDESIMVC.Controllers
 {
-    [Autenticated]
     public class TicketController : BaseController
     {
+        private readonly TicketService _ticketService;
+        private readonly AreaService _areaService;
+        private readonly CategoriaService _categoriaService;
+        private readonly RolService _rolService;
+        private readonly UsuarioService _usuarioService;
+        private readonly EvidenciaService _evidenciaService;
+        private readonly FoliadorService _foliadorService;
+
+        public TicketController()
+        {
+            _ticketService = new TicketService(httpClientConnection);
+            _areaService = new AreaService(httpClientConnection);
+            _categoriaService = new CategoriaService(httpClientConnection);
+            _rolService = new RolService(httpClientConnection);
+            _usuarioService = new UsuarioService(httpClientConnection);
+            _evidenciaService = new EvidenciaService(httpClientConnection);
+            _foliadorService = new FoliadorService(httpClientConnection);
+        }
+
         public async Task<ActionResult> Index(long id = 0)
         {
+            // 1. Obtener permisos para la página "Tickets"
+            var permisos = await _ticketService.ObtenerPermisosParaTicket();
+
+            // 2. Validar permiso de lectura
+            if (permisos == null || !((PermisosViewModel)permisos).PuedeLeer)
+            {
+                return RedirectToAction("AccesoDenegado", "Home");
+            }
+
             var ticket = new Ticket();
 
             // Cargar áreas
-            var areasResponse = await httpClientConnection.ObtenerAreas(tokenCookie.EmpresaID);
+            var areasResponse = await _areaService.ConsultarTodasAreas();
             if (areasResponse.IsSuccess && areasResponse.Response != null)
             {
                 ViewBag.Areas = areasResponse.Response;
             }
 
             // Cargar categorías (solo las principales, sin padre)
-            var categoriasResponse = await httpClientConnection.ObtenerCategorias();
+            var categoriasResponse = await _categoriaService.ConsultarTodasCategorias();
             if (categoriasResponse.IsSuccess && categoriasResponse.Response != null)
             {
-                var todasCategorias = JsonConvert.DeserializeObject<List<Categoria>>(categoriasResponse.Response.ToString());
-                var categoriasPrincipales = todasCategorias.Where(c => c.CategoriaPadre == null).ToList();
+                var categoriasPrincipales = categoriasResponse.Response.Where(c => c.CategoriaPadreId == null).Cast<Categoria>().ToList();
                 ViewBag.Categorias = categoriasPrincipales;
             }
 
+            // Cargar estatus de tickets
+            var estatusResponse = await _ticketService.ObtenerTicketEstatus();
+            if (estatusResponse.IsSuccess && estatusResponse.Response != null)
+            {
+                ViewBag.Estatus = estatusResponse.Response;
+            }
+
+            // Cargar configuración de evidencias (límites y extensiones) para la vista.
+            ViewBag.EvidenciaConfig = await ObtenerEvidenciaConfig();
+
             if (id > 0)
             {
-                var response = await httpClientConnection.ObtenerTicketPorId(id);
+                var response = await _ticketService.ObtenerTicketPorId(id);
 
                 if (response.IsSuccess && response.Response != null)
                 {
-                    ticket = JsonConvert.DeserializeObject<Ticket>(response.Response.ToString());
+                    ticket = response.Response;
 
                     // Cargar subcategorías según la categoría seleccionada
-                    if (ticket.Categoria != null && ticket.Categoria.Id > 0)
+                    if (ticket.CategoriaId > 0)
                     {
-                        var subcategoriasResponse = await httpClientConnection.ObtenerCategoriasPorPadre(ticket.Categoria.Id);
+                        var subcategoriasResponse = await _categoriaService.ObtenerCategoriasPorPadre(ticket.CategoriaId);
                         if (subcategoriasResponse.IsSuccess && subcategoriasResponse.Response != null)
                         {
                             ViewBag.Subcategorias = subcategoriasResponse.Response;
@@ -59,17 +98,49 @@ namespace ServiceDeskDESIMVC.Controllers
                 }
             }
 
+            // Pasar permisos a la vista
+            ViewBag.Permisos = permisos;
+
+            // Determinar si el usuario es agente (tiene un rol con PuedeAtenderTickets)
+            bool esAgente = false;
+            var tokenCookie = SessionHelper.GetSessionUser();
+            if (tokenCookie != null && tokenCookie.UserID > 0)
+            {
+                var rolesResponse = await _rolService.ObtenerRolesPorUsuario(tokenCookie.UserID);
+                esAgente = rolesResponse.IsSuccess && rolesResponse.Response != null && rolesResponse.Response.Any(r => r.PuedeAtenderTickets);
+            }
+            ViewBag.EsAgente = esAgente;
+
+            ViewBag.UsuarioActualId = tokenCookie.UserID;
+            ViewBag.UsuarioActualNombre = tokenCookie.UserName;
+            bool esResponsableArea = false;
+            var usuarioActual = await _usuarioService.ObtenerUsuarioPorId(tokenCookie.UserID);
+            if (usuarioActual != null && usuarioActual.AreaId.HasValue)
+            {
+                var areaActual = await _areaService.ObtenerAreaPorId(usuarioActual.AreaId.Value);
+                esResponsableArea = areaActual != null && areaActual.UsuarioResponsableId == tokenCookie.UserID;
+            }
+            ViewBag.EsResponsableArea = esResponsableArea;
+
             return View(ticket);
         }
 
+        [Permiso("Tickets")]
         public async Task<string> GuardarOActualizarTicket(Ticket ticket)
         {
-            ticket.Estatus = true;
-
-            var response = await httpClientConnection.GuardarOActualizarTicket(ticket);
+            var response = await _ticketService.GuardarOActualizarTicket(ticket);
             return JsonConvert.SerializeObject(response);
         }
 
+        [HttpPost]
+        [Permiso("Tickets")]
+        public async Task<string> GuardarTicketConEvidencias(Ticket ticket)
+        {
+            var response = await _ticketService.GuardarTicketConEvidencias(ticket, Request.Files);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [Permiso("Tickets", "Eliminar")]
         public async Task<string> EliminarTicket(Ticket ticket)
         {
             var tokenCookie = SessionHelper.GetSessionUser();
@@ -77,45 +148,170 @@ namespace ServiceDeskDESIMVC.Controllers
             ticket.ModificadoPor = tokenCookie?.UserName ?? "system";
             ticket.FechaModificacion = DateTime.Now;
 
-            var response = await httpClientConnection.EliminarTicket(ticket);
+            var response = await _ticketService.EliminarTicket(ticket);
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ConsultarTodasTickets()
         {
-            var response = await httpClientConnection.ObtenerTickets();
+            var response = await _ticketService.ObtenerTickets();
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ConsultarTicketsPorArea(long areaId)
         {
-            var response = await httpClientConnection.ObtenerTicketsPorArea(areaId);
+            var response = await _ticketService.ObtenerTicketsPorArea(areaId);
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ConsultarTicketsPorUsuario(string creadoPor)
         {
-            var response = await httpClientConnection.ObtenerTicketsPorUsuario(creadoPor);
+            var response = await _ticketService.ObtenerTicketsPorUsuario(creadoPor);
             return JsonConvert.SerializeObject(response);
         }
 
         public async Task<string> ConsultarTicketsPorUrgencia(int urgencia)
         {
-            var response = await httpClientConnection.ObtenerTicketsPorUrgencia(urgencia);
+            var response = await _ticketService.ObtenerTicketsPorUrgencia(urgencia);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<string> ConsultarTicketsPorEstatus(int ticketEstatusId)
+        {
+            var response = await _ticketService.ObtenerTicketsPorEstatus(ticketEstatusId);
             return JsonConvert.SerializeObject(response);
         }
 
         [HttpGet]
         public async Task<string> ObtenerSubcategoriasPorCategoria(long categoriaId)
         {
-            var response = await httpClientConnection.ObtenerCategoriasPorPadre(categoriaId);
+            var response = await _categoriaService.ObtenerCategoriasPorPadre(categoriaId);
             return JsonConvert.SerializeObject(response);
         }
+
+        [HttpGet]
+        public async Task<string> ConsultarFoliador()
+        {
+            var response = await _foliadorService.ConsultarFolioSiguiente();
+            return JsonConvert.SerializeObject(response);
+        }
+
         [HttpGet]
         public async Task<string> ObtenerCategoriasPorArea(long areaId)
         {
-            var response = await httpClientConnection.ObtenerCategoriasPorArea(areaId);
+            var response = await _categoriaService.ObtenerCategoriasPorArea(areaId);
             return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Editar")]
+        public async Task<string> TomarTicket(long ticketId, string comentario)
+        {
+            var response = await _ticketService.TomarTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Editar")]
+        public async Task<string> ResolverTicket(long ticketId, string comentario)
+        {
+            var response = await _ticketService.ResolverTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> CerrarTicket(long ticketId, string comentario)
+        {
+            var response = await _ticketService.CerrarTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> RechazarTicket(long ticketId, string comentario)
+        {
+            var response = await _ticketService.RechazarTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Editar")]
+        public async Task<string> RetomarTicket(long ticketId)
+        {
+            var response = await _ticketService.RetomarTicket(ticketId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Editar")]
+        public async Task<string> ReasignarTicket(long ticketId, long nuevoUsuarioId, string comentario)
+        {
+            var response = await _ticketService.ReasignarTicket(ticketId, nuevoUsuarioId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        public async Task<string> ObtenerUsuariosArea(long areaId)
+        {
+            var response = await _ticketService.ObtenerUsuariosArea(areaId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        public async Task<string> ObtenerTicketAsignaciones(long ticketId)
+        {
+            var response = await _ticketService.ObtenerTicketAsignaciones(ticketId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> SubirEvidencia(long ticketId)
+        {
+            var response = await _evidenciaService.GuardarEvidencias(ticketId, Request.Files);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        [Permiso("Tickets", "Leer")]
+        public async Task<string> ObtenerEvidenciasPorTicket(long ticketId)
+        {
+            var response = await _evidenciaService.ObtenerEvidenciasPorTicket(ticketId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpGet]
+        [Permiso("Tickets", "Leer")]
+        public async Task<ActionResult> DescargarEvidencia(long id)
+        {
+            var dto = await _evidenciaService.ObtenerEvidenciaDescarga(id);
+
+            if (dto == null || dto.Contenido == null || dto.Contenido.Length == 0)
+                return HttpNotFound("Evidencia no encontrada.");
+
+            return File(dto.Contenido, dto.ContentType ?? "application/octet-stream", dto.NombreArchivo);
+        }
+
+        private async Task<EvidenciaConfigDTO> ObtenerEvidenciaConfig()
+        {
+            try
+            {
+                var response = await _evidenciaService.ObtenerConfiguracion();
+                if (response != null && response.IsSuccess && response.Response != null)
+                    return response.Response;
+            }
+            catch
+            {
+                // Si no se puede obtener la configuración (WebApi caída, etc.), usar defaults.
+            }
+
+            return new EvidenciaConfigDTO
+            {
+                MaxArchivos = 3,
+                MaxTamanoMB = 3,
+                ExtensionesPermitidas = new List<string> { "pdf", "jpg", "png" }
+            };
         }
     }
 }

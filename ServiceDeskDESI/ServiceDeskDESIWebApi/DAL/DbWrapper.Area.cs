@@ -1,44 +1,37 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using Serilog;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerAreas(long empresaId)
+        public ModelResponse<List<Area>> ObtenerAreas(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Area>>();
 
             try
             {
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
                 var areas = GetObjects("ObtenerAreas", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@EmpresaId", empresaId) },
+                    new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, Area>((reader) =>
                     {
                         var area = LlenarEntidad<Area>(reader);
-
                         return area;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = areas;
+                modelResponse.Response = areas.ToList();
                 modelResponse.Message = "Áreas obtenidas correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener áreas para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener las áreas";
             }
@@ -46,19 +39,16 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerAreaPorId(long id, long empresaId)
+        public ModelResponse<Area> ObtenerAreaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Area>();
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
                 var area = GetObject("ObtenerAreaPorId", CommandType.StoredProcedure,
                     new[] {
-                new SqlParameter("@Id", id),
-                new SqlParameter("@EmpresaId", empresaId)
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
                     },
                     new Func<IDataReader, Area>((reader) =>
                     {
@@ -77,13 +67,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = area;
                 modelResponse.Message = "Área obtenida correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener área {Id} para usuario {Usuario}", id, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener el área";
             }
@@ -91,32 +77,25 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarArea(Area a, long empresaId)
+        public ModelResponse<Area> GuardarOActualizarArea(Area a)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Area>();
 
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(a.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
-                if (a.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (a.Descripcion != null && a.Descripcion.Length > 500) { throw new ArgumentException("La descripción no puede exceder los 500 caracteres."); }
-                if (a.Correo != null && a.Correo.Length > 100) { throw new ArgumentException("El correo no puede exceder los 100 caracteres."); }
-                if (string.IsNullOrWhiteSpace(a.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
                 var parametrosObj = new
                 {
                     a.Id,
                     a.Nombre,
                     a.Descripcion,
                     a.Correo,
+                    a.UsuarioResponsableId,
                     a.CreadoPor,
                     a.FechaCreacion,
                     a.ModificadoPor,
                     a.FechaModificacion,
                     a.Estatus,
-                    EmpresaId = empresaId
+                    Usuario = a.CreadoPor
                 };
 
                 var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
@@ -135,13 +114,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = a;
                 modelResponse.Message = "Área guardada correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al guardar área");
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar el área";
             }
@@ -149,22 +124,18 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse EliminarArea(long id, string modificadoPor, DateTime fechaModificacion, long empresaId)
+        public ModelResponse EliminarArea(long id, string modificadoPor, DateTime fechaModificacion, string usuario)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
                 var result = ExecuteScalar("EliminarArea", CommandType.StoredProcedure, new SqlParameter[]
                 {
-            new SqlParameter("@Id", id),
-            new SqlParameter("@ModificadoPor", modificadoPor),
-            new SqlParameter("@FechaModificacion", fechaModificacion),
-            new SqlParameter("@EmpresaId", empresaId)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion),
+                    new SqlParameter("@Usuario", usuario)
                 });
 
                 if (Convert.ToInt64(result) == 0)
@@ -177,15 +148,45 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Área eliminada correctamente";
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
+                Log.Error(ex, "Error al eliminar área {Id} para usuario {Usuario}", id, usuario);
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
+                modelResponse.Message = "Ocurrió un error al eliminar el área";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse<Area> GuardarNuevaAreaParaEmpresa(Area area, long empresaId)
+        {
+            var modelResponse = new ModelResponse<Area>();
+
+            try
+            {
+                var parametrosObj = new
+                {
+                    area.Nombre,
+                    area.Descripcion,
+                    area.Correo,
+                    area.CreadoPor,
+                    area.FechaCreacion,
+                    EmpresaId = empresaId
+                };
+
+                var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
+                var areaId = ExecuteScalar("GuardarNuevaAreaParaEmpresa", CommandType.StoredProcedure, parametros);
+                area.Id = Convert.ToInt64(areaId);
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = area;
+                modelResponse.Message = "Área creada exitosamente para la nueva empresa.";
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al crear área para nueva empresa");
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al eliminar el área";
+                modelResponse.Message = "Ocurrió un error al crear el área para la empresa.";
             }
 
             return modelResponse;

@@ -1,7 +1,8 @@
-﻿﻿@model ServiceDeskDESIEntities.Catalogos.Activo
+﻿@model ServiceDeskDESIEntities.Catalogos.Activo
 @{
     ViewBag.Title = "Active";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
 }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
@@ -28,7 +29,9 @@
             </button>
         </div>
     }
+
     <h3 class="section-title"><i class="fas fa-laptop me-2"></i>Catálogo de Activos</h3>
+
     <form enctype="multipart/form-data" id="frmActivo" name="frmActivo" method="post">
         @Html.HiddenFor(x => x.Id)
         @Html.HiddenFor(x => x.CreadoPor)
@@ -71,7 +74,7 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Tipo de Activo</label>
-                    @Html.DropDownListFor(x => x.TipoActivo.Id, (IEnumerable<SelectListItem>)ViewBag.TipoActivoss, "Seleccione un tipo", new { @class = "form-control", id = "ddlTipoActivo" })
+                    @Html.DropDownListFor(x => x.TipoActivoId, (IEnumerable<SelectListItem>)ViewBag.TipoActivoss, "Seleccione un tipo", new { @class = "form-control", id = "ddlTipoActivo" })
                 </div>
             </div>
             <div class="col-md-4">
@@ -87,7 +90,7 @@
                             }
                         }
                     </select>
-                    @Html.HiddenFor(x => x.Marca.Id)
+                    @Html.HiddenFor(x => x.MarcaId)
                 </div>
             </div>
             <div class="col-md-4">
@@ -96,7 +99,7 @@
                     <select id="ddlModelo" class="form-control">
                         <option value="">Seleccione un modelo</option>
                     </select>
-                    @Html.HiddenFor(x => x.Modelo.Id)
+                    @Html.HiddenFor(x => x.ModeloId)
                 </div>
             </div>
         </div>
@@ -104,14 +107,17 @@
         <div class="col-md-4">
             <div class="mb-3">
                 <label>Fecha de Compra</label>
-                @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", type = "date", @Value = Model.Id == 0 ? "" : Model.FechaCompra.ToString("yyyy-MM-dd") })
+                @Html.TextBoxFor(x => x.FechaCompra, new { @class = "form-control", type = "date", @Value = Model.Id == 0 ? "" : (Model.FechaCompra?.ToString("yyyy-MM-dd") ?? "") })
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarActivo()" />
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarActivo()" />
+                    }
                     <a href="/Catalogs/Active" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -130,6 +136,7 @@
                                 <th>Marca</th>
                                 <th>Modelo</th>
                                 <th>Tipo</th>
+                                <th>Asignado a</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -143,10 +150,13 @@
 </div>
 
 <script>
+    // Pasar permisos a JavaScript para controlar los botones en el DataTable
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+
     var tablaActivo;
-    var tipoActivoSelect = @(Model.TipoActivo?.Id ?? 0);
-    var marcaSelect = @(Model.Marca?.Id ?? 0);
-    var modeloSelect = @(Model.Modelo?.Id ?? 0);
+    var tipoActivoSelect = @(Model.TipoActivoId ?? 0);
+    var marcaSelect = @(Model.MarcaId ?? 0);
+    var modeloSelect = @(Model.ModeloId ?? 0);
     var activoId = @Model.Id;
 
     $(document).ready(function () {
@@ -159,7 +169,7 @@
 
             // Limpiar el DDL de modelos
             $("#ddlModelo").empty().append('<option value="">Seleccione un modelo</option>');
-            $("#Modelo_Id").val('');
+            $("#ModeloId").val('');
 
             // Remover estilo de error del DDL de modelo
             $("#ddlModelo").removeClass("is-invalid-dropdown");
@@ -184,7 +194,7 @@
                             // Seleccionar el modelo si estamos en modo edición
                             if (modeloSelect > 0) {
                                 $("#ddlModelo").val(modeloSelect);
-                                $("#Modelo_Id").val(modeloSelect);
+                                $("#ModeloId").val(modeloSelect);
                             }
                         } else {
                             $("#ddlModelo").append('<option value="">No hay modelos disponibles</option>');
@@ -271,15 +281,26 @@
                 { data: 'Nombre', title: 'Nombre' },
                 { data: 'Descripcion', title: 'Descripción' },
                 { data: 'Serial', title: 'Serial', defaultContent: '---' },
-                { data: 'Marca.Nombre', title: 'Marca', defaultContent: '---' },
-                { data: 'Modelo.Nombre', title: 'Modelo', defaultContent: '---' },
-                { data: 'TipoActivo.Nombre', title: 'Tipo', defaultContent: '---' },
+                { data: 'MarcaNombre', title: 'Marca', defaultContent: '---' },
+                { data: 'ModeloNombre', title: 'Modelo', defaultContent: '---' },
+                { data: 'TipoActivoNombre', title: 'Tipo', defaultContent: '---' },
+                { data: 'PersonaNombre', title: 'Asignado a', defaultContent: '---', render: function (data, type, row) { return row.PersonaNombre ? row.PersonaNombre + ' ' + (row.PersonaApellido || '') : '---'; } },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarActivo(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarActivo(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
+                        var html = '<div class="d-flex gap-3">';
+
+                        // Botón Editar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarActivo(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+
+                        // Botón Eliminar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarActivo(' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+
+                        html += '</div>';
+                        return html;
                     }
                 }
             ],
@@ -365,9 +386,9 @@
                 Serial: $("#Serial").val(),
                 Notas: $("#Notas").val(),
                 FechaCompra: $("#FechaCompra").val(),
-                TipoActivo: { Id: parseInt($("#ddlTipoActivo").val()) },
-                Marca: { Id: parseInt($("#ddlMarca").val()) },
-                Modelo: { Id: parseInt($("#ddlModelo").val()) },
+                TipoActivoId: parseInt($("#ddlTipoActivo").val()),
+                MarcaId: parseInt($("#ddlMarca").val()),
+                ModeloId: parseInt($("#ddlModelo").val()),
                 CreadoPor: $("#CreadoPor").val(),
                 FechaCreacion: $("#FechaCreacion").val(),
                 ModificadoPor: $("#ModificadoPor").val() || null,

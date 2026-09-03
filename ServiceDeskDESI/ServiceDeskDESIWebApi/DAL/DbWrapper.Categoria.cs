@@ -1,59 +1,37 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using Serilog;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerCategoriasPorArea(long areaId)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategorias(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<CategoriaDTO>>();
 
             try
             {
-                if (areaId <= 0) { throw new ArgumentException("El ID del área es requerido."); }
-
-                var categorias = GetObjects("ObtenerCategoriasPorArea", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@AreaId", areaId) },
-                    new Func<IDataReader, Categoria>((reader) =>
+                var categorias = GetObjects("ObtenerCategorias", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Usuario", usuario) },
+                    new Func<IDataReader, CategoriaDTO>((reader) =>
                     {
-                        var categoria = LlenarEntidad<Categoria>(reader);
-
-                        categoria.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        if (reader["CategoriaPadreId"] != DBNull.Value)
-                        {
-                            categoria.CategoriaPadre = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"]),
-                                Nombre = MapearPorpiedades<string>(reader["CategoriaPadreNombre"])
-                            };
-                        }
-
+                        var categoria = LlenarEntidad<CategoriaDTO>(reader);
                         return categoria;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = categorias;
+                modelResponse.Response = categorias.ToList();
                 modelResponse.Message = "Categorías obtenidas correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener categorías para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener las categorías";
             }
@@ -61,33 +39,51 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerCategoriaPorId(long id)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategoriasPorArea(long areaId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<CategoriaDTO>>();
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID de la categoría es requerido."); }
-
-                var categoria = GetObject("ObtenerCategoriaPorId", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) },
-                    new Func<IDataReader, Categoria>((reader) =>
+                var categorias = GetObjects("ObtenerCategoriasPorArea", CommandType.StoredProcedure,
+                    new[] {
+                        new SqlParameter("@AreaId", areaId),
+                        new SqlParameter("@Usuario", usuario)
+                    },
+                    new Func<IDataReader, CategoriaDTO>((reader) =>
                     {
-                        var c = LlenarEntidad<Categoria>(reader);
+                        var categoria = LlenarEntidad<CategoriaDTO>(reader);
+                        return categoria;
+                    }));
 
-                        c.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"])
-                        };
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = categorias.ToList();
+                modelResponse.Message = "Categorías por área obtenidas correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener categorías por área {AreaId} para usuario {Usuario}", areaId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener las categorías por área";
+            }
 
-                        if (reader["CategoriaPadreId"] != DBNull.Value)
-                        {
-                            c.CategoriaPadre = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"])
-                            };
-                        }
+            return modelResponse;
+        }
 
+        public ModelResponse<CategoriaDTO> ObtenerCategoriaPorId(long id, string usuario)
+        {
+            var modelResponse = new ModelResponse<CategoriaDTO>();
+
+            try
+            {
+                var categoria = GetObject("ObtenerCategoriaPorId", CommandType.StoredProcedure,
+                    new[] {
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
+                    },
+                    new Func<IDataReader, CategoriaDTO>((reader) =>
+                    {
+                        var c = LlenarEntidad<CategoriaDTO>(reader);
                         return c;
                     }));
 
@@ -102,13 +98,9 @@ namespace ServiceDeskDESIWebApi.DAL
                 modelResponse.Response = categoria;
                 modelResponse.Message = "Categoría obtenida correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener categoría {Id} para usuario {Usuario}", id, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener la categoría";
             }
@@ -116,39 +108,30 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse ObtenerCategoriasPorPadre(long categoriaPadreId)
+        public ModelResponse<List<CategoriaDTO>> ObtenerCategoriasPorPadre(long categoriaPadreId, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<CategoriaDTO>>();
 
             try
             {
-                if (categoriaPadreId <= 0) { throw new ArgumentException("El ID de la categoría padre es requerido."); }
-
                 var categorias = GetObjects("ObtenerCategoriasPorPadre", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@CategoriaPadreId", categoriaPadreId) },
-                    new Func<IDataReader, Categoria>((reader) =>
+                    new[] {
+                        new SqlParameter("@CategoriaPadreId", categoriaPadreId),
+                        new SqlParameter("@Usuario", usuario)
+                    },
+                    new Func<IDataReader, CategoriaDTO>((reader) =>
                     {
-                        var c = LlenarEntidad<Categoria>(reader);
-
-                        c.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"])
-                        };
-
+                        var c = LlenarEntidad<CategoriaDTO>(reader);
                         return c;
                     }));
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = categorias;
+                modelResponse.Response = categorias.ToList();
                 modelResponse.Message = "Subcategorías obtenidas correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener subcategorías para categoría padre {CategoriaPadreId} para usuario {Usuario}", categoriaPadreId, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al obtener las subcategorías";
             }
@@ -156,50 +139,47 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarCategoria(Categoria c)
+        public ModelResponse<Categoria> GuardarOActualizarCategoria(Categoria c, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Categoria>();
 
             try
             {
-                // Validaciones
-                if (string.IsNullOrWhiteSpace(c.Nombre)) { throw new ArgumentException("El nombre de la categoría es requerido."); }
-                if (c.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (c.Area == null || c.Area.Id <= 0) { throw new ArgumentException("El área es requerida."); }
-                if (c.CategoriaPadre != null && c.CategoriaPadre.Id == c.Id) { throw new ArgumentException("La categoría no puede ser padre de sí misma."); }
-                if (string.IsNullOrWhiteSpace(c.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-
-                // Construir objeto con IDs
-                var categoriaParaSP = new
+                var parametrosObj = new
                 {
                     c.Id,
                     c.Nombre,
                     c.Descripcion,
-                    CategoriaPadreId = c.CategoriaPadre?.Id,
-                    AreaId = c.Area.Id,
+                    c.CategoriaPadreId,
+                    c.AreaId,
                     c.Orden,
                     c.CreadoPor,
                     c.FechaCreacion,
                     c.ModificadoPor,
                     c.FechaModificacion,
-                    c.Estatus
+                    c.Estatus,
+                    Usuario = usuario
                 };
 
-                var parametros = ObtenerParametrosSQL(categoriaParaSP).ToArray();
+                var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
                 var categoriaId = ExecuteScalar("GuardarOActualizarCategoria", CommandType.StoredProcedure, parametros);
+
+                if (Convert.ToInt64(categoriaId) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para realizar esta operación.";
+                    return modelResponse;
+                }
+
                 c.Id = Convert.ToInt64(categoriaId);
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = c;
                 modelResponse.Message = "Categoría guardada correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al guardar categoría para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al guardar la categoría";
             }
@@ -207,89 +187,35 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
-        public ModelResponse EliminarCategoria(long id, string modificadoPor, DateTime fechaModificacion)
+        public ModelResponse EliminarCategoria(long id, string modificadoPor, DateTime fechaModificacion, string usuario)
         {
             var modelResponse = new ModelResponse();
 
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID de la categoría es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-
-                // Verificar si tiene subcategorías
-                var subcategorias = ObtenerCategoriasPorPadre(id);
-                if (subcategorias.IsSuccess && subcategorias.Response != null)
+                var result = ExecuteScalar("EliminarCategoria", CommandType.StoredProcedure, new SqlParameter[]
                 {
-                    var lista = subcategorias.Response as IEnumerable<Categoria>;
-                    if (lista != null && lista.Any())
-                    {
-                        modelResponse.IsSuccess = false;
-                        modelResponse.Message = "No se puede eliminar la categoría porque tiene subcategorías asociadas.";
-                        return modelResponse;
-                    }
-                }
-
-                ExecuteNonQuery("EliminarCategoria", CommandType.StoredProcedure, new SqlParameter[]
-                {
-            new SqlParameter("@Id", id),
-            new SqlParameter("@ModificadoPor", modificadoPor),
-            new SqlParameter("@FechaModificacion", fechaModificacion)
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion),
+                    new SqlParameter("@Usuario", usuario)
                 });
+
+                if (Convert.ToInt64(result) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No tiene permisos para eliminar esta categoría.";
+                    return modelResponse;
+                }
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Message = "Categoría eliminada correctamente";
             }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al eliminar categoría {Id} para usuario {Usuario}", id, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al eliminar la categoría";
-            }
-
-            return modelResponse;
-        }
-
-        public ModelResponse ObtenerCategorias()
-        {
-            var modelResponse = new ModelResponse();
-
-            try
-            {
-                var categorias = GetObjects("ObtenerCategorias", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
-                    new Func<IDataReader, Categoria>((reader) =>
-                    {
-                        var categoria = LlenarEntidad<Categoria>(reader);
-
-                        categoria.Area = new Area()
-                        {
-                            Id = MapearPorpiedades<long>(reader["AreaId"]),
-                            Nombre = MapearPorpiedades<string>(reader["AreaNombre"])
-                        };
-
-                        if (reader["CategoriaPadreId"] != DBNull.Value)
-                        {
-                            categoria.CategoriaPadre = new Categoria()
-                            {
-                                Id = MapearPorpiedades<long>(reader["CategoriaPadreId"]),
-                                Nombre = MapearPorpiedades<string>(reader["CategoriaPadreNombre"])
-                            };
-                        }
-
-                        return categoria;
-                    }));
-
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = categorias;
-                modelResponse.Message = "Categorías obtenidas correctamente";
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener las categorías";
             }
 
             return modelResponse;

@@ -12,71 +12,34 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodasLasEmpresas()
+        public async Task<ModelResponse<Empresa>> ObtenerEmpresaPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Empresas/List", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }));
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Empresa>($"api/Empresas/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerEmpresasPorId(long id)
+        public async Task<ModelResponse<Empresa>> GuardarOActualizarEmpresa(Empresa empresa)
         {
-            var result = await RequestAsync<object>($"api/Empresas/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Empresa>($"api/Empresas/Guardar", HttpMethod.Post, empresa, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerEmpresasPorRFC(string rfc)
+        public async Task<ModelResponse<Empresa>> GuardarNuevaEmpresa(Empresa empresa)
         {
-            var empresa = new Empresa { RFC = rfc };
-
-            var result = await RequestAsync<object>($"api/Empresas/RFC", HttpMethod.Post, empresa,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Empresa>($"api/Empresas/Registrar", HttpMethod.Post, empresa);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarEmpresa(Empresa empresa)
+        public async Task<ModelResponse<Empresa>> RegistrarEmpresa(Empresa empresa)
         {
-            var result = await RequestAsync<object>($"api/Empresas", HttpMethod.Post, empresa,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Empresa>($"api/Empresas/Registrar", HttpMethod.Post, empresa);
         }
 
-        public async Task<ModelResponse> GuardarNuevaEmpresa(Empresa empresa)
+        public async Task<ModelResponse<Empresa>> GuardarNuevaEmpresaCompleta(Empresa empresa)
         {
-            var result = await RequestAsync<object>($"api/Empresas/Nueva", HttpMethod.Post, empresa,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }));
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Empresa>($"api/Empresas/NuevaCompleta", HttpMethod.Post, empresa);
         }
 
         public async Task<ModelResponse> EliminarEmpresa(Empresa empresa)
         {
-            var result = await RequestAsync<object>($"api/Empresas", HttpMethod.Delete, empresa,
+            var result = await RequestAsync<object>($"api/Empresas/Eliminar", HttpMethod.Delete, empresa,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

@@ -1,0 +1,220 @@
+﻿<div class="modal fade" id="modalDetalleTicket" tabindex="-1" aria-labelledby="modalDetalleTicketLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetalleTicketLabel"><i class="fas fa-eye me-2"></i>Detalle del ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Título:</dt>
+                    <dd class="col-sm-9" id="detTitulo">---</dd>
+
+                    <dt class="col-sm-3">Folio:</dt>
+                    <dd class="col-sm-9" id="detFolio">---</dd>
+
+                    <dt class="col-sm-3">Área:</dt>
+                    <dd class="col-sm-9" id="detArea">---</dd>
+
+                    <dt class="col-sm-3">Categoría:</dt>
+                    <dd class="col-sm-9" id="detCategoria">---</dd>
+
+                    <dt class="col-sm-3">Subcategoría:</dt>
+                    <dd class="col-sm-9" id="detSubcategoria">---</dd>
+
+                    <dt class="col-sm-3">Urgencia:</dt>
+                    <dd class="col-sm-9" id="detUrgencia">---</dd>
+
+                    <dt class="col-sm-3">Estatus:</dt>
+                    <dd class="col-sm-9" id="detEstatus">---</dd>
+
+                    <dt class="col-sm-3">Agente:</dt>
+                    <dd class="col-sm-9" id="detAgente">---</dd>
+
+                    <dt class="col-sm-3">Creado por:</dt>
+                    <dd class="col-sm-9" id="detCreadoPor">---</dd>
+
+                    <dt class="col-sm-3">Fecha creación:</dt>
+                    <dd class="col-sm-9" id="detFechaCreacion">---</dd>
+
+                    <dt class="col-sm-3">Descripción:</dt>
+                    <dd class="col-sm-9" id="detDescripcion">---</dd>
+                </dl>
+
+                <hr />
+
+                <h6><i class="fas fa-history me-2"></i>Historial</h6>
+                <div class="table-responsive">
+                    <table id="tblHistorial" class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Movimiento</th>
+                                <th>Agente</th>
+                                <th>Comentario</th>
+                                <th>Estatus</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr />
+
+                <h6><i class="fas fa-paperclip me-2"></i>Evidencias</h6>
+
+                <div id="listaEvidencias"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSubirEvidencia" tabindex="-1" aria-labelledby="modalSubirEvidenciaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalSubirEvidenciaLabel"><i class="fas fa-upload me-2"></i>Subir evidencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="file" id="inputEvidenciasModal" multiple accept=".pdf,.jpg,.jpeg,.png" class="form-control" />
+                <small class="text-muted">Máximo 3 archivos (PDF, JPG o PNG), 3 MB cada uno.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="SubirEvidenciaDesdeModal()">
+                    <i class="fas fa-upload me-1"></i>Subir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var historialTable;
+
+    // Ajustar columnas del DataTable cuando el modal ya es visible (evita desalineación al inicializarse oculto)
+    $("#modalDetalleTicket").on("shown.bs.modal", function () {
+        if (historialTable) {
+            historialTable.columns.adjust().draw();
+        }
+    });
+
+    function CargarHistorial(ticketId) {
+        GetMVC('/Ticket/ObtenerTicketAsignaciones?ticketId=' + ticketId, function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+            var data = (result.IsSuccess && result.Response) ? result.Response : [];
+
+            if (!historialTable) {
+                historialTable = $('#tblHistorial').DataTable({
+                    data: data,
+                    columns: [
+                        {
+                            data: 'FechaCreacion',
+                            render: function (d) {
+                                return d ? new Date(d).toLocaleString() : '---';
+                            }
+                        },
+                        { data: 'TipoMovimiento', defaultContent: '---' },
+                        {
+                            data: 'AgenteNombre',
+                            render: function (d, type, row) {
+                                return row.AgenteNombre ? row.AgenteNombre + ' ' + (row.AgenteApellido || '') : '---';
+                            }
+                        },
+                        { data: 'Comentario', defaultContent: '---' },
+                        {
+                            data: 'EstatusNombre',
+                            render: function (d, type, row) {
+                                if (row.EstatusColor) {
+                                    return '<span class="badge" style="background-color: ' + row.EstatusColor + '; color: white;">' + row.EstatusNombre + '</span>';
+                                }
+                                return d || '---';
+                            }
+                        }
+                    ],
+                    language: {
+                        url: "/Content/datatables/i18n/es-ES.json"
+                    }
+                });
+            } else {
+                historialTable.clear().rows.add(data).draw();
+            }
+        });
+    }
+
+    $("#inputEvidenciasModal").change(function () {
+        if (!ValidarArchivosEvidencia(this.files)) {
+            $(this).val('');
+        }
+    });
+
+    function CargarEvidencias(ticketId) {
+        GetMVC('/Ticket/ObtenerEvidenciasPorTicket?ticketId=' + ticketId, function (response) {
+            var result = typeof response === 'string' ? JSON.parse(response) : response;
+            var data = (result.IsSuccess && result.Response) ? result.Response : [];
+
+            var html = '';
+
+            if (!data || data.length === 0) {
+                html = '<p class="text-muted mb-0">Sin evidencias.</p>';
+            } else {
+                html = '<ul class="list-group">';
+                data.forEach(function (e) {
+                    var fecha = e.FechaSubida ? new Date(e.FechaSubida).toLocaleString() : '';
+                    html += '<li class="list-group-item d-flex justify-content-between align-items-center">' +
+                        '<span><i class="fas fa-file me-2"></i>' + e.NombreArchivo +
+                        (fecha ? ' <small class="text-muted">(' + fecha + ')</small>' : '') +
+                        '</span>' +
+                        '<a class="btn btn-sm btn-outline-primary" href="/Ticket/DescargarEvidencia?id=' + e.Id + '">' +
+                        '<i class="fas fa-download me-1"></i>Descargar</a>' +
+                        '</li>';
+                });
+                html += '</ul>';
+            }
+
+            $("#listaEvidencias").html(html);
+        });
+    }
+
+    var ticketIdSubirEvidencia = 0;
+
+    function AbrirSubirEvidencia(ticketId) {
+        ticketIdSubirEvidencia = ticketId;
+        var input = document.getElementById('inputEvidenciasModal');
+        if (input) input.value = '';
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSubirEvidencia')).show();
+    }
+
+    function SubirEvidenciaDesdeModal() {
+        var input = document.getElementById('inputEvidenciasModal');
+
+        if (!input || !input.files || input.files.length === 0) {
+            Swal.fire({ title: 'Error', text: 'Debe seleccionar al menos un archivo.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+
+        if (!ticketIdSubirEvidencia || ticketIdSubirEvidencia <= 0) {
+            Swal.fire({ title: 'Error', text: 'No se ha seleccionado un ticket.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+
+        var files = Array.prototype.slice.call(input.files);
+
+        if (!ValidarArchivosEvidencia(files)) {
+            input.value = '';
+            return;
+        }
+
+        SubirEvidencias(ticketIdSubirEvidencia, files, function () {
+            input.value = '';
+            bootstrap.Modal.getInstance(document.getElementById('modalSubirEvidencia')).hide();
+            CargarEvidencias(ticketIdSubirEvidencia);
+            ToastExito('Evidencias subidas correctamente.');
+        });
+    }
+</script>

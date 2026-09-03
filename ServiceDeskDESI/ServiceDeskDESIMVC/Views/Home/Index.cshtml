@@ -2,46 +2,51 @@
 @{
     ViewBag.Title = "Inicio";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var esAgente = ViewBag.EsAgente != null && (bool)ViewBag.EsAgente;
+    var ind = ViewBag.Indicadores as ServiceDeskDESIEntities.Tickets.DashboardIndicadoresDTO;
 }
 
 <h2 class="page-title">Dashboard Service Desk DESI</h2>
 
-<!-- Tarjetas estadísticas -->
-<div class="row">
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card primary">
-            <div class="stat-number">145</div>
-            <div class="stat-title">Tickets Activos</div>
-            <small class="text-success">+12% vs ayer</small>
+@if (esAgente)
+{
+    <!-- Tarjetas estadísticas -->
+    <div class="row">
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card primary">
+                <div class="stat-number">@(ind != null ? ind.ActivosSemana : 0)</div>
+                <div class="stat-title">Tickets Activos (semana)</div>
+                <small class="text-muted">Creados esta semana</small>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card success">
+                <div class="stat-number">@(ind != null ? ind.ResueltosSemana : 0)</div>
+                <div class="stat-title">Resueltos (semana)</div>
+                <small class="text-muted">Resueltos esta semana</small>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card warning">
+                <div class="stat-number">@(ind != null ? ind.Trabajando : 0)</div>
+                <div class="stat-title">Trabajando</div>
+                <small class="text-muted">Asignados a mí</small>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card info">
+                <div class="stat-number">@(ind != null ? ind.CerradosSemana : 0)</div>
+                <div class="stat-title">Cerrados (semana)</div>
+                <small class="text-muted">Cerrados esta semana</small>
+            </div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card success">
-            <div class="stat-number">89</div>
-            <div class="stat-title">Resueltos Hoy</div>
-            <small class="text-success">+5% vs ayer</small>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card warning">
-            <div class="stat-number">23</div>
-            <div class="stat-title">Pendientes</div>
-            <small class="text-danger">-3% vs ayer</small>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card info">
-            <div class="stat-number">12</div>
-            <div class="stat-title">Agentes</div>
-            <small>Disponibles: 8</small>
-        </div>
-    </div>
-</div>
+}
 
 <!-- ========================================= -->
 <!-- SECCIÓN DE FORMULARIOS DE CAPTURA -->
 <!-- ========================================= -->
-<div class="form-section">
+<!--<div class="form-section">
     <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Registro de Nuevo Ticket</h3>
 
     <div class="row">
@@ -120,12 +125,12 @@
             <button type="reset" class="btn btn-secondary"><i class="fas fa-times me-2"></i>Cancelar</button>
         </div>
     </div>
-</div>
+</div>-->
 
 <!-- ========================================= -->
 <!-- EJEMPLOS DE BOTONES -->
 <!-- ========================================= -->
-<div class="form-section">
+<!--<div class="form-section">
     <h3 class="section-title"><i class="fas fa-palette me-2"></i>Ejemplos de Botones</h3>
 
     <div class="row mb-4">
@@ -160,12 +165,12 @@
             <button class="btn btn-outline-warning">Outline Warning</button>
         </div>
     </div>
-</div>
+</div>-->
 
 <!-- ========================================= -->
 <!-- SECCIÓN DE VIDEOS -->
 <!-- ========================================= -->
-<div class="video-section">
+<!--<div class="video-section">
     <h3 class="section-title"><i class="fas fa-video me-2"></i>Videos Tutoriales</h3>
 
     <div class="row">
@@ -200,7 +205,7 @@
             </div>
         </div>
     </div>
-</div>
+</div>-->
 
 <!-- ========================================= -->
 <!-- SECCIÓN DE GRÁFICAS -->
@@ -231,7 +236,7 @@
 </div>-->
 
 <!-- Tickets recientes -->
-<div class="form-section">
+<!--<div class="form-section">
     <h3 class="section-title"><i class="fas fa-clock me-2"></i>Tickets Recientes</h3>
 
     <div class="ticket-card high">
@@ -253,4 +258,4 @@
         <div class="ticket-title">#1237 - Falla en red principal</div>
         <div class="ticket-meta">Creado: 09/03/2026 | Prioridad: Alta | Asignado: Ana Martínez</div>
     </div>
-</div>
+</div>-->

@@ -49,114 +49,116 @@
     <!-- ========================================= -->
     <script>
         $(document).ready(function () {
-            console.log("jQuery cargado correctamente - versión: " + $.fn.jquery);
+            $("#sidebar").empty().load("/Home/MenusUser", function () {
+                //console.log("jQuery cargado correctamente - versión: " + $.fn.jquery);
 
-            // =========================================
-            // FUNCIONALIDAD DEL SIDEBAR (COLLAPSE)
-            // =========================================
-            $('#sidebarCollapse').on('click', function () {
-                $('#sidebar').toggleClass('active');
-                $('#content').toggleClass('active');
-                console.log('Sidebar toggled');
-            });
+                // =========================================
+                // FUNCIONALIDAD DEL SIDEBAR (COLLAPSE)
+                // =========================================
+                $('#sidebarCollapse').on('click', function () {
+                    $('#sidebar').toggleClass('active');
+                    $('#content').toggleClass('active');
+                    console.log('Sidebar toggled');
+                });
 
-            // =========================================
-            // MANEJO DE SUBMENÚS DESPLEGABLES
-            // =========================================
-            $('.has-arrow').on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+                // =========================================
+                // MANEJO DE SUBMENÚS DESPLEGABLES
+                // =========================================
+                $('.has-arrow').on('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
 
-                const $parent = $(this).parent();
+                    const $parent = $(this).parent();
 
-                // Cerrar otros submenús abiertos (opcional - comentar si no se desea)
-                $('.components li').not($parent).removeClass('active');
+                    // Cerrar otros submenús abiertos (opcional - comentar si no se desea)
+                    $('.components li').not($parent).removeClass('active');
 
-                // Toggle del submenú actual
-                $parent.toggleClass('active');
+                    // Toggle del submenú actual
+                    $parent.toggleClass('active');
 
-                console.log('Submenú toggled:', $parent.find('.menu-text').text());
-            });
+                    console.log('Submenú toggled:', $parent.find('.menu-text').text());
+                });
 
-            // =========================================
-            // MARCAR ENLACES SIN REDIRECCIÓN COMO DESHABILITADOS
-            // =========================================
-            // Añade la clase `disabled-module` a todos los enlaces en .components con href="#".
-            // Para enlaces que NO son padres (.has-arrow) se evita el click y se añade aria-disabled.
-            $('.components a[href="#"]').each(function () {
-                var $a = $(this);
-                $a.addClass('disabled-module');
-
-                if (!$a.hasClass('has-arrow')) {
-                    // Marcar como realmente no accionable (legend/tooltip accesible)
-                    $a.attr('aria-disabled', 'true');
-                    $a.on('click.disabled', function (ev) {
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                        // opcional: mostrar un tooltip o Swal indicando "Módulo en desarrollo"
-                        // Swal.fire('Módulo en desarrollo', '', 'info');
-                    });
-                }
-            });
-
-            // =========================================
-            // CERRAR SUBMENÚS AL HACER CLIC FUERA
-            // =========================================
-            $(document).on('click', function (e) {
-                if (!$(e.target).closest('.components li').length) {
-                    $('.components li').removeClass('active');
-                }
-            });
-
-            // =========================================
-            // MANEJO DE RESPONSIVE - CERRAR SIDEBAR EN MÓVIL AL SELECCIONAR OPCIÓN
-            // =========================================
-            $('.components a').on('click', function () {
-                if ($(window).width() <= 992) {
-                    if (!$(this).hasClass('has-arrow')) {
-                        $('#sidebar').removeClass('active');
-                        $('#content').removeClass('active');
-                    }
-                }
-            });
-
-            // =========================================
-            // AJUSTE EN CAMBIO DE TAMAÑO DE VENTANA
-            // =========================================
-            $(window).on('resize', function () {
-                if ($(window).width() > 992) {
-                    $('#sidebar, #content').removeClass('active');
-                }
-            });
-
-            // =========================================
-            // MARCAR ENLACES SIN REDIRECCIÓN COMO DESHABILITADOS
-            // =========================================
-            $('.components a[href="#"]').each(function () {
-                var $a = $(this);
-
-                // Si es un padre de submenú (tiene .has-arrow) no lo marcamos como "disabled"
-                if ($a.hasClass('has-arrow')) {
-                    // Asegurar que no tenga la clase por algún motivo previo
-                    $a.removeClass('disabled-module');
-                    $a.removeAttr('aria-disabled');
-                    $a.off('click.disabled');
-                } else {
-                    // Solo marcar enlaces leaf (sin submenú) que usan href="#"
+                // =========================================
+                // MARCAR ENLACES SIN REDIRECCIÓN COMO DESHABILITADOS
+                // =========================================
+                // Añade la clase `disabled-module` a todos los enlaces en .components con href="#".
+                // Para enlaces que NO son padres (.has-arrow) se evita el click y se añade aria-disabled.
+                $('.components a[href="#"]').each(function () {
+                    var $a = $(this);
                     $a.addClass('disabled-module');
-                    $a.attr('aria-disabled', 'true');
-                    $a.on('click.disabled', function (ev) {
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                        // opcional: mostrar aviso: Swal.fire('Módulo en desarrollo', '', 'info');
-                    });
+
+                    if (!$a.hasClass('has-arrow')) {
+                        // Marcar como realmente no accionable (legend/tooltip accesible)
+                        $a.attr('aria-disabled', 'true');
+                        $a.on('click.disabled', function (ev) {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            // opcional: mostrar un tooltip o Swal indicando "Módulo en desarrollo"
+                            // Swal.fire('Módulo en desarrollo', '', 'info');
+                        });
+                    }
+                });
+
+                // =========================================
+                // CERRAR SUBMENÚS AL HACER CLIC FUERA
+                // =========================================
+                $(document).on('click', function (e) {
+                    if (!$(e.target).closest('.components li').length) {
+                        $('.components li').removeClass('active');
+                    }
+                });
+
+                // =========================================
+                // MANEJO DE RESPONSIVE - CERRAR SIDEBAR EN MÓVIL AL SELECCIONAR OPCIÓN
+                // =========================================
+                $('.components a').on('click', function () {
+                    if ($(window).width() <= 992) {
+                        if (!$(this).hasClass('has-arrow')) {
+                            $('#sidebar').removeClass('active');
+                            $('#content').removeClass('active');
+                        }
+                    }
+                });
+
+                // =========================================
+                // AJUSTE EN CAMBIO DE TAMAÑO DE VENTANA
+                // =========================================
+                $(window).on('resize', function () {
+                    if ($(window).width() > 992) {
+                        $('#sidebar, #content').removeClass('active');
+                    }
+                });
+
+                // =========================================
+                // MARCAR ENLACES SIN REDIRECCIÓN COMO DESHABILITADOS
+                // =========================================
+                $('.components a[href="#"]').each(function () {
+                    var $a = $(this);
+
+                    // Si es un padre de submenú (tiene .has-arrow) no lo marcamos como "disabled"
+                    if ($a.hasClass('has-arrow')) {
+                        // Asegurar que no tenga la clase por algún motivo previo
+                        $a.removeClass('disabled-module');
+                        $a.removeAttr('aria-disabled');
+                        $a.off('click.disabled');
+                    } else {
+                        // Solo marcar enlaces leaf (sin submenú) que usan href="#"
+                        $a.addClass('disabled-module');
+                        $a.attr('aria-disabled', 'true');
+                        $a.on('click.disabled', function (ev) {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            // opcional: mostrar aviso: Swal.fire('Módulo en desarrollo', '', 'info');
+                        });
+                    }
+                });
+
+                // Verificar SweetAlert2 disponible
+                if (typeof Swal !== 'undefined') {
+                    console.log('SweetAlert2 disponible');
                 }
             });
-
-            // Verificar SweetAlert2 disponible
-            if (typeof Swal !== 'undefined') {
-                console.log('SweetAlert2 disponible');
-            }
         });
     </script>
 
@@ -171,106 +173,7 @@
         <!-- SIDEBAR - Service Desk DESI -->
         <!-- ========================================= -->
         <nav id="sidebar">
-            <div class="sidebar-header">
-                <i class="fas fa-headset" style="font-size: 3rem; color: white;"></i>
-                <h3>Service Desk DESI</h3>
-                <p>Sistema de Gestión de Tickets</p>
-            </div>
 
-            <ul class="components">
-                <li>
-                    <a href="/Home/Index">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span class="menu-text">Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="has-arrow">
-                        <i class="fas fa-ticket-alt"></i>
-                        <span class="menu-text">Tickets</span>
-                    </a>
-                    <ul>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-list"></i> Ver Tickets</a></li>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-plus"></i> Nuevo Ticket</a></li>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-clock"></i> Pendientes</a></li>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-check-circle"></i> Resueltos</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="/Ticket/Index">
-                        <i class="fas fa-ticket-alt"></i>
-                        <span class="menu-text">Tickets</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="has-arrow">
-                        <i class="fas fa-users"></i>
-                        <span class="menu-text">Usuarios</span>
-                    </a>
-                    <ul>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-user"></i> Agentes</a></li>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-user-tie"></i> Administradores</a></li>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-user-plus"></i> Nuevo Usuario</a></li>
-                    </ul>
-                </li>
-                <!--<li>
-                    <a href="#" class="has-arrow">
-                        <i class="fas fa-folder"></i>
-                        <span class="menu-text">Categorías</span>
-                    </a>
-                    <ul>
-                        <li><a href="#"><i class="fas fa-laptop"></i> Hardware</a></li>
-                        <li><a href="#"><i class="fas fa-code"></i> Software</a></li>
-                        <li><a href="#"><i class="fas fa-network-wired"></i> Redes</a></li>
-                        <li><a href="#"><i class="fas fa-database"></i> Base de Datos</a></li>
-                    </ul>
-                </li>-->
-                <li>
-                    <a href="#" class="has-arrow">
-                        <i class="fas fa-book"></i>
-                        <span class="menu-text">Catálogos</span>
-                    </a>
-                    <ul>
-                        <li><a href="/Catalogs/Active"><i class="fas fa-building"></i> Activos</a></li>
-                        <li><a href="/Catalogs/Model"><i class="fas fa-building"></i> Modelo</a></li>
-                        <li><a href="/Catalogs/Mark"><i class="fas fa-building"></i> Marca</a></li>
-                        <li><a href="/Catalogs/TypeActive"><i class="fas fa-building"></i> Tipo De Activos</a></li>
-                        <li><a href="/Catalogs/Company"><i class="fas fa-building"></i> Compañías</a></li>
-                        <li><a href="/Catalogs/WorkArea"><i class="fas fa-chart-simple"></i> Áreas</a></li>
-                        <li><a href="/Catalogs/Branch"><i class="fas fa-store"></i> Sucursales</a></li>
-                        <li><a href="/Catalogs/Category"><i class="fas fa-folder-tree"></i> Categorías</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#" class="disabled-module">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span class="menu-text">Calendario</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="disabled-module">
-                        <i class="fas fa-video"></i>
-                        <span class="menu-text">Videos Tutoriales</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="disabled-module">
-                        <i class="fas fa-chart-bar"></i>
-                        <span class="menu-text">Reportes</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="has-arrow">
-                        <i class="fas fa-cog"></i>
-                        <span class="menu-text">Configuración</span>
-                    </a>
-                    <ul>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-sliders-h"></i> General</a></li>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-bell"></i> Notificaciones</a></li>
-                        <li><a href="#" class="disabled-module"><i class="fas fa-shield-alt"></i> Seguridad</a></li>
-                    </ul>
-                </li>
-            </ul>
         </nav>
 
         <!-- ========================================= -->
