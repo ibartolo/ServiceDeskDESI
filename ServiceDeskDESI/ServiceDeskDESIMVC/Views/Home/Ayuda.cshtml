@@ -1,0 +1,537 @@
+﻿@{
+    ViewBag.Title = "Ayuda";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ===== Estilos del manual de ayuda (autocontenido) ===== */
+    .ayuda-wrap { max-width: 1140px; margin: 0 auto; padding: 8px 0 40px 0; }
+    .ayuda-hero {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: #fff; border-radius: 14px; padding: 26px 28px; margin-bottom: 18px;
+    }
+    .ayuda-hero h2 { margin: 0 0 6px 0; font-weight: 700; }
+    .ayuda-hero p { margin: 0; opacity: .92; }
+    .ayuda-buscador {
+        background: #fff; border-radius: 12px; padding: 16px 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08); margin-bottom: 18px;
+    }
+    .ayuda-buscador input {
+        width: 100%; border: 1px solid #d1d3e2; border-radius: 8px;
+        padding: 10px 14px; font-size: 1rem;
+    }
+    .ayuda-resultado-msg { margin-top: 8px; font-size: .85rem; color: #6c757d; min-height: 20px; }
+    .ayuda-indice {
+        background: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .ayuda-indice a { text-decoration: none; }
+    .chip {
+        display: inline-block; background: #eaedf7; color: #2e59d9; border-radius: 20px;
+        padding: 5px 12px; margin: 3px 4px 3px 0; font-size: .82rem; cursor: pointer;
+    }
+    .chip:hover { background: #d7def2; }
+    .seccion-card {
+        background: #fff; border: 1px solid #e3e6f0; border-radius: 12px;
+        padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.04);
+    }
+    .seccion-card h3 {
+        color: #224abe; font-size: 1.25rem; font-weight: 700;
+        border-bottom: 2px solid #eaedf7; padding-bottom: 8px; margin-bottom: 12px;
+    }
+    .seccion-card h4 { color: #333; font-size: 1.02rem; font-weight: 700; margin: 14px 0 6px 0; }
+    .seccion-card .subtitulo { color: #4e73df; font-weight: 600; margin: 10px 0 4px 0; }
+    .seccion-card ul, .seccion-card ol { margin-bottom: 8px; }
+    .seccion-card li { margin-bottom: 3px; }
+    .enlace-app {
+        display: inline-block; background: #4e73df; color: #fff !important; text-decoration: none !important;
+        border-radius: 6px; padding: 4px 10px; font-size: .85rem; margin: 2px 4px 2px 0;
+    }
+    .enlace-app:hover { background: #224abe; }
+    .enlace-seccion { color: #2e59d9; text-decoration: underline; }
+    .aviso {
+        background: #fff8e6; border-left: 4px solid #f6c23e; padding: 8px 12px;
+        border-radius: 6px; font-size: .9rem; margin: 8px 0;
+    }
+    .tip {
+        background: #eafaf1; border-left: 4px solid #1cc88a; padding: 8px 12px;
+        border-radius: 6px; font-size: .9rem; margin: 8px 0;
+    }
+    .danger-tip {
+        background: #fdecec; border-left: 4px solid #e74a3b; padding: 8px 12px;
+        border-radius: 6px; font-size: .9rem; margin: 8px 0;
+    }
+    /* Diagrama de flujo simple */
+    .flujo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 6px 0; }
+    .flujo .f-paso {
+        background: #eaedf7; color: #1e2a4a; border: 1px solid #c9d4f5; border-radius: 8px;
+        padding: 8px 12px; font-size: .85rem; font-weight: 600; text-align: center; min-width: 90px;
+    }
+    .flujo .f-paso.estado { background: #4e73df; color: #fff; border-color: #4e73df; }
+    .flujo .f-paso.accion { background: #1cc88a; color: #fff; border-color: #1cc88a; }
+    .flujo .f-paso.decision { background: #f6c23e; color: #1e2a4a; border-color: #f6c23e; }
+    .flujo .f-flecha { font-weight: 700; color: #858796; }
+    .flujo .f-flecha.doble { color: #e74a3b; }
+    .tabla-campos { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .9rem; }
+    .tabla-campos th, .tabla-campos td { border: 1px solid #e3e6f0; padding: 6px 10px; text-align: left; }
+    .tabla-campos th { background: #f8f9fc; }
+    .faq-q { font-weight: 700; margin: 12px 0 4px 0; color: #1e2a4a; }
+    .faq-q::before { content: "Q: "; color: #4e73df; }
+    .faq-a { margin: 0 0 10px 0; }
+    .faq-a::before { content: "R: "; color: #1cc88a; font-weight: 700; }
+    .volver-arriba {
+        position: fixed; right: 18px; bottom: 18px; z-index: 900;
+        background: #4e73df; color: #fff; border-radius: 50%; width: 44px; height: 44px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,.3); cursor: pointer; text-decoration: none;
+    }
+    .volver-arriba:hover { background: #224abe; color: #fff; }
+    body.dark-theme .ayuda-buscador,
+    body.dark-theme .ayuda-indice,
+    body.dark-theme .seccion-card { background: #252b43; border-color: #3a4163; color: #e4e6ef; }
+    body.dark-theme .seccion-card h3 { color: #9db4f0; border-color: #3a4163; }
+    body.dark-theme .seccion-card h4, body.dark-theme .faq-q { color: #e4e6ef; }
+    body.dark-theme .tabla-campos th { background: #303754; color: #e4e6ef; }
+    body.dark-theme .tabla-campos td, body.dark-theme .tabla-campos th { border-color: #3a4163; }
+    body.dark-theme .chip { background: #303754; color: #9db4f0; }
+    body.dark-theme .flujo .f-paso { background: #303754; color: #e4e6ef; border-color: #4a5278; }
+    body.dark-theme .aviso { background: #40371a; border-left-color: #f6c23e; }
+    body.dark-theme .tip { background: #16342a; border-left-color: #1cc88a; }
+    body.dark-theme .danger-tip { background: #3d2020; border-left-color: #e74a3b; }
+    body.dark-theme .ayuda-buscador input { background: #1d2233; color: #e4e6ef; border-color: #3a4163; }
+</style>
+
+<div class="ayuda-wrap">
+    <div class="ayuda-hero">
+        <h2><i class="fas fa-question-circle me-2"></i>Centro de Ayuda</h2>
+        <p>Guía rápida y sencilla para usar Service Desk DESI. Escribe una palabra clave para encontrar el tema que buscas, o navega por las secciones.</p>
+    </div>
+
+    <div class="ayuda-buscador">
+        <input type="text" id="buscadorAyuda" placeholder="Buscar: ticket, activo, tipo de activo, asignar, correo, contraseña, permiso, marca, modelo..." autocomplete="off">
+        <div class="ayuda-resultado-msg" id="resultadoMsg"></div>
+    </div>
+
+    <div class="ayuda-indice">
+        <strong>Índice rápido:</strong><br>
+        <a class="chip" data-ir="#que-es">¿Qué es?</a>
+        <a class="chip" data-ir="#primer-acceso">Primer acceso</a>
+        <a class="chip" data-ir="#tickets">Tickets</a>
+        <a class="chip" data-ir="#activos">Activos</a>
+        <a class="chip" data-ir="#tipo-activo">Tipo de activo</a>
+        <a class="chip" data-ir="#marca">Marca</a>
+        <a class="chip" data-ir="#modelo">Modelo</a>
+        <a class="chip" data-ir="#catalogos">Catálogos</a>
+        <a class="chip" data-ir="#personal-usuarios">Personal y usuarios</a>
+        <a class="chip" data-ir="#roles-permisos">Roles y permisos</a>
+        <a class="chip" data-ir="#empresa-licencia">Empresa y licencia</a>
+        <a class="chip" data-ir="#correos">Correos que recibes</a>
+        <a class="chip" data-ir="#configuracion">Perfil y configuración</a>
+        <a class="chip" data-ir="#preguntas">Preguntas frecuentes</a>
+        <a class="chip" data-ir="#glosario">Glosario</a>
+    </div>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="que-es" data-tags="que es sistema ayuda service desk tickets activos">
+        <h3><i class="fas fa-info-circle me-2"></i>¿Qué es Service Desk DESI?</h3>
+        <p>Es la <strong>mesa de ayuda</strong> de tu empresa: un solo lugar para:</p>
+        <ul>
+            <li><strong>Reportar y dar seguimiento</strong> a solicitudes o problemas (tickets).</li>
+            <li><strong>Registrar y asignar activos</strong> (equipos de cómputo, licencias, mobiliario, etc.) a las personas.</li>
+            <li><strong>Mantener catálogos</strong> ordenados (tipos de activo, marcas, modelos, áreas, categorías...).</li>
+            <li><strong>Controlar accesos</strong>: cada persona entra con su usuario y ve solo lo que su rol le permite.</li>
+        </ul>
+        <p>Todo lo que haces queda <strong>registrado con fecha y responsable</strong>, así siempre hay trazabilidad.</p>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="primer-acceso" data-tags="primera vez entrar login usuario contrasena credenciales bienvenida password">
+        <h3><i class="fas fa-door-open me-2"></i>Primer acceso (cuando te dan de alta)</h3>
+        <div class="flujo">
+            <div class="f-paso accion">1. Te llega un correo de bienvenida</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">2. Revisa tu usuario y contraseña temporal</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">3. Entra en la página de login</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">4. ¡Listo, ya estás dentro!</div>
+        </div>
+        <h4>Qué hacer:</h4>
+        <ol>
+            <li>Busca en tu correo el mensaje de <strong>bienvenida</strong> (revisa también la carpeta de spam).</li>
+            <li>El correo trae tu <strong>usuario</strong> (normalmente tu nombre + apellido, sin espacios) y una <strong>contraseña temporal</strong>.</li>
+            <li>Entra en <a href="/Home/Autentication">la pantalla de acceso</a> y escribe esos datos.</li>
+        </ol>
+        <div class="tip"><strong>Consejo:</strong> si no recibes el correo o ya caducó la contraseña temporal, usa la opción "¿Olvidaste tu contraseña?" de la pantalla de acceso o pídele a tu administrador que te apoye.</div>
+        <div class="danger-tip"><strong>Importante:</strong> tu usuario es personal e intransferible. No lo compartas.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="tickets" data-tags="ticket solicitud reportar problema soporte folio capturar nuevo atender resolver cerrar rechazar estatus ciclo">
+        <h3><i class="fas fa-ticket-alt me-2"></i>Tickets (solicitudes de soporte)</h3>
+        <p>Un <strong>ticket</strong> es una solicitud de ayuda: "no me abre el sistema", "necesito una licencia", "mi equipo no enciende"... Todo empieza capturando un ticket.</p>
+
+        <h4>¿Cómo capturar un ticket nuevo?</h4>
+        <div class="flujo">
+            <div class="f-paso accion">1. Menú Tickets</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">2. Botón "Nuevo Ticket"</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">3. Elige Área → Categoría → Subcategoría</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">4. Indica urgencia, título y descripción</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">5. Guardar: se genera tu folio</div>
+        </div>
+        <p>Entra en <a class="enlace-app" href="/Ticket/Index">Ir a Tickets</a></p>
+        <ul>
+            <li>Selecciona el <strong>área</strong> a la que pertenece tu duda (las listas se van filtrando solas).</li>
+            <li>La <strong>urgencia</strong> va del 1 (baja) al 4 (crítica).</li>
+            <li>Escribe un <strong>título corto</strong> y una <strong>descripción</strong> con el detalle del problema.</li>
+            <li>Al guardar, el sistema asigna un <strong>folio único</strong> (ej. T-00001). Con ese folio identificas tu ticket.</li>
+        </ul>
+        <div class="aviso"><strong>Atención:</strong> una vez creado, el ticket <u>no se puede editar</u>; queda registrado tal cual para mantener un historial confiable.</div>
+
+        <h4>Ciclo de vida de un ticket</h4>
+        <div class="flujo">
+            <div class="f-paso estado">Nuevo</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">En Progreso</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">Resuelto</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">Cerrado</div>
+        </div>
+        <div class="flujo">
+            <div class="f-paso decision">Resuelto pero no conforme</div>
+            <div class="f-flecha doble">&#10132;</div>
+            <div class="f-paso estado">Rechazado → lo retoma el agente</div>
+        </div>
+        <ul>
+            <li><strong>Nuevo:</strong> acabas de crearlo y espera atención.</li>
+            <li><strong>En Progreso:</strong> un agente lo tomó y está trabajando en él.</li>
+            <li><strong>Resuelto:</strong> el agente indica qué hizo, con un comentario.</li>
+            <li><strong>Cerrado:</strong> tú (solicitante) confirmas que quedó resuelto.</li>
+            <li><strong>Rechazado:</strong> si no quedó resuelto, lo devuelves explicando por qué; el agente puede retomarlo.</li>
+        </ul>
+
+        <h4>¿Qué puedes hacer según tu rol?</h4>
+        <table class="tabla-campos">
+            <thead><tr><th>Rol</th><th>Puede hacer</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Solicitante</strong></td><td>Crear tickets, ver los propios, cerrar o rechazar sus tickets resueltos.</td></tr>
+                <tr><td><strong>Agente</strong></td><td>Ver tickets de su área, tomarlos, resolverlos y retomarlos.</td></tr>
+                <tr><td><strong>Responsable de área</strong></td><td>Ver tickets de su área y reasignarlos a otro agente.</td></tr>
+            </tbody>
+        </table>
+        <div class="tip"><strong>Tip:</strong> el historial del ticket (quién, cuándo y qué hizo) lo ves en el detalle, en modo solo lectura.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="activos" data-tags="activo equipo computadora licencia asignar inventario capturar nuevo activo alta serial">
+        <h3><i class="fas fa-laptop me-2"></i>Activos (inventario de equipos y bienes)</h3>
+        <p>Un <strong>activo</strong> es cualquier bien que tu empresa controla: una laptop, un monitor, una licencia de software, un celular, etc. Se registran en el módulo de <strong>Activos</strong> y después pueden <strong>asignarse a una persona</strong>.</p>
+
+        <h4>¿Cómo capturar un activo nuevo?</h4>
+        <div class="flujo">
+            <div class="f-paso accion">1. Menú Activos</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">2. Botón nuevo / alta</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">3. Llena los datos del activo</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">4. Guardar</div>
+        </div>
+        <p>Entra en <a class="enlace-app" href="/Catalogs/Active">Ir a Activos</a></p>
+        <p class="subtitulo">Campos principales y su significado:</p>
+        <table class="tabla-campos">
+            <thead><tr><th>Campo</th><th>Qué es</th></tr></thead>
+            <tbody>
+                <tr><td>Nombre</td><td>Nombre con el que identificas el activo (ej. "Laptop HP Mary").</td></tr>
+                <tr><td><a class="enlace-seccion" href="/Catalogs/TypeActive">Tipo de activo</a></td><td>Clasificación del bien: computadora, monitor, impresora, licencia... <a class="enlace-seccion" href="#tipo-activo">Ver explicación</a>.</td></tr>
+                <tr><td>Serial / Serie</td><td>Número de serie que trae el equipo (si aplica).</td></tr>
+                <tr><td><a class="enlace-seccion" href="/Catalogs/Mark">Marca</a></td><td>Fabricante: HP, Dell, Lenovo, Samsung... <a class="enlace-seccion" href="#marca">Ver explicación</a>.</td></tr>
+                <tr><td><a class="enlace-seccion" href="/Catalogs/Model">Modelo</a></td><td>Referencia exacta del equipo (depende de la marca). <a class="enlace-seccion" href="#modelo">Ver explicación</a>.</td></tr>
+                <tr><td>Fecha de compra</td><td>Cuándo se adquirió (opcional, ayuda al control).</td></tr>
+                <tr><td>Notas</td><td>Observaciones: estado físico, garantía, ubicación, etc.</td></tr>
+            </tbody>
+        </table>
+        <div class="aviso"><strong>Permisos:</strong> para capturar, editar o eliminar activos tu rol necesita el permiso correspondiente (lo configura el administrador en <a class="enlace-seccion" href="/Security/Permisos">Permisos</a>). Si no ves el botón, pídelo a tu administrador.</div>
+
+        <h4>Asignar un activo a una persona</h4>
+        <div class="flujo">
+            <div class="f-paso accion">Administrador asigna el activo</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">Llega correo a la persona</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">La persona se identifica y confirma</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">Aparece en "Mis Activos"</div>
+        </div>
+        <ul>
+            <li>Solo quien recibe el activo puede <strong>confirmar la recepción</strong> con sus propias credenciales; nadie puede aceptar por él.</li>
+            <li>La liga del correo no caduca: la persona puede confirmar cuando quiera.</li>
+            <li>Cada usuario ve sus activos en <a class="enlace-app" href="/Home/MisActivos">Mis Activos</a> (vigentes y pendientes de aceptar).</li>
+            <li>Para devolver un activo, el administrador inicia la <strong>desvinculación</strong> y la persona confirma por correo.</li>
+        </ul>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="tipo-activo" data-tags="tipo activo clasificacion computadora monitor impresora licencia catalogo">
+        <h3><i class="fas fa-tag me-2"></i>Tipo de activo</h3>
+        <p>Es el <strong>catálogo de clasificación</strong> que usan los activos: computadora, monitor, impresora, celular, licencia, mobiliario, etc. Tenerlo ordenado te permite filtrar el inventario fácilmente.</p>
+        <ul>
+            <li><strong>Dónde está:</strong> menú lateral → Activos → Tipo de activo, o directamente <a class="enlace-app" href="/Catalogs/TypeActive">Tipo de activo</a>.</li>
+            <li><strong>Qué datos necesita:</strong> nombre (ej. "Computadora") y, si quieres, una descripción corta.</li>
+            <li><strong>Para qué sirve:</strong> al capturar un activo eliges su tipo de una lista; así todos los equipos iguales quedan agrupados.</li>
+        </ul>
+        <div class="tip"><strong>Tip:</strong> si un tipo no existe, primero créalo aquí y después úsalo en el alta del activo.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="marca" data-tags="marca fabricante hp dell lenovo samsung catalogo">
+        <h3><i class="fas fa-copyright me-2"></i>Marca</h3>
+        <p>Es el <strong>fabricante</strong> del equipo o bien: HP, Dell, Lenovo, Samsung, Epson, etc.</p>
+        <ul>
+            <li><strong>Dónde está:</strong> menú lateral → Activos → Marca, o directamente <a class="enlace-app" href="/Catalogs/Mark">Marca</a>.</li>
+            <li><strong>Qué datos necesita:</strong> nombre de la marca y, si quieres, una descripción.</li>
+            <li><strong>Relación:</strong> los <a class="enlace-seccion" href="#modelo">modelos</a> pertenecen a una marca.</li>
+        </ul>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="modelo" data-tags="modelo referencia equipo dependencia marca catalogo">
+        <h3><i class="fas fa-microchip me-2"></i>Modelo</h3>
+        <p>Es la <strong>referencia exacta</strong> del equipo dentro de su marca. Por ejemplo: marca <em>HP</em>, modelo <em>ProBook 450 G8</em>.</p>
+        <ul>
+            <li><strong>Dónde está:</strong> menú lateral → Activos → Modelo, o directamente <a class="enlace-app" href="/Catalogs/Model">Modelo</a>.</li>
+            <li><strong>Qué datos necesita:</strong> nombre del modelo, la <a class="enlace-seccion" href="#marca">marca</a> a la que pertenece y, si quieres, una descripción.</li>
+            <li><strong>Consejo:</strong> elige primero la marca y el sistema te muestra solo los modelos de esa marca.</li>
+        </ul>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="catalogos" data-tags="catalogo area categoria subcategoria sucursal puesto compania persona responsable areas categorias">
+        <h3><i class="fas fa-list me-2"></i>Otros catálogos importantes</h3>
+        <p>Además de tipo de activo, marca y modelo, el sistema usa estos catálogos (menú lateral según tus permisos):</p>
+        <table class="tabla-campos">
+            <thead><tr><th>Catálogo</th><th>Qué es</th><th>Dónde</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Áreas</strong></td><td>Departamentos de la empresa (TI, RH, Finanzas...). Los tickets se canalizan por área.</td><td><a class="enlace-app" href="/Catalogs/WorkArea">Áreas</a></td></tr>
+                <tr><td><strong>Categorías / Subcategorías</strong></td><td>Tipos de problema o solicitud dentro de un área; ayudan a clasificar el ticket.</td><td><a class="enlace-app" href="/Catalogs/Category">Categorías</a></td></tr>
+                <tr><td><strong>Responsables de categoría</strong></td><td>Qué usuario atiende cada categoría.</td><td><a class="enlace-app" href="/Catalogs/CategoriaResponsable">Categoría - Responsable</a></td></tr>
+                <tr><td><strong>Sucursales</strong></td><td>Ubicaciones o sucursales de la empresa.</td><td><a class="enlace-app" href="/Catalogs/Branch">Sucursales</a></td></tr>
+                <tr><td><strong>Puestos</strong></td><td>Catálogo de puestos del personal.</td><td><a class="enlace-app" href="/Catalogs/Puesto">Puestos</a></td></tr>
+                <tr><td><strong>Compañías</strong></td><td>Empresas o razones sociales relacionadas.</td><td><a class="enlace-app" href="/Catalogs/Company">Compañías</a></td></tr>
+                <tr><td><strong>Personas</strong></td><td>Directorio del personal (se puede vincular con su usuario).</td><td><a class="enlace-app" href="/Catalogs/Persona">Personas</a></td></tr>
+            </tbody>
+        </table>
+        <div class="tip"><strong>Tip:</strong> si un catálogo no aparece en tu menú, es porque tu rol no tiene permiso para verlo.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="personal-usuarios" data-tags="personal personas usuarios alta vincular cuenta acceso empleado">
+        <h3><i class="fas fa-users me-2"></i>Personal y usuarios</h3>
+        <ul>
+            <li><strong>Personas:</strong> el directorio de tu personal (nombre, correo, teléfono, puesto, sucursal).</li>
+            <li><strong>Usuarios:</strong> las cuentas que permiten entrar al sistema. Cada usuario tiene un rol.</li>
+            <li><strong>Vincular:</strong> una persona puede vincularse a su cuenta de usuario (relación 1 a 1). Al vincular, los datos de la persona se sincronizan con la cuenta y quedan protegidos para evitar errores.</li>
+        </ul>
+        <p>Administra usuarios en <a class="enlace-app" href="/User/Users">Usuarios</a> y personas en <a class="enlace-app" href="/Catalogs/Persona">Personas</a>.</p>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="roles-permisos" data-tags="rol permiso administrador agente supervisor usuario seguridad acceso menu">
+        <h3><i class="fas fa-user-shield me-2"></i>Roles y permisos</h3>
+        <ul>
+            <li><strong>Rol:</strong> es el "puesto" dentro del sistema (Administrador, Supervisor, Agente, Usuario...). Define qué puede ver y hacer cada persona.</li>
+            <li><strong>Permiso:</strong> autorización concreta sobre una página y una acción (leer, crear, editar, eliminar).</li>
+        </ul>
+        <p>Administra roles en <a class="enlace-app" href="/Security/Role">Roles</a> y asigna permisos en <a class="enlace-app" href="/Security/Permisos">Permisos</a>.</p>
+        <div class="aviso"><strong>Importante:</strong> si no ves un módulo o un botón, es porque tu rol no tiene ese permiso. Solicítalo a tu administrador; los permisos se validan siempre en el servidor, no basta recargar la página.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="empresa-licencia" data-tags="empresa licencia periodo prueba vigencia vencer renovar multitenant">
+        <h3><i class="fas fa-building me-2"></i>Empresa y licencia</h3>
+        <ul>
+            <li>Cada empresa ve y administra <strong>solo su información</strong>: sus tickets, activos, usuarios y folios.</li>
+            <li>El registro de una empresa nueva valida que sus datos sean únicos (RFC, correo, razón social).</li>
+            <li>Las empresas nuevas entran en <strong>período de prueba</strong> (por ejemplo 30 días). Cuando el período vence, la empresa debe renovar su acceso para seguir operando.</li>
+        </ul>
+        <p>Si eres responsable de área, en <a class="enlace-app" href="/Home/Configuration">Configuración</a> ves el tiempo restante de la licencia.</p>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="correos" data-tags="correo email templates bienvenida nuevo usuario recuperar contrasena asignacion desvinculacion activo estatus notificacion spam">
+        <h3><i class="fas fa-envelope-open-text me-2"></i>Correos que puedes recibir</h3>
+        <p>Todos los correos llegan desde la propia plataforma. Si no los ves, revisa <strong>spam / correo no deseado</strong>.</p>
+        <table class="tabla-campos">
+            <thead><tr><th>Correo</th><th>Cuándo llega</th><th>Qué debes hacer</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Bienvenida (alta de empresa)</strong></td>
+                    <td>Cuando tu empresa se registra.</td>
+                    <td>Guarda tu usuario y contraseña temporal y entra al sistema.</td>
+                </tr>
+                <tr>
+                    <td><strong>Nuevo usuario</strong></td>
+                    <td>Cuando el administrador te da de alta.</td>
+                    <td>Usa tus credenciales para tu primer acceso.</td>
+                </tr>
+                <tr>
+                    <td><strong>Recuperación de contraseña</strong></td>
+                    <td>Cuando pides "¿Olvidaste tu contraseña?".</td>
+                    <td>Abre la liga <strong>pronto</strong> (caduca en pocos minutos) y define tu nueva contraseña.</td>
+                </tr>
+                <tr>
+                    <td><strong>Cambio de estatus de ticket</strong></td>
+                    <td>Cuando un ticket tuyo es tomado, resuelto, etc.</td>
+                    <td>Entra al sistema y revisa el detalle del ticket.</td>
+                </tr>
+                <tr>
+                    <td><strong>Asignación de activo</strong></td>
+                    <td>Cuando te asignan un equipo o bien.</td>
+                    <td>Abre la liga, identifícate con tus credenciales y confirma la recepción.</td>
+                </tr>
+                <tr>
+                    <td><strong>Desvinculación de activo</strong></td>
+                    <td>Cuando te van a retirar un activo.</td>
+                    <td>Abre la liga, identifícate y confirma la devolución.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="configuracion" data-tags="perfil configuracion tema claro oscuro cambiar contrasena avatar foto datos">
+        <h3><i class="fas fa-user-cog me-2"></i>Perfil y configuración</h3>
+        <ul>
+            <li><strong>Mi Perfil</strong> (<a class="enlace-app" href="/User/MyProfile">abrir</a>): revisa tus datos, foto de perfil y actualiza tu información.</li>
+            <li><strong>Configuración</strong> (<a class="enlace-app" href="/Home/Configuration">abrir</a>): cambia el <strong>tema</strong> de la aplicación (claro u oscuro). El cambio se guarda en tu cuenta y la página se recarga sola para aplicarlo.</li>
+        </ul>
+        <div class="tip"><strong>Tip:</strong> el tema que eliges lo ves tú; cada usuario puede tener el suyo.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="preguntas" data-tags="preguntas frecuentes faq no puedo entrar no me llega correo no veo menu no veo boton sesion caduco olvide contrasena">
+        <h3><i class="fas fa-question me-2"></i>Preguntas frecuentes</h3>
+
+        <div class="faq-q">Olvidé mi contraseña, ¿qué hago?</div>
+        <p class="faq-a">En la pantalla de acceso elige "¿Olvidaste tu contraseña?", escribe tu correo y sigue la liga que recibas (vigente por unos minutos). Si no te llega, revisa spam o pide apoyo a tu administrador.</p>
+
+        <div class="faq-q">No me llegan los correos del sistema.</div>
+        <p class="faq-a">Revisa la carpeta de <strong>spam / correo no deseado</strong>. Confirma también que tu administrador tenga bien escrito tu correo en tu usuario.</p>
+
+        <div class="faq-q">No veo un módulo o un botón en el menú.</div>
+        <p class="faq-a">Tu rol no tiene ese permiso. Solicita a tu administrador que lo active en Roles / Permisos.</p>
+
+        <div class="faq-q">Cambié el tema y no se ve el cambio.</div>
+        <p class="faq-a">El sistema recarga la página automáticamente al guardar el tema. Si aún así no cambia, cierra sesión y vuelve a entrar; tu preferencia queda guardada en tu cuenta.</p>
+
+        <div class="faq-q">Se cerró mi sesión y me manda al login.</div>
+        <p class="faq-a">Es normal: la sesión expira después de un tiempo por seguridad. Vuelve a entrar con tu usuario y contraseña.</p>
+
+        <div class="faq-q">¿Puedo editar un ticket que ya capturé?</div>
+        <p class="faq-a">No. Los tickets se guardan tal cual para mantener un historial confiable. Si necesitas corregir algo, captura un ticket nuevo o pide apoyo al agente.</p>
+
+        <div class="faq-q">Recibí un correo para confirmar un activo que no conozco.</div>
+        <p class="faq-a">No confirmes nada que no reconozcas. Avísale a tu administrador para que revise la asignación.</p>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="glosario" data-tags="glosario definiciones ticket folio activo catalogo rol permiso agente solicitante responsable area licencia">
+        <h3><i class="fas fa-book me-2"></i>Glosario rápido</h3>
+        <table class="tabla-campos">
+            <thead><tr><th>Término</th><th>Significado</th></tr></thead>
+            <tbody>
+                <tr><td>Ticket</td><td>Solicitud de soporte o reporte de un problema.</td></tr>
+                <tr><td>Folio</td><td>Número único que identifica a un ticket (ej. T-00001).</td></tr>
+                <tr><td>Activo</td><td>Bien controlado por la empresa (equipo, licencia, mueble...).</td></tr>
+                <tr><td>Catálogo</td><td>Lista maestra que se usa para llenar formularios (marcas, modelos, áreas...).</td></tr>
+                <tr><td>Rol</td><td>Puesto en el sistema que agrupa permisos (Administrador, Agente...).</td></tr>
+                <tr><td>Permiso</td><td>Autorización para ver una sección o ejecutar una acción (crear, editar, eliminar).</td></tr>
+                <tr><td>Solicitante</td><td>Persona que reporta o solicita apoyo.</td></tr>
+                <tr><td>Agente</td><td>Persona que atiende los tickets.</td></tr>
+                <tr><td>Responsable de área</td><td>Persona encargada de un área; ve y reasigna sus tickets.</td></tr>
+                <tr><td>Licencia / Período de prueba</td><td>Vigencia de uso del sistema para la empresa.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <p class="text-center text-muted mt-4">
+        ¿No encuentras lo que buscas? Pide apoyo a tu administrador o escribe a <strong>soporte@desipr.com.mx</strong>.
+    </p>
+</div>
+
+<a class="volver-arriba" href="#" id="btnArriba" title="Volver arriba"><i class="fas fa-arrow-up"></i></a>
+
+<script>
+    $(document).ready(function () {
+        var $cards = $('.seccion-card');
+        var $msg = $('#resultadoMsg');
+
+        function normalizar(texto) {
+            // minúsculas + sin acentos para comparar mejor
+            return texto.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9\s]/g, ' ');
+        }
+
+        function filtrar() {
+            var q = normalizar($('#buscadorAyuda').val());
+            if (!q) {
+                $cards.show();
+                $msg.text('');
+                return;
+            }
+            var palabras = q.split(/\s+/).filter(function (w) { return w.length > 0; });
+            var visibles = 0;
+            $cards.each(function () {
+                var texto = normalizar($(this).attr('data-tags') + ' ' + $(this).text());
+                var ok = palabras.every(function (p) { return texto.indexOf(p) !== -1; });
+                $(this).toggle(ok);
+                if (ok) { visibles++; }
+            });
+
+            if (visibles === 0) {
+                $msg.html('No encontré secciones con "<strong>' + $('#buscadorAyuda').val() +
+                    '</strong>". Prueba con: ticket, activo, tipo de activo, marca, modelo, asignar, correo, contraseña, permiso, rol, catálogo.');
+            } else {
+                $msg.text(visibles + ' sección(es) encontrada(s).');
+            }
+        }
+
+        $('#buscadorAyuda').on('input', filtrar);
+
+        // Índice rápido: desplazarse a la sección elegida
+        $('.chip[data-ir]').on('click', function (e) {
+            e.preventDefault();
+            var destino = $(this).attr('data-ir');
+            $('html, body').animate({ scrollTop: $(destino).offset().top - 90 }, 400);
+            $(destino).css('box-shadow', '0 0 0 3px #4e73df');
+            setTimeout(function () { $(destino).css('box-shadow', ''); }, 2500);
+        });
+
+        // Volver arriba
+        $('#btnArriba').on('click', function (e) {
+            e.preventDefault();
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        });
+
+        // Soporte: enlaces internos tipo #seccion que puedan venir de otra vista
+        if (window.location.hash) {
+            try {
+                var $dest = $(window.location.hash);
+                if ($dest.length) {
+                    setTimeout(function () {
+                        $('html, body').animate({ scrollTop: $dest.offset().top - 90 }, 400);
+                        $dest.css('box-shadow', '0 0 0 3px #4e73df');
+                        setTimeout(function () { $dest.css('box-shadow', ''); }, 2500);
+                    }, 300);
+                }
+            } catch (err) { }
+        }
+    });
+</script>
