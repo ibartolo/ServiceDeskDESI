@@ -196,8 +196,26 @@ namespace ServiceDeskDESIMVC.Controllers
         }
 
         /// <summary>
+        /// Manual de usuario / Ayuda. Requiere sesión (el filtro global AuthenticationFilter
+        /// redirige a Home/Autentication si no hay sesión; aquí se refuerza igual que MyProfile).
+        /// </summary>
+        public ActionResult Ayuda()
+        {
+            var tokenCookie = SessionHelper.GetSessionUser();
+            if (tokenCookie == null || tokenCookie.UserID == 0)
+            {
+                return RedirectToAction("Autentication", "Home");
+            }
+
+            return View();
+        }
+
+        /// <summary>
         /// Guarda la preferencia de tema (light/dark) en una cookie propia del usuario
         /// (no es la cookie de sesión). Expira en 1 año y se renueva cada vez que cambia el tema.
+        /// Antes de guardar elimina cualquier cookie de tema previa del usuario para evitar
+        /// que quede una versión vieja en el navegador (causaba que el cambio solo se viera
+        /// hasta borrar cookies manualmente).
         /// </summary>
         [HttpPost]
         public ActionResult GuardarTema(string tema)
@@ -211,6 +229,21 @@ namespace ServiceDeskDESIMVC.Controllers
             var cookieName = tokenCookie != null && tokenCookie.UserID > 0
                 ? $"TemaUsuario_{tokenCookie.UserID}"
                 : "TemaUsuario";
+
+            // Forzar la expiración de cualquier cookie de tema previa de este usuario
+            // (incluye la genérica "TemaUsuario" por si quedó de una versión anterior).
+            foreach (string nombre in Request.Cookies.AllKeys)
+            {
+                if (nombre == cookieName || nombre == "TemaUsuario")
+                {
+                    var cookieVieja = new HttpCookie(nombre)
+                    {
+                        Expires = DateTime.Now.AddDays(-1),
+                        Path = "/"
+                    };
+                    Response.Cookies.Add(cookieVieja);
+                }
+            }
 
             var cookie = new HttpCookie(cookieName, tema)
             {
