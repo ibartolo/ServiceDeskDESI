@@ -12,51 +12,33 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodosLosTipoActivos(long empresaId)
+        public async Task<ModelResponse<List<TipoActivo>>> ObtenerTodosLosTipoActivos()
         {
-            var result = await RequestAsync($"api/TipoActivo/List/{empresaId}", HttpMethod.Get, null,
+            return await RequestAsync<List<TipoActivo>>($"api/TipoActivo/List", HttpMethod.Get, null, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse<TipoActivo>> ObtenerTipoActivoPorId(long id)
+        {
+            return await RequestAsync<TipoActivo>($"api/TipoActivo/{id}", HttpMethod.Get, null, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse<TipoActivo>> GuardarOActualizarTipoActivo(TipoActivo tipoActivo)
+        {
+            MappingColumSecurity(tipoActivo);
+            return await RequestAsync<TipoActivo>($"api/TipoActivo/Guardar", HttpMethod.Post, tipoActivo, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse> EliminarTipoActivo(TipoActivo tipoActivo)
+        {
+            MappingColumSecurity(tipoActivo);
+            var result = await RequestAsync<object>($"api/TipoActivo/Eliminar", HttpMethod.Delete, tipoActivo,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelresponse;
-        }
 
-        public async Task<ModelResponse> GuardarOActualizarTipoActivo (TipoActivo t,long empresaId)
-        {
-            MappingColumSecurity(t);
-            var result = await RequestAsync<object>($"api/TipoActivo/Guardar/{empresaId}", HttpMethod.Post, t,
-               new Func<string, string>((responseString) =>
-               {
-                   return responseString;
-               }), token.Token.access_token);
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
-        }
-
-        public async Task<ModelResponse> ObtenerTipoActivoPorId(long id, long empresaId)
-        {
-            var result = await RequestAsync<object>($"api/TipoActivo/{id}/{empresaId}", HttpMethod.Get, null,
-            new Func<string, string>((responseString) =>
-            {
-                return responseString;
-            }));
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
-        }
-
-        public async Task<ModelResponse> EliminarTipoActivo (TipoActivo t, long empresaId)
-        {
-            MappingColumSecurity(t);
-            var result = await RequestAsync<object>($"api/TipoActivo/Eliminar/{empresaId}", HttpMethod.Delete, t,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelreponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelreponse;
         }
     }
 }

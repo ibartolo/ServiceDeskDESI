@@ -1,0 +1,51 @@
+﻿@model List<ServiceDeskDESIEntities.Seguridad.Pagina>
+
+<div class="sidebar-header">
+    <i class="fas fa-headset" style="font-size: 3rem; color: white;"></i>
+    <h3>Service Desk DESI</h3>
+    <p>Sistema de Gestión de Tickets</p>
+</div>
+
+<ul class="components">
+    @{
+        var menusPrincipales = Model.Where(p => p.Tipo == "Menu" && p.PermisosPadreId == null).OrderBy(p => p.OrdenB);
+    }
+
+    @foreach (var menu in menusPrincipales)
+    {
+        var subMenus = Model.Where(p => p.Tipo == "SubMenu" && p.PermisosPadreId == menu.Id).OrderBy(p => p.OrdenB);
+
+        if (subMenus.Any())
+        {
+            <li class="">
+                <a href="#" class="has-arrow">
+                    <i class="fas @menu.Logo"></i>
+                    <span class="menu-text">@(menu.NombreVisible ?? menu.Nombre)</span>
+                </a>
+                <ul>
+                    @foreach (var sub in subMenus)
+                    {
+                        <li>
+                            <a href="@sub.Direccion">
+                                @if (!string.IsNullOrEmpty(sub.Logo))
+                                {
+                                    <i class="fas @sub.Logo"></i>
+                                }
+                                <span class="menu-text">@(sub.NombreVisible ?? sub.Nombre)</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+        else
+        {
+            <li>
+                <a href="@menu.Direccion">
+                    <i class="fas @menu.Logo"></i>
+                    <span class="menu-text">@(menu.NombreVisible ?? menu.Nombre)</span>
+                </a>
+            </li>
+        }
+    }
+</ul>

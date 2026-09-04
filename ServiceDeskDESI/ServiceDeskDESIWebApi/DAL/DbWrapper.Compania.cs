@@ -1,62 +1,88 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using Serilog;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
 
 namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerCompania(long empresaId)
+        public ModelResponse<List<Compania>> ObtenerCompanias(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<Compania>>();
+
             try
             {
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
                 var companias = GetObjects("ObtenerCompanias", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@EmpresaId", empresaId) },
+                    new[] { new SqlParameter("@Usuario", usuario) },
                     new Func<IDataReader, Compania>((reader) =>
                     {
                         var compania = LlenarEntidad<Compania>(reader);
                         return compania;
                     }));
-                modelResponse.IsSuccess = true;
-                modelResponse.Response = companias;
-                modelResponse.Message = "Companias obtenidas correctamente";
 
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = companias.ToList();
+                modelResponse.Message = "Compañías obtenidas correctamente";
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al obtener compañías para usuario {Usuario}", usuario);
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener las áreas";
+                modelResponse.Message = "Ocurrió un error al obtener las compañías";
             }
 
             return modelResponse;
         }
 
-        public ModelResponse GuardarOActualizarCompania(Compania c, long empresaId)
+        public ModelResponse<Compania> ObtenerCompaniaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<Compania>();
+
             try
             {
-                // validaciones
-                if (string.IsNullOrWhiteSpace(c.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
-                if (c.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
-                if (c.Acronimo != null && c.Acronimo.Length > 500) { throw new ArgumentException("El Acronimo no puede exceder los 500 caracteres."); }
-                if (c.RFC != null && c.RFC.Length > 100) { throw new ArgumentException("El RFC no puede exceder los 100 caracteres."); }
-                if (c.Direccion != null && c.Direccion.Length > 100) { throw new ArgumentException("La Direccion no puede exceder los 100 caracteres."); }
-                if (string.IsNullOrWhiteSpace(c.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
+                var result = GetObject("ObtenerCompaniaPorId", CommandType.StoredProcedure,
+                    new[] {
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@Usuario", usuario)
+                    },
+                    new Func<IDataReader, Compania>((reader) =>
+                    {
+                        var r = LlenarEntidad<Compania>(reader);
+                        return r;
+                    }));
+
+                if (result == null)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se encontró la compañía especificada.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = result;
+                modelResponse.Message = "Compañía obtenida correctamente";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al obtener compañía {Id} para usuario {Usuario}", id, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al obtener la compañía";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse<Compania> GuardarOActualizarCompania(Compania c, string usuario)
+        {
+            var modelResponse = new ModelResponse<Compania>();
+
+            try
+            {
                 var parametrosObj = new
                 {
                     c.Id,
@@ -69,120 +95,67 @@ namespace ServiceDeskDESIWebApi.DAL
                     c.ModificadoPor,
                     c.FechaModificacion,
                     c.Estatus,
-                    EmpresaId = empresaId
-
+                    Usuario = usuario
                 };
-               var parametros = ObtenerParametrosSQL(c).ToArray();
+
+                var parametros = ObtenerParametrosSQL(parametrosObj).ToArray();
                 var companiaId = ExecuteScalar("GuardarOActualizarCompania", CommandType.StoredProcedure, parametros);
-                if (Convert.ToInt64(companiaId)== 0)
+
+                if (Convert.ToInt64(companiaId) == 0)
                 {
                     modelResponse.IsSuccess = false;
                     modelResponse.Message = "No tiene permisos para realizar esta operación.";
                     return modelResponse;
                 }
+
                 c.Id = Convert.ToInt64(companiaId);
 
                 modelResponse.IsSuccess = true;
                 modelResponse.Response = c;
-                modelResponse.Message = "Compania Guardado correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
+                modelResponse.Message = "Compañía guardada correctamente";
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al guardar compañía");
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al guardar el Compania";
-            }
-            return modelResponse;
-        }
-        public ModelResponse ObtenerCompaniaPorId (long id, long empresaId)
-        {
-            var modelResponse = new ModelResponse();
-           try
-           {
-                if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-                var result = GetObject("ObtenerCompaniaPorId", CommandType.StoredProcedure,
-                      new[] {
-                new SqlParameter("@Id", id),
-                new SqlParameter("@EmpresaId", empresaId)
-                    },
-
-                    new Func<IDataReader, Compania>((reader) =>
-                    {
-                        var r = LlenarEntidad<Compania>(reader);
-                        return r;
-                    }));
-                if (result == null)
-                {
-                    modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se encontró la Compania Especificada.";
-                    return modelResponse;
-                }
-                modelResponse.Response = result;
-                modelResponse.IsSuccess = true;
-                modelResponse.Message = "Compania obtenido correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
-            }
-            catch (Exception ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al obtener Compania";
+                modelResponse.Message = "Ocurrió un error al guardar la compañía";
             }
 
             return modelResponse;
-
         }
-        public ModelResponse EliminarCompania(long id, string modificadoPor, DateTime fechaModificacion, long empresaId)
 
+        public ModelResponse EliminarCompania(long id, string modificadoPor, DateTime fechaModificacion, string usuario)
         {
             var modelResponse = new ModelResponse();
+
             try
             {
-                if (id <= 0) { throw new ArgumentException("El ID de la Compania es requerido."); }
-                if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
-                if (empresaId <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
-
-              var result=ExecuteScalar  ("EliminarCompania", CommandType.StoredProcedure, new SqlParameter[]
-                
-              {
-            new SqlParameter("@Id", id),
-            new SqlParameter("@ModificadoPor", modificadoPor),
-            new SqlParameter("@FechaModificacion", fechaModificacion),
-            new SqlParameter("@EmpresaId", empresaId)
-              });
+                var result = ExecuteScalar("EliminarCompania", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@Id", id),
+                    new SqlParameter("@ModificadoPor", modificadoPor),
+                    new SqlParameter("@FechaModificacion", fechaModificacion),
+                    new SqlParameter("@Usuario", usuario)
+                });
 
                 if (Convert.ToInt64(result) == 0)
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No tiene permisos para eliminar esta Compania.";
+                    modelResponse.Message = "No tiene permisos para eliminar esta compañía.";
                     return modelResponse;
                 }
 
                 modelResponse.IsSuccess = true;
-                modelResponse.Message = "Compania eliminada correctamente";
-            }
-            catch (ArgumentException ex)
-            {
-                modelResponse.IsSuccess = false;
-                modelResponse.Message = ex.Message;
+                modelResponse.Message = "Compañía eliminada correctamente";
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error al eliminar compañía {Id} para usuario {Usuario}", id, usuario);
                 modelResponse.IsSuccess = false;
-                modelResponse.Message = "Ocurrió un error al eliminar la Compània";
+                modelResponse.Message = "Ocurrió un error al eliminar la compañía";
             }
 
             return modelResponse;
         }
-
     }
-
 }

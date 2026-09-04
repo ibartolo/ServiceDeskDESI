@@ -1,0 +1,16 @@
+change: mejoras-rol-activos-permisos
+status: archived
+created: 2026-08-31
+archived: 2026-09-01
+artifact_store: openspec
+execution_mode: interactive
+phases:
+  explore: done
+  propose: done
+  spec: done
+  design: done
+  tasks: done
+  apply: done
+  verify: done
+  archive: done
+verdict: PASS WITH WARNINGS

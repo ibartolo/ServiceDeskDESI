@@ -1,0 +1,14 @@
+change: autorizacion-e2e
+status: in-progress
+created: 2026-08-18
+artifact_store: openspec
+execution_mode: interactive
+phases:
+  explore: done
+  propose: done
+  spec: done
+  design: done
+  tasks: done
+  apply: done
+  verify: pending
+  archive: pending

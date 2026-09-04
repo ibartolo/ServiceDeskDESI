@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -23,12 +24,6 @@ namespace ServiceDeskDESIMVC.Controllers
             httpClientConnection = new HttpClientConnection();
             mr = new ModelResponse();
             tokenCookie = SessionHelper.GetSessionUser();
-
-            if (tokenCookie?.Token?.ExpirationDate <= DateTime.Now)
-            {
-                SessionHelper.CloseSession();
-                Redirect("~/Home/Autenticacion");
-            }
         }
         public List<SelectListItem> MappingPropertiToDropDownList<T>(IEnumerable<T> items, string value, string title, string prefix = "")
         {

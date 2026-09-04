@@ -1,0 +1,121 @@
+﻿@{
+    ViewBag.Title = "Configuración";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Leer el tema actual desde la cookie propia del usuario (no la de sesión)
+    var tokenCookie = ServiceDeskDESIMVC.Helpers.SessionHelper.GetSessionUser();
+    var temaCookieName = tokenCookie != null && tokenCookie.UserID > 0 ? $"TemaUsuario_{tokenCookie.UserID}" : "TemaUsuario";
+    var temaActual = Request.Cookies[temaCookieName]?.Value ?? "light";
+
+    // Datos de vigencia de licencia (solo para jefes de área)
+    var esJefeArea = ViewBag.EsJefeArea != null && (bool)ViewBag.EsJefeArea;
+    var empresaNombre = ViewBag.EmpresaNombre as string;
+    var fechaVigenciaFin = ViewBag.FechaVigenciaFin as DateTime?;
+    var fechaVigenciaInicio = ViewBag.FechaVigenciaInicio as DateTime?;
+    var esPeriodoPrueba = ViewBag.EsPeriodoPrueba != null && (bool)ViewBag.EsPeriodoPrueba;
+    var diasRestantes = ViewBag.DiasRestantes != null ? (int)ViewBag.DiasRestantes : 0;
+}
+
+<div class="row">
+    <div class="col-md-6 col-lg-4">
+        <div class="form-section" style="padding: 20px;">
+            <h3 class="section-title" style="font-size: 1.1rem;"><i class="fas fa-cog me-2"></i>Tema</h3>
+
+            <div class="stat-card primary" style="margin-bottom: 15px; padding: 15px;">
+                <div class="stat-title" style="font-size: 0.8rem;">Tema de la aplicación</div>
+                <div class="d-flex align-items-center gap-3 mt-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="temaApp" id="temaClaro" value="light" @(temaActual != "dark" ? "checked" : "") onchange="CambiarTema('light')">
+                        <label class="form-check-label" for="temaClaro">
+                            <i class="fas fa-sun me-1"></i> Claro
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="temaApp" id="temaOscuro" value="dark" @(temaActual == "dark" ? "checked" : "") onchange="CambiarTema('dark')">
+                        <label class="form-check-label" for="temaOscuro">
+                            <i class="fas fa-moon me-1"></i> Oscuro
+                        </label>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-2">El cambio se aplica de inmediato y se guarda en tu cuenta.</small>
+            </div>
+        </div>
+    </div>
+
+    @if (esJefeArea)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="form-section" style="padding: 20px;">
+                <h3 class="section-title" style="font-size: 1.1rem;"><i class="fas fa-building me-2"></i>Licencia</h3>
+
+                @if (fechaVigenciaFin.HasValue)
+                {
+                    var claseUrgencia = diasRestantes <= 15 ? "danger" : (diasRestantes <= 30 ? "warning" : "success");
+                    var textoUrgencia = diasRestantes <= 15 ? "¡Vigencia por vencer!" : (diasRestantes <= 30 ? "Vigencia próxima a vencer" : "Vigencia activa");
+
+                    <div class="stat-card @claseUrgencia" style="margin-bottom: 15px; padding: 15px;">
+                        <div class="stat-title" style="font-size: 0.8rem;">Tiempo restante de licencia</div>
+                        <div class="stat-number" style="font-size: 1.8rem;">@diasRestantes <small style="font-size: 0.9rem;">días</small></div>
+                        <div class="mt-1">
+                            <span class="badge @(claseUrgencia == "danger" ? "bg-danger" : claseUrgencia == "warning" ? "bg-warning text-dark" : "bg-success")">@textoUrgencia</span>
+                            @if (esPeriodoPrueba)
+                            {
+                                <span class="badge bg-info ms-1">Período de prueba</span>
+                            }
+                        </div>
+                        @*<small class="text-muted d-block mt-2">
+                            <i class="fas fa-calendar-alt me-1"></i>Vigencia: @fechaVigenciaInicio?.ToString("dd/MM/yyyy") — @fechaVigenciaFin.Value.ToString("dd/MM/yyyy")
+                        </small>*@
+                        @if (!string.IsNullOrEmpty(empresaNombre))
+                        {
+                            <small class="text-muted d-block">@empresaNombre</small>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="stat-card primary" style="padding: 15px;">
+                        <div class="stat-title" style="font-size: 0.8rem;">Licencia</div>
+                        <div class="mt-2">No se encontró información de vigencia para tu empresa.</div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function CambiarTema(tema) {
+        // Aplicar el cambio de estilos de inmediato (para que no se sienta lento)
+        $('body').toggleClass('dark-theme', tema === 'dark');
+
+        // Guardar la preferencia en la cookie
+        $.post('/Home/GuardarTema', { tema: tema }, function (response) {
+            if (response && response.IsSuccess) {
+                // Forzar recarga: el servidor vuelve a pintar la página leyendo la cookie
+                // nueva. Sin esta recarga, el tema solo se aplicaba al abrir/borrar cookies.
+                setTimeout(function () {
+                    window.location.reload();
+                }, 200);
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo guardar la preferencia de tema.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        }).fail(function () {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo guardar la preferencia de tema.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+        });
+    }
+</script>

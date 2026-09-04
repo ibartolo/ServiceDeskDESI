@@ -1,5 +1,6 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,21 +14,23 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/UsuarioPagina")]
     public class UsuarioPaginaController : BaseController
     {
-        [AllowAnonymous]
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerUsuarioPagina()
+        public ModelResponse<List<UsuarioPagina>> ObtenerUsuarioPagina()
         {
-            var result = dbWrapper.ObtenerUsuarioPagina();
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerUsuarioPagina(usuario);
             return result;
         }
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerUsuarioPaginaPorId(long id)
+        public ModelResponse<UsuarioPagina> ObtenerUsuarioPaginaPorId(long id)
         {
-            var result = dbWrapper.ObtenerUsuarioPaginaPorId(id);
+            var usuario = User.Identity.Name;
+            var result = dbWrapper.ObtenerUsuarioPaginaPorId(id, usuario);
             return result;
         }
+        [Permiso("Permisos")]
         [HttpPost, Route("")]
-        public ModelResponse GuardarOActualizarUsuarioPagina(UsuarioPagina r)
+        public ModelResponse<UsuarioPagina> GuardarOActualizarUsuarioPagina(UsuarioPagina r)
         {
             var result = dbWrapper.GuardarOActualizarUsuarioPagina(r);
             return result;
