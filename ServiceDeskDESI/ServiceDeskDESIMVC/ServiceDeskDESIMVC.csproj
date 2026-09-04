@@ -247,6 +247,7 @@
     <Content Include="Views\Security\Role.cshtml" />
     <Content Include="Views\Security\Permisos.cshtml" />
     <Content Include="Views\Home\Configuration.cshtml" />
+    <Content Include="Views\Home\Ayuda.cshtml" />
     <Content Include="Views\Catalogs\CategoriaResponsable.cshtml" />
     <Content Include="Views\Catalogs\Puesto.cshtml" />
     <Content Include="Views\Catalogs\Persona.cshtml" />
