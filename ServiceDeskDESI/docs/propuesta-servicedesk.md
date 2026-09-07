@@ -120,6 +120,47 @@ ServiceDeskDESI está pensado para operar **varias empresas a la vez**:
 - No existe forma de consultar ni modificar datos de otra empresa.
 - El registro de nuevas empresas valida que sus datos sean únicos (RFC, correo, nombre).
 
+### 6. Configuración de Empresa
+
+Cada empresa puede personalizar el sistema y definir sus reglas de operación desde una
+página independiente del menú (ícono de engranaje): **Configuración de Empresa**. Solo
+la ven los roles con el permiso de la página asignado; por defecto el rol
+**Administrador** la tiene con permisos de **lectura** y **edición** (otros roles pueden
+recibirla después desde la administración de permisos). Ver la página exige permiso de
+lectura y guardar cambios exige permiso de edición; el módulo **no tiene operación de
+eliminar**.
+
+**Datos de la empresa (solo lectura)**
+- La página abre con una tarjeta que muestra los **datos generales de la empresa** en
+  modo solo lectura; ahí no se edita nada.
+
+**Horario laboral**
+- Un editor con una fila por día de la semana (**lunes a domingo**). Cada día tiene una
+  casilla **"Labora"** y las horas de **inicio** y **fin** en formato de 12 horas con
+  **AM/PM** (hora de 1 a 12 y minutos de 00 a 55 en pasos de 5).
+- Un solo botón **Guardar** persiste la semana completa en una sola transacción. Si un
+  día queda desmarcado, sus horas se limpian. El sistema valida que la **hora de fin sea
+  mayor que la de inicio**.
+- Cada empresa guarda su propio horario (una fila de registro por día). Las empresas de
+  nuevo registro reciben por defecto **lunes a viernes de 09:00 a 17:00**, con sábado y
+  domingo no laborables.
+- **Uso futuro:** este horario alimentará al módulo de **Estadísticas** para calcular
+  tiempos de resolución dentro de las horas hábiles de la empresa.
+
+**Logotipo de la empresa**
+- La empresa puede subir su **logotipo** (formato **SVG o PNG**, máximo **2048 KB**).
+  El archivo se guarda en la carpeta de la empresa (`Uploads/Logos/{empresaId}/`) y la
+  base de datos conserva solo su ruta relativa (`LogoUrl`).
+- Cuando hay logotipo, este aparece en la parte superior del menú lateral en lugar del
+  logo de DESi. Si no hay logotipo, se muestra el **logo DESi por defecto** (ícono y
+  texto).
+- La opción **"Quitar logo"** (con confirmación) elimina el logotipo y regresa al logo
+  DESi; volver a subir una imagen reemplaza al archivo anterior, sin duplicados.
+
+**Pie de página institucional**
+- El sitio muestra un pie de página fijo **"Service Desk by DESi"** con los enlaces
+  Ayuda · Términos · Privacidad. Es informativo y no se edita desde la página.
+
 ---
 
 ## Flujos de trabajo principales

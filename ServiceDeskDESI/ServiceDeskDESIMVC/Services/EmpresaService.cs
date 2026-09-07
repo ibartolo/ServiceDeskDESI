@@ -52,6 +52,11 @@ namespace ServiceDeskDESIMVC.Services
             return await _httpClient.EliminarEmpresa(empresa);
         }
 
+        public async Task<ModelResponse> GuardarLogoEmpresa(string logoUrl)
+        {
+            return await _httpClient.GuardarLogoEmpresa(logoUrl);
+        }
+
         public async Task<object> ObtenerPermisosParaEmpresa()
         {
             var permisosResponse = await _httpClient.ObtenerPermisosPorUsuario();

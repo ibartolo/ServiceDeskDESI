@@ -151,6 +151,30 @@ namespace ServiceDeskDESIMVC.Controllers
             {
                 paginas = paginasResponse.Response;
             }
+
+            // Logotipo de la empresa para el encabezado del sidebar (con fallback DESi).
+            // La empresa se resuelve desde la sesión (TokenCookie.EmpresaID), nunca desde el request.
+            ViewBag.LogoUrl = null;
+            ViewBag.NombreComercial = null;
+
+            var tokenCookie = SessionHelper.GetSessionUser();
+            if (tokenCookie != null && tokenCookie.EmpresaID > 0)
+            {
+                try
+                {
+                    var empresa = await _empresaService.ObtenerEmpresaPorId(tokenCookie.EmpresaID);
+                    if (empresa != null)
+                    {
+                        ViewBag.LogoUrl = empresa.LogoUrl;
+                        ViewBag.NombreComercial = empresa.NombreComercial;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error al cargar la empresa para el logotipo del sidebar");
+                }
+            }
+
             return PartialView(paginas);
         }
 
@@ -313,6 +337,10 @@ namespace ServiceDeskDESIMVC.Controllers
                 };
 
                 SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
+
+                // Crea la cookie de tema (por defecto oscuro) si el usuario aún no tiene una,
+                // para que el tema aplique desde el primer acceso sin esperar a Configuración.
+                ThemeHelper.AsegurarTemaCookie(Request, Response, tokenCookie);
 
                 Log.Information("LogIn exitoso para {Usuario}", user);
             }
