@@ -108,7 +108,7 @@
     </div>
 
     <div class="ayuda-buscador">
-        <input type="text" id="buscadorAyuda" placeholder="Buscar: ticket, activo, tipo de activo, asignar, correo, contraseña, permiso, marca, modelo..." autocomplete="off">
+        <input type="text" id="buscadorAyuda" placeholder="Buscar: ticket, activo, tipo de activo, asignar, correo, contraseña, permiso, marca, modelo, horario, empresa, logo..." autocomplete="off">
         <div class="ayuda-resultado-msg" id="resultadoMsg"></div>
     </div>
 
@@ -127,6 +127,7 @@
         <a class="chip" data-ir="#empresa-licencia">Empresa y licencia</a>
         <a class="chip" data-ir="#correos">Correos que recibes</a>
         <a class="chip" data-ir="#configuracion">Perfil y configuración</a>
+        <a class="chip" data-ir="#configuracion-empresa">Configuración de empresa</a>
         <a class="chip" data-ir="#preguntas">Preguntas frecuentes</a>
         <a class="chip" data-ir="#glosario">Glosario</a>
     </div>
@@ -414,6 +415,39 @@
     </section>
 
     <!-- ============================================================ -->
+    <section class="seccion-card" id="configuracion-empresa" data-tags="configuracion empresa horario laboral dia lunes martes miercoles jueves viernes sabado domingo am pm logo logotipo imagen svg png subir quitar administrador permiso">
+        <h3><i class="fas fa-cog me-2"></i>Configuración de Empresa</h3>
+        <p>Esta página permite a la empresa definir su <strong>horario laboral</strong> y su <strong>logotipo</strong>. Es una página de menú independiente: solo la ven los roles que tienen asignado su permiso (por defecto, el rol <strong>Administrador</strong>, con permisos de lectura y edición).</p>
+        <div class="aviso"><strong>Acceso:</strong> para <strong>ver</strong> la página se requiere permiso de <strong>lectura</strong>; para <strong>guardar cambios</strong> se requiere permiso de <strong>edición</strong>. Este módulo no tiene operación de eliminar.</div>
+
+        <h4>Datos de la empresa (solo lectura)</h4>
+        <p>Al entrar en <a class="enlace-app" href="/ConfiguracionEmpresa/Index">Configuración de Empresa</a> ves una tarjeta con los <strong>datos generales de tu empresa</strong>. Es de solo lectura: no hay campos que editar.</p>
+
+        <h4>Horario laboral</h4>
+        <p>Indica en qué días y a qué horas trabaja tu empresa. El editor muestra una fila por día de la semana (<strong>lunes a domingo</strong>):</p>
+        <ul>
+            <li>Marca la casilla <strong>¿Labora?</strong> en los días que la empresa trabaja. Si un día queda <strong>desmarcado</strong>, sus horas se limpian y no se pueden capturar.</li>
+            <li>Captura la <strong>hora de inicio</strong> y la <strong>hora de fin</strong> en formato de 12 horas con <strong>AM/PM</strong> (hora de 1 a 12 y minutos de 00 a 55, en pasos de 5).</li>
+            <li>El botón <strong>Guardar</strong> guarda la semana completa de una sola vez.</li>
+        </ul>
+        <div class="aviso"><strong>Validación:</strong> la <strong>hora de fin</strong> debe ser mayor que la <strong>hora de inicio</strong>; si no se cumple, el sistema muestra un error y no guarda.</div>
+        <div class="tip"><strong>Tip:</strong> al registrarse, cada empresa nueva queda con el horario <strong>lunes a viernes de 09:00 a 17:00</strong> y sábado/domingo no laborables. Este horario se usará más adelante en el módulo de <strong>Estadísticas</strong> para calcular tiempos de atención dentro de las horas hábiles.</div>
+
+        <h4>Logotipo de la empresa</h4>
+        <p>Puedes subir el <strong>logotipo de tu empresa</strong> para que aparezca en la parte superior del menú lateral, en lugar del logo de DESi.</p>
+        <ul>
+            <li>Formatos permitidos: <strong>SVG o PNG</strong>, con un tamaño máximo de <strong>2048 KB</strong>. Si el archivo no es válido o excede el tamaño, se muestra un error y no se guarda.</li>
+            <li>Al guardar una imagen válida se muestra una <strong>vista previa</strong> y el logotipo reemplaza al logo DESi en la parte superior del menú.</li>
+            <li><strong>Quitar logo:</strong> si ya no quieres usar logotipo, pulsa "Quitar logo" y <strong>confirma</strong>; el sistema lo elimina y vuelve a mostrar el logo DESi por defecto.</li>
+            <li>Si vuelves a subir otra imagen, esta <strong>reemplaza</strong> al archivo anterior (no se duplican archivos).</li>
+        </ul>
+        <div class="tip"><strong>Tip:</strong> mientras la empresa no tenga logotipo asignado, el menú muestra el <strong>logo DESi por defecto</strong> (ícono + texto).</div>
+
+        <h4>Pie de página del sistema</h4>
+        <p>Al pie de las páginas se muestra el texto fijo <strong>"Service Desk by DESi"</strong> con los enlaces Ayuda · Términos · Privacidad. Es un texto informativo del sistema y no se edita desde esta página.</p>
+    </section>
+
+    <!-- ============================================================ -->
     <section class="seccion-card" id="preguntas" data-tags="preguntas frecuentes faq no puedo entrar no me llega correo no veo menu no veo boton sesion caduco olvide contrasena">
         <h3><i class="fas fa-question me-2"></i>Preguntas frecuentes</h3>
 
@@ -497,7 +531,7 @@
 
             if (visibles === 0) {
                 $msg.html('No encontré secciones con "<strong>' + $('#buscadorAyuda').val() +
-                    '</strong>". Prueba con: ticket, activo, tipo de activo, marca, modelo, asignar, correo, contraseña, permiso, rol, catálogo.');
+                    '</strong>". Prueba con: ticket, activo, tipo de activo, marca, modelo, asignar, correo, contraseña, permiso, rol, catálogo, horario, empresa, logo.');
             } else {
                 $msg.text(visibles + ' sección(es) encontrada(s).');
             }

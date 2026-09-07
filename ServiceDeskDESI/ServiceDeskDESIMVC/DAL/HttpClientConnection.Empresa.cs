@@ -48,5 +48,18 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
+
+        public async Task<ModelResponse> GuardarLogoEmpresa(string logoUrl)
+        {
+            var result = await RequestAsync<object>("api/Empresas/GuardarLogo", HttpMethod.Post,
+                new { LogoUrl = logoUrl },
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
     }
 }

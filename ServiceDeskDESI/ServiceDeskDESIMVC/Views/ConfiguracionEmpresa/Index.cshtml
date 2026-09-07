@@ -1,0 +1,464 @@
+﻿@model ServiceDeskDESIEntities.Catalogos.Empresa
+@{
+    ViewBag.Title = "Configuración de Empresa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool puedeEditar = (ViewBag.PuedeEditar != null && (bool)ViewBag.PuedeEditar);
+}
+
+@helper HoraSelect(string tipo)
+{
+    <div class="hora-group hora-@tipo d-flex gap-1">
+        <select class="form-select form-select-sm sel-hora" style="width:72px;">
+            @for (int h = 1; h <= 12; h++)
+            {
+                <option value="@h">@h</option>
+            }
+        </select>
+        <select class="form-select form-select-sm sel-minuto" style="width:82px;">
+            @for (int m = 0; m < 60; m += 5)
+            {
+                <option value="@(m.ToString("00"))">@(m.ToString("00"))</option>
+            }
+        </select>
+        <select class="form-select form-select-sm sel-ampm" style="width:82px;">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+        </select>
+    </div>
+}
+
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-cog me-2"></i>Configuración de Empresa</h3>
+
+    <!-- ========================================= -->
+    <!-- 1. CARD DATOS GENERALES (SOLO LECTURA)   -->
+    <!-- ========================================= -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-building me-2"></i>Datos generales
+        </div>
+        <div class="card-body">
+            @if (Model == null)
+            {
+                <div class="alert alert-warning">No se pudo obtener la información de la empresa.</div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Nombre comercial</label>
+                        <div>@Model.NombreComercial</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Razón social</label>
+                        <div>@Model.RazonSocial</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">RFC</label>
+                        <div>@Model.RFC</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Responsable</label>
+                        <div>@Model.Responsable</div>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label class="fw-bold">Dirección</label>
+                        <div>@Model.Direccion</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Ciudad</label>
+                        <div>@Model.Ciudad</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Estado</label>
+                        <div>@Model.Estado</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Código postal</label>
+                        <div>@Model.CodigoPostal</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Teléfono</label>
+                        <div>@Model.Telefono</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Correo de contacto</label>
+                        <div>@Model.CorreoContacto</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Inicio de vigencia</label>
+                        <div>@Model.FechaVigenciaInicio.ToString("yyyy-MM-dd")</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Fin de vigencia</label>
+                        <div>@Model.FechaVigenciaFin.ToString("yyyy-MM-dd")</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Periodo de prueba</label>
+                        <div>@(Model.EsPeriodoPrueba ? "Sí" : "No")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 2. EDITOR DE HORARIO LABORAL (7 DÍAS)    -->
+    <!-- ========================================= -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-clock me-2"></i>Horario laboral
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered align-middle" id="tablaHorario">
+                <thead>
+                    <tr>
+                        <th style="width:150px;">Día</th>
+                        <th style="width:110px; text-align:center;">¿Labora?</th>
+                        <th>Hora de inicio</th>
+                        <th>Hora de fin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-dia="1"><td>Lunes</td><td class="text-center"><input type="checkbox" class="chkLabora form-check-input" /></td><td>@HoraSelect("inicio")</td><td>@HoraSelect("fin")</td></tr>
+                    <tr data-dia="2"><td>Martes</td><td class="text-center"><input type="checkbox" class="chkLabora form-check-input" /></td><td>@HoraSelect("inicio")</td><td>@HoraSelect("fin")</td></tr>
+                    <tr data-dia="3"><td>Miércoles</td><td class="text-center"><input type="checkbox" class="chkLabora form-check-input" /></td><td>@HoraSelect("inicio")</td><td>@HoraSelect("fin")</td></tr>
+                    <tr data-dia="4"><td>Jueves</td><td class="text-center"><input type="checkbox" class="chkLabora form-check-input" /></td><td>@HoraSelect("inicio")</td><td>@HoraSelect("fin")</td></tr>
+                    <tr data-dia="5"><td>Viernes</td><td class="text-center"><input type="checkbox" class="chkLabora form-check-input" /></td><td>@HoraSelect("inicio")</td><td>@HoraSelect("fin")</td></tr>
+                    <tr data-dia="6"><td>Sábado</td><td class="text-center"><input type="checkbox" class="chkLabora form-check-input" /></td><td>@HoraSelect("inicio")</td><td>@HoraSelect("fin")</td></tr>
+                    <tr data-dia="7"><td>Domingo</td><td class="text-center"><input type="checkbox" class="chkLabora form-check-input" /></td><td>@HoraSelect("inicio")</td><td>@HoraSelect("fin")</td></tr>
+                </tbody>
+            </table>
+
+            @if (puedeEditar)
+            {
+                <button type="button" id="btnGuardarHorario" class="btn btn-success">
+                    <span class="spinner-border spinner-border-sm d-none" id="spinnerHorario" role="status" aria-hidden="true"></span>
+                    <span id="txtGuardarHorario">Guardar</span>
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 3. SUBIDA DE LOGOTIPO (SVG / PNG)        -->
+    <!-- ========================================= -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-image me-2"></i>Logotipo de la empresa
+        </div>
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                @if (Model != null && !string.IsNullOrEmpty(Model.LogoUrl))
+                {
+                    <img id="imgLogoPreview" src="@Model.LogoUrl" alt="Logotipo actual" style="max-width:120px; max-height:60px; object-fit:contain;" />
+                }
+                else
+                {
+                    <img id="imgLogoPreview" src="" alt="Vista previa del logotipo" style="max-width:120px; max-height:60px; object-fit:contain; display:none;" />
+                }
+            </div>
+
+            @if (puedeEditar)
+            {
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <input type="file" id="fileLogo" class="form-control" accept=".svg,.png" style="max-width:320px;" />
+                    <button type="button" id="btnSubirLogo" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="spinnerLogo" role="status" aria-hidden="true"></span>
+                        <span id="txtSubirLogo">Subir</span>
+                    </button>
+                    <button type="button" id="btnQuitarLogo" class="btn btn-outline-danger" style="@(Model != null && !string.IsNullOrEmpty(Model.LogoUrl) ? "" : "display:none;")">
+                        <span class="spinner-border spinner-border-sm d-none" id="spinnerQuitarLogo" role="status" aria-hidden="true"></span>
+                        <span id="txtQuitarLogo">Quitar logo</span>
+                    </button>
+                </div>
+                <small class="text-muted">Formatos permitidos: @ViewBag.LogoEmpresaTiposPermitidos. Tamaño máximo: @ViewBag.LogoEmpresaMaxTamanoKB KB.</small>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    var puedeEditar = @(puedeEditar ? "true" : "false");
+
+    $(function () {
+        // Cargar el horario actual
+        CargarHorario();
+
+        // Deshabilitar controles si no puede editar
+        if (!puedeEditar) {
+            $('#tablaHorario input, #tablaHorario select').prop('disabled', true);
+        }
+
+        // Cambio de checkbox "labora" -> habilitar/deshabilitar horas
+        $('#tablaHorario').on('change', '.chkLabora', function () {
+            var $tr = $(this).closest('tr');
+            AplicarEstadoFila($tr, $(this).is(':checked'));
+        });
+
+        // Guardar horario
+        $('#btnGuardarHorario').on('click', function () {
+            GuardarHorario();
+        });
+
+        // Vista previa del logotipo antes de guardar
+        $('#fileLogo').on('change', function (e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (ev) {
+                    $('#imgLogoPreview').attr('src', ev.target.result).show();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Subir logotipo
+        $('#btnSubirLogo').on('click', function () {
+            SubirLogo();
+        });
+
+        // Quitar logotipo
+        $('#btnQuitarLogo').on('click', function () {
+            QuitarLogo();
+        });
+    });
+
+    function AplicarEstadoFila($tr, labora) {
+        $tr.find('.hora-group select').prop('disabled', !labora);
+    }
+
+    function pad2(n) {
+        return (n < 10 ? '0' : '') + n;
+    }
+
+    // Convierte "HH:mm" (24h) al valor de los selects (12h + AM/PM).
+    function setHora($group, hhmm) {
+        if (!hhmm) { return; }
+        var parts = hhmm.split(':');
+        var h = parseInt(parts[0], 10);
+        var m = parts[1] || '00';
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        var h12 = h % 12;
+        if (h12 === 0) { h12 = 12; }
+        $group.find('.sel-hora').val(h12);
+        $group.find('.sel-minuto').val(m);
+        $group.find('.sel-ampm').val(ampm);
+    }
+
+    // Lee los selects (12h + AM/PM) y devuelve "HH:mm" (24h).
+    function getHora($group) {
+        var h12 = parseInt($group.find('.sel-hora').val(), 10);
+        var m = $group.find('.sel-minuto').val();
+        var ampm = $group.find('.sel-ampm').val();
+        var h24 = h12;
+        if (ampm === 'AM') {
+            if (h12 === 12) { h24 = 0; }
+        } else {
+            if (h12 !== 12) { h24 = h12 + 12; }
+        }
+        return pad2(h24) + ':' + m;
+    }
+
+    function CargarHorario() {
+        GetMVC('/ConfiguracionEmpresa/ObtenerHorario', function (r) {
+            if (r && r.IsSuccess && r.Response) {
+                $.each(r.Response, function (i, item) {
+                    var $tr = $('#tablaHorario tbody tr[data-dia="' + item.DiaSemana + '"]');
+                    if ($tr.length) {
+                        $tr.find('.chkLabora').prop('checked', item.EsLaboral);
+                        if (item.EsLaboral) {
+                            setHora($tr.find('.hora-inicio'), item.HoraInicio);
+                            setHora($tr.find('.hora-fin'), item.HoraFin);
+                        } else {
+                            setHora($tr.find('.hora-inicio'), '09:00');
+                            setHora($tr.find('.hora-fin'), '17:00');
+                        }
+                        if (!puedeEditar) {
+                            $tr.find('.chkLabora, .hora-group select').prop('disabled', true);
+                        } else {
+                            AplicarEstadoFila($tr, item.EsLaboral);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function ObtenerHorarioGuardar() {
+        var lista = [];
+        $('#tablaHorario tbody tr').each(function () {
+            var $tr = $(this);
+            var dia = parseInt($tr.data('dia'));
+            var labora = $tr.find('.chkLabora').is(':checked');
+            var inicio = labora ? getHora($tr.find('.hora-inicio')) : '';
+            var fin = labora ? getHora($tr.find('.hora-fin')) : '';
+
+            lista.push({ DiaSemana: dia, EsLaboral: labora, HoraInicio: inicio, HoraFin: fin });
+        });
+        return lista;
+    }
+
+    function GuardarHorario() {
+        var $btn = $('#btnGuardarHorario');
+        $btn.prop('disabled', true);
+        $('#spinnerHorario').removeClass('d-none');
+        $('#txtGuardarHorario').text('Guardando…');
+
+        $.ajax({
+            url: '/ConfiguracionEmpresa/GuardarHorario',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify({ horario: ObtenerHorarioGuardar() }),
+            success: function (response) {
+                $btn.prop('disabled', false);
+                $('#spinnerHorario').addClass('d-none');
+                $('#txtGuardarHorario').text('Guardar');
+
+                if (response && response.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.Message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: 'white',
+                        iconColor: '#4e73df'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response && response.Message ? response.Message : 'Ocurrió un error al guardar.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        background: 'white',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            },
+            error: function () {
+                $btn.prop('disabled', false);
+                $('#spinnerHorario').addClass('d-none');
+                $('#txtGuardarHorario').text('Guardar');
+
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al guardar.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+
+    function SubirLogo() {
+        var file = document.getElementById('fileLogo').files[0];
+        if (!file) {
+            Swal.fire({
+                title: 'Aviso',
+                text: 'Seleccione un archivo de logotipo.',
+                icon: 'info',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+
+        var $btn = $('#btnSubirLogo');
+        $btn.prop('disabled', true);
+        $('#spinnerLogo').removeClass('d-none');
+        $('#txtSubirLogo').text('Guardando…');
+
+        var parameters = [];
+        parameters.push({ Name: "file", Value: file });
+
+        PostFileMVC('/ConfiguracionEmpresa/SubirLogo', parameters, function (response) {
+            $btn.prop('disabled', false);
+            $('#spinnerLogo').addClass('d-none');
+            $('#txtSubirLogo').text('Subir');
+
+            if (response && response.IsSuccess) {
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: response.Message,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: 'white',
+                    iconColor: '#4e73df'
+                }).then(function () {
+                    // Refrescar el sidebar para mostrar el nuevo logotipo.
+                    // La vista previa ya muestra la imagen seleccionada (FileReader).
+                    $("#sidebar").empty().load("/Home/MenusUser");
+                    // Ahora existe un logotipo: habilitar la opción "Quitar logo".
+                    $('#btnQuitarLogo').show();
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: response && response.Message ? response.Message : 'Ocurrió un error al subir el logotipo.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+
+    function QuitarLogo() {
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Se quitará el logotipo actual y se restaurará el logo de DESi.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, quitar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796'
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                var $btn = $('#btnQuitarLogo');
+                $btn.prop('disabled', true);
+                $('#spinnerQuitarLogo').removeClass('d-none');
+                $('#txtQuitarLogo').text('Quitando…');
+
+                PostMVC('/ConfiguracionEmpresa/QuitarLogo', {}, function (response) {
+                    $btn.prop('disabled', false);
+                    $('#spinnerQuitarLogo').addClass('d-none');
+                    $('#txtQuitarLogo').text('Quitar logo');
+
+                    if (response && response.IsSuccess) {
+                        // Ocultar la vista previa y refrescar el sidebar (fallback DESi).
+                        $('#imgLogoPreview').attr('src', '').hide();
+                        $('#btnQuitarLogo').hide();
+                        $("#sidebar").empty().load("/Home/MenusUser");
+
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: response.Message || 'Logotipo quitado correctamente.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: 'white',
+                            iconColor: '#4e73df'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response && response.Message ? response.Message : 'Ocurrió un error al quitar el logotipo.',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                            background: 'white',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>

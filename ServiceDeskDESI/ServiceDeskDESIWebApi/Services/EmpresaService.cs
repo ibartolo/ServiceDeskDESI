@@ -264,6 +264,36 @@ namespace ServiceDeskDESIWebApi.Services
             }
         }
 
+        public ModelResponse GuardarLogoEmpresa(string usuario, string logoUrl)
+        {
+            try
+            {
+                Log.Information("EmpresaService.GuardarLogoEmpresa para usuario {Usuario}", usuario);
+
+                if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
+                // LogoUrl puede ser NULL/vacío para QUITAR el logotipo (CE-006 amendment: "Quitar logo").
+                // El SP GuardarLogoEmpresa persiste NULL correctamente (UPDATE Empresa SET LogoUrl = @LogoUrl).
+
+                var result = _dbWrapper.GuardarLogoEmpresa(usuario, logoUrl);
+                Log.Information("EmpresaService.GuardarLogoEmpresa RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                return result;
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Error de validación en GuardarLogoEmpresa para usuario {Usuario}", usuario);
+                return new ModelResponse { IsSuccess = false, Message = ex.Message };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en EmpresaService.GuardarLogoEmpresa para usuario {Usuario}", usuario);
+                return new ModelResponse
+                {
+                    IsSuccess = false,
+                    Message = "Ocurrió un error al guardar el logotipo."
+                };
+            }
+        }
+
         public ModelResponse<Empresa> GuardarNuevaEmpresaConDatosIniciales(Empresa empresa)
         {
             var modelResponse = new ModelResponse<Empresa>();
@@ -532,6 +562,23 @@ namespace ServiceDeskDESIWebApi.Services
                     {
                         Log.Warning("⚠️ No se encontró el rol 'Usuario' creado; no se asignó la página 'Mis Activos'.");
                     }
+
+                    // =========================================
+                    // PASO 5.2: SEMBRAR HORARIO LABORAL POR DEFECTO
+                    // (Lun-Vie 09:00-17:00; Sáb/Dom no laborable)
+                    // =========================================
+                    Log.Information("PASO 5.2/8 - Sembrando horario laboral por defecto...");
+
+                    for (int dia = 1; dia <= 7; dia++)
+                    {
+                        bool laborable = dia >= 1 && dia <= 5;
+                        DateTime? inicio = laborable ? new DateTime(1900, 1, 1, 9, 0, 0) : (DateTime?)null;
+                        DateTime? fin    = laborable ? new DateTime(1900, 1, 1, 17, 0, 0) : (DateTime?)null;
+                        var r = _dbWrapper.GuardarHorarioLaboralDia(usernameAdmin, dia, inicio, fin, laborable);
+                        if (!r.IsSuccess) { throw new Exception("No se pudo sembrar el horario laboral por defecto."); }
+                    }
+
+                    Log.Information("✅ PASO 5.2/8 - Horario laboral por defecto sembrado exitosamente para empresa {EmpresaId}", empresaGuardada.Id);
 
                     // =========================================
                     // PASO 6: ASIGNAR ROL "ADMINISTRADOR" AL USUARIO

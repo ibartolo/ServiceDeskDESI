@@ -57,6 +57,7 @@
     <Compile Include="Catalogos\Empresa.cs" />
     <Compile Include="Catalogos\Foliador.cs" />
     <Compile Include="Catalogos\FoliadorDTO.cs" />
+    <Compile Include="Catalogos\HorarioLaboral.cs" />
     <Compile Include="Catalogos\Mantenimiento.cs" />
     <Compile Include="Catalogos\Marca.cs" />
     <Compile Include="Catalogos\Modelo.cs" />

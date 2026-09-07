@@ -18,6 +18,12 @@
 > debe aplicarse a la base de datos ANTES de probar estos módulos; sin ella, los
 > casos de los módulos 22–25 fallarán por ausencia de columna/índice/tabla/SP.
 
+> **Cambios recientes (2026-09-07):** el módulo 27 cubre el cambio `configuracion-empresa`
+> (página "Configuración de Empresa": horario laboral semanal y logotipo de la empresa).
+> La migración de este cambio (`openspec/changes/configuracion-empresa/migration.sql`) debe
+> estar aplicada a la base de datos ANTES de probar este módulo; sin ella, los casos del
+> módulo 27 fallarán por ausencia de tabla/columna/SP.
+
 ---
 
 ## Resumen de cobertura
@@ -50,7 +56,8 @@
 | 24 | Campos nuevos del Activo: SerieLocal y Notas (textarea 250) | 5 |
 | 25 | Gestor de mantenimientos de Activos (modal) | 8 |
 | 26 | Correcciones en ventana de Permisos: contador de páginas y tema oscuro | 5 |
-| | **Total** | **~149** |
+| 27 | Configuración de Empresa | 16 |
+| | **Total** | **~165** |
 
 ---
 
@@ -1074,6 +1081,85 @@ correctamente en tema oscuro.
     - En tema oscuro el chooser aplica los estilos oscuros (sin fondos claros ni texto ilegible).
     - Alternar el tema no rompe el layout ni deja estilos mezclados.
     - El chooser se ve correctamente en ambos temas sin necesidad de recargar la página.
+
+---
+
+## 27. Configuración de Empresa
+
+**Objetivo:** validar la página independiente "Configuración de Empresa": acceso
+controlado por rol/permiso (leer para ver, editar para guardar; sin eliminar), tarjeta
+de datos generales de la empresa en solo lectura, editor de horario laboral (7 días,
+formato 12 h AM/PM) con su guardado y validaciones, alta/uso del logotipo (SVG/PNG)
+con reemplazo y quita, y el pie de página "by DESi".
+
+- [ ] **CE-01 — La página "Configuración de Empresa" aparece en el menú lateral para el rol Administrador**
+  - *Pre:* rol Administrador con el permiso de la página (lectura y edición).
+  - *Pasos:* iniciar sesión como Administrador y revisar el menú lateral.
+  - *Esperado:* aparece el ítem "Configuración de Empresa" y la página se abre con normalidad (también para roles con el permiso asignado).
+
+- [ ] **CE-02 — Usuario sin permiso no ve el ítem en el menú; la URL directa es denegada**
+  - *Pre:* usuario cuyo rol NO tiene asignada la página.
+  - *Pasos:* iniciar sesión, revisar el menú e intentar entrar por URL directa a la página.
+  - *Esperado:* el ítem no aparece en el menú; la URL directa redirige a "Acceso denegado".
+
+- [ ] **CE-03 — Tarjeta de datos generales de la empresa en solo lectura**
+  - *Pasos:* abrir "Configuración de Empresa".
+  - *Esperado:* la tarjeta muestra los datos generales de la empresa sin campos editables.
+
+- [ ] **CE-04 — El editor de horario carga los 7 días con sus valores guardados**
+  - *Pre:* horario previamente guardado.
+  - *Pasos:* abrir la página y revisar el editor de horario.
+  - *Esperado:* aparecen los 7 días (lunes a domingo) con sus casillas y horas guardadas; el día desmarcado no permite capturar horas.
+
+- [ ] **CE-05 — Guardar horario persiste la semana completa**
+  - *Pasos:* ajustar varios días y pulsar "Guardar"; recargar la página.
+  - *Esperado:* al recargar se muestran los valores guardados de toda la semana.
+
+- [ ] **CE-06 — Validación: hora de fin debe ser mayor que hora de inicio**
+  - *Pre:* un día con hora de fin menor o igual a la de inicio.
+  - *Pasos:* pulsar "Guardar".
+  - *Esperado:* se muestra error de validación y no se guarda.
+
+- [ ] **CE-07 — Empresa de nuevo registro con horario por defecto**
+  - *Pasos:* registrar una empresa nueva y abrir su "Configuración de Empresa".
+  - *Esperado:* lunes a viernes 09:00–17:00 y sábado/domingo no laborables.
+
+- [ ] **CE-08 — Subir logotipo SVG válido**
+  - *Pasos:* subir un archivo SVG válido (≤ 2048 KB) y guardar.
+  - *Esperado:* el logotipo se muestra en la parte superior del menú reemplazando al logo DESi.
+
+- [ ] **CE-09 — Subir logotipo PNG válido**
+  - *Pasos:* subir un archivo PNG válido (≤ 2048 KB) y guardar.
+  - *Esperado:* funciona igual que con SVG.
+
+- [ ] **CE-10 — Archivo no permitido o que excede el tamaño máximo**
+  - *Pasos:* subir un archivo de otro formato (p. ej. JPG) y luego uno mayor a 2048 KB.
+  - *Esperado:* en ambos casos se muestra error y no se guarda.
+
+- [ ] **CE-11 — Quitar logotipo con confirmación**
+  - *Pasos:* con un logotipo asignado, pulsar "Quitar logo" y confirmar.
+  - *Esperado:* el logotipo desaparece y vuelve el logo DESi por defecto.
+
+- [ ] **CE-12 — Re-subir logotipo reemplaza al anterior**
+  - *Pasos:* subir un logotipo nuevo cuando ya existe uno asignado.
+  - *Esperado:* el nuevo reemplaza al anterior sin duplicar archivos.
+
+- [ ] **CE-13 — Sin logotipo asignado se muestra el logo DESi por defecto**
+  - *Pasos:* con la empresa sin logotipo, revisar la parte superior del menú.
+  - *Esperado:* se muestra el logo DESi por defecto (ícono + texto).
+
+- [ ] **CE-14 — El footer "by DESi" se muestra al pie de las páginas**
+  - *Pasos:* recorrer varias páginas del sistema y revisar el pie.
+  - *Esperado:* se muestra "Service Desk by DESi" con los enlaces Ayuda · Términos · Privacidad.
+
+- [ ] **CE-15 — Aislamiento por empresa**
+  - *Pre:* dos empresas A y B con configuraciones distintas.
+  - *Pasos:* configurar la empresa A; iniciar sesión en la empresa B y revisar su configuración.
+  - *Esperado:* lo que configura una empresa no afecta a la otra.
+
+- [ ] **CE-16 — Textos en español correcto (sin caracteres raros)**
+  - *Pasos:* revisar todos los textos de la página.
+  - *Esperado:* el español se ve correcto, con acentos/ñ bien formados (sin caracteres tipo "Ã").
 
 ---
 

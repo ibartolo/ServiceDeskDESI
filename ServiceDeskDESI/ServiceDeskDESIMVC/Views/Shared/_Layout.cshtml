@@ -221,6 +221,17 @@
             <!-- Contenido principal -->
             <div class="main-content">
                 @RenderBody()
+
+                <!-- Footer estático "by DESi" (markup fijo, no editable) -->
+                <footer class="app-footer" style="margin-top:2rem; padding:1rem 0; border-top:1px solid #e3e6f0; color:#858796; font-size:0.85rem;">
+                    <span class="footer-brand">
+                        <i class="fas fa-headset"></i>
+                        © @DateTime.Now.Year Service Desk by <strong>DESi</strong>
+                    </span>
+                    <span class="footer-links" style="margin-left:1rem;">
+                        <a href="/Home/Ayuda">Ayuda</a> · <a href="#">Términos</a> · <a href="#">Privacidad</a>
+                    </span>
+                </footer>
             </div>
         </div>
     </div>
