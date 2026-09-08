@@ -1,0 +1,160 @@
+Módulo de Métricas y Desempeño — Reglas de Negocio y Comportamiento de Usuario
+Propósito: Proveer a los responsables y administradores de información accionable sobre el desempeño del equipo de soporte, la carga de trabajo por área y la calidad del servicio, sin necesidad de exportar datos a hojas de cálculo externas.
+
+1. Roles y acceso al módulo
+1.1 ¿Quién puede ver el módulo de métricas?
+Administrador: Acceso total a todas las vistas del módulo.
+
+Responsable de área: Acceso a las vistas del módulo, pero filtrado por su propia área (si el sistema lo permite). En una primera versión, puede ver todo.
+
+Agente: No tiene acceso al módulo de métricas (no lo ve en el menú).
+
+Solicitante/Usuario: No tiene acceso al módulo de métricas.
+
+1.2 ¿Dónde aparece?
+El módulo se llama "Estadísticas" o "Insights" en el menú lateral.
+
+Aparece como un ítem independiente, no dentro de "Administración" es necesario ingresar un nuevo registro a la tabla de paginas.
+
+1.3 Permisos asociados
+Se necesita el permiso de lectura sobre la página "Estadísticas" para ver el módulo.
+
+No hay acciones de escritura dentro del módulo (es solo consulta).
+
+2. Dashboard de KPIs (vista principal)
+2.1 ¿Qué ve el usuario al entrar?
+Una pantalla con tres secciones:
+
+A. Tarjetas de resumen (parte superior)
+
+Total de tickets: Todos los tickets activos de la empresa(en un perido de tiempo determinado).
+
+Nuevos: Tickets en estatus "Nuevo".
+
+En Progreso: Tickets en estatus "En Progreso".
+
+Resueltos: Tickets en estatus "Resuelto".
+
+Cerrados: Tickets en estatus "Cerrado".
+
+Rechazados: Tickets en estatus "Rechazado".
+
+Eficiencia: (Cerrados / Total) * 100, mostrado como porcentaje (ej. "78%").
+
+Tiempo promedio de resolución: En horas, calculado desde la creación del ticket hasta que se marcó como "Resuelto". 
+Se muestra con un decimal (ej. "4.5 hrs") el sistema debe ser capas de disernir un horario laboral de 8 horas, y calcular cuantas horas habiles han sigo asignadas 
+a ese ticket.
+
+B. Gráfica de distribución de estatus (mitad inferior izquierda)
+
+Una gráfica de pastel con los estatus: Nuevo, En Progreso, Resuelto, Cerrado, Rechazado.
+
+Al pasar el mouse sobre cada porción, muestra el nombre del estatus y el número de tickets.
+
+C. Gráfica de evolución diaria (mitad inferior derecha)
+
+Una gráfica de líneas con dos series:
+
+Tickets creados (por día).
+
+Tickets resueltos (por día).
+
+Eje X: días (últimos 30 días por defecto).
+
+Eje Y: cantidad de tickets.
+
+Se puede cambiar el rango de días mediante un selector (7, 15, 30, 60, 90 días).
+
+D. En la parde superior de la pagina, son necesarios 2 datetimepicker(utilizar inputs nativos), en donde por defecto tendremos la primer fecha del año con la fecha actal, no podran seleccionare fechas posteriores al día de hoy  y la fecha de inicio no puede ser mayor a la fecha final,
+el usuario puede moverse entre ciertos peridoos del año por ejmplo 20251201 al 20251231
+
+2.2 Comportamiento esperado
+Los números se actualizan en tiempo real cada vez que se recarga la página o se cambia el filtro de días.
+
+Si no hay tickets en algún estatus, la tarjeta muestra "0".
+
+Si no hay datos suficientes para la gráfica de evolución (ej. empresa nueva sin tickets), la gráfica muestra "Sin datos" en el centro.
+
+De preferencia utilizar librerias para graficas que sean gratuitas pero agradables a usuario
+
+3. Ranking de Áreas
+3.1 ¿Qué muestra?
+Una tabla con las siguientes columnas:
+
+Área	Total tickets	Promedio urgencia	Cerrados	Rechazados
+Sistemas	145	3.2	120	5
+RH	32	1.8	28	1
+Finanzas	78	2.5	65	4
+Orden: De mayor a menor por "Total tickets".
+
+3.2 Interpretación para el usuario
+Promedio de urgencia: Un número alto (cercano a 4) indica que esa área reporta problemas muy urgentes con frecuencia.
+
+Rechazados: Tickets que el solicitante devolvió porque no quedó conforme. Un número alto puede indicar mala calidad en la resolución de esa área.
+
+3.3 Comportamiento esperado
+Si un área no tiene tickets, no aparece en la lista.
+
+El promedio de urgencia se muestra con un decimal.
+
+4. Ranking de Agentes por Reasignaciones
+4.1 ¿Qué muestra?
+Dos listas separadas, una al lado de la otra:
+
+Lista A: "Agentes que más reciben tickets reasignados"
+
+Agente	Tickets recibidos
+Ana García	23
+Carlos López	18
+Laura Martínez	12
+Lista B: "Agentes a quienes más les quitan tickets"
+
+Agente	Tickets quitados
+Pedro Ramírez	15
+Ana García	9
+Luis Torres	7
+4.2 Interpretación para el usuario
+Agente que más recibe: Es el "comodín" del equipo. El responsable confía en él para resolver problemas difíciles o urgentes. También puede significar que el agente es el que mejor resuelve.
+
+Agente a quien más le quitan: Puede indicar:
+
+Saturación: Está sobrecargado y el responsable le retira tickets para equilibrar la carga.
+
+Dificultad: El agente no pudo resolver y el responsable lo reasignó a otro.
+
+Alerta: Si aparece consistentemente, el responsable debe revisar si el agente necesita apoyo o capacitación.
+
+4.3 Comportamiento esperado
+Solo se cuentan reasignaciones donde el ticket cambió de agente (no se cuentan tomas iniciales).
+
+Los agentes sin reasignaciones no aparecen en las listas.
+
+El conteo es histórico, desde que se implementó el módulo, y basado en los innputs de fecha inicio y fecha fin.
+
+
+5. Experiencia de usuario (UX) esperada
+5.1 Mensajes informativos
+"Sin datos": Cuando no hay tickets en la empresa, mostrar un mensaje amigable: "Aún no hay tickets registrados. Comienza creando tu primer ticket."
+
+"Sin reasignaciones": En el ranking de agentes, si no hay reasignaciones, mostrar: "No hay reasignaciones registradas."
+
+5.2 Tiempos de carga
+Se tiene que mostrar un spinner y un mensaje: "Cargando datos..." desde que sale el requetes y ocultar el mensaje cuando regrese.
+
+5.3 Actualización de datos
+Los datos se actualizan cada vez que se recarga la página.
+
+6. Consideraciones de privacidad y seguridad
+Un agente no puede ver las métricas de otro agente. Solo administradores y responsables pueden ver todo( aquí tengo mis dudas, sugiereme basado en la estructura de persmisos y roles que tenemos).
+
+Los datos están estrictamente separados por empresa. Un usuario de la empresa A nunca ve datos de la empresa B.
+
+7. Criterios de éxito (desde la perspectiva del negocio)
+Un responsable puede identificar en 5 segundos cuál área genera más tickets y tomar decisiones (ej. asignar más agentes a esa área).
+
+Un administrador puede ver en la gráfica de evolución si el equipo está resolviendo más tickets de los que llegan (tendencia positiva).
+
+El ranking de "agentes más quitados" permite al responsable detectar tempranamente a un agente que podría necesitar apoyo, antes de que afecte la satisfacción del usuario.
+
+La eficiencia (cerrados/total) se convierte en un KPI de gestión para medir el desempeño del equipo mes a mes.
+

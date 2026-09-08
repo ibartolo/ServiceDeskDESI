@@ -21,5 +21,6 @@ namespace ServiceDeskDESIEntities.Catalogos
         public DateTime FechaVigenciaInicio { get; set; }
         public DateTime FechaVigenciaFin { get; set; }
         public bool EsPeriodoPrueba { get; set; }
+        public string LogoUrl { get; set; }
     }
 }

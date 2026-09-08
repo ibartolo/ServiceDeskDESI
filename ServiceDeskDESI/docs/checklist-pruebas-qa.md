@@ -18,6 +18,12 @@
 > debe aplicarse a la base de datos ANTES de probar estos módulos; sin ella, los
 > casos de los módulos 22–25 fallarán por ausencia de columna/índice/tabla/SP.
 
+> **Cambios recientes (2026-09-07):** el módulo 27 cubre el cambio `configuracion-empresa`
+> (página "Configuración de Empresa": horario laboral semanal y logotipo de la empresa).
+> La migración de este cambio (`openspec/changes/configuracion-empresa/migration.sql`) debe
+> estar aplicada a la base de datos ANTES de probar este módulo; sin ella, los casos del
+> módulo 27 fallarán por ausencia de tabla/columna/SP.
+
 ---
 
 ## Resumen de cobertura
@@ -50,7 +56,9 @@
 | 24 | Campos nuevos del Activo: SerieLocal y Notas (textarea 250) | 5 |
 | 25 | Gestor de mantenimientos de Activos (modal) | 8 |
 | 26 | Correcciones en ventana de Permisos: contador de páginas y tema oscuro | 5 |
-| | **Total** | **~149** |
+| 27 | Configuración de Empresa | 16 |
+| 28 | Estadísticas | 20 |
+| | **Total** | **~185** |
 
 ---
 
@@ -1074,6 +1082,190 @@ correctamente en tema oscuro.
     - En tema oscuro el chooser aplica los estilos oscuros (sin fondos claros ni texto ilegible).
     - Alternar el tema no rompe el layout ni deja estilos mezclados.
     - El chooser se ve correctamente en ambos temas sin necesidad de recargar la página.
+
+---
+
+## 27. Configuración de Empresa
+
+**Objetivo:** validar la página independiente "Configuración de Empresa": acceso
+controlado por rol/permiso (leer para ver, editar para guardar; sin eliminar), tarjeta
+de datos generales de la empresa en solo lectura, editor de horario laboral (7 días,
+formato 12 h AM/PM) con su guardado y validaciones, alta/uso del logotipo (SVG/PNG)
+con reemplazo y quita, y el pie de página "by DESi".
+
+- [ ] **CE-01 — La página "Configuración de Empresa" aparece en el menú lateral para el rol Administrador**
+  - *Pre:* rol Administrador con el permiso de la página (lectura y edición).
+  - *Pasos:* iniciar sesión como Administrador y revisar el menú lateral.
+  - *Esperado:* aparece el ítem "Configuración de Empresa" y la página se abre con normalidad (también para roles con el permiso asignado).
+
+- [ ] **CE-02 — Usuario sin permiso no ve el ítem en el menú; la URL directa es denegada**
+  - *Pre:* usuario cuyo rol NO tiene asignada la página.
+  - *Pasos:* iniciar sesión, revisar el menú e intentar entrar por URL directa a la página.
+  - *Esperado:* el ítem no aparece en el menú; la URL directa redirige a "Acceso denegado".
+
+- [ ] **CE-03 — Tarjeta de datos generales de la empresa en solo lectura**
+  - *Pasos:* abrir "Configuración de Empresa".
+  - *Esperado:* la tarjeta muestra los datos generales de la empresa sin campos editables.
+
+- [ ] **CE-04 — El editor de horario carga los 7 días con sus valores guardados**
+  - *Pre:* horario previamente guardado.
+  - *Pasos:* abrir la página y revisar el editor de horario.
+  - *Esperado:* aparecen los 7 días (lunes a domingo) con sus casillas y horas guardadas; el día desmarcado no permite capturar horas.
+
+- [ ] **CE-05 — Guardar horario persiste la semana completa**
+  - *Pasos:* ajustar varios días y pulsar "Guardar"; recargar la página.
+  - *Esperado:* al recargar se muestran los valores guardados de toda la semana.
+
+- [ ] **CE-06 — Validación: hora de fin debe ser mayor que hora de inicio**
+  - *Pre:* un día con hora de fin menor o igual a la de inicio.
+  - *Pasos:* pulsar "Guardar".
+  - *Esperado:* se muestra error de validación y no se guarda.
+
+- [ ] **CE-07 — Empresa de nuevo registro con horario por defecto**
+  - *Pasos:* registrar una empresa nueva y abrir su "Configuración de Empresa".
+  - *Esperado:* lunes a viernes 09:00–17:00 y sábado/domingo no laborables.
+
+- [ ] **CE-08 — Subir logotipo SVG válido**
+  - *Pasos:* subir un archivo SVG válido (≤ 2048 KB) y guardar.
+  - *Esperado:* el logotipo se muestra en la parte superior del menú reemplazando al logo DESi.
+
+- [ ] **CE-09 — Subir logotipo PNG válido**
+  - *Pasos:* subir un archivo PNG válido (≤ 2048 KB) y guardar.
+  - *Esperado:* funciona igual que con SVG.
+
+- [ ] **CE-10 — Archivo no permitido o que excede el tamaño máximo**
+  - *Pasos:* subir un archivo de otro formato (p. ej. JPG) y luego uno mayor a 2048 KB.
+  - *Esperado:* en ambos casos se muestra error y no se guarda.
+
+- [ ] **CE-11 — Quitar logotipo con confirmación**
+  - *Pasos:* con un logotipo asignado, pulsar "Quitar logo" y confirmar.
+  - *Esperado:* el logotipo desaparece y vuelve el logo DESi por defecto.
+
+- [ ] **CE-12 — Re-subir logotipo reemplaza al anterior**
+  - *Pasos:* subir un logotipo nuevo cuando ya existe uno asignado.
+  - *Esperado:* el nuevo reemplaza al anterior sin duplicar archivos.
+
+- [ ] **CE-13 — Sin logotipo asignado se muestra el logo DESi por defecto**
+  - *Pasos:* con la empresa sin logotipo, revisar la parte superior del menú.
+  - *Esperado:* se muestra el logo DESi por defecto (ícono + texto).
+
+- [ ] **CE-14 — El footer "by DESi" se muestra al pie de las páginas**
+  - *Pasos:* recorrer varias páginas del sistema y revisar el pie.
+  - *Esperado:* se muestra "Service Desk by DESi" con los enlaces Ayuda · Términos · Privacidad.
+
+- [ ] **CE-15 — Aislamiento por empresa**
+  - *Pre:* dos empresas A y B con configuraciones distintas.
+  - *Pasos:* configurar la empresa A; iniciar sesión en la empresa B y revisar su configuración.
+  - *Esperado:* lo que configura una empresa no afecta a la otra.
+
+- [ ] **CE-16 — Textos en español correcto (sin caracteres raros)**
+  - *Pasos:* revisar todos los textos de la página.
+  - *Esperado:* el español se ve correcto, con acentos/ñ bien formados (sin caracteres tipo "Ã").
+
+---
+
+## 28. Estadísticas
+
+**Objetivo:** validar el panel "Estadísticas" (métricas y desempeño): acceso por
+rol/permiso (Administrador, Supervisor o jefe de área) en modo solo lectura, filtros de
+fecha, las 8 tarjetas de KPI, las gráficas de estatus y de evolución diaria, los rankings
+de Áreas y de Reasignaciones, los estados de carga y vacío, el aislamiento multi-empresa
+y los textos en español.
+
+- [ ] **ESTD-01 — La página "Estadísticas" aparece en el menú lateral para Administrador y Supervisor**
+  - *Pre:* rol Administrador o Supervisor con permiso de lectura de la página (asignado por defecto); jefe de área con el permiso.
+  - *Pasos:* iniciar sesión con cada rol y revisar el menú lateral.
+  - *Esperado:* aparece el ítem "Estadísticas" y la página abre con normalidad.
+
+- [ ] **ESTD-02 — Un Agente/Usuario sin el permiso no ve el ítem; la URL directa es denegada**
+  - *Pre:* usuario cuyo rol NO tiene asignado el permiso de la página "Estadísticas".
+  - *Pasos:* iniciar sesión, revisar el menú e intentar entrar por URL directa.
+  - *Esperado:* el ítem no aparece en el menú; la URL directa redirige a "Acceso denegado".
+
+- [ ] **ESTD-03 — Un Supervisor (aunque no sea jefe de área) accede y ve datos de TODAS las áreas**
+  - *Pre:* usuario con rol Supervisor que no es responsable de ningún área.
+  - *Pasos:* iniciar sesión como ese Supervisor y abrir "Estadísticas".
+  - *Esperado:* accede sin problema y los indicadores/rankings incluyen todas las áreas de su empresa.
+
+- [ ] **ESTD-04 — Un jefe de área (Area.UsuarioResponsableId) con el permiso asignado accede**
+  - *Pre:* usuario que es responsable (Area.UsuarioResponsableId) de al menos un área y tiene el permiso de lectura.
+  - *Pasos:* iniciar sesión y abrir "Estadísticas".
+  - *Esperado:* el ítem aparece y la página abre con normalidad.
+
+- [ ] **ESTD-05 — Filtros de fecha con valores por defecto (1 de enero del año actual → hoy)**
+  - *Pasos:* abrir "Estadísticas" sin tocar nada.
+  - *Esperado:* la fecha de inicio muestra el 1 de enero del año en curso y la de fin la fecha de hoy.
+
+- [ ] **ESTD-06 — No se pueden elegir fechas futuras; validación inicio ≤ fin**
+  - *Pasos:* intentar seleccionar una fecha futura en cualquiera de los filtros y luego un rango con inicio mayor que fin.
+  - *Esperado:* no se permiten fechas futuras y, si el inicio es mayor que el fin, se muestra error y no se aplica.
+
+- [ ] **ESTD-07 — Al aplicar un rango, las 8 tarjetas se recalculan**
+  - *Pre:* empresa con tickets en fechas distintas.
+  - *Pasos:* elegir un rango y pulsar "Aplicar".
+  - *Esperado:* Total, Nuevos, En Progreso, Resueltos, Cerrados, Rechazados, Eficiencia (%) y Tiempo promedio (h) se recalculan según el rango.
+
+- [ ] **ESTD-08 — Las tarjetas muestran "0" cuando no hay tickets en ese estatus**
+  - *Pre:* un estatus sin tickets dentro del rango.
+  - *Pasos:* revisar las 8 tarjetas.
+  - *Esperado:* la tarjeta del estatus sin tickets muestra "0".
+
+- [ ] **ESTD-09 — Eficiencia = (Cerrados/Total)×100 mostrada como porcentaje**
+  - *Pre:* empresa con tickets; Total > 0.
+  - *Pasos:* comparar la tarjeta de Eficiencia contra los valores de Cerrados y Total.
+  - *Esperado:* el porcentaje coincide con (Cerrados ÷ Total) × 100 y se muestra como % (ej. "75 %").
+
+- [ ] **ESTD-10 — Tiempo promedio de resolución con 1 decimal que respeta el horario laboral**
+  - *Pre:* horario laboral configurado en "Configuración de Empresa" (días y horas hábiles).
+  - *Pasos:* revisar la tarjeta "Tiempo promedio de resolución" para un rango con tickets resueltos.
+  - *Esperado:* el valor se muestra con 1 decimal (ej. "4.5 h") y se calcula en horas hábiles: los días/horas no laborables no suman tiempo.
+
+- [ ] **ESTD-11 — Gráfica de pastel muestra la distribución de estatus con tooltip**
+  - *Pre:* tickets en el rango.
+  - *Pasos:* pasar el cursor sobre cada porción de la gráfica de pastel.
+  - *Esperado:* cada porción muestra el nombre del estatus y la cantidad de tickets (tooltip nombre + cantidad).
+
+- [ ] **ESTD-12 — Gráfica de evolución muestra creados vs. resueltos por día y respeta el rango**
+  - *Pre:* tickets creados/resueltos en el rango.
+  - *Pasos:* revisar la gráfica de líneas antes y después de aplicar un rango distinto.
+  - *Esperado:* se grafican los creados y los resueltos por día, y el periodo mostrado coincide con el rango elegido.
+
+- [ ] **ESTD-13 — Sin tickets en el rango, las gráficas muestran "Sin datos"**
+  - *Pre:* un rango sin tickets.
+  - *Pasos:* aplicar el rango y revisar las gráficas.
+  - *Esperado:* la gráfica de pastel y la de evolución muestran el mensaje "Sin datos" (mensaje amigable, no error).
+
+- [ ] **ESTD-14 — Ranking de Áreas: orden por Total desc, promedio de urgencia a 1 decimal, sin áreas sin tickets**
+  - *Pre:* varias áreas con distinta cantidad de tickets.
+  - *Pasos:* revisar la tabla de ranking de Áreas.
+  - *Esperado:* aparecen todas las áreas con tickets ordenadas por Total descendente (Área, Total, Promedio de urgencia a 1 decimal, Cerrados, Rechazados); las áreas sin tickets NO aparecen.
+
+- [ ] **ESTD-15 — Ranking de Reasignaciones: dos listas, solo reasignaciones reales y TOP N**
+  - *Pre:* historial con tomas iniciales y reasignaciones reales entre agentes.
+  - *Pasos:* revisar el bloque de reasignaciones.
+  - *Esperado:* se muestran las dos listas (reciben / quitan), solo se cuentan reasignaciones reales (el ticket cambió de agente; la toma inicial no cuenta) y cada lista respeta el TOP N (5 por defecto).
+
+- [ ] **ESTD-16 — Sin reasignaciones se muestra el mensaje de vacío**
+  - *Pre:* un rango sin reasignaciones reales.
+  - *Pasos:* aplicar el rango y revisar el bloque de reasignaciones.
+  - *Esperado:* se muestra "No hay reasignaciones registradas.".
+
+- [ ] **ESTD-17 — Spinner "Cargando datos…" en cada sección**
+  - *Pasos:* abrir el panel o aplicar un rango y observar la carga de cada sección.
+  - *Esperado:* mientras se consultan los datos, cada sección muestra el indicador "Cargando datos…".
+
+- [ ] **ESTD-18 — Aislamiento por empresa**
+  - *Pre:* dos empresas A y B con tickets distintos.
+  - *Pasos:* comparar los datos del panel entre un usuario de la empresa A y uno de la empresa B (mismo rango).
+  - *Esperado:* cada usuario ve únicamente los indicadores de su propia empresa; los datos de la empresa A no se ven desde la empresa B.
+
+- [ ] **ESTD-19 — El módulo es solo lectura**
+  - *Pasos:* recorrer la página buscando acciones de escritura.
+  - *Esperado:* no existe crear/editar/eliminar ni exportar; solo se consultan indicadores.
+
+- [ ] **ESTD-20 — Textos en español correcto (sin caracteres raros)**
+  - *Pasos:* revisar todos los textos del panel (tarjetas, gráficas, rankings, mensajes).
+  - *Esperado:* el español se ve correcto, con acentos/ñ bien formados (sin caracteres tipo "Ã").
 
 ---
 

@@ -77,5 +77,21 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = _empresaService.EliminarEmpresa(e.Id, e.ModificadoPor, e.FechaModificacion.Value, usuario);
             return result;
         }
+
+        [Permiso("ConfiguracionEmpresa", "Editar")]
+        [HttpPost, Route("GuardarLogo")]
+        public ModelResponse GuardarLogo([FromBody] GuardarLogoRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _empresaService.GuardarLogoEmpresa(usuario, request.LogoUrl);
+            return result;
+        }
     }
+
+    #region Request classes
+    public class GuardarLogoRequest
+    {
+        public string LogoUrl { get; set; }
+    }
+    #endregion
 }

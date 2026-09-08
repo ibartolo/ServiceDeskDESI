@@ -120,6 +120,103 @@ ServiceDeskDESI está pensado para operar **varias empresas a la vez**:
 - No existe forma de consultar ni modificar datos de otra empresa.
 - El registro de nuevas empresas valida que sus datos sean únicos (RFC, correo, nombre).
 
+### 6. Configuración de Empresa
+
+Cada empresa puede personalizar el sistema y definir sus reglas de operación desde una
+página independiente del menú (ícono de engranaje): **Configuración de Empresa**. Solo
+la ven los roles con el permiso de la página asignado; por defecto el rol
+**Administrador** la tiene con permisos de **lectura** y **edición** (otros roles pueden
+recibirla después desde la administración de permisos). Ver la página exige permiso de
+lectura y guardar cambios exige permiso de edición; el módulo **no tiene operación de
+eliminar**.
+
+**Datos de la empresa (solo lectura)**
+- La página abre con una tarjeta que muestra los **datos generales de la empresa** en
+  modo solo lectura; ahí no se edita nada.
+
+**Horario laboral**
+- Un editor con una fila por día de la semana (**lunes a domingo**). Cada día tiene una
+  casilla **"Labora"** y las horas de **inicio** y **fin** en formato de 12 horas con
+  **AM/PM** (hora de 1 a 12 y minutos de 00 a 55 en pasos de 5).
+- Un solo botón **Guardar** persiste la semana completa en una sola transacción. Si un
+  día queda desmarcado, sus horas se limpian. El sistema valida que la **hora de fin sea
+  mayor que la de inicio**.
+- Cada empresa guarda su propio horario (una fila de registro por día). Las empresas de
+  nuevo registro reciben por defecto **lunes a viernes de 09:00 a 17:00**, con sábado y
+  domingo no laborables.
+- **Uso futuro:** este horario alimentará al módulo de **Estadísticas** para calcular
+  tiempos de resolución dentro de las horas hábiles de la empresa.
+
+**Logotipo de la empresa**
+- La empresa puede subir su **logotipo** (formato **SVG o PNG**, máximo **2048 KB**).
+  El archivo se guarda en la carpeta de la empresa (`Uploads/Logos/{empresaId}/`) y la
+  base de datos conserva solo su ruta relativa (`LogoUrl`).
+- Cuando hay logotipo, este aparece en la parte superior del menú lateral en lugar del
+  logo de DESi. Si no hay logotipo, se muestra el **logo DESi por defecto** (ícono y
+  texto).
+- La opción **"Quitar logo"** (con confirmación) elimina el logotipo y regresa al logo
+  DESi; volver a subir una imagen reemplaza al archivo anterior, sin duplicados.
+
+**Pie de página institucional**
+- El sitio muestra un pie de página fijo **"Service Desk by DESi"** con los enlaces
+  Ayuda · Términos · Privacidad. Es informativo y no se edita desde la página.
+
+### 7. Estadísticas (Métricas y Desempeño)
+
+Panel independiente de **solo lectura** con los indicadores (KPIs) del service desk de la
+empresa: cuántos tickets se atienden, en qué estatus están, qué tan rápido se resuelven y
+cómo se reparte la carga entre áreas y agentes. Su propósito es dar a la empresa métricas
+accionables **sin tener que exportar datos a hojas de cálculo**.
+
+**Acceso y alcance**
+- Es un ítem **independiente del menú** ("Estadísticas"). Por defecto lo ven los roles
+  **Administrador** y **Supervisor**; en tiempo de ejecución también entra un **jefe de
+  área** (usuario responsable de al menos un área). Quien no tenga el permiso no ve el
+  ítem y, si entra por URL directa, es llevado a "Acceso denegado".
+- El módulo es **solo lectura**: no hay crear, editar, eliminar ni exportar.
+- En esta primera versión el **Supervisor** ve la información de **todas las áreas** de
+  su empresa.
+
+**Filtros por fecha**
+- Dos filtros nativos de fecha (inicio y fin) con valores por defecto: **1 de enero del
+  año actual → hoy**.
+- No se permiten fechas futuras ni rangos donde el inicio sea mayor que el fin.
+- El botón **"Aplicar"** recalcula todas las tarjetas y gráficas del panel.
+
+**Indicadores (8 tarjetas)**
+- **Total:** tickets creados en el rango.
+- **Nuevos, En Progreso, Resueltos, Cerrados y Rechazados:** tickets agrupados por su
+  **estatus actual**; si un estatus no tiene tickets, la tarjeta muestra "0".
+- **Eficiencia:** porcentaje de cierre = (Cerrados ÷ Total) × 100.
+- **Tiempo promedio de resolución:** promedio en horas con un decimal (ej. "4.5 h"),
+  calculado en **horas hábiles** según el horario laboral que la empresa configuró en
+  "Configuración de Empresa"; los días y horas no laborables no suman tiempo.
+
+**Gráficas**
+- **Pastel de distribución de estatus:** cada estatus con su color; al pasar el cursor se
+  muestra el nombre del estatus y la cantidad de tickets.
+- **Evolución diaria (líneas):** tickets creados vs. resueltos por día dentro del rango.
+- Ambas se dibujan con Chart.js y muestran **"Sin datos"** cuando el rango no tiene tickets.
+
+**Ranking de Áreas**
+- Lista las áreas que tienen tickets, **ordenada por Total descendente**, con Área, Total,
+  Promedio de urgencia (un decimal), Cerrados y Rechazados. Las áreas sin tickets no
+  aparecen.
+
+**Ranking de Reasignaciones**
+- Dos listas lado a lado: **"Agentes que más reciben tickets reasignados"** y **"Agentes a
+  quienes más les quitan tickets"**, con **TOP N** configurable (5 por defecto, parámetro
+  `EstadisticasTopAgentes`).
+- Solo cuentan las **reasignaciones reales** (el ticket cambió de agente); la toma inicial
+  de un ticket no se considera. Sin reasignaciones, se muestra "No hay reasignaciones
+  registradas.".
+
+**Experiencia de uso y aislamiento**
+- Cada sección muestra **"Cargando datos…"** mientras consulta sus datos y un mensaje
+  amigable (**"Aún no hay tickets registrados…"**) cuando la empresa aún no tiene tickets.
+- Los datos están **aislados por empresa**: un usuario de la empresa A nunca ve las
+  métricas de la empresa B.
+
 ---
 
 ## Flujos de trabajo principales

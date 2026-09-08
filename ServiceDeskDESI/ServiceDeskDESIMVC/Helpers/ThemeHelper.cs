@@ -1,4 +1,5 @@
 using ServiceDeskDESIEntities.Seguridad;
+using System;
 using System.Web;
 
 namespace ServiceDeskDESIMVC.Helpers
@@ -22,7 +23,8 @@ namespace ServiceDeskDESIMVC.Helpers
         }
 
         /// <summary>
-        /// Lee el tema guardado en la cookie ('light' o 'dark'). Si no existe, devuelve 'light'.
+        /// Lee el tema guardado en la cookie ('light' o 'dark'). Si no existe, devuelve 'dark'
+        /// (el tema oscuro es el predeterminado del sistema).
         /// </summary>
         public static string GetTema(HttpRequestBase request, TokenCookie tokenCookie)
         {
@@ -32,7 +34,30 @@ namespace ServiceDeskDESIMVC.Helpers
             {
                 return cookie.Value;
             }
-            return "light";
+            return "dark";
+        }
+
+        /// <summary>
+        /// Crea la cookie de tema con el valor por defecto ('dark') si el usuario aún no tiene una,
+        /// para que el tema oscuro aplique desde el primer acceso sin esperar a cambiarlo en Configuración.
+        /// No sobrescribe una preferencia existente.
+        /// </summary>
+        public static void AsegurarTemaCookie(HttpRequestBase request, HttpResponseBase response, TokenCookie tokenCookie)
+        {
+            var cookieName = GetCookieName(tokenCookie);
+            var cookie = request?.Cookies[cookieName];
+            if (cookie != null && (cookie.Value == "light" || cookie.Value == "dark"))
+            {
+                return; // ya tiene una preferencia guardada
+            }
+
+            var nueva = new HttpCookie(cookieName, "dark")
+            {
+                Expires = DateTime.Now.AddYears(1),
+                HttpOnly = true,
+                Path = "/"
+            };
+            response.Cookies.Add(nueva);
         }
 
         /// <summary>
