@@ -57,7 +57,8 @@
 | 25 | Gestor de mantenimientos de Activos (modal) | 8 |
 | 26 | Correcciones en ventana de Permisos: contador de páginas y tema oscuro | 5 |
 | 27 | Configuración de Empresa | 16 |
-| | **Total** | **~165** |
+| 28 | Estadísticas | 20 |
+| | **Total** | **~185** |
 
 ---
 
@@ -1159,6 +1160,111 @@ con reemplazo y quita, y el pie de página "by DESi".
 
 - [ ] **CE-16 — Textos en español correcto (sin caracteres raros)**
   - *Pasos:* revisar todos los textos de la página.
+  - *Esperado:* el español se ve correcto, con acentos/ñ bien formados (sin caracteres tipo "Ã").
+
+---
+
+## 28. Estadísticas
+
+**Objetivo:** validar el panel "Estadísticas" (métricas y desempeño): acceso por
+rol/permiso (Administrador, Supervisor o jefe de área) en modo solo lectura, filtros de
+fecha, las 8 tarjetas de KPI, las gráficas de estatus y de evolución diaria, los rankings
+de Áreas y de Reasignaciones, los estados de carga y vacío, el aislamiento multi-empresa
+y los textos en español.
+
+- [ ] **ESTD-01 — La página "Estadísticas" aparece en el menú lateral para Administrador y Supervisor**
+  - *Pre:* rol Administrador o Supervisor con permiso de lectura de la página (asignado por defecto); jefe de área con el permiso.
+  - *Pasos:* iniciar sesión con cada rol y revisar el menú lateral.
+  - *Esperado:* aparece el ítem "Estadísticas" y la página abre con normalidad.
+
+- [ ] **ESTD-02 — Un Agente/Usuario sin el permiso no ve el ítem; la URL directa es denegada**
+  - *Pre:* usuario cuyo rol NO tiene asignado el permiso de la página "Estadísticas".
+  - *Pasos:* iniciar sesión, revisar el menú e intentar entrar por URL directa.
+  - *Esperado:* el ítem no aparece en el menú; la URL directa redirige a "Acceso denegado".
+
+- [ ] **ESTD-03 — Un Supervisor (aunque no sea jefe de área) accede y ve datos de TODAS las áreas**
+  - *Pre:* usuario con rol Supervisor que no es responsable de ningún área.
+  - *Pasos:* iniciar sesión como ese Supervisor y abrir "Estadísticas".
+  - *Esperado:* accede sin problema y los indicadores/rankings incluyen todas las áreas de su empresa.
+
+- [ ] **ESTD-04 — Un jefe de área (Area.UsuarioResponsableId) con el permiso asignado accede**
+  - *Pre:* usuario que es responsable (Area.UsuarioResponsableId) de al menos un área y tiene el permiso de lectura.
+  - *Pasos:* iniciar sesión y abrir "Estadísticas".
+  - *Esperado:* el ítem aparece y la página abre con normalidad.
+
+- [ ] **ESTD-05 — Filtros de fecha con valores por defecto (1 de enero del año actual → hoy)**
+  - *Pasos:* abrir "Estadísticas" sin tocar nada.
+  - *Esperado:* la fecha de inicio muestra el 1 de enero del año en curso y la de fin la fecha de hoy.
+
+- [ ] **ESTD-06 — No se pueden elegir fechas futuras; validación inicio ≤ fin**
+  - *Pasos:* intentar seleccionar una fecha futura en cualquiera de los filtros y luego un rango con inicio mayor que fin.
+  - *Esperado:* no se permiten fechas futuras y, si el inicio es mayor que el fin, se muestra error y no se aplica.
+
+- [ ] **ESTD-07 — Al aplicar un rango, las 8 tarjetas se recalculan**
+  - *Pre:* empresa con tickets en fechas distintas.
+  - *Pasos:* elegir un rango y pulsar "Aplicar".
+  - *Esperado:* Total, Nuevos, En Progreso, Resueltos, Cerrados, Rechazados, Eficiencia (%) y Tiempo promedio (h) se recalculan según el rango.
+
+- [ ] **ESTD-08 — Las tarjetas muestran "0" cuando no hay tickets en ese estatus**
+  - *Pre:* un estatus sin tickets dentro del rango.
+  - *Pasos:* revisar las 8 tarjetas.
+  - *Esperado:* la tarjeta del estatus sin tickets muestra "0".
+
+- [ ] **ESTD-09 — Eficiencia = (Cerrados/Total)×100 mostrada como porcentaje**
+  - *Pre:* empresa con tickets; Total > 0.
+  - *Pasos:* comparar la tarjeta de Eficiencia contra los valores de Cerrados y Total.
+  - *Esperado:* el porcentaje coincide con (Cerrados ÷ Total) × 100 y se muestra como % (ej. "75 %").
+
+- [ ] **ESTD-10 — Tiempo promedio de resolución con 1 decimal que respeta el horario laboral**
+  - *Pre:* horario laboral configurado en "Configuración de Empresa" (días y horas hábiles).
+  - *Pasos:* revisar la tarjeta "Tiempo promedio de resolución" para un rango con tickets resueltos.
+  - *Esperado:* el valor se muestra con 1 decimal (ej. "4.5 h") y se calcula en horas hábiles: los días/horas no laborables no suman tiempo.
+
+- [ ] **ESTD-11 — Gráfica de pastel muestra la distribución de estatus con tooltip**
+  - *Pre:* tickets en el rango.
+  - *Pasos:* pasar el cursor sobre cada porción de la gráfica de pastel.
+  - *Esperado:* cada porción muestra el nombre del estatus y la cantidad de tickets (tooltip nombre + cantidad).
+
+- [ ] **ESTD-12 — Gráfica de evolución muestra creados vs. resueltos por día y respeta el rango**
+  - *Pre:* tickets creados/resueltos en el rango.
+  - *Pasos:* revisar la gráfica de líneas antes y después de aplicar un rango distinto.
+  - *Esperado:* se grafican los creados y los resueltos por día, y el periodo mostrado coincide con el rango elegido.
+
+- [ ] **ESTD-13 — Sin tickets en el rango, las gráficas muestran "Sin datos"**
+  - *Pre:* un rango sin tickets.
+  - *Pasos:* aplicar el rango y revisar las gráficas.
+  - *Esperado:* la gráfica de pastel y la de evolución muestran el mensaje "Sin datos" (mensaje amigable, no error).
+
+- [ ] **ESTD-14 — Ranking de Áreas: orden por Total desc, promedio de urgencia a 1 decimal, sin áreas sin tickets**
+  - *Pre:* varias áreas con distinta cantidad de tickets.
+  - *Pasos:* revisar la tabla de ranking de Áreas.
+  - *Esperado:* aparecen todas las áreas con tickets ordenadas por Total descendente (Área, Total, Promedio de urgencia a 1 decimal, Cerrados, Rechazados); las áreas sin tickets NO aparecen.
+
+- [ ] **ESTD-15 — Ranking de Reasignaciones: dos listas, solo reasignaciones reales y TOP N**
+  - *Pre:* historial con tomas iniciales y reasignaciones reales entre agentes.
+  - *Pasos:* revisar el bloque de reasignaciones.
+  - *Esperado:* se muestran las dos listas (reciben / quitan), solo se cuentan reasignaciones reales (el ticket cambió de agente; la toma inicial no cuenta) y cada lista respeta el TOP N (5 por defecto).
+
+- [ ] **ESTD-16 — Sin reasignaciones se muestra el mensaje de vacío**
+  - *Pre:* un rango sin reasignaciones reales.
+  - *Pasos:* aplicar el rango y revisar el bloque de reasignaciones.
+  - *Esperado:* se muestra "No hay reasignaciones registradas.".
+
+- [ ] **ESTD-17 — Spinner "Cargando datos…" en cada sección**
+  - *Pasos:* abrir el panel o aplicar un rango y observar la carga de cada sección.
+  - *Esperado:* mientras se consultan los datos, cada sección muestra el indicador "Cargando datos…".
+
+- [ ] **ESTD-18 — Aislamiento por empresa**
+  - *Pre:* dos empresas A y B con tickets distintos.
+  - *Pasos:* comparar los datos del panel entre un usuario de la empresa A y uno de la empresa B (mismo rango).
+  - *Esperado:* cada usuario ve únicamente los indicadores de su propia empresa; los datos de la empresa A no se ven desde la empresa B.
+
+- [ ] **ESTD-19 — El módulo es solo lectura**
+  - *Pasos:* recorrer la página buscando acciones de escritura.
+  - *Esperado:* no existe crear/editar/eliminar ni exportar; solo se consultan indicadores.
+
+- [ ] **ESTD-20 — Textos en español correcto (sin caracteres raros)**
+  - *Pasos:* revisar todos los textos del panel (tarjetas, gráficas, rankings, mensajes).
   - *Esperado:* el español se ve correcto, con acentos/ñ bien formados (sin caracteres tipo "Ã").
 
 ---

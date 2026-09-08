@@ -161,6 +161,62 @@ eliminar**.
 - El sitio muestra un pie de página fijo **"Service Desk by DESi"** con los enlaces
   Ayuda · Términos · Privacidad. Es informativo y no se edita desde la página.
 
+### 7. Estadísticas (Métricas y Desempeño)
+
+Panel independiente de **solo lectura** con los indicadores (KPIs) del service desk de la
+empresa: cuántos tickets se atienden, en qué estatus están, qué tan rápido se resuelven y
+cómo se reparte la carga entre áreas y agentes. Su propósito es dar a la empresa métricas
+accionables **sin tener que exportar datos a hojas de cálculo**.
+
+**Acceso y alcance**
+- Es un ítem **independiente del menú** ("Estadísticas"). Por defecto lo ven los roles
+  **Administrador** y **Supervisor**; en tiempo de ejecución también entra un **jefe de
+  área** (usuario responsable de al menos un área). Quien no tenga el permiso no ve el
+  ítem y, si entra por URL directa, es llevado a "Acceso denegado".
+- El módulo es **solo lectura**: no hay crear, editar, eliminar ni exportar.
+- En esta primera versión el **Supervisor** ve la información de **todas las áreas** de
+  su empresa.
+
+**Filtros por fecha**
+- Dos filtros nativos de fecha (inicio y fin) con valores por defecto: **1 de enero del
+  año actual → hoy**.
+- No se permiten fechas futuras ni rangos donde el inicio sea mayor que el fin.
+- El botón **"Aplicar"** recalcula todas las tarjetas y gráficas del panel.
+
+**Indicadores (8 tarjetas)**
+- **Total:** tickets creados en el rango.
+- **Nuevos, En Progreso, Resueltos, Cerrados y Rechazados:** tickets agrupados por su
+  **estatus actual**; si un estatus no tiene tickets, la tarjeta muestra "0".
+- **Eficiencia:** porcentaje de cierre = (Cerrados ÷ Total) × 100.
+- **Tiempo promedio de resolución:** promedio en horas con un decimal (ej. "4.5 h"),
+  calculado en **horas hábiles** según el horario laboral que la empresa configuró en
+  "Configuración de Empresa"; los días y horas no laborables no suman tiempo.
+
+**Gráficas**
+- **Pastel de distribución de estatus:** cada estatus con su color; al pasar el cursor se
+  muestra el nombre del estatus y la cantidad de tickets.
+- **Evolución diaria (líneas):** tickets creados vs. resueltos por día dentro del rango.
+- Ambas se dibujan con Chart.js y muestran **"Sin datos"** cuando el rango no tiene tickets.
+
+**Ranking de Áreas**
+- Lista las áreas que tienen tickets, **ordenada por Total descendente**, con Área, Total,
+  Promedio de urgencia (un decimal), Cerrados y Rechazados. Las áreas sin tickets no
+  aparecen.
+
+**Ranking de Reasignaciones**
+- Dos listas lado a lado: **"Agentes que más reciben tickets reasignados"** y **"Agentes a
+  quienes más les quitan tickets"**, con **TOP N** configurable (5 por defecto, parámetro
+  `EstadisticasTopAgentes`).
+- Solo cuentan las **reasignaciones reales** (el ticket cambió de agente); la toma inicial
+  de un ticket no se considera. Sin reasignaciones, se muestra "No hay reasignaciones
+  registradas.".
+
+**Experiencia de uso y aislamiento**
+- Cada sección muestra **"Cargando datos…"** mientras consulta sus datos y un mensaje
+  amigable (**"Aún no hay tickets registrados…"**) cuando la empresa aún no tiene tickets.
+- Los datos están **aislados por empresa**: un usuario de la empresa A nunca ve las
+  métricas de la empresa B.
+
 ---
 
 ## Flujos de trabajo principales
