@@ -11,19 +11,20 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerUsuarioPagina()
+        public ModelResponse<List<UsuarioPagina>> ObtenerUsuarioPagina(string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<UsuarioPagina>>();
             try
             {
-                var usuario = GetObjects("ObtenerUsuarioPagina", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
+                var usuarioResp = GetObjects("ObtenerUsuarioPagina", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Usuario", usuario) },
                   new Func<IDataReader, UsuarioPagina>((reader) =>
                   {
                       var usuarioPagina = LlenarEntidad<UsuarioPagina>(reader);
                       return usuarioPagina;
                   }));
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = usuario;
+                modelResponse.Response = usuarioResp.ToList();
                 modelResponse.Message = "UsuarioPagina obtenidas correctamente";
             }
             catch (Exception ex)
@@ -34,9 +35,9 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             return modelResponse;
         }
-        public ModelResponse GuardarOActualizarUsuarioPagina(UsuarioPagina u)
+        public ModelResponse<UsuarioPagina> GuardarOActualizarUsuarioPagina(UsuarioPagina u)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioPagina>();
             try
             {
                 var parametros = ObtenerParametrosSQL(u).ToArray();
@@ -56,9 +57,9 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
-        public ModelResponse ObtenerUsuarioPaginaPorId(long id)
+        public ModelResponse<UsuarioPagina> ObtenerUsuarioPaginaPorId(long id, string usuario)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioPagina>();
             try
             {
                 modelResponse.IsSuccess = true;
@@ -70,6 +71,7 @@ namespace ServiceDeskDESIWebApi.DAL
                     ParameterName = "@Id",
                     SqlDbType = System.Data.SqlDbType.Int
                 });
+                parameters.Add(new SqlParameter("@Usuario", usuario));
 
                 var result = GetObject("ObtenerUsuarioPaginaPorId", System.Data.CommandType.StoredProcedure,
                     parameters, new Func<System.Data.IDataReader, UsuarioPagina>((reader) =>

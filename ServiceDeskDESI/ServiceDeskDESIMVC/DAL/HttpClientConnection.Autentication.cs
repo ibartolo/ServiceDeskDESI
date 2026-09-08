@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Seguridad;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +13,18 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> AutenticarUsuario(Usuario usuario)
+        public async Task<ModelResponse<UsuarioDTO>> AutenticarUsuario(Usuario usuario)
         {
-            var result = await RequestAsync<object>($"api/Autentication/autenticar", HttpMethod.Post, usuario,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                })); // No necesita token porque es el login
+            // No necesita token porque es el login
+            var result = await RequestAsync<UsuarioDTO>($"api/Autentication/autenticar", HttpMethod.Post, usuario);
+            Log.Information("AutenticarUsuario (MVC DAL) para {Usuario}: IsSuccess={IsSuccess}, Message={Message}", usuario.NombreUsuario, result?.IsSuccess, result?.Message);
+            return result;
+        }
 
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
+        public async Task<ModelResponse<Usuario>> ActualizarPerfilUsuario(Usuario usuario)
+        {
+            MappingColumSecurity(usuario);
+            return await RequestAsync<Usuario>($"api/Autentication/ActualizarPerfil", HttpMethod.Post, usuario, token.Token.access_token);
         }
 
         public async Task<ModelResponse> ValidarTokenRecuperacion(string token)
@@ -68,6 +70,12 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
 
             return modelResponse;
+        }
+
+        public async Task<ModelResponse<Usuario>> GuardarOActualizarUsuarioAdmin(Usuario usuario)
+        {
+            MappingColumSecurity(usuario);
+            return await RequestAsync<Usuario>($"api/Autentication/Admin/Usuario", HttpMethod.Post, usuario, token.Token.access_token);
         }
     }
 }

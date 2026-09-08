@@ -1,62 +1,75 @@
-﻿@model ServiceDeskDESIEntities.Catalogos.Marca
-    @{
-        ViewBag.Title = "Mark";
-        Layout = "~/Views/Shared/_Layout.cshtml";
+﻿﻿@model ServiceDeskDESIEntities.Catalogos.Marca
+@{
+    ViewBag.Title = "Mark";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
     }
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
-    <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
-    <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
-   
-    <div class="form-section">
-        @if (ViewBag.ErrorMessage != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        }
-        <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Marca</h3>
-        <form id="frmMarca" name="frmMarca" method="post">
-            @Html.HiddenFor(x => x.Id)
-            @Html.HiddenFor(x => x.CreadoPor)
-            @Html.HiddenFor(x => x.FechaCreacion)
-            @Html.HiddenFor(x => x.ModificadoPor)
-            @Html.HiddenFor(x => x.FechaModificacion)
-            @Html.HiddenFor(x => x.Estatus)
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label>Nombre</label>
-                        @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Marca" })
-                    </div>
-                </div>
-                <div class="col-md-8">
-                    <div class="mb-3">
-                        <label>Descripcion</label>
-                        @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripcion Marca" })
-                    </div>
+
+    <h3 class="section-title"><i class="fas fa-trademark me-2"></i>Catálogo de Marcas</h3>
+
+    <form id="frmMarca" name="frmMarca" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre de la marca" })
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-3">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label>Descripción</label>
+                    @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripción de la marca" })
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
                         <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarMarca()" />
-                        <a href="/Catalogs/Mark" class="btn btn-warning">Cancelar</a>
-                    </div>
+                    }
+                    <a href="/Catalogs/Mark" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12 table-responsive">
-                    <div class="mb-3">
-                        <table id="tblMarca"></table>
-                    </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                    <table id="tblMarca"></table>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
+
 <script>
+    // Pasar permisos a JavaScript para controlar los botones en el DataTable
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+
     $(function () {
         $("#frmMarca").validate({
             rules: {
@@ -71,17 +84,17 @@
             },
             messages: {
                 "Nombre": {
-                    required: "El Nombre Es Requerido",
-                    maxlength: "El Nombre no puede superar los 250 caracteristicas "
+                    required: "El campo 'Nombre' es requerido.",
+                    maxlength: "El nombre no puede superar los 250 caracteres."
                 },
                 "Descripcion": {
-                    required: "Descripcion es requerido",
-                    maxlength: "Descripcion no puede superar los 250 caracteristicas "
+                    required: "El campo 'Descripción' es requerido.",
+                    maxlength: "La descripción no puede superar los 250 caracteres."
                 }
             },
             errorElement: "span",
             errorClass: "text-danger",
-            highligth: function (element) {
+            highlight: function (element) {
                 $(element).addClass("is-invalid").removeClass("is-valid");
             },
             unhighlight: function (element) {
@@ -90,7 +103,6 @@
             errorPlacement: function (error, element) {
                 error.insertAfter(element);
             }
-
         });
     });
 
@@ -99,19 +111,30 @@
             columns: [
                 { data: 'Id', title: 'ID', visible: false },
                 { data: 'Nombre', title: 'Nombre' },
-                { data: 'Descripcion', title: 'Descripcion' },
+                { data: 'Descripcion', title: 'Descripción' },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
-                        // Dentro del render de la columna "Acciones" añade type="button"
-                        return '<div class="d-flex gap-3">' +
-                            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarMarca(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarMarca(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
-                    }
+                        var html = '<div class="d-flex gap-3">';
 
+                        // Botón Editar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarMarca(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+
+                        // Botón Eliminar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarMarca(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+
+                        html += '</div>';
+                        return html;
+                    }
                 },
                 { data: 'Estatus', title: 'Estatus', visible: false }
-            ]
+            ],
+            language: {
+                url: "/Content/datatables/i18n/es-ES.json"
+            }
         });
         ConsultarTodasMarcas();
     });
@@ -137,6 +160,7 @@
                 FechaModificacion: null,
                 Estatus: true
             };
+
             PostMVC('/Catalogs/GuardarOActualizarMarca', marca, function (response) {
                 Swal.close();
 
@@ -190,7 +214,6 @@
     }
 
     function EliminarMarca(event, id) {
-
         Swal.fire({
             title: '¿Está seguro?',
             text: 'Esta acción eliminará lógicamente el registro',
@@ -210,11 +233,13 @@
                         Swal.showLoading();
                     }
                 });
+
                 var marca = {
                     Id: id,
                     ModificadoPor: $("#ModificadoPor").val() || "system",
                     FechaModificacion: new Date().toISOString()
                 };
+
                 PostMVC('/Catalogs/EliminarMarcas', marca, function (response) {
                     Swal.close();
 
@@ -229,6 +254,8 @@
                             iconColor: '#4e73df'
                         }).then(() => {
                             ConsultarTodasMarcas();
+                            $("#frmMarca")[0].reset();
+                            $("#Id").val(0);
                         });
                     } else {
                         Swal.fire({
@@ -246,6 +273,4 @@
 
         return false;
     }
-
 </script>
-

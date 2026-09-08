@@ -1,0 +1,113 @@
+﻿<div class="modal fade" id="modalReasignarTicket" tabindex="-1" aria-labelledby="modalReasignarTicketLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalReasignarTicketLabel"><i class="fas fa-user-plus me-2"></i>Reasignar ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="ticketIdReasignar" name="ticketId" />
+
+                <div class="mb-3">
+                    <label>Usuario:</label>
+                    <select id="ddlUsuarioReasignar" name="nuevoUsuarioId" class="form-control">
+                        <option value="">Seleccione un usuario</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Comentario (obligatorio, máximo 300 caracteres):</label>
+                    <textarea id="comentarioReasignar" name="comentario" class="form-control" rows="3" maxlength="300" placeholder="Escriba el motivo de la reasignación"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="ConfirmarReasignar()">Reasignar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function ConfirmarReasignar() {
+        var ticketId = $("#ticketIdReasignar").val();
+        var nuevoUsuarioId = $("#ddlUsuarioReasignar").val();
+        var comentario = $("#comentarioReasignar").val();
+
+        if (!nuevoUsuarioId) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe seleccionar un usuario',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+
+        if (!comentario || !comentario.trim()) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe escribir un comentario para reasignar el ticket.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+
+        if (comentario.length > 300) {
+            Swal.fire({
+                title: 'Error',
+                text: 'El comentario no puede superar los 300 caracteres.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Reasignando...',
+            text: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        PostMVC('/Ticket/ReasignarTicket', { ticketId: ticketId, nuevoUsuarioId: parseInt(nuevoUsuarioId), comentario: comentario }, function (response) {
+            Swal.close();
+
+            if (response.IsSuccess) {
+                bootstrap.Modal.getInstance(document.getElementById('modalReasignarTicket')).hide();
+
+                if (typeof RefrescarTabla === 'function') {
+                    RefrescarTabla();
+                }
+
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: response.Message,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: 'white',
+                    iconColor: '#4e73df'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: response.Message,
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    background: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            }
+        });
+    }
+</script>

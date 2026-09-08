@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using ServiceDeskDESIEntities.Autenticacion;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using System;
@@ -12,47 +14,28 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTickets()
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTickets()
         {
-            var result = await RequestAsync<object>($"api/Ticket/Lista", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<TicketDTO>>($"api/Ticket/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerTicketPorId(long id)
+        public async Task<ModelResponse<TicketDTO>> ObtenerTicketPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Ticket/{id}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<TicketDTO>($"api/Ticket/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarTicket(Ticket ticket)
+        public async Task<ModelResponse<Ticket>> GuardarOActualizarTicket(Ticket ticket)
         {
             MappingColumSecurity(ticket);
 
-            var result = await RequestAsync<object>($"api/Ticket", HttpMethod.Post, ticket,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<Ticket>($"api/Ticket/Guardar", HttpMethod.Post, ticket, token.Token.access_token);
         }
 
         public async Task<ModelResponse> EliminarTicket(Ticket ticket)
         {
-            var result = await RequestAsync<object>($"api/Ticket", HttpMethod.Delete, ticket,
+            MappingColumSecurity(ticket);
+
+            var result = await RequestAsync<object>($"api/Ticket/Eliminar", HttpMethod.Delete, ticket,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -62,33 +45,40 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ObtenerTicketsPorArea(long areaId)
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTicketsPorArea(long areaId)
         {
-            var result = await RequestAsync<object>($"api/Ticket/Area/{areaId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<TicketDTO>>($"api/Ticket/Area/{areaId}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerTicketsPorUsuario(string creadoPor)
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTicketsPorUsuario(string creadoPor)
         {
-            var result = await RequestAsync<object>($"api/Ticket/Usuario/{creadoPor}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
+            return await RequestAsync<List<TicketDTO>>($"api/Ticket/Usuario/{creadoPor}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerTicketsPorUrgencia(int urgencia)
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTicketsPorUrgencia(int urgencia)
         {
-            var result = await RequestAsync<object>($"api/Ticket/Urgencia/{urgencia}", HttpMethod.Get, null,
+            return await RequestAsync<List<TicketDTO>>($"api/Ticket/Urgencia/{urgencia}", HttpMethod.Get, null, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse<List<TicketDTO>>> ObtenerTicketsPorEstatus(int ticketEstatusId)
+        {
+            return await RequestAsync<List<TicketDTO>>($"api/Ticket/Estatus/{ticketEstatusId}", HttpMethod.Get, null, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse<List<TicketEstatus>>> ObtenerTicketEstatus()
+        {
+            return await RequestAsync<List<TicketEstatus>>($"api/Ticket/Estatus/List", HttpMethod.Get, null, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse> TomarTicket(long ticketId, string comentario)
+        {
+            var request = new
+            {
+                TicketId = ticketId,
+                Comentario = comentario
+            };
+
+            var result = await RequestAsync<object>($"api/Ticket/Tomar", HttpMethod.Post, request,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
@@ -97,5 +87,106 @@ namespace ServiceDeskDESIMVC.DAL
             var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
             return modelResponse;
         }
+
+        public async Task<ModelResponse> ReasignarTicket(long ticketId, long nuevoUsuarioId, string comentario)
+        {
+            var request = new
+            {
+                TicketId = ticketId,
+                NuevoUsuarioId = nuevoUsuarioId,
+                Comentario = comentario
+            };
+
+            var result = await RequestAsync<object>($"api/Ticket/Reasignar", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse<List<TicketAsignacionDTO>>> ObtenerTicketAsignaciones(long ticketId)
+        {
+            return await RequestAsync<List<TicketAsignacionDTO>>($"api/Ticket/Asignaciones/{ticketId}", HttpMethod.Get, null, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse> ResolverTicket(long ticketId, string comentario)
+        {
+            var request = new
+            {
+                TicketId = ticketId,
+                Comentario = comentario
+            };
+
+            var result = await RequestAsync<object>($"api/Ticket/Resolver", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> RechazarTicket(long ticketId, string comentario)
+        {
+            var request = new
+            {
+                TicketId = ticketId,
+                Comentario = comentario
+            };
+
+            var result = await RequestAsync<object>($"api/Ticket/Rechazar", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> CerrarTicket(long ticketId, string comentario)
+        {
+            var request = new
+            {
+                TicketId = ticketId,
+                Comentario = comentario
+            };
+
+            var result = await RequestAsync<object>($"api/Ticket/Cerrar", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> RetomarTicket(long ticketId)
+        {
+            var request = new
+            {
+                TicketId = ticketId
+            };
+
+            var result = await RequestAsync<object>($"api/Ticket/Retomar", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse<List<UsuarioDTO>>> ObtenerUsuariosArea(long areaId)
+        {
+            return await RequestAsync<List<UsuarioDTO>>($"api/Ticket/UsuariosArea/{areaId}", HttpMethod.Get, null, token.Token.access_token);
+        }
+
     }
 }

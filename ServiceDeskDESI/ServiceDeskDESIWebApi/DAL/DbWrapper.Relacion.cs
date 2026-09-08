@@ -11,9 +11,9 @@ namespace ServiceDeskDESIWebApi.DAL
 {
     public partial class DbWrapper
     {
-        public ModelResponse ObtenerTodasRelaciones()
+        public ModelResponse<List<UsuarioPagina>> ObtenerTodasRelaciones()
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<List<UsuarioPagina>>();
             try 
             {
                 var relacion = GetObjects("ObtenerRelacion", CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>(),
@@ -23,7 +23,7 @@ namespace ServiceDeskDESIWebApi.DAL
                       return relaciones;
                   }));
                 modelResponse.IsSuccess = true;
-                modelResponse.Response = relacion;
+                modelResponse.Response = relacion.ToList();
                 modelResponse.Message = "Relacion obtenidas correctamente";
             }
             catch (Exception ex)
@@ -34,9 +34,9 @@ namespace ServiceDeskDESIWebApi.DAL
             }
             return modelResponse;
         }
-        public ModelResponse GuardarOActualizarRelacion(UsuarioPagina r)
+        public ModelResponse<UsuarioPagina> GuardarOActualizarRelacion(UsuarioPagina r)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioPagina>();
             try
             {
                 var parametros = ObtenerParametrosSQL(r).ToArray();
@@ -56,9 +56,9 @@ namespace ServiceDeskDESIWebApi.DAL
 
             return modelResponse;
         }
-        public ModelResponse ObtenerRelacionPorId(long id)
+        public ModelResponse<UsuarioPagina> ObtenerRelacionPorId(long id)
         {
-            var modelResponse = new ModelResponse();
+            var modelResponse = new ModelResponse<UsuarioPagina>();
             try
             {
                 modelResponse.IsSuccess = true;

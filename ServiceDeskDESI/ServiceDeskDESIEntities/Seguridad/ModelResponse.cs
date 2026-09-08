@@ -10,11 +10,18 @@ namespace ServiceDeskDESIEntities.Seguridad
     {
         public ModelResponse()
         {
-            IsSuccess = true;
+            IsSuccess = false;
         }
 
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
         public object Response { get; set; }
+    }
+
+    public class ModelResponse<T>
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public T Response { get; set; }
     }
 }

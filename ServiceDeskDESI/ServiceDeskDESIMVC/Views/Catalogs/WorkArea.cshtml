@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Area";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as ServiceDeskDESIEntities.Seguridad.PermisosViewModel;
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
@@ -48,9 +49,33 @@
             </div>
         </div>
         <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Responsable del área:</label>
+                    <select id="ddlUsuarioResponsable" class="form-control">
+                        <option value="">-- Seleccione un responsable --</option>
+                        @if (ViewBag.UsuariosQuePuedenAtender != null)
+                        {
+                            foreach (var usuario in (List<ServiceDeskDESIEntities.Autenticacion.UsuarioDTO>)ViewBag.UsuariosQuePuedenAtender)
+                            {
+                                <option value="@usuario.Id" @(Model.UsuarioResponsableId == usuario.Id ? "selected" : "")>@usuario.Nombre @usuario.Apellido (@usuario.NombreUsuario)</option>
+                            }
+                        }
+                    </select>
+                    @Html.HiddenFor(x => x.UsuarioResponsableId)
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarArea()" />
+                    @if (permisos != null && (
+                        (Model.Id == 0 && permisos.PuedeCrear) ||
+                        (Model.Id > 0 && permisos.PuedeEditar)
+                    ))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarArea()" />
+                    }
                     <a href="/Catalogs/WorkArea" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -65,7 +90,11 @@
         </div>
     </form>
 </div>
+
 <script>
+    // Pasar permisos a JavaScript para controlar los botones en el DataTable
+    var permisosGlobal = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(permisos));
+
     $(function () {
         $("#frmArea").validate({
             rules: {
@@ -121,10 +150,20 @@
                 { data: 'Correo', title: 'Correo' },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarArea(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarArea(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
+                        var html = '<div class="d-flex gap-3">';
+
+                        // Botón Editar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button class="btn btn-sm btn-outline-primary" onclick="EditarArea(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+
+                        // Botón Eliminar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button class="btn btn-sm btn-outline-danger" onclick="EliminarArea(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+
+                        html += '</div>';
+                        return html;
                     }
                 },
                 { data: 'Estatus', title: 'Estatus', visible: false }
@@ -149,6 +188,7 @@
                 Nombre: $("#Nombre").val(),
                 Descripcion: $("#Descripcion").val(),
                 Correo: $("#Correo").val(),
+                UsuarioResponsableId: $("#ddlUsuarioResponsable").val() ? parseInt($("#ddlUsuarioResponsable").val()) : null,
                 CreadoPor: $("#CreadoPor").val(),
                 FechaCreacion: new Date().toISOString(),
                 ModificadoPor: $("#ModificadoPor").val() || null,

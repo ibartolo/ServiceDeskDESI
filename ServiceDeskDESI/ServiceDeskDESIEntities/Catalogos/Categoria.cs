@@ -10,8 +10,8 @@ namespace ServiceDeskDESIEntities.Catalogos
     {
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
-        public Categoria CategoriaPadre { get; set; }
-        public Area Area { get; set; }
+        public long? CategoriaPadreId { get; set; }
+        public long AreaId { get; set; }
         public int Orden { get; set; }
     }
 }

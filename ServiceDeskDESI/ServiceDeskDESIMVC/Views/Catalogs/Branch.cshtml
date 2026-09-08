@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Sucursal";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
@@ -77,7 +78,10 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarSucursal()" />
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarSucursal()" />
+                    }
                     <a href="/Catalogs/Branch" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -109,6 +113,9 @@
 </div>
 
 <script>
+    // Pasar permisos a JavaScript para controlar los botones en el DataTable
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+
     var tablaSucursal;
 
     $(document).ready(function () {
@@ -196,10 +203,20 @@
                 { data: 'CodigoPostal', title: 'Código Postal' },
                 {
                     data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarSucursal(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarSucursal(' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
+                        var html = '<div class="d-flex gap-3">';
+
+                        // Botón Editar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEditar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="EditarSucursal(' + data + ')"><i class="fas fa-edit"></i></button>';
+                        }
+
+                        // Botón Eliminar - solo si tiene permiso
+                        if (permisosGlobal && permisosGlobal.PuedeEliminar) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="EliminarSucursal(' + data + ')"><i class="fas fa-trash-alt"></i></button>';
+                        }
+
+                        html += '</div>';
+                        return html;
                     }
                 }
             ],

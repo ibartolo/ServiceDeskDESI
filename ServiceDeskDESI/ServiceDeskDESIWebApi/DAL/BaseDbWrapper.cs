@@ -15,6 +15,62 @@ namespace ServiceDeskDESIWebApi.DAL
         protected abstract TimeSpan SQLCommandTimeOut { get; }
         #endregion
 
+        #region Transaction
+        private SqlConnection _ambientConnection;
+        private SqlTransaction _ambientTransaction;
+
+        /// <summary>
+        /// Inicia una transacción sobre una única SqlConnection. Mientras esté activa,
+        /// ExecuteScalar/ExecuteNonQuery/GetObject/GetObjects reutilizan esta conexión y
+        /// su transacción, evitando abrir múltiples conexiones (y con ello la escalación a MSDTC).
+        /// </summary>
+        public void BeginTransaction()
+        {
+            if (_ambientTransaction != null)
+                throw new InvalidOperationException("Ya existe una transacción activa.");
+
+            _ambientConnection = new SqlConnection(SQLConnectionString);
+            _ambientConnection.Open();
+            _ambientTransaction = _ambientConnection.BeginTransaction();
+        }
+
+        public void CommitTransaction()
+        {
+            if (_ambientTransaction == null)
+                throw new InvalidOperationException("No hay una transacción activa.");
+
+            try
+            {
+                _ambientTransaction.Commit();
+            }
+            finally
+            {
+                _ambientTransaction.Dispose();
+                _ambientTransaction = null;
+                _ambientConnection.Dispose();
+                _ambientConnection = null;
+            }
+        }
+
+        public void RollbackTransaction()
+        {
+            if (_ambientTransaction == null)
+                return;
+
+            try
+            {
+                _ambientTransaction.Rollback();
+            }
+            finally
+            {
+                _ambientTransaction.Dispose();
+                _ambientTransaction = null;
+                _ambientConnection.Dispose();
+                _ambientConnection = null;
+            }
+        }
+        #endregion
+
         #region ExecuteScalar
         protected object ExecuteScalar(string cmdText) => ExecuteScalar(cmdText, CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>());
 
@@ -22,6 +78,19 @@ namespace ServiceDeskDESIWebApi.DAL
 
         protected object ExecuteScalar(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters)
         {
+            if (_ambientTransaction != null)
+            {
+                using (var sqlCommand = _ambientConnection.CreateCommand())
+                {
+                    sqlCommand.CommandTimeout = (int)SQLCommandTimeOut.TotalSeconds;
+                    sqlCommand.CommandText = cmdText;
+                    sqlCommand.CommandType = cmdType;
+                    sqlCommand.Parameters.AddRange(sqlParameters?.ToArray() ?? Enumerable.Empty<SqlParameter>().ToArray());
+                    sqlCommand.Transaction = _ambientTransaction;
+                    return sqlCommand.ExecuteScalar();
+                }
+            }
+
             using (var sqlConnection = new SqlConnection(SQLConnectionString))
             {
                 sqlConnection.Open();
@@ -84,6 +153,19 @@ namespace ServiceDeskDESIWebApi.DAL
 
         protected int ExecuteNonQuery(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters)
         {
+            if (_ambientTransaction != null)
+            {
+                using (var sqlCommand = _ambientConnection.CreateCommand())
+                {
+                    sqlCommand.CommandTimeout = (int)SQLCommandTimeOut.TotalSeconds;
+                    sqlCommand.CommandText = cmdText;
+                    sqlCommand.CommandType = cmdType;
+                    sqlCommand.Parameters.AddRange(sqlParameters?.ToArray() ?? Enumerable.Empty<SqlParameter>().ToArray());
+                    sqlCommand.Transaction = _ambientTransaction;
+                    return sqlCommand.ExecuteNonQuery();
+                }
+            }
+
             using (var sqlConnection = new SqlConnection(SQLConnectionString))
             {
                 sqlConnection.Open();
@@ -148,6 +230,31 @@ namespace ServiceDeskDESIWebApi.DAL
         protected T GetObject<T>(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters,
             Func<IDataReader, T> readerFunctionPointer) where T : class
         {
+            if (_ambientTransaction != null)
+            {
+                using (var sqlCommand = _ambientConnection.CreateCommand())
+                {
+                    sqlCommand.CommandTimeout = (int)SQLCommandTimeOut.TotalSeconds;
+                    sqlCommand.CommandText = cmdText;
+                    sqlCommand.CommandType = cmdType;
+                    sqlCommand.Parameters.AddRange(sqlParameters?.ToArray() ?? Enumerable.Empty<SqlParameter>().ToArray());
+                    sqlCommand.Transaction = _ambientTransaction;
+
+                    using (var reader = sqlCommand.ExecuteReader())
+                    {
+                        if (typeof(T) == typeof(DataTable))
+                        {
+                            return readerFunctionPointer?.Invoke(reader);
+                        }
+
+                        if (reader.Read())
+                        {
+                            return readerFunctionPointer?.Invoke(reader);
+                        }
+                    }
+                }
+                return default(T);
+            }
 
             using (var sqlConnection = new SqlConnection(SQLConnectionString))
             {
@@ -238,6 +345,29 @@ namespace ServiceDeskDESIWebApi.DAL
         protected IEnumerable<T> GetObjects<T>(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters,
             Func<IDataReader, T> readerFunctionPointer) where T : class
         {
+            if (_ambientTransaction != null)
+            {
+                using (var sqlCommand = _ambientConnection.CreateCommand())
+                {
+                    sqlCommand.CommandTimeout = (int)SQLCommandTimeOut.TotalSeconds;
+                    sqlCommand.CommandText = cmdText;
+                    sqlCommand.CommandType = cmdType;
+                    sqlCommand.Parameters.AddRange(sqlParameters?.ToArray() ?? Enumerable.Empty<SqlParameter>().ToArray());
+                    sqlCommand.Transaction = _ambientTransaction;
+
+                    using (var reader = sqlCommand.ExecuteReader())
+                    {
+                        var objList = new List<T>();
+
+                        while (reader.Read())
+                        {
+                            objList.Add(readerFunctionPointer?.Invoke(reader));
+                        }
+
+                        return objList;
+                    }
+                }
+            }
 
             using (var sqlConnection = new SqlConnection(SQLConnectionString))
             {

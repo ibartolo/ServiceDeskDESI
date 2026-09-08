@@ -10,6 +10,6 @@ namespace ServiceDeskDESIEntities.Catalogos
     {
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
-        public Marca Marca { get; set; }
+        public long? MarcaId { get; set; }
     }
 }

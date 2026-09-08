@@ -1,10 +1,14 @@
-﻿using ServiceDeskDESIEntities.Catalogos;
+﻿using Serilog;
+using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
+using ServiceDeskDESIWebApi.Filters;
+using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Web.Http;
 
 namespace ServiceDeskDESIWebApi.Controllers
@@ -13,15 +17,22 @@ namespace ServiceDeskDESIWebApi.Controllers
     [RoutePrefix("api/Area")]
     public class AreaController : BaseController
     {
+        private readonly AreaService _areaService;
+
+        public AreaController()
+        {
+            _areaService = new AreaService();
+        }
+
         /// <summary>
         /// Obtiene todas las áreas de la empresa del usuario autenticado
         /// </summary>
         /// <returns>Lista de áreas</returns>
         [HttpGet, Route("List")]
-        public ModelResponse ObtenerAreas()
+        public ModelResponse<List<Area>> ObtenerAreas()
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerAreas(usuario);
+            var result = _areaService.ObtenerAreas(usuario);
             return result;
         }
 
@@ -31,10 +42,10 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// <param name="id">ID del área</param>
         /// <returns>Área encontrada</returns>
         [HttpGet, Route("{id:long}")]
-        public ModelResponse ObtenerAreaPorId(long id)
+        public ModelResponse<Area> ObtenerAreaPorId(long id)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.ObtenerAreaPorId(id, usuario);
+            var result = _areaService.ObtenerAreaPorId(id, usuario);
             return result;
         }
 
@@ -43,11 +54,12 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="area">Objeto área con los datos</param>
         /// <returns>Área guardada con su ID actualizado</returns>
+        [Permiso("Áreas")]
         [HttpPost, Route("Guardar")]
-        public ModelResponse GuardarOActualizarArea(Area area)
+        public ModelResponse<Area> GuardarOActualizarArea(Area area)
         {
             var usuario = User.Identity.Name;
-            var result = dbWrapper.GuardarOActualizarArea(area, usuario);
+            var result = _areaService.GuardarOActualizarArea(area, usuario);
             return result;
         }
 
@@ -56,12 +68,13 @@ namespace ServiceDeskDESIWebApi.Controllers
         /// </summary>
         /// <param name="area">Área a eliminar (debe incluir Id, ModificadoPor)</param>
         /// <returns>Resultado de la operación</returns>
+        [Permiso("Áreas", "Eliminar")]
         [HttpDelete, Route("Eliminar")]
         public ModelResponse EliminarArea(Area area)
         {
             var usuario = User.Identity.Name;
             area.FechaModificacion = DateTime.Now;
-            var result = dbWrapper.EliminarArea(area.Id, area.ModificadoPor, area.FechaModificacion.Value, usuario);
+            var result = _areaService.EliminarArea(area.Id, area.ModificadoPor, area.FechaModificacion.Value, usuario);
             return result;
         }
     }
