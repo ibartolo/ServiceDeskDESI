@@ -15,7 +15,7 @@ Proveer a Administradores y jefes de área ("responsables") un panel de solo lec
 
 ### In Scope
 - Página global `Pagina.Nombre='Estadisticas'` (llave sin acento), `NombreVisible='Estadísticas'`, `Tipo='Menu'`; seed `RolPaginaAccion` con `PuedeLeer=1` para roles **Administrador** y **Supervisor** (patrón `MisActivos`).
-- Regla de acceso en runtime en el controlador MVC: rol con página asignada (PuedeLeer=1) **Y** (`Area.UsuarioResponsableId == UserID` **O** rol `Administrador`); si no cumple → redirect `Home/AccesoDenegado`. "Jefe de departamento" no es rol, se modela como `Area.UsuarioResponsableId`.
+- Regla de acceso en runtime en el controlador MVC: rol con página asignada (PuedeLeer=1) **Y** (`Area.UsuarioResponsableId == UserID` **O** rol `Administrador` **O** rol `Supervisor` — Opción A: Supervisor siempre autorizado); si no cumple → redirect `Home/AccesoDenegado`. "Jefe de departamento" no es rol, se modela como `Area.UsuarioResponsableId`.
 - Vista principal (tarjetas): Total, Nuevos, En Progreso, Resueltos, Cerrados, Rechazados, Eficiencia (%), Tiempo promedio de resolución (h, 1 decimal).
 - Gráfica de pastel (distribución de estatus) y gráfica de líneas (evolución diaria: creados vs resueltos) con Chart.js.
 - Ranking de Áreas (Área, Total, Promedio urgencia, Cerrados, Rechazados) y Ranking de Reasignaciones (2 listas), TOP N = 5 configurable vía `EstadisticasTopAgentes` en `Web.config`.
@@ -104,7 +104,7 @@ Replicar el precedente `Dashboard` (DashboardController → DashboardService →
 ## Success Criteria
 
 - [ ] La página "Estadísticas" aparece en el menú solo para Administrador y Supervisor (PuedeLeer=1).
-- [ ] El controlador redirige a `Home/AccesoDenegado` si el usuario no es Administrador ni `Area.UsuarioResponsableId == UserID`.
+- [ ] El controlador redirige a `Home/AccesoDenegado` solo si el usuario no es Administrador, no es Supervisor y no es `Area.UsuarioResponsableId == UserID`.
 - [ ] Tarjetas, pie, evolución diaria y rankings se cargan con spinner "Cargando datos…" y muestran "Sin datos" cuando no hay registros.
 - [ ] Los 2 filtros `datetime` (default 1-ene → hoy) respetan: sin fechas futuras, inicio ≤ fin.
 - [ ] Tiempo promedio de resolución usa horas hábiles (Lun–Vie 09:00–17:00) con 1 decimal.
