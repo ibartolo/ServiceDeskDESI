@@ -203,7 +203,8 @@ BEGIN
             WHERE d.n <= DATEDIFF(day, i.FechaInicio, i.FechaFin)
         ) dia
         INNER JOIN #Horario h
-            ON h.DiaSemana = ((DATEPART(weekday, dia.Dia) + @@DATEFIRST - 1) % 7) + 1
+            -- ISO weekday (1=Lun..7=Dom): ((DATEPART(weekday, d) + @@DATEFIRST - 2) % 7) + 1
+            ON h.DiaSemana = ((DATEPART(weekday, dia.Dia) + @@DATEFIRST - 2) % 7) + 1
         CROSS APPLY (
             SELECT
                 CASE WHEN i.FechaInicio > DATEADD(day, DATEDIFF(day, 0, dia.Dia), CAST(h.HoraInicio AS datetime))
