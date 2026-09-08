@@ -1,52 +1,44 @@
-# Convenciones de idioma y codificación (ServiceDeskDESI)
+# Convenciones observadas de codificación
 
-> Regla de oro: **todo texto de la aplicación se escribe SIEMPRE con acentos y
-> caracteres correctos del español**: á é í ó ú ü ñ, ¿ ¡, viñetas, comillas
-> españolas, etc. Nunca "a" por "á", nunca "n" por "ñ", nunca texto sin acentos
-> "para evitar problemas".
+Este documento describe patrones visibles en la solución; no convierte recomendaciones en reglas ya establecidas.
 
-## Por qué
+## Estructura
 
-El proyecto (vistas `.cshtml`, templates `.html`, controladores `.cs`, correos)
-contiene textos en español. Si un archivo se guarda con la codificación
-incorrecta, los acentos se ven así en pantalla:
+- La solución usa .NET Framework 4.8, MVC 5, Web API 2 y entidades compartidas.
+- Flujo habitual: controlador MVC -> servicio MVC -> `HttpClientConnection` -> controlador API -> servicio API -> `DbWrapper` ADO.NET -> procedimiento almacenado.
+- MVC y API agrupan conexiones y datos en archivos parciales por dominio, por ejemplo `HttpClientConnection.Ticket.cs` y `DbWrapper.Ticket.cs`.
+- Entidades y DTO se organizan en `Catalogos`, `Seguridad` y `Tickets`. Reutilice el tipo que represente el contrato real antes de crear duplicados.
 
-- ❌ `Ãndice rÃ¡pido:` (mojibake: UTF-8 leído como Windows-1252)
-- ❌ `Configuraci�n`, `secci�n`
-- ✅ `Índice rápido:`, `Configuración`, `sección`
+## Controladores, servicios y datos
 
-## Reglas técnicas
+- Los controladores construyen servicios y devuelven vistas o JSON con Newtonsoft.Json.
+- Servicios API validan negocio y registran con Serilog. Valide antes de invocar datos.
+- `DbWrapper` encapsula parámetros SQL, procedimientos y mapeo de lectores. No coloque SQL ad hoc en controladores.
+- Para varias escrituras relacionadas, el patrón existente usa la misma instancia de `DbWrapper` y transacción explícita. Mantenga atomicidad y compense archivos físicos si la base revierte.
 
-1. **Los archivos `.cshtml` (vistas Razor) deben guardarse en UTF-8 CON BOM**
-   (firma). Sin BOM, ASP.NET/Razor los interpreta como Windows-1252 y los
-   acentos se ven como `Ã` / `�`.
+## Seguridad y contratos
 
-   - Visual Studio: **Archivo → Guardar como → Guardar con codificación… →
-     "Unicode (UTF-8 con firma) - página de códigos 65001"**.
-   - Las vistas existentes del proyecto ya tienen BOM; una vista nueva debe
-     tenerlo también.
+- API usa `[Authorize]` y `[Permiso]`; MVC combina filtro global de sesión y `[Permiso]` por acción. La UI no sustituye el control servidor.
+- Obtenga usuario y empresa desde sesión o identidad. No confíe empresa, actor o rutas físicas proporcionadas por cliente.
+- El contrato observado es `ModelResponse` o `ModelResponse<T>`: `IsSuccess`, `Message`, `Response`; el éxito inicia en falso.
+- En validaciones devuelva `IsSuccess=false` y mensaje accionable. En excepciones, registre detalle seguro y no exponga secretos, SQL ni stack traces.
 
-2. **Los demás archivos** (`.cs`, `.html`, `.config`, `.sql`, `.md`) también se
-   guardan en UTF-8 (con BOM recomendado en `.cshtml` y `.html`).
+## Proyectos clásicos
 
-3. La codificación es responsabilidad del **guardado del archivo**, no del
-   contenido: escribe siempre el acento correcto y asegúrate de que el archivo
-   quede en UTF-8. No "traduzcas" quitando acentos.
+Los `.csproj` son de formato clásico y registran cada `Compile`, `Content` y referencia. Al añadir `.cs`, `.cshtml`, recurso o partial:
 
-4. **Al crear o editar** cualquier archivo con texto en español (vistas,
-   templates de correo, manuales, mensajes), verifica:
-   - que el acento se vea bien en el editor, y
-   - que el archivo tenga **BOM UTF-8** (revisar el primer byte o el diálogo de
-     codificación del editor).
+1. Inclúyalo explícitamente en el `.csproj` correcto.
+2. Conserve `ProjectReference` y `DependentUpon` cuando correspondan.
+3. No asuma descubrimiento automático de archivos de formatos SDK modernos.
 
-5. **Si aparece mojibake** (tipo `Ãndice`), el problema es de codificación de
-   lectura → agrega el **BOM UTF-8** al archivo y recarga (Ctrl+F5 / reinicia el
-   sitio de desarrollo).
+## Idioma y codificación
 
-## Ejemplo rápido de verificación (PowerShell)
+- Use español con acentos correctos; no los elimine como solución de codificación.
+- Verifique UTF-8 con BOM al editar vistas Razor con texto acentuado. El historial documenta riesgo de mojibake y las vistas nuevas de los cambios revisados lo requieren.
+- Mantenga nombres existentes, incluso si combinan inglés y español; una normalización amplia requiere cambio separado y pruebas.
 
-```powershell
-$b = [System.IO.File]::ReadAllBytes("ruta\Vista.cshtml")
-$tieneBom = $b.Length -ge 3 -and $b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF
-$tieneBom   # True = correcto
-```
+## Recomendaciones pendientes
+
+- `DataAnnotations` y `ModelState` no son una práctica generalizada observada.
+- Manejador global de excepciones, HTTP homogéneo, antiforgery/CSRF y paginación son deuda documentada, no capacidades confirmadas.
+- Antes de cambiar procedimiento o entidad compartida, trace impacto en entidad, `DbWrapper`, servicio/controlador API, conexión/servicio/controlador MVC y vista.
