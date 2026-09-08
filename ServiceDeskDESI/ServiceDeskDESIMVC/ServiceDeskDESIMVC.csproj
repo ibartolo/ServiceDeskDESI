@@ -152,6 +152,7 @@
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CatalogsController.cs" />
     <Compile Include="Controllers\ConfiguracionEmpresaController.cs" />
+    <Compile Include="Controllers\EstadisticasController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PermissionsController.cs" />
     <Compile Include="Controllers\SecurityController.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="DAL\HttpClientConnection.Foliador.cs" />
     <Compile Include="DAL\HttpClientConnection.HorarioLaboral.cs" />
     <Compile Include="DAL\HttpClientConnection.Dashboard.cs" />
+    <Compile Include="DAL\HttpClientConnection.Estadisticas.cs" />
     <Compile Include="DAL\HttpClientConnection.Marca.cs" />
     <Compile Include="DAL\HttpClientConnection.Mantenimiento.cs" />
     <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
@@ -205,6 +207,7 @@
     <Compile Include="Services\FoliadorService.cs" />
     <Compile Include="Services\HorarioLaboralService.cs" />
     <Compile Include="Services\DashboardService.cs" />
+    <Compile Include="Services\EstadisticasService.cs" />
     <Compile Include="Services\MarcaService.cs" />
     <Compile Include="Services\MantenimientoService.cs" />
     <Compile Include="Services\ModeloService.cs" />
@@ -247,6 +250,7 @@
     <Content Include="Views\Home\MenusUser.cshtml" />
     <Content Include="Views\Home\MisActivos.cshtml" />
     <Content Include="Views\ConfiguracionEmpresa\Index.cshtml" />
+    <Content Include="Views\Estadisticas\Index.cshtml" />
     <Content Include="Views\Home\VerAsignacion.cshtml" />
     <Content Include="Views\Home\AccesoDenegado.cshtml" />
     <Content Include="Views\Security\Role.cshtml" />
