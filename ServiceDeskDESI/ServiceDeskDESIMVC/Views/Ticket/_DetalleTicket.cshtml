@@ -52,6 +52,7 @@
                                 <th>Movimiento</th>
                                 <th>Agente</th>
                                 <th>Comentario</th>
+                                <th>Fecha estimada</th>
                                 <th>Estatus</th>
                             </tr>
                         </thead>
@@ -127,6 +128,7 @@
                             }
                         },
                         { data: 'Comentario', defaultContent: '---' },
+                        { data: 'FechaEstimada', defaultContent: '---', render: function (d) { return d ? new Date(d).toLocaleDateString() : '---'; } },
                         {
                             data: 'EstatusNombre',
                             render: function (d, type, row) {

@@ -4,6 +4,7 @@ using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIMVC.DAL;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -178,6 +179,16 @@ namespace ServiceDeskDESIMVC.Services
         public async Task<ModelResponse> RetomarTicket(long ticketId)
         {
             return await _httpClient.RetomarTicket(ticketId);
+        }
+
+        public async Task<ModelResponse> PausarTicket(long ticketId, string tipoPausa, string comentario, DateTime? fechaEstimada)
+        {
+            return await _httpClient.PausarTicket(ticketId, tipoPausa, comentario, fechaEstimada);
+        }
+
+        public async Task<ModelResponse> ReanudarTicket(long ticketId, string comentario)
+        {
+            return await _httpClient.ReanudarTicket(ticketId, comentario);
         }
 
         public async Task<ModelResponse<List<UsuarioDTO>>> ObtenerUsuariosArea(long areaId)

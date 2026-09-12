@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIWebApi.Filters;
+using ServiceDeskDESIWebApi.Models;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -242,6 +243,32 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         /// <summary>
+        /// Pausa el ticket (agente asignado) por dependencia externa, con comentario obligatorio.
+        /// </summary>
+        [Permiso("Tickets", "Editar")]
+        [HttpPost, Route("Pausar")]
+        public ModelResponse PausarTicket([FromBody] PausarTicketRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var tipoMovimiento = request.TipoPausa == "Materiales" ? "PendienteMateriales"
+                : request.TipoPausa == "Terceros" ? "EnEsperaTerceros" : request.TipoPausa;
+            var result = _ticketService.PausarTicket(request.TicketId, usuario, request.Comentario, request.FechaEstimada, tipoMovimiento);
+            return result;
+        }
+
+        /// <summary>
+        /// Reanuda el ticket pausado (agente asignado) y lo regresa a "En Progreso".
+        /// </summary>
+        [Permiso("Tickets", "Editar")]
+        [HttpPost, Route("Reanudar")]
+        public ModelResponse ReanudarTicket([FromBody] TransicionTicketRequest request)
+        {
+            var usuario = User.Identity.Name;
+            var result = _ticketService.ReanudarTicket(request.TicketId, usuario, request.Comentario);
+            return result;
+        }
+
+        /// <summary>
         /// Obtiene los usuarios (agentes) de un área.
         /// </summary>
         [HttpGet, Route("UsuariosArea/{areaId:long}")]
@@ -289,25 +316,5 @@ namespace ServiceDeskDESIWebApi.Controllers
 
             return ticket;
         }
-    }
-
-    public class TomarTicketRequest
-    {
-        public long TicketId { get; set; }
-        public string Comentario { get; set; }
-    }
-
-    public class ReasignarTicketRequest
-    {
-        public long TicketId { get; set; }
-        public long NuevoUsuarioId { get; set; }
-        public string Comentario { get; set; }
-    }
-
-    public class TransicionTicketRequest
-    {
-        public long TicketId { get; set; }
-        public string Comentario { get; set; }
-        public long? NuevoUsuarioId { get; set; }
     }
 }

@@ -44,11 +44,37 @@
 ### Fix: acentos en es-ES.json (DONE)
 - `Content/datatables/i18n/es-ES.json` was CORRUPTED (accents stored as `?`, ASCII). Rewrote full file UTF-8 with correct accents (Ningún, búsqueda, Último, Colección, Añadir condición, Vacío, ¿Está seguro, Próximo, Mié, Sáb, sangría, conservarán, información). JSON valid, UTF-8 confirmed. The 3 remaining `?` are legitimate question marks ("¿Está seguro...?").
 
-## Pending Tasks
-- [ ] User to verify: DataTables accents fixed + tables inside modals fully dark (last request delivered; awaiting user confirmation).
-- [ ] IF user wants: darken SweetAlert popups (hardcoded `background:'white'` in Swal.fire calls) — prefer CSS override `.swal2-popup { background:#232334; color:#d5d7e3 }`.
-- [ ] IF user wants: sidebar dark gradient blue-navy instead of gray.
+## Other Feature Notes (unrelated to current mission — informational, not action items)
+- User to verify: DataTables accents fixed + tables inside modals fully dark (last request delivered; awaiting user confirmation).
+- IF user wants: darken SweetAlert popups (hardcoded `background:'white'` in Swal.fire calls) — prefer CSS override `.swal2-popup { background:#232334; color:#d5d7e3 }`.
+- IF user wants: sidebar dark gradient blue-navy instead of gray.
 
 ## Notes
-- User prefers NO spec process, NO context updates, ONLY direct code changes (told explicitly). Keep responses short in Spanish.
+- User ahora trabaja con OpenSpec (`openspec/changes/`): proposal/design/tasks/specs + `migration.sql`. Mantener respuestas concisas en español. (La nota previa de "NO spec process" quedó obsoleta.)
 - .opencode/todo.md + work-log.md exist from earlier Reviewer work (ses_1/ses_2) — feature 1 closed.
+
+## Current Status (2026-09-11) — MISSION `tickets-estatus-espera` COMPLETE
+Task IDs (background agents): Planner `task_6c134052`; Workers `task_ef41bc72` (Entities+WebApi), `task_ebea06ab` (MVC backend), `task_c119c62b` (Frontend), `task_2099dd55` (fix `using System;`); Reviewers `task_d3ed914e`, `task_6cae70c0`, `task_c0557b76`, `task_5dac0b37`.
+OpenSpec artifacts: `openspec/changes/tickets-estatus-espera/` = proposal.md, design.md, tasks.md (22/22), specs/ticket-estatus-espera/spec.md, migration.sql, rollback.sql, verify-report.md (PASS).
+Final build re-run by Commander: `MSBuild ServiceDeskDESI.sln /t:Rebuild /p:Configuration=Debug` → 0 errores.
+OpenSpec change: `openspec/changes/tickets-estatus-espera/` (estatus 6 "Pendiente de Materiales" y 7 "En Espera de Terceros").
+- **TODO**: `.opencode/todo.md` = 17/17 (14 sub-tasks [x] + 3 milestones completed).
+- **Build**: `MSBuild.exe ServiceDeskDESI.sln /t:Rebuild /p:Configuration=Debug` → **exit 0, 0 errores**, 3 assemblies (`ServiceDeskDESIEntities.dll`, `ServiceDeskDESIMVC.dll`, `ServiceDeskDESIWebApi.dll`). Warnings only pre-existing CS0168 (UserController.cs:128, CatalogsController.cs:647) + CS1998 (Startup.cs:163,186).
+- **Spec**: 11/11 PASS vs `spec.md`.
+- **Sync issues**: `.opencode/sync-issues.md` = none (all resolved).
+- **Files changed (11 manifest)**: Entities `TicketAsignacion.cs`/`TicketDTO.cs` (+`FechaEstimada`); WebApi `DAL/DbWrapper.Ticket.cs` (Pausar/Reanudar via SP `TransicionarTicket`), `Services/TicketService.cs` (validación), `Controllers/TicketController.cs` (routes `Pausar`/`Reanudar` + `PausarTicketRequest`); MVC `DAL/HttpClientConnection.Ticket.cs` (POST `api/Ticket/Pausar`/`Reanudar`), `Services/TicketService.cs`, `Controllers/TicketController.cs` (JSON actions); views `_PausarTicket.cshtml` (CREATE), `Index.cshtml`, `_DetalleTicket.cshtml`. Also `ServiceDeskDESIMVC.csproj` (+`<Content Include="Views\Ticket\_PausarTicket.cshtml" />` line 236).
+- **Blockers resolved**: SYNC-1 `TicketDTO.cs` missing `using System;`; SYNC-2 MVC `Services/TicketService.cs` missing `using System;`; SYNC-3 `_PausarTicket.cshtml` not registered in WAP content list.
+- **SQL**: `migration.sql` estatus 6/7, `TicketAsignacion.FechaEstimada`, SP transitions (2→6/7, 6/7→2; Resolver/Cerrar/Rechazar/Reasignar blocked from 6/7), dashboard `ActivosSemana IN (1,2,6,7)` / `Trabajando=2`.
+- **Correcciones post-verificación (feedback del usuario, 2026-09-11)**: (a) TODAS las clases request inline se sacaron de los controllers WebApi → `ServiceDeskDESIWebApi/Models/` (Ticket: `TomarTicketRequest`, `ReasignarTicketRequest`, `TransicionTicketRequest`, `PausarTicketRequest`; PersonaActivo: `AsignarActivoRequest`, `DesvincularActivoRequest`, `ConfirmarRecepcionRequest`; Persona: `VincularUsuarioRequest`, `DesvincularUsuarioRequest`; Rol: `AsignarRolRequest`, `EliminarRolUsuarioRequest`) y se registraron en `ServiceDeskDESIWebApi.csproj` (`<Compile Include>` explícito). `RestablecerContraseniaRequest` NO se duplicó: ya existía idéntico en `ServiceDeskDESIEntities.Seguridad` y se reutiliza. (b) `_PausarTicket.cshtml` era el ÚNICO `.cshtml` sin BOM → acentos rotos en Razor; se re-guardó como UTF-8 **con BOM**. Build re-verificado: **0 errores**.
+- **Regla de encoding**: los `.cshtml` del proyecto MUST guardarse como UTF-8 **con BOM** (Razor/legacy CodeDom lee sin BOM como ANSI y rompe acentos). Los `.cs` con BOM también; los `.sql` del repo van sin BOM (convención existente).
+- **Estado final (2026-09-11)**: 11 archivos en `ServiceDeskDESIWebApi/Models/` (todos con BOM) + 12 includes en `ServiceDeskDESIWebApi.csproj` (11 `<Compile>` + `<Folder Include="Models\" />`); 0 clases request declaradas en controllers de la WebApi; `_PausarTicket.cshtml` con BOM; manual de ayuda `Views/Home/Ayuda.cshtml` actualizado (estatus 6/7 + sección "Pausar y reanudar" + roles + FAQ + glosario + data-tags); `MSBuild ServiceDeskDESI.sln /t:Rebuild /p:Configuration=Debug` → **0 errores**. Misión + correcciones completas.
+
+## Current Status (2026-09-11) — cambio `tickets-notificacion-estatus` COMPLETE
+- OpenSpec change: `openspec/changes/tickets-notificacion-estatus/` (proposal, design, tasks, specs/ticket-notificacion-estatus/spec.md). **Sin cambios de BD.**
+- Implementado en `ServiceDeskDESIWebApi/Services/TicketService.cs`: `using ServiceDeskDESIWebApi.Helpers;` + `NotificarCambioEstatus(ticketId, usuario, tipoMovimiento, comentario, fechaEstimada)` (best-effort, `try/catch` + log) + `ObtenerMensajeYNota`/`ObtenerPrioridadTexto`/`ObtenerPrioridadColor` + **8 llamadas** tras cada transición exitosa (`Tomar`, `Reasignar`, `Resolver`, `Rechazar`, `Cerrar`, `Retomar`, `Pausar`[tipoMovimiento], `Reanudar`).
+- Reutiliza `ObtenerTicketPorId` + `ObtenerUsuarioPorNombreUsuario` (trae `Correo`) y el template existente `ServiceDeskDESIWebApi/Template/Template_CambioEstatusTicket.html` (placeholders rellenados). URL = `AppSettings["BaseUri"] + "Ticket/Index"`.
+- Build: `MSBuild ServiceDeskDESI.sln /t:Rebuild /p:Configuration=Debug` → **0 errores**. BOM conservado.
+
+## Pending Tasks
+- [ ] EXTERNAL (out of code scope): user must execute `openspec/changes/tickets-estatus-espera/migration.sql` against the live DB (no DB access in this environment).
+- [ ] Optional/informational (unrelated to mission): verify DataTables accents + dark tables in modals; optionally darken SweetAlert popups; optionally sidebar dark gradient.

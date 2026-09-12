@@ -73,6 +73,7 @@
 
 @Html.Partial("_CapturarTicket")
 @Html.Partial("_ReasignarTicket")
+@Html.Partial("_PausarTicket")
 @Html.Partial("_DetalleTicket")
 
 <script>
@@ -129,10 +130,13 @@
                     title: 'Estatus',
                     defaultContent: '---',
                     render: function (data, type, row) {
-                        if (row.EstatusColor) {
-                            return '<span class="badge" style="background-color: ' + row.EstatusColor + '; color: white;">' + row.EstatusNombre + '</span>';
+                        var badge = row.EstatusColor
+                            ? '<span class="badge" style="background-color: ' + row.EstatusColor + '; color: white;">' + row.EstatusNombre + '</span>'
+                            : (data || '---');
+                        if ((row.TicketEstatusId === 6 || row.TicketEstatusId === 7) && row.FechaEstimada) {
+                            badge += '<div><small class="text-muted">Est. respuesta: ' + new Date(row.FechaEstimada).toLocaleDateString() + '</small></div>';
                         }
-                        return data || '---';
+                        return badge;
                     }
                 },
                 {
@@ -192,6 +196,16 @@
                         // Reasignar - responsable de área sobre un ticket en progreso o rechazado
                         if (esResponsableAreaGlobal && (row.TicketEstatusId === 2 || row.TicketEstatusId === 4)) {
                             html += '<button type="button" class="btn btn-sm btn-outline-info" title="Reasignar ticket" onclick="AbrirReasignar(' + data + ', ' + row.AreaId + ')"><i class="fas fa-user-plus"></i></button>';
+                        }
+
+                        // Pausar - agente dueño sobre un ticket en progreso
+                        if (esAgenteGlobal && row.AgenteId === usuarioActualIdGlobal && row.TicketEstatusId === 2) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-warning" title="Pausar ticket" onclick="AbrirPausar(' + data + ')"><i class="fas fa-pause"></i></button>';
+                        }
+
+                        // Reanudar - agente dueño sobre un ticket pausado
+                        if (esAgenteGlobal && row.AgenteId === usuarioActualIdGlobal && (row.TicketEstatusId === 6 || row.TicketEstatusId === 7)) {
+                            html += '<button type="button" class="btn btn-sm btn-outline-primary" title="Reanudar ticket" onclick="ReanudarTicket(' + data + ')"><i class="fas fa-play"></i></button>';
                         }
 
                         html += '</div>';
@@ -618,6 +632,42 @@
                             background: 'white',
                             confirmButtonColor: '#4e73df'
                         });
+                    }
+                });
+            }
+        });
+    }
+
+    function ReanudarTicket(id) {
+        Swal.fire({
+            title: 'Reanudar ticket',
+            text: 'Comentario (opcional, máximo 300 caracteres)',
+            input: 'textarea',
+            inputPlaceholder: 'Detalle de la reanudación...',
+            inputAttributes: { maxlength: 300 },
+            showCancelButton: true,
+            confirmButtonText: 'Reanudar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#4e73df',
+            cancelButtonColor: '#858796',
+            background: 'white',
+            inputValidator: function (value) {
+                if (value && value.length > 300) {
+                    return 'El comentario no puede superar los 300 caracteres.';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Reanudando...', text: 'Por favor espere', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+                PostMVC('/Ticket/ReanudarTicket', { ticketId: id, comentario: result.value }, function (response) {
+                    Swal.close();
+
+                    if (response.IsSuccess) {
+                        ToastExito(response.Message);
+                        RefrescarTabla();
+                    } else {
+                        Swal.fire({ title: 'Error', text: response.Message, icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
                     }
                 });
             }
