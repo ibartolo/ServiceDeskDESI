@@ -291,6 +291,41 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
+        public ModelResponse GuardarLogoEmpresa(string usuario, string logoUrl)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("GuardarLogoEmpresa", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@Usuario", usuario),
+                    // IMPORTANTE: si logoUrl es null hay que enviar DBNull.Value explícitamente;
+                    // SqlParameter con Value=null hace que ADO.NET OMITA el parámetro y SQL Server
+                    // devuelve: "Procedure expects parameter '@LogoUrl', which was not supplied".
+                    new SqlParameter("@LogoUrl", (object)logoUrl ?? DBNull.Value)
+                });
+
+                if (Convert.ToInt32(resultado) == 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo guardar el logotipo de la empresa.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Message = "Logotipo guardado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al guardar logotipo de empresa para usuario {Usuario}", usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al guardar el logotipo.";
+            }
+
+            return modelResponse;
+        }
+
         public ModelResponse GuardarRolParaNuevaEmpresa(Rol rol, long empresaId)
         {
             var modelResponse = new ModelResponse();

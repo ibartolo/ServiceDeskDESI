@@ -127,6 +127,8 @@
         <a class="chip" data-ir="#empresa-licencia">Empresa y licencia</a>
         <a class="chip" data-ir="#correos">Correos que recibes</a>
         <a class="chip" data-ir="#configuracion">Perfil y configuración</a>
+        <a class="chip" data-ir="#configuracion-empresa">Configuración de empresa</a>
+        <a class="chip" data-ir="#estadisticas">Estadísticas</a>
         <a class="chip" data-ir="#preguntas">Preguntas frecuentes</a>
         <a class="chip" data-ir="#glosario">Glosario</a>
     </div>
@@ -440,6 +442,103 @@
             <li><strong>Configuración</strong> (<a class="enlace-app" href="/Home/Configuration">abrir</a>): cambia el <strong>tema</strong> de la aplicación (claro u oscuro). El cambio se guarda en tu cuenta y la página se recarga sola para aplicarlo.</li>
         </ul>
         <div class="tip"><strong>Tip:</strong> el tema que eliges lo ves tú; cada usuario puede tener el suyo.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="configuracion-empresa" data-tags="configuracion empresa horario laboral dia lunes martes miercoles jueves viernes sabado domingo am pm logo logotipo imagen svg png subir quitar administrador permiso">
+        <h3><i class="fas fa-cog me-2"></i>Configuración de Empresa</h3>
+        <p>Esta página permite a la empresa definir su <strong>horario laboral</strong> y su <strong>logotipo</strong>. Es una página de menú independiente: solo la ven los roles que tienen asignado su permiso (por defecto, el rol <strong>Administrador</strong>, con permisos de lectura y edición).</p>
+        <div class="aviso"><strong>Acceso:</strong> para <strong>ver</strong> la página se requiere permiso de <strong>lectura</strong>; para <strong>guardar cambios</strong> se requiere permiso de <strong>edición</strong>. Este módulo no tiene operación de eliminar.</div>
+
+        <h4>Datos de la empresa (solo lectura)</h4>
+        <p>Al entrar en <a class="enlace-app" href="/ConfiguracionEmpresa/Index">Configuración de Empresa</a> ves una tarjeta con los <strong>datos generales de tu empresa</strong>. Es de solo lectura: no hay campos que editar.</p>
+
+        <h4>Horario laboral</h4>
+        <p>Indica en qué días y a qué horas trabaja tu empresa. El editor muestra una fila por día de la semana (<strong>lunes a domingo</strong>):</p>
+        <ul>
+            <li>Marca la casilla <strong>¿Labora?</strong> en los días que la empresa trabaja. Si un día queda <strong>desmarcado</strong>, sus horas se limpian y no se pueden capturar.</li>
+            <li>Captura la <strong>hora de inicio</strong> y la <strong>hora de fin</strong> en formato de 12 horas con <strong>AM/PM</strong> (hora de 1 a 12 y minutos de 00 a 55, en pasos de 5).</li>
+            <li>El botón <strong>Guardar</strong> guarda la semana completa de una sola vez.</li>
+        </ul>
+        <div class="aviso"><strong>Validación:</strong> la <strong>hora de fin</strong> debe ser mayor que la <strong>hora de inicio</strong>; si no se cumple, el sistema muestra un error y no guarda.</div>
+        <div class="tip"><strong>Tip:</strong> al registrarse, cada empresa nueva queda con el horario <strong>lunes a viernes de 09:00 a 17:00</strong> y sábado/domingo no laborables. Este horario se usará más adelante en el módulo de <strong>Estadísticas</strong> para calcular tiempos de atención dentro de las horas hábiles.</div>
+
+        <h4>Logotipo de la empresa</h4>
+        <p>Puedes subir el <strong>logotipo de tu empresa</strong> para que aparezca en la parte superior del menú lateral, en lugar del logo de DESi.</p>
+        <ul>
+            <li>Formatos permitidos: <strong>SVG o PNG</strong>, con un tamaño máximo de <strong>2048 KB</strong>. Si el archivo no es válido o excede el tamaño, se muestra un error y no se guarda.</li>
+            <li>Al guardar una imagen válida se muestra una <strong>vista previa</strong> y el logotipo reemplaza al logo DESi en la parte superior del menú.</li>
+            <li><strong>Quitar logo:</strong> si ya no quieres usar logotipo, pulsa "Quitar logo" y <strong>confirma</strong>; el sistema lo elimina y vuelve a mostrar el logo DESi por defecto.</li>
+            <li>Si vuelves a subir otra imagen, esta <strong>reemplaza</strong> al archivo anterior (no se duplican archivos).</li>
+        </ul>
+        <div class="tip"><strong>Tip:</strong> mientras la empresa no tenga logotipo asignado, el menú muestra el <strong>logo DESi por defecto</strong> (ícono + texto).</div>
+
+        <h4>Pie de página del sistema</h4>
+        <p>Al pie de las páginas se muestra el texto fijo <strong>"Service Desk by DESi"</strong> con los enlaces Ayuda · Términos · Privacidad. Es un texto informativo del sistema y no se edita desde esta página.</p>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="seccion-card" id="estadisticas" data-tags="estadisticas metricas dashboard graficas grafica kpi eficiencia desempeno rendimiento reportes reasignaciones urgencia resueltos cerrados">
+        <h3><i class="fas fa-chart-pie me-2"></i>Estadísticas (métricas y desempeño)</h3>
+        <p>El panel de <strong>Estadísticas</strong> concentra en una sola pantalla los <strong>indicadores (KPIs)</strong> del service desk de tu empresa: cuántos tickets hay, en qué estatus están, qué tan rápido se resuelven y cómo se reparte la carga entre áreas y agentes. Es un módulo <strong>de solo lectura</strong>: solo consultas indicadores, no hay botones para crear, editar ni eliminar nada.</p>
+        <div class="aviso"><strong>Acceso:</strong> el ítem <strong>"Estadísticas"</strong> aparece en el menú lateral con el ícono de gráfica de pastel. Por defecto lo ven los roles <strong>Administrador</strong> y <strong>Supervisor</strong>; también puede entrar un <strong>jefe de área</strong> (el usuario responsable de al menos un área). Si tu rol no tiene el permiso, el ítem no se muestra y, si intentas entrar por la dirección directa, el sistema te lleva a <strong>"Acceso denegado"</strong>.</div>
+
+        <h4>Elegir el periodo (filtros de fecha)</h4>
+        <ol>
+            <li>Al abrir el panel, los dos filtros traen el periodo por defecto: <strong>1 de enero del año actual → hoy</strong>.</li>
+            <li>Puedes cambiar la <strong>fecha de inicio</strong> y la <strong>fecha de fin</strong>. No se permiten fechas futuras ni que el inicio sea mayor que el fin (si ocurre, el sistema muestra un error).</li>
+            <li>Pulsa el botón <strong>Aplicar</strong> para volver a calcular todas las tarjetas y gráficas con el nuevo rango.</li>
+        </ol>
+
+        <h4>Las 8 tarjetas de indicadores</h4>
+        <p>En la parte superior se muestran <strong>8 tarjetas</strong>. Todas se calculan sobre los tickets creados dentro del rango de fechas elegido. Si un estatus no tiene tickets, su tarjeta muestra <strong>"0"</strong>.</p>
+        <table class="tabla-campos">
+            <thead><tr><th>Tarjeta</th><th>Qué significa</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Total</strong></td><td>Todos los tickets creados en el rango.</td></tr>
+                <tr><td><strong>Nuevos</strong></td><td>Tickets que hoy están en estatus "Nuevo".</td></tr>
+                <tr><td><strong>En Progreso</strong></td><td>Tickets que hoy están en estatus "En Progreso".</td></tr>
+                <tr><td><strong>Resueltos</strong></td><td>Tickets que hoy están en estatus "Resuelto".</td></tr>
+                <tr><td><strong>Cerrados</strong></td><td>Tickets que hoy están en estatus "Cerrado".</td></tr>
+                <tr><td><strong>Rechazados</strong></td><td>Tickets que hoy están en estatus "Rechazado".</td></tr>
+                <tr><td><strong>Eficiencia</strong></td><td>Porcentaje de tickets cerrados: (Cerrados ÷ Total) × 100.</td></tr>
+                <tr><td><strong>Tiempo promedio de resolución</strong></td><td>Promedio de horas que tarda en resolverse un ticket, con un decimal (ej. "4.5 h"). Se calcula en <strong>horas hábiles</strong> usando el horario laboral que tu empresa configuró en <a class="enlace-seccion" href="#configuracion-empresa">Configuración de Empresa</a>: los días y horas no laborables no suman tiempo.</td></tr>
+            </tbody>
+        </table>
+        <p>Nota: los estatus Nuevo, En Progreso, Resuelto, Cerrado y Rechazado se agrupan por el <strong>estatus actual</strong> del ticket.</p>
+
+        <h4>Gráficas de estatus y de evolución</h4>
+        <ul>
+            <li><strong>Gráfica de pastel (distribución de estatus):</strong> reparte los tickets por su estatus actual (Nuevo, En Progreso, Resuelto, Cerrado, Rechazado), cada uno con su color. Al pasar el cursor sobre una porción ves el <strong>nombre del estatus y la cantidad</strong> de tickets.</li>
+            <li><strong>Gráfica de líneas (evolución diaria):</strong> muestra, día por día, cuántos tickets se <strong>crearon</strong> y cuántos se <strong>resolvieron</strong> dentro del rango elegido.</li>
+            <li>Si no hay tickets en el rango, cada gráfica muestra el mensaje <strong>"Sin datos"</strong>.</li>
+        </ul>
+
+        <h4>Ranking de Áreas</h4>
+        <p>Una tabla con el desempeño por área, <strong>ordenada de mayor a menor cantidad de tickets</strong>. Entra desde <a class="enlace-app" href="/Estadisticas/Index">Estadísticas</a> y revisa la sección del ranking. Cada fila indica:</p>
+        <ul>
+            <li><strong>Área:</strong> el departamento (TI, RH, Finanzas...).</li>
+            <li><strong>Total:</strong> cantidad de tickets del área en el rango.</li>
+            <li><strong>Promedio de urgencia:</strong> la urgencia promedio de sus tickets, con un decimal (la urgencia va del 1, baja, al 4, crítica).</li>
+            <li><strong>Cerrados</strong> y <strong>Rechazados:</strong> cuántos tickets tiene en cada uno de esos estatus.</li>
+            <li>Las áreas <strong>sin tickets no aparecen</strong> en el ranking.</li>
+        </ul>
+
+        <h4>Ranking de Reasignaciones</h4>
+        <p>Dos listas lado a lado con el <strong>TOP de agentes</strong> (5 por defecto; la cantidad es configurable por el administrador del sistema):</p>
+        <ul>
+            <li><strong>Agentes que más reciben tickets reasignados:</strong> a quiénes llegan más tickets por reasignación.</li>
+            <li><strong>Agentes a quienes más les quitan tickets:</strong> a quiénes más tickets les retiran al reasignarse.</li>
+            <li>Solo se cuentan <strong>reasignaciones reales</strong> (el ticket cambió de agente). La <strong>toma inicial</strong> de un ticket no se cuenta como reasignación.</li>
+            <li>Si no hay reasignaciones en el rango, se muestra: <strong>"No hay reasignaciones registradas."</strong></li>
+        </ul>
+
+        <h4>Carga y mensajes de la página</h4>
+        <ul>
+            <li>Mientras cada sección consulta sus datos se muestra el mensaje <strong>"Cargando datos…"</strong>.</li>
+            <li>Si la empresa aún no tiene tickets, el panel muestra un mensaje amigable: <strong>"Aún no hay tickets registrados…"</strong>.</li>
+        </ul>
+        <div class="tip"><strong>Tip:</strong> los datos del panel están <strong>separados por empresa</strong>: cada empresa ve únicamente sus propios indicadores, nunca los de otra.</div>
     </section>
 
     <!-- ============================================================ -->

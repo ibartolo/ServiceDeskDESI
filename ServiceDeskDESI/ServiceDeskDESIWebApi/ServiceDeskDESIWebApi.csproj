@@ -220,7 +220,9 @@
     <Compile Include="Controllers\EmpresaController.cs" />
     <Compile Include="Controllers\EvidenciaController.cs" />
     <Compile Include="Controllers\FoliadorController.cs" />
+    <Compile Include="Controllers\HorarioLaboralController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
+    <Compile Include="Controllers\EstadisticasController.cs" />
     <Compile Include="Controllers\MarcaController.cs" />
     <Compile Include="Controllers\MantenimientoController.cs" />
     <Compile Include="Controllers\ModeloController.cs" />
@@ -247,7 +249,9 @@
     <Compile Include="DAL\DbWrapper.Empresa.cs" />
     <Compile Include="DAL\DbWrapper.Evidencia.cs" />
     <Compile Include="DAL\DbWrapper.Foliador.cs" />
+    <Compile Include="DAL\DbWrapper.HorarioLaboral.cs" />
     <Compile Include="DAL\DbWrapper.Dashboard.cs" />
+    <Compile Include="DAL\DbWrapper.Estadisticas.cs" />
     <Compile Include="DAL\DbWrapper.Marca.cs" />
     <Compile Include="DAL\DbWrapper.Mantenimiento.cs" />
     <Compile Include="DAL\DbWrapper.Modelo.cs" />
@@ -276,7 +280,9 @@
     <Compile Include="Services\EmpresaService.cs" />
     <Compile Include="Services\EvidenciaService.cs" />
     <Compile Include="Services\FoliadorService.cs" />
+    <Compile Include="Services\HorarioLaboralService.cs" />
     <Compile Include="Services\DashboardService.cs" />
+    <Compile Include="Services\EstadisticasService.cs" />
     <Compile Include="Services\MarcaService.cs" />
     <Compile Include="Services\MantenimientoService.cs" />
     <Compile Include="Services\ModeloService.cs" />

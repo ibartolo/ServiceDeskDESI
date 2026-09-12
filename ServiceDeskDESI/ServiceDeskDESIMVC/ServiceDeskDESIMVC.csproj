@@ -151,6 +151,8 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CatalogsController.cs" />
+    <Compile Include="Controllers\ConfiguracionEmpresaController.cs" />
+    <Compile Include="Controllers\EstadisticasController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PermissionsController.cs" />
     <Compile Include="Controllers\SecurityController.cs" />
@@ -168,7 +170,9 @@
     <Compile Include="DAL\HttpClientConnection.Empresa.cs" />
     <Compile Include="DAL\HttpClientConnection.Evidencia.cs" />
     <Compile Include="DAL\HttpClientConnection.Foliador.cs" />
+    <Compile Include="DAL\HttpClientConnection.HorarioLaboral.cs" />
     <Compile Include="DAL\HttpClientConnection.Dashboard.cs" />
+    <Compile Include="DAL\HttpClientConnection.Estadisticas.cs" />
     <Compile Include="DAL\HttpClientConnection.Marca.cs" />
     <Compile Include="DAL\HttpClientConnection.Mantenimiento.cs" />
     <Compile Include="DAL\HttpClientConnection.Modelo.cs" />
@@ -190,6 +194,7 @@
     <Compile Include="Helpers\SessionHelper.cs" />
     <Compile Include="Helpers\ThemeHelper.cs" />
     <Compile Include="Models\CategoriaResponsableViewModel.cs" />
+    <Compile Include="Models\HorarioViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ActivoService.cs" />
     <Compile Include="Services\AreaService.cs" />
@@ -200,7 +205,9 @@
     <Compile Include="Services\EmpresaService.cs" />
     <Compile Include="Services\EvidenciaService.cs" />
     <Compile Include="Services\FoliadorService.cs" />
+    <Compile Include="Services\HorarioLaboralService.cs" />
     <Compile Include="Services\DashboardService.cs" />
+    <Compile Include="Services\EstadisticasService.cs" />
     <Compile Include="Services\MarcaService.cs" />
     <Compile Include="Services\MantenimientoService.cs" />
     <Compile Include="Services\ModeloService.cs" />
@@ -243,11 +250,14 @@
     <Content Include="Views\User\Users.cshtml" />
     <Content Include="Views\Home\MenusUser.cshtml" />
     <Content Include="Views\Home\MisActivos.cshtml" />
+    <Content Include="Views\ConfiguracionEmpresa\Index.cshtml" />
+    <Content Include="Views\Estadisticas\Index.cshtml" />
     <Content Include="Views\Home\VerAsignacion.cshtml" />
     <Content Include="Views\Home\AccesoDenegado.cshtml" />
     <Content Include="Views\Security\Role.cshtml" />
     <Content Include="Views\Security\Permisos.cshtml" />
     <Content Include="Views\Home\Configuration.cshtml" />
+    <Content Include="Views\Home\Ayuda.cshtml" />
     <Content Include="Views\Catalogs\CategoriaResponsable.cshtml" />
     <Content Include="Views\Catalogs\Puesto.cshtml" />
     <Content Include="Views\Catalogs\Persona.cshtml" />
