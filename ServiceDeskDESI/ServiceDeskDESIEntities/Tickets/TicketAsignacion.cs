@@ -14,5 +14,6 @@ namespace ServiceDeskDESIEntities.Tickets
         public bool EsActiva { get; set; }
         public string TipoMovimiento { get; set; }
         public int? TicketEstatusId { get; set; }
+        public DateTime? FechaEstimada { get; set; }
     }
 }

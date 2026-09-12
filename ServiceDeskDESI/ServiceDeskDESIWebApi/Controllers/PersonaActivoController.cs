@@ -1,6 +1,7 @@
-using ServiceDeskDESIEntities.Catalogos;
+﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.Filters;
+using ServiceDeskDESIWebApi.Models;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -122,21 +123,5 @@ namespace ServiceDeskDESIWebApi.Controllers
             var usuario = User.Identity.Name;
             return _personaActivoService.IniciarDesvinculacion(request.PersonaActivoId, usuario);
         }
-    }
-
-    public class AsignarActivoRequest
-    {
-        public long PersonaId { get; set; }
-        public long ActivoId { get; set; }
-    }
-
-    public class DesvincularActivoRequest
-    {
-        public long PersonaActivoId { get; set; }
-    }
-
-    public class ConfirmarRecepcionRequest
-    {
-        public Guid Token { get; set; }
     }
 }

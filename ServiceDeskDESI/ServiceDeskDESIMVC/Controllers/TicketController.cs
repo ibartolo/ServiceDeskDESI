@@ -245,6 +245,22 @@ namespace ServiceDeskDESIMVC.Controllers
 
         [HttpPost]
         [Permiso("Tickets", "Editar")]
+        public async Task<string> PausarTicket(long ticketId, string tipoPausa, string comentario, DateTime? fechaEstimada)
+        {
+            var response = await _ticketService.PausarTicket(ticketId, tipoPausa, comentario, fechaEstimada);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Editar")]
+        public async Task<string> ReanudarTicket(long ticketId, string comentario)
+        {
+            var response = await _ticketService.ReanudarTicket(ticketId, comentario);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        [HttpPost]
+        [Permiso("Tickets", "Editar")]
         public async Task<string> ReasignarTicket(long ticketId, long nuevoUsuarioId, string comentario)
         {
             var response = await _ticketService.ReasignarTicket(ticketId, nuevoUsuarioId, comentario);

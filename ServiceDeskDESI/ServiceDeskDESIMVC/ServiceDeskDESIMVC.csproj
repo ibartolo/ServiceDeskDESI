@@ -240,6 +240,7 @@
     <Content Include="Views\Ticket\_CapturarTicket.cshtml" />
     <Content Include="Views\Ticket\_ReasignarTicket.cshtml" />
     <Content Include="Views\Ticket\_DetalleTicket.cshtml" />
+    <Content Include="Views\Ticket\_PausarTicket.cshtml" />
     <Content Include="Views\Catalogs\TypeActive.cshtml" />
     <Content Include="Views\Catalogs\Model.cshtml" />
     <Content Include="Views\Catalogs\Mark.cshtml" />
