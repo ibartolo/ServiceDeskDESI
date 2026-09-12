@@ -1,0 +1,80 @@
+﻿<div class="modal fade" id="modalPausarTicket" tabindex="-1" aria-labelledby="modalPausarTicketLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalPausarTicketLabel"><i class="fas fa-pause-circle me-2"></i>Pausar ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="ticketIdPausar" />
+
+                <div class="mb-3">
+                    <label>Motivo de la pausa:</label>
+                    <select id="ddlTipoPausa" class="form-control">
+                        <option value="">Seleccione un motivo</option>
+                        <option value="Materiales">Pendiente de Materiales</option>
+                        <option value="Terceros">En Espera de Terceros</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Detalle (obligatorio, máximo 300 caracteres):</label>
+                    <textarea id="comentarioPausa" class="form-control" rows="3" maxlength="300" placeholder="Describa de qué se depende (compra, proveedor, etc.)"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label>Fecha estimada de respuesta (opcional):</label>
+                    <input type="date" id="fechaEstimadaPausa" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="ConfirmarPausar()">Pausar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function AbrirPausar(id) {
+        $("#ticketIdPausar").val(id);
+        $("#ddlTipoPausa").val('');
+        $("#comentarioPausa").val('');
+        $("#fechaEstimadaPausa").val('');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPausarTicket')).show();
+    }
+
+    function ConfirmarPausar() {
+        var ticketId = $("#ticketIdPausar").val();
+        var tipoPausa = $("#ddlTipoPausa").val();
+        var comentario = $("#comentarioPausa").val();
+        var fechaEstimada = $("#fechaEstimadaPausa").val();
+
+        if (!tipoPausa) {
+            Swal.fire({ title: 'Error', text: 'Debe seleccionar un motivo de pausa.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+        if (!comentario || !comentario.trim()) {
+            Swal.fire({ title: 'Error', text: 'Debe escribir un comentario para pausar el ticket.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+        if (comentario.length > 300) {
+            Swal.fire({ title: 'Error', text: 'El comentario no puede superar los 300 caracteres.', icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            return;
+        }
+
+        Swal.fire({ title: 'Pausando...', text: 'Por favor espere', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+        PostMVC('/Ticket/PausarTicket', { ticketId: ticketId, tipoPausa: tipoPausa, comentario: comentario, fechaEstimada: fechaEstimada || null }, function (response) {
+            Swal.close();
+
+            if (response.IsSuccess) {
+                bootstrap.Modal.getInstance(document.getElementById('modalPausarTicket')).hide();
+                if (typeof RefrescarTabla === 'function') { RefrescarTabla(); }
+                Swal.fire({ title: '¡Éxito!', text: response.Message, icon: 'success', timer: 1500, showConfirmButton: false, background: 'white', iconColor: '#4e73df' });
+            } else {
+                Swal.fire({ title: 'Error', text: response.Message, icon: 'error', confirmButtonText: 'Aceptar', background: 'white', confirmButtonColor: '#4e73df' });
+            }
+        });
+    }
+</script>

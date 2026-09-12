@@ -183,6 +183,44 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
+        public async Task<ModelResponse> PausarTicket(long ticketId, string tipoPausa, string comentario, DateTime? fechaEstimada)
+        {
+            var request = new
+            {
+                TicketId = ticketId,
+                TipoPausa = tipoPausa,
+                Comentario = comentario,
+                FechaEstimada = fechaEstimada
+            };
+
+            var result = await RequestAsync<object>($"api/Ticket/Pausar", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
+        public async Task<ModelResponse> ReanudarTicket(long ticketId, string comentario)
+        {
+            var request = new
+            {
+                TicketId = ticketId,
+                Comentario = comentario
+            };
+
+            var result = await RequestAsync<object>($"api/Ticket/Reanudar", HttpMethod.Post, request,
+                new Func<string, string>((responseString) =>
+                {
+                    return responseString;
+                }), token.Token.access_token);
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
+        }
+
         public async Task<ModelResponse<List<UsuarioDTO>>> ObtenerUsuariosArea(long areaId)
         {
             return await RequestAsync<List<UsuarioDTO>>($"api/Ticket/UsuariosArea/{areaId}", HttpMethod.Get, null, token.Token.access_token);

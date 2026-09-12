@@ -169,10 +169,4 @@ namespace ServiceDeskDESIWebApi.Controllers
             return result;
         }
     }
-
-    public class RestablecerContraseniaRequest
-    {
-        public string Token { get; set; }
-        public string NuevaContrasena { get; set; }
-    }
 }

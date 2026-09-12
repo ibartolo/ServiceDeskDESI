@@ -537,6 +537,81 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
+        public ModelResponse PausarTicket(long ticketId, string usuario, string comentario, DateTime? fechaEstimada, string tipoMovimiento)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@TipoMovimiento", tipoMovimiento),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+                    new SqlParameter("@FechaEstimada", (object)fechaEstimada ?? DBNull.Value),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo pausar el ticket. Verifique que sea el agente asignado y que el ticket esté en progreso.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket pausado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al pausar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al pausar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ReanudarTicket(long ticketId, string usuario, string comentario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@TipoMovimiento", "Reanudar"),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo reanudar el ticket. Verifique que sea el agente asignado y que el ticket esté en espera.";
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket reanudado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al reanudar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al reanudar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
         public ModelResponse<List<UsuarioDTO>> ObtenerUsuariosArea(long areaId, string usuario)
         {
             var modelResponse = new ModelResponse<List<UsuarioDTO>>();

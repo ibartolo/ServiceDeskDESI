@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.Filters;
+using ServiceDeskDESIWebApi.Models;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -148,17 +149,4 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
         #endregion
     }
-
-    #region Request classes
-    public class AsignarRolRequest
-    {
-        public long UsuarioId { get; set; }
-        public long RolId { get; set; }
-    }
-
-    public class EliminarRolUsuarioRequest
-    {
-        public long UsuarioRolId { get; set; }
-    }
-    #endregion
 }
