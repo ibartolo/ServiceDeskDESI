@@ -80,7 +80,11 @@ namespace ServiceDeskDESIWebApi.DAL
 
             foreach (var p in parametersName)
             {
-                listParameters.Add(new SqlParameter($"@{p.Name}", p.GetValue(o))
+                // IMPORTANTE: SqlClient OMITE el parámetro cuando el valor es null "puro"
+                // (lanza "Procedure expects parameter '@X', which was not supplied").
+                // Se debe convertir null -> DBNull.Value para que viaje como NULL.
+                var valor = p.GetValue(o) ?? DBNull.Value;
+                listParameters.Add(new SqlParameter($"@{p.Name}", valor)
                 {
                     IsNullable = true
                 });
@@ -90,8 +94,9 @@ namespace ServiceDeskDESIWebApi.DAL
         }
 
         /// <summary>
-        /// Indica si ya existe un usuario con ese NombreUsuario (búsqueda global, sin filtro
-        /// de empresa). Se usa para garantizar usuarios únicos al registrar una nueva empresa.
+        /// Indica si ya existe un usuario con ese NombreUsuario (búsqueda GLOBAL, sin filtro
+        /// de empresa). Los usernames son únicos globalmente (índice UX_Usuarios_NombreUsuario).
+        /// Se usa para garantizar unicidad al registrar una nueva empresa.
         /// </summary>
         public bool ExisteNombreUsuario(string nombreUsuario)
         {

@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -21,11 +22,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PuestoService.ObtenerTodosLosPuestos para usuario {Usuario}", usuario);
+                Log.Information("PuestoService.ObtenerTodosLosPuestos ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerTodosLosPuestos(usuario);
                 Log.Information("PuestoService.ObtenerTodosLosPuestos RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PuestoService.ObtenerTodosLosPuestos SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -45,12 +48,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PuestoService.ObtenerPuestoPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("PuestoService.ObtenerPuestoPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del puesto es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerPuestoPorId(id, usuario);
                 Log.Information("PuestoService.ObtenerPuestoPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PuestoService.ObtenerPuestoPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -70,6 +75,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PuestoService.GuardarOActualizarPuesto para usuario {Usuario}", usuario);
+                Log.Information("PuestoService.GuardarOActualizarPuesto ENTRADA: {Json}", LogSanitizer.ToJson(new { puesto, usuario }));
 
                 if (string.IsNullOrWhiteSpace(puesto.Nombre)) { throw new ArgumentException("El nombre del puesto es requerido."); }
                 if (puesto.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
@@ -79,6 +85,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarPuesto(puesto, usuario);
                 Log.Information("PuestoService.GuardarOActualizarPuesto RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PuestoService.GuardarOActualizarPuesto SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -98,6 +105,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PuestoService.EliminarPuesto para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("PuestoService.EliminarPuesto ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del puesto es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -105,6 +113,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarPuesto(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("PuestoService.EliminarPuesto RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PuestoService.EliminarPuesto SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

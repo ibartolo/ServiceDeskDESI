@@ -1,6 +1,8 @@
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIMVC.DAL;
+using ServiceDeskDESIMVC.Helpers;
+using Serilog;
 using System.Threading.Tasks;
 
 namespace ServiceDeskDESIMVC.Services
@@ -16,7 +18,13 @@ namespace ServiceDeskDESIMVC.Services
 
         public async Task<ModelResponse<DashboardIndicadoresDTO>> ObtenerIndicadores()
         {
-            return await _httpClient.ObtenerIndicadoresDashboard();
+            var sesion = SessionHelper.GetSessionUser();
+            Log.Information("DashboardService.ObtenerIndicadores ENTRADA: Usuario={Usuario}, EmpresaId={EmpresaId}, UserId={UserId}",
+                sesion?.UserName, sesion?.EmpresaID, sesion?.UserID);
+            var resultado = await _httpClient.ObtenerIndicadoresDashboard();
+            Log.Information("DashboardService.ObtenerIndicadores SALIDA: IsSuccess={IsSuccess}, Message={Message}",
+                resultado?.IsSuccess, resultado?.Message);
+            return resultado;
         }
     }
 }

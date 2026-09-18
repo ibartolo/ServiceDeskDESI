@@ -1,6 +1,8 @@
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIMVC.DAL;
+using ServiceDeskDESIMVC.Helpers;
+using Serilog;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -21,11 +23,20 @@ namespace ServiceDeskDESIMVC.Services
 
         public async Task<ModelResponse<EvidenciaConfigDTO>> ObtenerConfiguracion()
         {
-            return await _httpClient.ObtenerConfiguracionEvidencias();
+            var sesion = SessionHelper.GetSessionUser();
+            Log.Information("EvidenciaService.ObtenerConfiguracion ENTRADA: Usuario={Usuario}, EmpresaId={EmpresaId}, UserId={UserId}",
+                sesion?.UserName, sesion?.EmpresaID, sesion?.UserID);
+            var resultado = await _httpClient.ObtenerConfiguracionEvidencias();
+            Log.Information("EvidenciaService.ObtenerConfiguracion SALIDA: IsSuccess={IsSuccess}, Message={Message}",
+                resultado?.IsSuccess, resultado?.Message);
+            return resultado;
         }
 
         public async Task<ModelResponse<List<TicketEvidencia>>> GuardarEvidencias(long ticketId, HttpFileCollectionBase files)
         {
+            var sesion = SessionHelper.GetSessionUser();
+            Log.Information("EvidenciaService.GuardarEvidencias ENTRADA: TicketId={TicketId}, Archivos={Archivos}, Usuario={Usuario}, EmpresaId={EmpresaId}, UserId={UserId}",
+                ticketId, files?.Count, sesion?.UserName, sesion?.EmpresaID, sesion?.UserID);
             using (var form = new MultipartFormDataContent())
             {
                 form.Add(new StringContent(ticketId.ToString()), "ticketId");
@@ -53,18 +64,33 @@ namespace ServiceDeskDESIMVC.Services
                     }
                 }
 
-                return await _httpClient.PostMultipartAsync<List<TicketEvidencia>>("api/Evidencia/Guardar", form);
+                var resultado = await _httpClient.PostMultipartAsync<List<TicketEvidencia>>("api/Evidencia/Guardar", form);
+                Log.Information("EvidenciaService.GuardarEvidencias SALIDA: IsSuccess={IsSuccess}, Message={Message}",
+                    resultado?.IsSuccess, resultado?.Message);
+                return resultado;
             }
         }
 
         public async Task<ModelResponse<List<TicketEvidencia>>> ObtenerEvidenciasPorTicket(long ticketId)
         {
-            return await _httpClient.ObtenerEvidenciasPorTicket(ticketId);
+            var sesion = SessionHelper.GetSessionUser();
+            Log.Information("EvidenciaService.ObtenerEvidenciasPorTicket ENTRADA: TicketId={TicketId}, Usuario={Usuario}, EmpresaId={EmpresaId}, UserId={UserId}",
+                ticketId, sesion?.UserName, sesion?.EmpresaID, sesion?.UserID);
+            var resultado = await _httpClient.ObtenerEvidenciasPorTicket(ticketId);
+            Log.Information("EvidenciaService.ObtenerEvidenciasPorTicket SALIDA: IsSuccess={IsSuccess}, Message={Message}",
+                resultado?.IsSuccess, resultado?.Message);
+            return resultado;
         }
 
         public async Task<EvidenciaDescargaDTO> ObtenerEvidenciaDescarga(long id)
         {
-            return await _httpClient.ObtenerEvidenciaDescarga(id);
+            var sesion = SessionHelper.GetSessionUser();
+            Log.Information("EvidenciaService.ObtenerEvidenciaDescarga ENTRADA: Id={Id}, Usuario={Usuario}, EmpresaId={EmpresaId}, UserId={UserId}",
+                id, sesion?.UserName, sesion?.EmpresaID, sesion?.UserID);
+            var resultado = await _httpClient.ObtenerEvidenciaDescarga(id);
+            Log.Information("EvidenciaService.ObtenerEvidenciaDescarga SALIDA: ResultadoObtenido={ResultadoObtenido}",
+                resultado != null);
+            return resultado;
         }
     }
 }

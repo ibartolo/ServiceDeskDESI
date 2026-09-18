@@ -27,6 +27,11 @@ namespace ServiceDeskDESIMVC.DAL
             return await RequestAsync<Usuario>($"api/Autentication/ActualizarPerfil", HttpMethod.Post, usuario, token.Token.access_token);
         }
 
+        public async Task<ModelResponse<bool>> ExisteNombreUsuario(string nombreUsuario)
+        {
+            return await RequestAsync<bool>($"api/Autentication/User/Existe/{Uri.EscapeDataString(nombreUsuario ?? string.Empty)}", HttpMethod.Get, null, token.Token.access_token);
+        }
+
         public async Task<ModelResponse> ValidarTokenRecuperacion(string token)
         {
             var result = await RequestAsync<object>($"api/Autentication/validarToken/{token}", HttpMethod.Get, null,

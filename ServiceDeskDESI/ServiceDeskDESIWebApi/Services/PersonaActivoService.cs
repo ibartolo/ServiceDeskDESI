@@ -35,12 +35,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaActivoService.ObtenerActivosPorPersona para PersonaId {PersonaId} usuario {Usuario}", personaId, usuario);
+                Log.Information("PersonaActivoService.ObtenerActivosPorPersona ENTRADA: {Json}", LogSanitizer.ToJson(new { personaId, usuario }));
 
                 if (personaId <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerActivosPorPersona(personaId, usuario);
                 Log.Information("PersonaActivoService.ObtenerActivosPorPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaActivoService.ObtenerActivosPorPersona SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -60,11 +62,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaActivoService.ObtenerActivosDisponibles para usuario {Usuario}", usuario);
+                Log.Information("PersonaActivoService.ObtenerActivosDisponibles ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerActivosDisponibles(usuario);
                 Log.Information("PersonaActivoService.ObtenerActivosDisponibles RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaActivoService.ObtenerActivosDisponibles SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -84,6 +88,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaActivoService.AsignarActivoPersona para PersonaId {PersonaId} ActivoId {ActivoId} usuario {Usuario}", personaId, activoId, usuario);
+                Log.Information("PersonaActivoService.AsignarActivoPersona ENTRADA: {Json}", LogSanitizer.ToJson(new { personaId, activoId, usuario }));
 
                 if (personaId <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (activoId <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
@@ -91,6 +96,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.AsignarActivoPersona(personaId, activoId, usuario);
                 Log.Information("PersonaActivoService.AsignarActivoPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaActivoService.AsignarActivoPersona SALIDA: {Json}", LogSanitizer.ToJson(result));
 
                 if (!result.IsSuccess)
                 {
@@ -217,12 +223,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaActivoService.DesvincularActivoPersona para PersonaActivoId {PersonaActivoId} usuario {Usuario}", personaActivoId, usuario);
+                Log.Information("PersonaActivoService.DesvincularActivoPersona ENTRADA: {Json}", LogSanitizer.ToJson(new { personaActivoId, usuario }));
 
                 if (personaActivoId <= 0) { throw new ArgumentException("El ID de la asignación es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.DesvincularActivoPersona(personaActivoId, usuario);
                 Log.Information("PersonaActivoService.DesvincularActivoPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaActivoService.DesvincularActivoPersona SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -246,6 +254,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaActivoService.ObtenerMisActivos para usuario {Usuario}", usuario);
+                Log.Information("PersonaActivoService.ObtenerMisActivos ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -263,6 +272,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.ObtenerActivosPorPersona(personaIdResponse.Response.Value, usuario);
                 Log.Information("PersonaActivoService.ObtenerMisActivos RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaActivoService.ObtenerMisActivos SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -282,12 +292,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaActivoService.ConfirmarRecepcion para usuario {Usuario} (token omitido por seguridad)", usuario);
+                Log.Information("PersonaActivoService.ConfirmarRecepcion ENTRADA: {Json}", LogSanitizer.ToJson(new { token, usuario }));
 
                 if (token == Guid.Empty) { throw new ArgumentException("El token de confirmación es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ConfirmarRecepcionActivo(token, usuario);
                 Log.Information("PersonaActivoService.ConfirmarRecepcion RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaActivoService.ConfirmarRecepcion SALIDA: {Json}", LogSanitizer.ToJson(result));
 
                 var estado = result != null && result.Response != null ? Convert.ToInt64(result.Response) : 0L;
 
@@ -320,12 +332,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaActivoService.DesvincularConfirmacion para usuario {Usuario} (token omitido por seguridad)", usuario);
+                Log.Information("PersonaActivoService.DesvincularConfirmacion ENTRADA: {Json}", LogSanitizer.ToJson(new { token, usuario }));
 
                 if (token == Guid.Empty) { throw new ArgumentException("El token de desvinculación es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.DesvincularActivoPersonaConfirmacion(token, usuario);
                 Log.Information("PersonaActivoService.DesvincularConfirmacion RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaActivoService.DesvincularConfirmacion SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -349,6 +363,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaActivoService.IniciarDesvinculacion para PersonaActivoId {PersonaActivoId} usuario {Usuario}", personaActivoId, usuario);
+                Log.Information("PersonaActivoService.IniciarDesvinculacion ENTRADA: {Json}", LogSanitizer.ToJson(new { personaActivoId, usuario }));
 
                 if (personaActivoId <= 0) { throw new ArgumentException("El ID de la asignación es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
@@ -408,12 +423,14 @@ namespace ServiceDeskDESIWebApi.Services
                     Log.Error(ex, "IniciarDesvinculacion: no se pudo registrar la bitácora de desvinculación. PersonaActivoId {PersonaActivoId}", personaActivoId);
                 }
 
-                return new ModelResponse
+                var salida = new ModelResponse
                 {
                     IsSuccess = true,
                     Response = personaActivoId,
                     Message = "Se envió el correo de desvinculación al usuario."
                 };
+                Log.Information("PersonaActivoService.IniciarDesvinculacion SALIDA: {Json}", LogSanitizer.ToJson(salida));
+                return salida;
             }
             catch (ArgumentException ex)
             {
@@ -435,11 +452,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaActivoService.ObtenerAsignacionPorToken (token omitido por seguridad)");
+                Log.Information("PersonaActivoService.ObtenerAsignacionPorToken ENTRADA: {Json}", LogSanitizer.ToJson(new { token }));
 
                 if (token == Guid.Empty) { throw new ArgumentException("El token es requerido."); }
 
                 var result = _dbWrapper.ObtenerAsignacionPorToken(token);
                 Log.Information("PersonaActivoService.ObtenerAsignacionPorToken RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaActivoService.ObtenerAsignacionPorToken SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

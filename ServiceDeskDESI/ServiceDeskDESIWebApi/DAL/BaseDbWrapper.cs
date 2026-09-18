@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Serilog;
+using ServiceDeskDESIWebApi.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -71,6 +73,26 @@ namespace ServiceDeskDESIWebApi.DAL
         }
         #endregion
 
+        #region Logging
+        /// <summary>
+        /// Registra (nivel Debug) el comando a ejecutar con sus parámetros serializados a JSON,
+        /// enmascarando datos sensibles. Punto único de trazabilidad de acceso a BD (regla R2).
+        /// </summary>
+        private void LogCommand(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> parameters)
+        {
+            try
+            {
+                if (!Log.IsEnabled(Serilog.Events.LogEventLevel.Debug)) return;
+                Log.Debug("DB {Tipo} {Cmd} | params: {Params}",
+                    cmdType, cmdText, LogSanitizer.FromSqlParameters(parameters));
+            }
+            catch
+            {
+                // El logging nunca debe romper la ejecución.
+            }
+        }
+        #endregion
+
         #region ExecuteScalar
         protected object ExecuteScalar(string cmdText) => ExecuteScalar(cmdText, CommandType.StoredProcedure, Enumerable.Empty<SqlParameter>());
 
@@ -78,6 +100,8 @@ namespace ServiceDeskDESIWebApi.DAL
 
         protected object ExecuteScalar(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters)
         {
+            LogCommand(cmdText, cmdType, sqlParameters);
+
             if (_ambientTransaction != null)
             {
                 using (var sqlCommand = _ambientConnection.CreateCommand())
@@ -121,6 +145,8 @@ namespace ServiceDeskDESIWebApi.DAL
         /// <returns>object scalar</returns>
         protected async Task<object> ExecuteScalarAsync(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters)
         {
+            LogCommand(cmdText, cmdType, sqlParameters);
+
             using (var sqlConnection = new SqlConnection(SQLConnectionString))
             {
                 await sqlConnection.OpenAsync();
@@ -153,6 +179,8 @@ namespace ServiceDeskDESIWebApi.DAL
 
         protected int ExecuteNonQuery(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters)
         {
+            LogCommand(cmdText, cmdType, sqlParameters);
+
             if (_ambientTransaction != null)
             {
                 using (var sqlCommand = _ambientConnection.CreateCommand())
@@ -197,6 +225,8 @@ namespace ServiceDeskDESIWebApi.DAL
         /// <returns>int rows affected</returns>
         protected async Task<int> ExecuteNonQueryAsync(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters)
         {
+            LogCommand(cmdText, cmdType, sqlParameters);
+
             using (var sqlConnection = new SqlConnection(SQLConnectionString))
             {
                 await sqlConnection.OpenAsync();
@@ -230,6 +260,8 @@ namespace ServiceDeskDESIWebApi.DAL
         protected T GetObject<T>(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters,
             Func<IDataReader, T> readerFunctionPointer) where T : class
         {
+            LogCommand(cmdText, cmdType, sqlParameters);
+
             if (_ambientTransaction != null)
             {
                 using (var sqlCommand = _ambientConnection.CreateCommand())
@@ -303,6 +335,7 @@ namespace ServiceDeskDESIWebApi.DAL
         protected async Task<T> GetObjectAsync<T>(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters,
             Func<IDataReader, T> readerFunctionPointer) where T : class
         {
+            LogCommand(cmdText, cmdType, sqlParameters);
 
             using (var sqlConnection = new SqlConnection(SQLConnectionString))
             {
@@ -345,6 +378,8 @@ namespace ServiceDeskDESIWebApi.DAL
         protected IEnumerable<T> GetObjects<T>(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters,
             Func<IDataReader, T> readerFunctionPointer) where T : class
         {
+            LogCommand(cmdText, cmdType, sqlParameters);
+
             if (_ambientTransaction != null)
             {
                 using (var sqlCommand = _ambientConnection.CreateCommand())
@@ -416,6 +451,8 @@ namespace ServiceDeskDESIWebApi.DAL
         protected async Task<IEnumerable<T>> GetObjectsAsync<T>(string cmdText, CommandType cmdType, IEnumerable<SqlParameter> sqlParameters,
             Func<IDataReader, T> readerFunctionPointer) where T : class
         {
+            LogCommand(cmdText, cmdType, sqlParameters);
+
             using (var sqlConnection = new SqlConnection(SQLConnectionString))
             {
                 await sqlConnection.OpenAsync();
