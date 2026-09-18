@@ -51,7 +51,7 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     <label>Nombre de usuario:</label>
-                    @Html.TextBoxFor(x => x.NombreUsuario, soloLectura ? (object)new { @class = "form-control", placeholder = "Nombre de usuario", id = "txtNombreUsuario", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Nombre de usuario", id = "txtNombreUsuario" })
+                    @Html.TextBoxFor(x => x.NombreUsuario, soloLectura ? (object)new { @class = "form-control", placeholder = "Nombre de usuario", id = "txtNombreUsuario", onblur = "ValidarUsernameExistente()", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Nombre de usuario", id = "txtNombreUsuario", onblur = "ValidarUsernameExistente()" })
                 </div>
             </div>
             <div class="col-md-6">

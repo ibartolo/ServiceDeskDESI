@@ -61,7 +61,6 @@ $(function () {
                 maxlength: 50
             },
             "RFC": {
-                required: true,
                 maxlength: 50
             }
         },
@@ -88,7 +87,6 @@ $(function () {
                 maxlength: "El teléfono no puede superar los 50 caracteres."
             },
             "RFC": {
-                required: "El campo 'RFC' es requerido.",
                 maxlength: "El RFC no puede superar los 50 caracteres."
             }
         },
@@ -126,6 +124,39 @@ function SugerirUsername() {
             $("#txtNombreUsuario").val(usernameSugerido);
         }
     }
+}
+
+function ValidarUsernameExistente() {
+    var valor = $("#txtNombreUsuario").val().trim();
+
+    // No validar si el campo está vacío
+    if (valor === "") {
+        $("#txtNombreUsuario").removeClass("is-invalid").removeClass("is-valid");
+        return;
+    }
+
+    // No validar cuando se está editando un usuario existente (Id > 0)
+    if (parseInt($("#Id").val() || 0, 10) > 0) {
+        return;
+    }
+
+    GetMVC('/User/ExisteNombreUsuario?nombreUsuario=' + encodeURIComponent(valor), function (response) {
+        var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+        if (result && result.IsSuccess && result.Response === true) {
+            $("#txtNombreUsuario").addClass("is-invalid").removeClass("is-valid");
+            Swal.fire({
+                title: 'Nombre de usuario no disponible',
+                text: "El nombre de usuario '" + valor + "' ya existe. Elige otro.",
+                icon: 'warning',
+                confirmButtonText: 'Aceptar',
+                background: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+        } else if (result && result.IsSuccess) {
+            $("#txtNombreUsuario").removeClass("is-invalid").addClass("is-valid");
+        }
+    });
 }
 
 function ConsultarUsuarios() {

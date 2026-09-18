@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -21,11 +22,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaService.ObtenerTodasLasPersonas para usuario {Usuario}", usuario);
+                Log.Information("PersonaService.ObtenerTodasLasPersonas ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerTodasLasPersonas(usuario);
                 Log.Information("PersonaService.ObtenerTodasLasPersonas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaService.ObtenerTodasLasPersonas SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -45,12 +48,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaService.ObtenerPersonaPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("PersonaService.ObtenerPersonaPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerPersonaPorId(id, usuario);
                 Log.Information("PersonaService.ObtenerPersonaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaService.ObtenerPersonaPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -70,6 +75,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaService.GuardarOActualizarPersona para usuario {Usuario}", usuario);
+                Log.Information("PersonaService.GuardarOActualizarPersona ENTRADA: {Json}", LogSanitizer.ToJson(new { persona, usuario }));
 
                 if (string.IsNullOrWhiteSpace(persona.Nombre)) { throw new ArgumentException("El nombre de la persona es requerido."); }
                 if (persona.Nombre.Length > 150) { throw new ArgumentException("El nombre no puede exceder los 150 caracteres."); }
@@ -83,6 +89,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarPersona(persona, usuario);
                 Log.Information("PersonaService.GuardarOActualizarPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaService.GuardarOActualizarPersona SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -102,6 +109,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaService.EliminarPersona para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("PersonaService.EliminarPersona ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -109,6 +117,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarPersona(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("PersonaService.EliminarPersona RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaService.EliminarPersona SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -128,6 +137,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaService.VincularPersonaUsuario para PersonaId {PersonaId} UsuarioId {UsuarioId} usuario {Usuario}", personaId, usuarioId, usuario);
+                Log.Information("PersonaService.VincularPersonaUsuario ENTRADA: {Json}", LogSanitizer.ToJson(new { personaId, usuarioId, usuario }));
 
                 if (personaId <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
@@ -135,6 +145,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.VincularPersonaUsuario(personaId, usuarioId, usuario);
                 Log.Information("PersonaService.VincularPersonaUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaService.VincularPersonaUsuario SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -154,12 +165,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PersonaService.DesvincularPersonaUsuario para PersonaId {PersonaId} usuario {Usuario}", personaId, usuario);
+                Log.Information("PersonaService.DesvincularPersonaUsuario ENTRADA: {Json}", LogSanitizer.ToJson(new { personaId, usuario }));
 
                 if (personaId <= 0) { throw new ArgumentException("El ID de la persona es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.DesvincularPersonaUsuario(personaId, usuario);
                 Log.Information("PersonaService.DesvincularPersonaUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PersonaService.DesvincularPersonaUsuario SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

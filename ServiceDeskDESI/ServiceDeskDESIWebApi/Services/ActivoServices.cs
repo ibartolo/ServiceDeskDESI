@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -21,11 +22,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("ActivoService.ObtenerTodosLosActivos para usuario {Usuario}", usuario);
+                Log.Information("ActivoService.ObtenerTodosLosActivos ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerTodosLosActivos(usuario);
                 Log.Information("ActivoService.ObtenerTodosLosActivos RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("ActivoService.ObtenerTodosLosActivos SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -45,12 +48,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("ActivoService.ObtenerActivoPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("ActivoService.ObtenerActivoPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerActivoPorId(id, usuario);
                 Log.Information("ActivoService.ObtenerActivoPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("ActivoService.ObtenerActivoPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -70,6 +75,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("ActivoService.GuardarOActualizarActivo para usuario {Usuario}", usuario);
+                Log.Information("ActivoService.GuardarOActualizarActivo ENTRADA: {Json}", LogSanitizer.ToJson(new { activo, usuario }));
 
                 if (string.IsNullOrWhiteSpace(activo.Nombre)) { throw new ArgumentException("El nombre del activo es requerido."); }
                 if (activo.Nombre.Length > 50) { throw new ArgumentException("El nombre no puede exceder los 50 caracteres."); }
@@ -85,6 +91,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarActivo(activo, usuario);
                 Log.Information("ActivoService.GuardarOActualizarActivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("ActivoService.GuardarOActualizarActivo SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -104,6 +111,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("ActivoService.EliminarActivo para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("ActivoService.EliminarActivo ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -111,6 +119,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarActivo(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("ActivoService.EliminarActivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("ActivoService.EliminarActivo SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

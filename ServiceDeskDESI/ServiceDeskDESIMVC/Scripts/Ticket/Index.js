@@ -329,46 +329,81 @@ function TomarTicket(id) {
 }
 
 function ResolverTicket(id) {
+    var maxArchivos = (typeof evidenciaConfig !== 'undefined' && evidenciaConfig && evidenciaConfig.MaxArchivos) ? evidenciaConfig.MaxArchivos : 3;
+    var maxTamanoMB = (typeof evidenciaConfig !== 'undefined' && evidenciaConfig && evidenciaConfig.MaxTamanoMB) ? evidenciaConfig.MaxTamanoMB : 3;
+    var extensiones = (typeof evidenciaConfig !== 'undefined' && evidenciaConfig && evidenciaConfig.ExtensionesPermitidas) ? evidenciaConfig.ExtensionesPermitidas : ["pdf", "jpg", "png"];
+
     Swal.fire({
         title: 'Resolver ticket',
-        text: 'Describe la solución (obligatorio, máximo 300 caracteres)',
-        input: 'textarea',
-        inputPlaceholder: 'Describe la solución...',
-        inputAttributes: {
-            maxlength: 300
-        },
+        html:
+            '<div class="text-start">' +
+            '  <label class="form-label">Solución <span class="text-danger">*</span> <small class="text-muted">(máx. 300)</small></label>' +
+            '  <textarea id="swalResolucionComentario" class="form-control" maxlength="300" rows="3" placeholder="Describe la solución..."></textarea>' +
+            '  <label class="form-label mt-3">Anexo <small class="text-muted">(opcional)</small></label>' +
+            '  <input type="file" id="swalResolucionArchivo" class="form-control" multiple />' +
+            '  <small class="text-muted">Formatos: ' + extensiones.join(', ') + ' · Máx. ' + maxArchivos + ' archivos de ' + maxTamanoMB + ' MB.</small>' +
+            '</div>',
         showCancelButton: true,
         confirmButtonText: 'Resolver',
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#4e73df',
         cancelButtonColor: '#858796',
         background: 'white',
-        inputValidator: function (value) {
-            if (!value || !value.trim()) {
-                return 'Debe escribir un comentario para resolver el ticket.';
+        focusConfirm: false,
+        preConfirm: function () {
+            var comentario = document.getElementById('swalResolucionComentario').value;
+            var input = document.getElementById('swalResolucionArchivo');
+
+            if (!comentario || !comentario.trim()) {
+                Swal.showValidationMessage('Debe escribir un comentario para resolver el ticket.');
+                return false;
             }
-            if (value.length > 300) {
-                return 'El comentario no puede superar los 300 caracteres.';
+            if (comentario.length > 300) {
+                Swal.showValidationMessage('El comentario no puede superar los 300 caracteres.');
+                return false;
             }
+
+            var files = (input && input.files) ? Array.prototype.slice.call(input.files) : [];
+            if (files.length > maxArchivos) {
+                Swal.showValidationMessage('No puede adjuntar más de ' + maxArchivos + ' archivos.');
+                return false;
+            }
+            for (var i = 0; i < files.length; i++) {
+                if (files[i].size > maxTamanoMB * 1024 * 1024) {
+                    Swal.showValidationMessage('El archivo "' + files[i].name + '" supera el tamaño máximo de ' + maxTamanoMB + ' MB.');
+                    return false;
+                }
+                var ext = ObtenerExtensionArchivo(files[i].name);
+                if (extensiones.indexOf(ext) === -1) {
+                    Swal.showValidationMessage('Extensión no permitida. Solo se aceptan: ' + extensiones.join(', ') + '.');
+                    return false;
+                }
+            }
+
+            return { comentario: comentario.trim(), files: files };
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
+    }).then(function (result) {
+        if (!result.isConfirmed) return;
+
+        var comentario = result.value.comentario;
+        var files = result.value.files;
+
+        // 1) Subir el anexo PRIMERO. Si falla, NO se resuelve el ticket (SubirEvidencias no llama onSuccess).
+        SubirEvidencias(id, files, function () {
+            // 2) Resolver el ticket (con el anexo ya guardado).
             Swal.fire({
                 title: 'Resolviendo...',
                 text: 'Por favor espere',
                 allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
+                didOpen: function () { Swal.showLoading(); }
             });
 
-            PostMVC('/Ticket/ResolverTicket', { ticketId: id, comentario: result.value }, function (response) {
+            PostMVC('/Ticket/ResolverTicket', { ticketId: id, comentario: comentario }, function (response) {
                 Swal.close();
 
                 if (response.IsSuccess) {
                     ToastExito(response.Message);
                     RefrescarTabla();
-                    AbrirSubirEvidencia(id);
                 } else {
                     Swal.fire({
                         title: 'Error',
@@ -380,7 +415,7 @@ function ResolverTicket(id) {
                     });
                 }
             });
-        }
+        });
     });
 }
 
@@ -564,17 +599,27 @@ function VerTicket(id) {
     $("#detFechaCreacion").text(row.FechaCreacion ? new Date(row.FechaCreacion).toLocaleString() : '---');
     $("#detDescripcion").text(row.Descripcion || '---');
 
-    if (typeof CargarHistorial === 'function') {
-        CargarHistorial(id);
-    }
-
     ticketDetalleActualId = id;
 
-    if (typeof CargarEvidencias === 'function') {
-        CargarEvidencias(id);
+    // Abrir el modal SOLO cuando las 2 consultas (historial + evidencias) hayan terminado.
+    var pendientes = 2;
+    function abrirCuandoListo() {
+        if (--pendientes <= 0) {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetalleTicket')).show();
+        }
     }
 
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetalleTicket')).show();
+    if (typeof CargarHistorial === 'function') {
+        CargarHistorial(id, abrirCuandoListo);
+    } else {
+        abrirCuandoListo();
+    }
+
+    if (typeof CargarEvidencias === 'function') {
+        CargarEvidencias(id, abrirCuandoListo);
+    } else {
+        abrirCuandoListo();
+    }
 }
 
 function AbrirReasignar(id, areaId) {

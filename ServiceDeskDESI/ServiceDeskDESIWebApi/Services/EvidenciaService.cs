@@ -2,6 +2,7 @@ using Serilog;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -26,6 +27,8 @@ namespace ServiceDeskDESIWebApi.Services
         /// </summary>
         public EvidenciaConfigDTO ObtenerConfiguracion()
         {
+            Log.Information("EvidenciaService.ObtenerConfiguracion ENTRADA: {Json}", LogSanitizer.ToJson(new { }));
+
             var config = new EvidenciaConfigDTO();
 
             int maxArchivos;
@@ -48,6 +51,7 @@ namespace ServiceDeskDESIWebApi.Services
                 .Where(e => !string.IsNullOrEmpty(e))
                 .ToList();
 
+            Log.Information("EvidenciaService.ObtenerConfiguracion SALIDA: {Json}", LogSanitizer.ToJson(config));
             return config;
         }
 
@@ -60,6 +64,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EvidenciaService.GuardarEvidencias para TicketId {TicketId} usuario {Usuario}, EmpresaId {EmpresaId}", ticketId, usuario, empresaId);
+                Log.Information("EvidenciaService.GuardarEvidencias ENTRADA: {Json}", LogSanitizer.ToJson(new { ticketId, usuario, empresaId, archivos = files?.Count }));
 
                 if (ticketId <= 0)
                     return new ModelResponse<List<TicketEvidencia>> { IsSuccess = false, Message = "TicketId requerido." };
@@ -181,6 +186,7 @@ namespace ServiceDeskDESIWebApi.Services
                     Message = "Evidencias guardadas correctamente."
                 };
                 Log.Information("EvidenciaService.GuardarEvidencias RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("EvidenciaService.GuardarEvidencias SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (Exception ex)
@@ -199,6 +205,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EvidenciaService.ObtenerEvidenciasPorTicket para TicketId {TicketId} usuario {Usuario}", ticketId, usuario);
+                Log.Information("EvidenciaService.ObtenerEvidenciasPorTicket ENTRADA: {Json}", LogSanitizer.ToJson(new { ticketId, usuario }));
 
                 if (ticketId <= 0) throw new ArgumentException("El ID del ticket es requerido.");
                 if (string.IsNullOrWhiteSpace(usuario)) throw new ArgumentException("El nombre de usuario es requerido.");
@@ -212,6 +219,7 @@ namespace ServiceDeskDESIWebApi.Services
                     Message = "Evidencias obtenidas correctamente."
                 };
                 Log.Information("EvidenciaService.ObtenerEvidenciasPorTicket RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("EvidenciaService.ObtenerEvidenciasPorTicket SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -235,6 +243,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EvidenciaService.ObtenerEvidenciaParaDescarga para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("EvidenciaService.ObtenerEvidenciaParaDescarga ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) throw new ArgumentException("El ID de la evidencia es requerido.");
                 if (string.IsNullOrWhiteSpace(usuario)) throw new ArgumentException("El nombre de usuario es requerido.");
@@ -261,6 +270,7 @@ namespace ServiceDeskDESIWebApi.Services
                     Message = "Evidencia obtenida correctamente."
                 };
                 Log.Information("EvidenciaService.ObtenerEvidenciaParaDescarga RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("EvidenciaService.ObtenerEvidenciaParaDescarga SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

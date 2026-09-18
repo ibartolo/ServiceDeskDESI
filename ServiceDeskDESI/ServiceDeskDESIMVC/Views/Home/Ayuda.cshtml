@@ -214,7 +214,7 @@
             <li><strong>En Progreso:</strong> un agente lo tomó y está trabajando en él.</li>
             <li><strong>Pendiente de Materiales:</strong> el agente no puede continuar porque falta una compra, refacción o un mantenimiento de un tercero que aún no se ejecuta (por ejemplo, una memoria RAM que tarda en llegar). El ticket <u>sigue abierto</u>; no está resuelto ni rechazado.</li>
             <li><strong>En Espera de Terceros:</strong> el avance depende de un proveedor externo (por ejemplo, el soporte del hosting) y el tiempo de espera <u>no depende de tu empresa</u>. El ticket <u>sigue abierto</u>.</li>
-            <li><strong>Resuelto:</strong> el agente indica qué hizo, con un comentario.</li>
+            <li><strong>Resuelto:</strong> el agente indica qué hizo con un comentario y puede <strong>adjuntar un anexo</strong> (evidencia) en el mismo paso.</li>
             <li><strong>Cerrado:</strong> tú (solicitante) confirmas que quedó resuelto.</li>
             <li><strong>Rechazado:</strong> si no quedó resuelto, lo devuelves explicando por qué; el agente puede retomarlo.</li>
         </ul>
@@ -251,7 +251,7 @@
             <thead><tr><th>Rol</th><th>Puede hacer</th></tr></thead>
             <tbody>
                 <tr><td><strong>Solicitante</strong></td><td>Crear tickets, ver los propios, cerrar o rechazar sus tickets resueltos.</td></tr>
-                <tr><td><strong>Agente</strong></td><td>Ver tickets de su área, tomarlos, resolverlos, retomarlos y <strong>pausarlos / reanudarlos</strong> (Pendiente de Materiales / En Espera de Terceros).</td></tr>
+                <tr><td><strong>Agente</strong></td><td>Ver <strong>todos</strong> los tickets de la empresa (sin importar el área), tomarlos, resolverlos (con anexo opcional en el mismo paso), retomarlos y <strong>pausarlos / reanudarlos</strong> (Pendiente de Materiales / En Espera de Terceros).</td></tr>
                 <tr><td><strong>Responsable de área</strong></td><td>Ver tickets de su área y reasignarlos a otro agente.</td></tr>
             </tbody>
         </table>
@@ -366,6 +366,8 @@
         <ul>
             <li><strong>Personas:</strong> el directorio de tu personal (nombre, correo, teléfono, puesto, sucursal).</li>
             <li><strong>Usuarios:</strong> las cuentas que permiten entrar al sistema. Cada usuario tiene un rol.</li>
+            <li><strong>Nombre de usuario:</strong> es único en todo el sistema. Al capturarlo, el sistema avisa si ya existe para que elijas otro.</li>
+            <li><strong>RFC:</strong> es opcional al capturar un usuario.</li>
             <li><strong>Vincular:</strong> una persona puede vincularse a su cuenta de usuario (relación 1 a 1). Al vincular, los datos de la persona se sincronizan con la cuenta y quedan protegidos para evitar errores.</li>
         </ul>
         <p>Administra usuarios en <a class="enlace-app" href="/User/Users">Usuarios</a> y personas en <a class="enlace-app" href="/Catalogs/Persona">Personas</a>.</p>

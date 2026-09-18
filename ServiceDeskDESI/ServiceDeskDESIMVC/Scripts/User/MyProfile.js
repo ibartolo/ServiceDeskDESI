@@ -14,7 +14,6 @@ $(function () {
                 maxlength: 50
             },
             "RFC": {
-                required: true,
                 maxlength: 50
             }
         },
@@ -32,7 +31,6 @@ $(function () {
                 maxlength: "El teléfono no puede superar los 50 caracteres."
             },
             "RFC": {
-                required: "El campo 'RFC' es requerido.",
                 maxlength: "El RFC no puede superar los 50 caracteres."
             }
         },

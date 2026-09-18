@@ -7,7 +7,7 @@ $("#modalDetalleTicket").on("shown.bs.modal", function () {
     }
 });
 
-function CargarHistorial(ticketId) {
+function CargarHistorial(ticketId, callback) {
     GetMVC('/Ticket/ObtenerTicketAsignaciones?ticketId=' + ticketId, function (response) {
         var result = typeof response === 'string' ? JSON.parse(response) : response;
         var data = (result.IsSuccess && result.Response) ? result.Response : [];
@@ -47,6 +47,8 @@ function CargarHistorial(ticketId) {
         } else {
             historialTable.clear().rows.add(data).draw();
         }
+
+        if (typeof callback === 'function') { callback(); }
     });
 }
 
@@ -56,7 +58,7 @@ $("#inputEvidenciasModal").change(function () {
     }
 });
 
-function CargarEvidencias(ticketId) {
+function CargarEvidencias(ticketId, callback) {
     GetMVC('/Ticket/ObtenerEvidenciasPorTicket?ticketId=' + ticketId, function (response) {
         var result = typeof response === 'string' ? JSON.parse(response) : response;
         var data = (result.IsSuccess && result.Response) ? result.Response : [];
@@ -81,6 +83,8 @@ function CargarEvidencias(ticketId) {
         }
 
         $("#listaEvidencias").html(html);
+
+        if (typeof callback === 'function') { callback(); }
     });
 }
 
