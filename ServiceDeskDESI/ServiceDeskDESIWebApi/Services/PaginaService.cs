@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -20,11 +21,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PaginaService.ObtenerPaginasPorUsuario para usuario {Usuario}", usuario);
+                Log.Information("PaginaService.ObtenerPaginasPorUsuario ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerPaginasPorUsuario(usuario);
                 Log.Information("PaginaService.ObtenerPaginasPorUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PaginaService.ObtenerPaginasPorUsuario SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -44,11 +47,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PaginaService.ObtenerPaginaPorNombre para Nombre {Nombre}", nombre);
+                Log.Information("PaginaService.ObtenerPaginaPorNombre ENTRADA: {Json}", LogSanitizer.ToJson(new { nombre }));
 
                 if (string.IsNullOrWhiteSpace(nombre)) { throw new ArgumentException("El nombre de la página es requerido."); }
 
                 var result = _dbWrapper.ObtenerPaginaPorNombre(nombre);
                 Log.Information("PaginaService.ObtenerPaginaPorNombre RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PaginaService.ObtenerPaginaPorNombre SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -68,9 +73,11 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PaginaService.ObtenerPaginas");
+                Log.Information("PaginaService.ObtenerPaginas ENTRADA: {Json}", LogSanitizer.ToJson(new { }));
 
                 var result = _dbWrapper.ObtenerPaginas();
                 Log.Information("PaginaService.ObtenerPaginas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PaginaService.ObtenerPaginas SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (Exception ex)

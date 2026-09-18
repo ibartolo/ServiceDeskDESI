@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -21,11 +22,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("TipoActivoService.ObtenerTodosLosTipoActivos para usuario {Usuario}", usuario);
+                Log.Information("TipoActivoService.ObtenerTodosLosTipoActivos ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerTodosLosTipoActivos(usuario);
                 Log.Information("TipoActivoService.ObtenerTodosLosTipoActivos RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("TipoActivoService.ObtenerTodosLosTipoActivos SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -45,12 +48,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("TipoActivoService.ObtenerTipoActivoPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("TipoActivoService.ObtenerTipoActivoPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del tipo de activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerTipoActivoPorId(id, usuario);
                 Log.Information("TipoActivoService.ObtenerTipoActivoPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("TipoActivoService.ObtenerTipoActivoPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -70,6 +75,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("TipoActivoService.GuardarOActualizarTipoActivo para usuario {Usuario}", usuario);
+                Log.Information("TipoActivoService.GuardarOActualizarTipoActivo ENTRADA: {Json}", LogSanitizer.ToJson(new { tipoActivo, usuario }));
 
                 if (string.IsNullOrWhiteSpace(tipoActivo.Nombre)) { throw new ArgumentException("El nombre del tipo de activo es requerido."); }
                 if (tipoActivo.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
@@ -79,6 +85,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarTipoActivo(tipoActivo, usuario);
                 Log.Information("TipoActivoService.GuardarOActualizarTipoActivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("TipoActivoService.GuardarOActualizarTipoActivo SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -98,6 +105,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("TipoActivoService.EliminarTipoActivo para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("TipoActivoService.EliminarTipoActivo ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del tipo de activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -105,6 +113,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarTipoActivo(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("TipoActivoService.EliminarTipoActivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("TipoActivoService.EliminarTipoActivo SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

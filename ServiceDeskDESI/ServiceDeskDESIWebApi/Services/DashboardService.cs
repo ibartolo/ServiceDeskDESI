@@ -2,6 +2,7 @@ using Serilog;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 
 namespace ServiceDeskDESIWebApi.Services
@@ -20,6 +21,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("DashboardService.ObtenerIndicadores para usuario {Usuario}", usuario);
+                Log.Information("DashboardService.ObtenerIndicadores ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -33,6 +35,7 @@ namespace ServiceDeskDESIWebApi.Services
                 };
 
                 Log.Information("DashboardService.ObtenerIndicadores RESULTADO: IsSuccess={IsSuccess}", result.IsSuccess);
+                Log.Information("DashboardService.ObtenerIndicadores SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

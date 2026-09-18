@@ -2,6 +2,7 @@ using Serilog;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 
 namespace ServiceDeskDESIWebApi.Services
@@ -24,6 +25,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("FoliadorService.ConsultarConsecutivo para Nombre {Nombre} usuario {Usuario}", nombre, usuario);
+                Log.Information("FoliadorService.ConsultarConsecutivo ENTRADA: {Json}", LogSanitizer.ToJson(new { nombre, usuario }));
 
                 if (string.IsNullOrWhiteSpace(nombre)) { throw new ArgumentException("El nombre del foliador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
@@ -50,6 +52,7 @@ namespace ServiceDeskDESIWebApi.Services
                 };
                 Log.Information("FoliadorService.ConsultarConsecutivo RESULTADO: IsSuccess={IsSuccess}, Consecutivo={Consecutivo}, FolioSiguiente={FolioSiguiente}",
                     result.IsSuccess, dto?.Consecutivo, dto?.FolioSiguiente);
+                Log.Information("FoliadorService.ConsultarConsecutivo SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -80,6 +83,12 @@ namespace ServiceDeskDESIWebApi.Services
         /// <summary>
         /// Único punto de verdad del formato del folio: T-{Consecutivo:00000}.
         /// </summary>
-        public static string FormatearFolio(int consecutivo) => $"T-{consecutivo:00000}";
+        public static string FormatearFolio(int consecutivo)
+        {
+            Log.Information("FoliadorService.FormatearFolio ENTRADA: {Json}", LogSanitizer.ToJson(new { consecutivo }));
+            var resultado = $"T-{consecutivo:00000}";
+            Log.Information("FoliadorService.FormatearFolio SALIDA: {Json}", LogSanitizer.ToJson(resultado));
+            return resultado;
+        }
     }
 }

@@ -26,12 +26,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EmpresaService.ObtenerEmpresaPorId para id {Id} y usuario {Usuario}", id, usuario);
+                Log.Information("EmpresaService.ObtenerEmpresaPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerEmpresaPorId(id, usuario);
                 Log.Information("EmpresaService.ObtenerEmpresaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("EmpresaService.ObtenerEmpresaPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -55,11 +57,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EmpresaService.ObtenerEmpresaPorRFC para RFC {RFC}", rfc);
+                Log.Information("EmpresaService.ObtenerEmpresaPorRFC ENTRADA: {Json}", LogSanitizer.ToJson(new { rfc }));
 
                 if (string.IsNullOrWhiteSpace(rfc)) { throw new ArgumentException("El RFC es requerido."); }
 
                 var result = _dbWrapper.ObtenerEmpresaPorRFC(rfc);
                 Log.Information("EmpresaService.ObtenerEmpresaPorRFC RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("EmpresaService.ObtenerEmpresaPorRFC SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -83,6 +87,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EmpresaService.GuardarOActualizarEmpresa para usuario {Usuario} y RFC {RFC}", usuario, empresa?.RFC);
+                Log.Information("EmpresaService.GuardarOActualizarEmpresa ENTRADA: {Json}", LogSanitizer.ToJson(new { empresa, usuario }));
 
                 if (string.IsNullOrWhiteSpace(empresa.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
                 if (empresa.NombreComercial.Length > 250) { throw new ArgumentException("El nombre comercial no puede exceder los 250 caracteres."); }
@@ -105,6 +110,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarEmpresa(empresa, usuario);
                 Log.Information("EmpresaService.GuardarOActualizarEmpresa RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("EmpresaService.GuardarOActualizarEmpresa SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -128,6 +134,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EmpresaService.GuardarNuevaEmpresa para RFC {RFC} y nombre comercial {NombreComercial}", empresa?.RFC, empresa?.NombreComercial);
+                Log.Information("EmpresaService.GuardarNuevaEmpresa ENTRADA: {Json}", LogSanitizer.ToJson(new { empresa }));
 
                 if (string.IsNullOrWhiteSpace(empresa.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
                 if (empresa.NombreComercial.Length > 250) { throw new ArgumentException("El nombre comercial no puede exceder los 250 caracteres."); }
@@ -151,6 +158,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarNuevaEmpresa(empresa);
                 Log.Information("EmpresaService.GuardarNuevaEmpresa RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("EmpresaService.GuardarNuevaEmpresa SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -173,6 +181,8 @@ namespace ServiceDeskDESIWebApi.Services
         {
             try
             {
+                Log.Information("EmpresaService.RegistrarEmpresa ENTRADA: {Json}", LogSanitizer.ToJson(new { empresa }));
+
                 // 1. Validar campos requeridos (espejo del flujo MVC pre-login)
                 if (empresa == null) { throw new ArgumentException("Los datos de la empresa son requeridos."); }
                 if (string.IsNullOrWhiteSpace(empresa.NombreComercial)) { throw new ArgumentException("El nombre comercial es requerido."); }
@@ -216,7 +226,9 @@ namespace ServiceDeskDESIWebApi.Services
                 empresa.Estatus = true;
 
                 // 4. Registro completo (empresa + datos iniciales vía SPs)
-                return GuardarNuevaEmpresaConDatosIniciales(empresa);
+                var resultado = GuardarNuevaEmpresaConDatosIniciales(empresa);
+                Log.Information("EmpresaService.RegistrarEmpresa SALIDA: {Json}", LogSanitizer.ToJson(resultado));
+                return resultado;
             }
             catch (ArgumentException ex)
             {
@@ -239,6 +251,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EmpresaService.EliminarEmpresa para id {Id} por usuario {Usuario}", id, usuario);
+                Log.Information("EmpresaService.EliminarEmpresa ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la empresa es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -246,6 +259,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarEmpresa(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("EmpresaService.EliminarEmpresa RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("EmpresaService.EliminarEmpresa SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -269,6 +283,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EmpresaService.GuardarLogoEmpresa para usuario {Usuario}", usuario);
+                Log.Information("EmpresaService.GuardarLogoEmpresa ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario, logoUrl }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 // LogoUrl puede ser NULL/vacío para QUITAR el logotipo (CE-006 amendment: "Quitar logo").
@@ -276,6 +291,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarLogoEmpresa(usuario, logoUrl);
                 Log.Information("EmpresaService.GuardarLogoEmpresa RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("EmpresaService.GuardarLogoEmpresa SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -310,6 +326,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("=== INICIO REGISTRO DE NUEVA EMPRESA ===");
+                Log.Information("EmpresaService.GuardarNuevaEmpresaConDatosIniciales ENTRADA: {Json}", LogSanitizer.ToJson(new { empresa }));
                 Log.Information("Datos recibidos - NombreComercial: {NombreComercial}, RazonSocial: {RazonSocial}, RFC: {RFC}, Correo: {CorreoContacto}, Responsable: {Responsable}",
                     empresa?.NombreComercial, empresa?.RazonSocial, empresa?.RFC, empresa?.CorreoContacto, empresa?.Responsable);
 
@@ -713,8 +730,8 @@ namespace ServiceDeskDESIWebApi.Services
             catch (ArgumentException ex)
             {
                 stopwatch.Stop();
-                Log.Warning(ex, "⚠️ VALIDACIÓN FALLIDA - Error de validación al registrar empresa. Datos: {@Empresa}, Duración: {Duration}ms",
-                    new { empresa?.NombreComercial, empresa?.RFC, empresa?.CorreoContacto }, stopwatch.ElapsedMilliseconds);
+                Log.Warning(ex, "⚠️ VALIDACIÓN FALLIDA - Error de validación al registrar empresa. Datos: {Empresa}, Duración: {Duration}ms",
+                    LogSanitizer.ToJson(new { empresa?.NombreComercial, empresa?.RFC, empresa?.CorreoContacto }), stopwatch.ElapsedMilliseconds);
 
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = ex.Message;
@@ -722,13 +739,14 @@ namespace ServiceDeskDESIWebApi.Services
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                Log.Error(ex, "❌ ERROR CRÍTICO - Fallo en el registro de empresa. Datos: {@Empresa}, Duración: {Duration}ms",
-                    new { empresa?.NombreComercial, empresa?.RFC, empresa?.CorreoContacto }, stopwatch.ElapsedMilliseconds);
+                Log.Error(ex, "❌ ERROR CRÍTICO - Fallo en el registro de empresa. Datos: {Empresa}, Duración: {Duration}ms",
+                    LogSanitizer.ToJson(new { empresa?.NombreComercial, empresa?.RFC, empresa?.CorreoContacto }), stopwatch.ElapsedMilliseconds);
 
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al registrar la empresa. Por favor, intente nuevamente.";
             }
 
+            Log.Information("EmpresaService.GuardarNuevaEmpresaConDatosIniciales SALIDA: {Json}", LogSanitizer.ToJson(modelResponse));
             return modelResponse;
         }
 
@@ -736,7 +754,7 @@ namespace ServiceDeskDESIWebApi.Services
         /// Genera el nombre de usuario del administrador a partir del "Responsable" registrado:
         /// normaliza (minúsculas, sin acentos, sin caracteres especiales) y arma
         /// primer nombre + apellido (paterno), omitiendo segundos nombres y apellido materno.
-        /// Garantiza unicidad global agregando un sufijo numérico si ya existe.
+        /// Garantiza unicidad GLOBAL agregando un sufijo numérico si ya existe.
         /// </summary>
         private string GenerarUsernameAdminUnico(string responsable)
         {
@@ -772,15 +790,15 @@ namespace ServiceDeskDESIWebApi.Services
             var tokens = sinAcentos.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             if (tokens.Length == 0) return null;
 
-            // 3) Regla: nombre + apellido (paterno). Omite segundos nombres y apellido materno.
-            //    "Ivan Francisco Bartolo Castro" -> ivanbartolo | "Juan Pérez López" -> juanperez
+            // 3) Regla: nombre + apellido (paterno) separados por punto. Omite segundos nombres y apellido materno.
+            //    "Ivan Francisco Bartolo Castro" -> ivan.bartolo | "Juan Pérez López" -> juan.perez
             string baseNombre;
             if (tokens.Length == 1)
                 baseNombre = tokens[0];
             else
             {
                 int idxApellido = tokens.Length == 2 ? 1 : tokens.Length - 2;
-                baseNombre = tokens[0] + tokens[idxApellido];
+                baseNombre = tokens[0] + "." + tokens[idxApellido];
             }
 
             // 4) Dejar margen (<=20) para que el sufijo numérico quepa en nvarchar(25)

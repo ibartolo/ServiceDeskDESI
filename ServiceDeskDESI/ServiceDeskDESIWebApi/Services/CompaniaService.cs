@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -21,11 +22,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("CompaniaService.ObtenerCompanias para usuario {Usuario}", usuario);
+                Log.Information("CompaniaService.ObtenerCompanias ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerCompanias(usuario);
                 Log.Information("CompaniaService.ObtenerCompanias RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("CompaniaService.ObtenerCompanias SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -45,12 +48,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("CompaniaService.ObtenerCompaniaPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("CompaniaService.ObtenerCompaniaPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la compañía es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerCompaniaPorId(id, usuario);
                 Log.Information("CompaniaService.ObtenerCompaniaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("CompaniaService.ObtenerCompaniaPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -70,6 +75,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("CompaniaService.GuardarOActualizarCompania para usuario {Usuario}", usuario);
+                Log.Information("CompaniaService.GuardarOActualizarCompania ENTRADA: {Json}", LogSanitizer.ToJson(new { compania, usuario }));
 
                 if (string.IsNullOrWhiteSpace(compania.Nombre)) { throw new ArgumentException("El nombre de la compañía es requerido."); }
                 if (compania.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
@@ -81,6 +87,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarCompania(compania, usuario);
                 Log.Information("CompaniaService.GuardarOActualizarCompania RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("CompaniaService.GuardarOActualizarCompania SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -100,6 +107,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("CompaniaService.EliminarCompania para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("CompaniaService.EliminarCompania ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la compañía es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -107,6 +115,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarCompania(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("CompaniaService.EliminarCompania RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("CompaniaService.EliminarCompania SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

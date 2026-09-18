@@ -2,6 +2,7 @@ using Serilog;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIEntities.Tickets;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -22,6 +23,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EstadisticasService.ObtenerResumen para usuario {Usuario} ({FechaInicio} - {FechaFin})", usuario, fechaInicio, fechaFin);
+                Log.Information("EstadisticasService.ObtenerResumen ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario, fechaInicio, fechaFin }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -35,6 +37,7 @@ namespace ServiceDeskDESIWebApi.Services
                 };
 
                 Log.Information("EstadisticasService.ObtenerResumen RESULTADO: IsSuccess={IsSuccess}", result.IsSuccess);
+                Log.Information("EstadisticasService.ObtenerResumen SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -54,6 +57,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EstadisticasService.ObtenerDistribucionEstatus para usuario {Usuario} ({FechaInicio} - {FechaFin})", usuario, fechaInicio, fechaFin);
+                Log.Information("EstadisticasService.ObtenerDistribucionEstatus ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario, fechaInicio, fechaFin }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -67,6 +71,7 @@ namespace ServiceDeskDESIWebApi.Services
                 };
 
                 Log.Information("EstadisticasService.ObtenerDistribucionEstatus RESULTADO: IsSuccess={IsSuccess}", result.IsSuccess);
+                Log.Information("EstadisticasService.ObtenerDistribucionEstatus SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -86,6 +91,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EstadisticasService.ObtenerEvolucionDiaria para usuario {Usuario} ({FechaInicio} - {FechaFin})", usuario, fechaInicio, fechaFin);
+                Log.Information("EstadisticasService.ObtenerEvolucionDiaria ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario, fechaInicio, fechaFin }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -99,6 +105,7 @@ namespace ServiceDeskDESIWebApi.Services
                 };
 
                 Log.Information("EstadisticasService.ObtenerEvolucionDiaria RESULTADO: IsSuccess={IsSuccess}", result.IsSuccess);
+                Log.Information("EstadisticasService.ObtenerEvolucionDiaria SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -118,6 +125,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EstadisticasService.ObtenerRankingAreas para usuario {Usuario} ({FechaInicio} - {FechaFin})", usuario, fechaInicio, fechaFin);
+                Log.Information("EstadisticasService.ObtenerRankingAreas ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario, fechaInicio, fechaFin }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -131,6 +139,7 @@ namespace ServiceDeskDESIWebApi.Services
                 };
 
                 Log.Information("EstadisticasService.ObtenerRankingAreas RESULTADO: IsSuccess={IsSuccess}", result.IsSuccess);
+                Log.Information("EstadisticasService.ObtenerRankingAreas SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -150,6 +159,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("EstadisticasService.ObtenerRankingReasignaciones para usuario {Usuario} ({FechaInicio} - {FechaFin})", usuario, fechaInicio, fechaFin);
+                Log.Information("EstadisticasService.ObtenerRankingReasignaciones ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario, fechaInicio, fechaFin }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
@@ -167,6 +177,7 @@ namespace ServiceDeskDESIWebApi.Services
                 };
 
                 Log.Information("EstadisticasService.ObtenerRankingReasignaciones RESULTADO: IsSuccess={IsSuccess}", result.IsSuccess);
+                Log.Information("EstadisticasService.ObtenerRankingReasignaciones SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

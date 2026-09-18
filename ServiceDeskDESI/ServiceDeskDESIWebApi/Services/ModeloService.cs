@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,11 +23,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("ModeloService.ObtenerModelos para usuario {Usuario}", usuario);
+                Log.Information("ModeloService.ObtenerModelos ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerModelos(usuario);
                 Log.Information("ModeloService.ObtenerModelos RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("ModeloService.ObtenerModelos SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -46,12 +49,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("ModeloService.ObtenerModeloPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("ModeloService.ObtenerModeloPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del modelo es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerModeloPorId(id, usuario);
                 Log.Information("ModeloService.ObtenerModeloPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("ModeloService.ObtenerModeloPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -71,6 +76,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("ModeloService.GuardarOActualizarModelo para usuario {Usuario}", usuario);
+                Log.Information("ModeloService.GuardarOActualizarModelo ENTRADA: {Json}", LogSanitizer.ToJson(new { modelo, usuario }));
 
                 if (string.IsNullOrWhiteSpace(modelo.Nombre)) { throw new ArgumentException("El nombre del modelo es requerido."); }
                 if (modelo.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
@@ -81,6 +87,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarModelo(modelo);
                 Log.Information("ModeloService.GuardarOActualizarModelo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("ModeloService.GuardarOActualizarModelo SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -100,6 +107,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("ModeloService.EliminarModelo para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("ModeloService.EliminarModelo ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del modelo es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -107,6 +115,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarModelo(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("ModeloService.EliminarModelo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("ModeloService.EliminarModelo SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -126,12 +135,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("ModeloService.ObtenerModelosPorMarcaId para MarcaId {MarcaId} usuario {Usuario}", marcaId, usuario);
+                Log.Information("ModeloService.ObtenerModelosPorMarcaId ENTRADA: {Json}", LogSanitizer.ToJson(new { marcaId, usuario }));
 
                 if (marcaId <= 0) { throw new ArgumentException("El ID de la marca es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerModelosPorMarcaId(marcaId, usuario);
                 Log.Information("ModeloService.ObtenerModelosPorMarcaId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("ModeloService.ObtenerModelosPorMarcaId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

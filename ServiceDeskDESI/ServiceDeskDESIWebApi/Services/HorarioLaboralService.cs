@@ -2,6 +2,7 @@ using Serilog;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -21,11 +22,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("HorarioLaboralService.ObtenerHorarioLaboral para usuario {Usuario}", usuario);
+                Log.Information("HorarioLaboralService.ObtenerHorarioLaboral ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerHorarioLaboral(usuario);
                 Log.Information("HorarioLaboralService.ObtenerHorarioLaboral RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("HorarioLaboralService.ObtenerHorarioLaboral SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -49,6 +52,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("HorarioLaboralService.GuardarHorarioLaboral para usuario {Usuario}", usuario);
+                Log.Information("HorarioLaboralService.GuardarHorarioLaboral ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario, horario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (horario == null || horario.Count != 7) { throw new ArgumentException("Debe proporcionar los 7 días de la semana."); }
@@ -80,6 +84,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarHorarioLaboral(usuario, horario);
                 Log.Information("HorarioLaboralService.GuardarHorarioLaboral RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("HorarioLaboralService.GuardarHorarioLaboral SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

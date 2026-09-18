@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -20,11 +21,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("RolService.ObtenerRoles para usuario {Usuario}", usuario);
+                Log.Information("RolService.ObtenerRoles ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerRoles(usuario);
                 Log.Information("RolService.ObtenerRoles RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("RolService.ObtenerRoles SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -44,12 +47,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("RolService.ObtenerRolPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("RolService.ObtenerRolPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerRolPorId(id, usuario);
                 Log.Information("RolService.ObtenerRolPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("RolService.ObtenerRolPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -69,6 +74,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("RolService.GuardarOActualizarRol para usuario {UsuarioAdmin}", usuarioAdmin);
+                Log.Information("RolService.GuardarOActualizarRol ENTRADA: {Json}", LogSanitizer.ToJson(new { rol, usuarioAdmin }));
 
                 if (string.IsNullOrWhiteSpace(rol.Nombre)) { throw new ArgumentException("El nombre del rol es requerido."); }
                 if (rol.Nombre.Length > 50) { throw new ArgumentException("El nombre no puede exceder los 50 caracteres."); }
@@ -78,6 +84,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarRol(rol, usuarioAdmin);
                 Log.Information("RolService.GuardarOActualizarRol RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("RolService.GuardarOActualizarRol SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -97,12 +104,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("RolService.EliminarRol para Id {Id} usuario {UsuarioAdmin}", id, usuarioAdmin);
+                Log.Information("RolService.EliminarRol ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuarioAdmin, fechaModificacion }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuarioAdmin)) { throw new ArgumentException("El usuario administrador es requerido."); }
 
                 var result = _dbWrapper.EliminarRol(id, usuarioAdmin, fechaModificacion);
                 Log.Information("RolService.EliminarRol RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("RolService.EliminarRol SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -122,6 +131,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("RolService.AsignarRolUsuario para UsuarioId {UsuarioId}, RolId {RolId}, usuario {AsignadoPor}, EmpresaId {EmpresaId}", usuarioId, rolId, asignadoPor, empresaId);
+                Log.Information("RolService.AsignarRolUsuario ENTRADA: {Json}", LogSanitizer.ToJson(new { usuarioId, rolId, asignadoPor, empresaId }));
 
                 if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
@@ -130,6 +140,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.AsignarRolUsuario(usuarioId, rolId, asignadoPor, empresaId);
                 Log.Information("RolService.AsignarRolUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("RolService.AsignarRolUsuario SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -149,12 +160,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("RolService.ObtenerRolesPorUsuario para UsuarioId {UsuarioId} usuario {UsuarioAutenticado}", usuarioId, usuarioAutenticado);
+                Log.Information("RolService.ObtenerRolesPorUsuario ENTRADA: {Json}", LogSanitizer.ToJson(new { usuarioId, usuarioAutenticado }));
 
                 if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuarioAutenticado)) { throw new ArgumentException("El usuario autenticado es requerido."); }
 
                 var result = _dbWrapper.ObtenerRolesPorUsuarioId(usuarioId);
                 Log.Information("RolService.ObtenerRolesPorUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("RolService.ObtenerRolesPorUsuario SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -174,12 +187,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("RolService.ObtenerUsuarioRolesPorUsuario para UsuarioId {UsuarioId} usuario {UsuarioAutenticado}", usuarioId, usuarioAutenticado);
+                Log.Information("RolService.ObtenerUsuarioRolesPorUsuario ENTRADA: {Json}", LogSanitizer.ToJson(new { usuarioId, usuarioAutenticado }));
 
                 if (usuarioId <= 0) { throw new ArgumentException("El ID del usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuarioAutenticado)) { throw new ArgumentException("El usuario autenticado es requerido."); }
 
                 var result = _dbWrapper.ObtenerUsuarioRolesPorUsuario(usuarioId);
                 Log.Information("RolService.ObtenerUsuarioRolesPorUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("RolService.ObtenerUsuarioRolesPorUsuario SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -199,6 +214,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("RolService.EliminarRolUsuario para UsuarioRolId {UsuarioRolId} usuario {ModificadoPor}, EmpresaId {EmpresaId}", usuarioRolId, modificadoPor, empresaId);
+                Log.Information("RolService.EliminarRolUsuario ENTRADA: {Json}", LogSanitizer.ToJson(new { usuarioRolId, modificadoPor, empresaId }));
 
                 if (usuarioRolId <= 0) { throw new ArgumentException("El ID de la relación usuario-rol es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -206,6 +222,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarRolUsuario(usuarioRolId, modificadoPor, empresaId);
                 Log.Information("RolService.EliminarRolUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("RolService.EliminarRolUsuario SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
