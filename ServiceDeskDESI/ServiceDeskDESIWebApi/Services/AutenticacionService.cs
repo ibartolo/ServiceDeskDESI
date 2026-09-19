@@ -218,6 +218,11 @@ namespace ServiceDeskDESIWebApi.Services
                 if (string.IsNullOrWhiteSpace(usuario.CreadoPor)) { throw new ArgumentException("El usuario creador es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuarioAdmin)) { throw new ArgumentException("El usuario administrador es requerido."); }
 
+                // ¿Es un alta? (Id <= 0 antes de guardar) y guardamos la contraseña EN CLARO
+                // antes de hashearla, para poder enviarla en el correo de alta.
+                var esNuevo = usuario.Id <= 0;
+                var contrasenaPlana = usuario.Contrasena;
+
                 if (!string.IsNullOrWhiteSpace(usuario.Contrasena))
                 {
                     usuario.Contrasena = Cryptography.HashPassword(usuario.Contrasena);
@@ -226,6 +231,14 @@ namespace ServiceDeskDESIWebApi.Services
                 var result = _dbWrapper.GuardarOActualizarUsuarioAdmin(usuario, usuarioAdmin);
                 Log.Information("AutenticacionService.GuardarOActualizarUsuarioAdmin RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
                 Log.Information("AutenticacionService.GuardarOActualizarUsuarioAdmin SALIDA: {Json}", LogSanitizer.ToJson(result));
+
+                // Notificación por correo SOLO en alta de usuario nuevo y si el guardado fue exitoso.
+                // Un fallo de correo NO revierte el alta (solo se registra en el log).
+                if (esNuevo && result != null && result.IsSuccess)
+                {
+                    EnviarCorreoAltaUsuario(usuario, contrasenaPlana, usuarioAdmin);
+                }
+
                 return result;
             }
             catch (ArgumentException ex)
@@ -237,6 +250,84 @@ namespace ServiceDeskDESIWebApi.Services
             {
                 Log.Error(ex, "Error en AutenticacionService.GuardarOActualizarUsuarioAdmin para usuario {UsuarioAdmin}", usuarioAdmin);
                 return new ModelResponse<Usuario> { IsSuccess = false, Message = "Ocurrió un error al guardar el usuario." };
+            }
+        }
+
+        /// <summary>
+        /// Envía el correo de alta de usuario usando la plantilla Template_AltaUsuario.html.
+        /// Un fallo aquí NO afecta el alta (se registra en el log y devuelve false).
+        /// </summary>
+        private bool EnviarCorreoAltaUsuario(Usuario usuario, string contrasenaTemporal, string usuarioAdmin)
+        {
+            try
+            {
+                if (usuario == null || string.IsNullOrWhiteSpace(usuario.Correo))
+                {
+                    Log.Warning("No se envió correo de alta: el usuario no tiene correo. Usuario: {Usuario}", usuario?.NombreUsuario);
+                    return false;
+                }
+
+                // Los nombres (Sucursal/Area/Rol) se resuelven desde los IDs contra la BD.
+                // Es un proceso de baja frecuencia (alta de usuario), así que el costo es despreciable.
+                string sucursalNombre = usuario.SucursalNombre;
+                string areaNombre = usuario.AreaNombre;
+                string rolNombre = usuario.RolNombre;
+
+                try
+                {
+                    if ((usuario.SucursalId ?? 0) > 0)
+                    {
+                        var rSuc = _dbWrapper.ObtenerSucursalPorId(usuario.SucursalId.Value, usuarioAdmin);
+                        if (rSuc != null && rSuc.IsSuccess && rSuc.Response != null) sucursalNombre = rSuc.Response.Nombre;
+                    }
+                    if ((usuario.AreaId ?? 0) > 0)
+                    {
+                        var rArea = _dbWrapper.ObtenerAreaPorId(usuario.AreaId.Value, usuarioAdmin);
+                        if (rArea != null && rArea.IsSuccess && rArea.Response != null) areaNombre = rArea.Response.Nombre;
+                    }
+                    if ((usuario.RolId ?? 0) > 0)
+                    {
+                        var rRol = _dbWrapper.ObtenerRolPorId(usuario.RolId.Value, usuarioAdmin);
+                        if (rRol != null && rRol.IsSuccess && rRol.Response != null) rolNombre = rRol.Response.Nombre;
+                    }
+                }
+                catch (Exception exNombres)
+                {
+                    Log.Warning(exNombres, "No se pudieron resolver los nombres (Sucursal/Area/Rol) para el correo de alta de {Usuario}", usuario.NombreUsuario);
+                }
+
+                string baseUri = System.Configuration.ConfigurationManager.AppSettings["BaseUri"];
+                string urlLogin = $"{baseUri}Home/Autentication";
+                string templatePath = System.Web.Hosting.HostingEnvironment.MapPath("~/Template/Template_AltaUsuario.html");
+
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    Log.Error("No se encontró la plantilla de correo de alta de usuario en: {TemplatePath}", templatePath);
+                    return false;
+                }
+
+                string templateHtml = System.IO.File.ReadAllText(templatePath);
+                templateHtml = templateHtml.Replace("{{NombreCompleto}}", $"{usuario.Nombre} {usuario.Apellido}".Trim());
+                templateHtml = templateHtml.Replace("{{NombreUsuario}}", usuario.NombreUsuario);
+                templateHtml = templateHtml.Replace("{{ContrasenaTemporal}}", contrasenaTemporal ?? string.Empty);
+                templateHtml = templateHtml.Replace("{{Correo}}", usuario.Correo);
+                templateHtml = templateHtml.Replace("{{Rol}}", rolNombre ?? string.Empty);
+                templateHtml = templateHtml.Replace("{{Sucursal}}", sucursalNombre ?? string.Empty);
+                templateHtml = templateHtml.Replace("{{Area}}", areaNombre ?? string.Empty);
+                templateHtml = templateHtml.Replace("{{UrlLogin}}", urlLogin);
+                templateHtml = templateHtml.Replace("{{UrlTerminos}}", $"{baseUri}Home/Terminos");
+                templateHtml = templateHtml.Replace("{{UrlPrivacidad}}", $"{baseUri}Home/Privacidad");
+
+                EmailHelper.EnvioEmaiil(new List<string> { usuario.Correo },
+                    "Bienvenido a Service Desk DESI - Tus credenciales de acceso", templateHtml, false);
+
+                Log.Information("Correo de alta de usuario enviado a: {Correo}", usuario.Correo);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "FALLO al enviar correo de alta de usuario a: {Correo}", usuario?.Correo);
+                return false;
             }
         }
 
@@ -468,6 +559,8 @@ namespace ServiceDeskDESIWebApi.Services
                 templateHtml = templateHtml.Replace("{{Nombre}}", usuario.Nombre);
                 templateHtml = templateHtml.Replace("{{Apellido}}", usuario.Apellido);
                 templateHtml = templateHtml.Replace("{{UrlRecuperacion}}", urlRecuperacion);
+                templateHtml = templateHtml.Replace("{{UrlTerminos}}", $"{baseUri}Home/Terminos");
+                templateHtml = templateHtml.Replace("{{UrlPrivacidad}}", $"{baseUri}Home/Privacidad");
 
                 // Enviar correo
                 var para = new List<string> { usuario.Correo };
@@ -590,6 +683,8 @@ namespace ServiceDeskDESIWebApi.Services
                 templateHtml = templateHtml.Replace("{{NombreUsuario}}", usuario.NombreUsuario);
                 templateHtml = templateHtml.Replace("{{ContrasenaTemporal}}", contrasenaTemporal);
                 templateHtml = templateHtml.Replace("{{UrlLogin}}", urlLogin);
+                templateHtml = templateHtml.Replace("{{UrlTerminos}}", $"{baseUri}Home/Terminos");
+                templateHtml = templateHtml.Replace("{{UrlPrivacidad}}", $"{baseUri}Home/Privacidad");
 
                 Log.Debug("Plantilla procesada, enviando correo a: {Email}", usuario.Correo);
 
