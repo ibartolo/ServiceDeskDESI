@@ -4,8 +4,7 @@ namespace ServiceDeskDESIEntities.Autenticacion
 {
     public class UsuarioDTO : Usuario
     {
-        public string SucursalNombre { get; set; }
-        public string AreaNombre { get; set; }
+        // SucursalNombre y AreaNombre ahora se heredan de Usuario (se usan también en el alta de usuario).
         // ObtenerUsuarios/ObtenerUsuarioPorId devuelven "EmpresaNombre"
         public string EmpresaNombre { get; set; }
         // AutenticarUsuario devuelve "EmpresaNombreComercial" + datos de vigencia/trial
