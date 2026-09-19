@@ -900,7 +900,9 @@ namespace ServiceDeskDESIWebApi.Services
                     .Replace("{{Estatus}}", ticket.EstatusNombre ?? string.Empty)
                     .Replace("{{DescripcionTicket}}", ticket.Descripcion ?? string.Empty)
                     .Replace("{{NotaAdicional}}", nota)
-                    .Replace("{{UrlTicket}}", $"{baseUri}Ticket/Index");
+                    .Replace("{{UrlTicket}}", $"{baseUri}Ticket/Index")
+                    .Replace("{{UrlTerminos}}", $"{baseUri}Home/Terminos")
+                    .Replace("{{UrlPrivacidad}}", $"{baseUri}Home/Privacidad");
 
                 var asunto = $"Ticket {(string.IsNullOrWhiteSpace(ticket.Folio) ? "#" + ticket.Id : ticket.Folio)} - Estatus: {ticket.EstatusNombre}";
 

@@ -507,6 +507,8 @@ namespace ServiceDeskDESIWebApi.Services
             templateHtml = templateHtml.Replace("{{PuestoUsuario}}", persona.PuestoNombre ?? string.Empty);
             templateHtml = templateHtml.Replace("{{CorreoUsuario}}", persona.Correo ?? string.Empty);
             templateHtml = templateHtml.Replace("{{UrlConfirmacion}}", urlConfirmacion ?? string.Empty);
+            templateHtml = templateHtml.Replace("{{UrlTerminos}}", ConfigurationManager.AppSettings["BaseUri"] + "Home/Terminos");
+            templateHtml = templateHtml.Replace("{{UrlPrivacidad}}", ConfigurationManager.AppSettings["BaseUri"] + "Home/Privacidad");
 
             return templateHtml;
         }
