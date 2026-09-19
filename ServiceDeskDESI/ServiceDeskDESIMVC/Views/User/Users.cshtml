@@ -1,0 +1,152 @@
+﻿@model ServiceDeskDESIEntities.Autenticacion.Usuario
+@{
+    ViewBag.Title = "Usuarios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
+    var soloLectura = (Model.Id > 0 && permisos != null && !permisos.PuedeEditar);
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <h3 class="section-title"><i class="fas fa-users me-2"></i>Gestión de Usuarios</h3>
+
+    <form id="frmUsuario" name="frmUsuario" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
+
+        <!-- FILA 1: Nombre y Apellidos -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label>Nombre(s):</label>
+                    @Html.TextBoxFor(x => x.Nombre, soloLectura ? (object)new { @class = "form-control", placeholder = "Nombre(s)", id = "txtNombre", onblur = "SugerirUsername()", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Nombre(s)", id = "txtNombre", onblur = "SugerirUsername()" })
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label>Apellidos:</label>
+                    @Html.TextBoxFor(x => x.Apellido, soloLectura ? (object)new { @class = "form-control", placeholder = "Apellidos", id = "txtApellido", onblur = "SugerirUsername()", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Apellidos", id = "txtApellido", onblur = "SugerirUsername()" })
+                </div>
+            </div>
+        </div>
+
+        <!-- FILA 2: Nombre de usuario y Correo -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label>Nombre de usuario:</label>
+                    @Html.TextBoxFor(x => x.NombreUsuario, soloLectura ? (object)new { @class = "form-control", placeholder = "Nombre de usuario", id = "txtNombreUsuario", onblur = "ValidarUsernameExistente()", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Nombre de usuario", id = "txtNombreUsuario", onblur = "ValidarUsernameExistente()" })
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label>Correo electrónico:</label>
+                    @Html.TextBoxFor(x => x.Correo, soloLectura ? (object)new { @class = "form-control", placeholder = "Correo electrónico", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Correo electrónico" })
+                </div>
+            </div>
+        </div>
+
+        <!-- FILA 3: Contraseña, Teléfono y RFC -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Contraseña (solo para nuevos usuarios):</label>
+                    @Html.TextBoxFor(x => x.Contrasena, soloLectura ? (object)new { @class = "form-control", placeholder = "Contraseña", type = "password", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Contraseña", type = "password" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Teléfono celular:</label>
+                    @Html.TextBoxFor(x => x.Celular, soloLectura ? (object)new { @class = "form-control", placeholder = "Teléfono celular", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "Teléfono celular" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>RFC:</label>
+                    @Html.TextBoxFor(x => x.RFC, soloLectura ? (object)new { @class = "form-control", placeholder = "RFC", disabled = "disabled" } : (object)new { @class = "form-control", placeholder = "RFC" })
+                </div>
+            </div>
+        </div>
+
+        <!-- FILA 4: Sucursal y Área -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Sucursal:</label>
+                    @Html.DropDownListFor(x => x.SucursalId, (IEnumerable<SelectListItem>)ViewBag.Sucursales, "Seleccione una sucursal", soloLectura ? (object)new { @class = "form-control", id = "ddlSucursal", disabled = "disabled" } : (object)new { @class = "form-control", id = "ddlSucursal" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Área:</label>
+                    @Html.DropDownListFor(x => x.AreaId, (IEnumerable<SelectListItem>)ViewBag.Areas, "Seleccione un área", soloLectura ? (object)new { @class = "form-control", id = "ddlArea", disabled = "disabled" } : (object)new { @class = "form-control", id = "ddlArea" })
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Rol:</label>
+                    @Html.DropDownList("RolId", (IEnumerable<SelectListItem>)ViewBag.Roles, "Seleccione un rol", soloLectura ? (object)new { @class = "form-control", id = "ddlRol", disabled = "disabled" } : (object)new { @class = "form-control", id = "ddlRol" })
+                </div>
+            </div>
+        </div>
+
+        <!-- FILA 5: Botones -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarUsuario()" />
+                    }
+                    <a href="/User/Users" class="btn btn-warning">Cancelar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                    <table id="tblUsuario" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Sucursal</th>
+                                <th>Área</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Pasar permisos a JavaScript para controlar los botones y los inputs en el DataTable
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+    var empresaId = @ViewBag.EmpresaId;
+</script>
+<script src="@Url.Content("~/Scripts/User/Users.js")"></script>

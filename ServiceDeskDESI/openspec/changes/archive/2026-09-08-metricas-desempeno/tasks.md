@@ -1,0 +1,51 @@
+# Tasks: Módulo "Estadísticas" (Métricas y Desempeño)
+
+Orden: **BD → Entidades → WebApi → MVC DAL/Services → MVC Controller/Vista/JS → Verificación**. Lista plana; los grupos indican orden de dependencia.
+
+> ⚠️ **Constraints para sdd-apply**: NO ejecutar `migration.sql`/`rollback.sql` contra ninguna BD (la migración la aplica el usuario manualmente, post-apply); NO correr la app; textos UI en español con acentos; todo `.cshtml` nuevo en **UTF-8 CON BOM**; no hay test project (`strict_tdd:false`); todo `.cs` nuevo DEBE registrarse en su `.csproj` old-style (`<Compile Include>`) o no compila (precedente `ThemeHelper`). **`TicketAsignacion`**: el CREATE vive solo en BD hosted (no en el dump) → pre-check `sys.columns` (T1) antes de escribir/ejecutar los SPs.
+
+## G1 — BD / migración
+
+- [x] **T1** — Pre-check (BD hosted, NO ejecutar nada): verificar columnas reales de `TicketAsignacion` (`TicketId`, `UsuarioId`, `TipoMovimiento`, `FechaCreacion`, `Estatus`, `EmpresaId`), `Ticket` (`Id`, `FechaCreacion`, `EmpresaId`, `Estatus`, `TicketEstatusId`, `Urgencia`, `AreaId`), `TicketEstatus` (`Id`, `Nombre`, `Color`, `Orden`, `Estatus`), `Usuarios` (`Id`, `EmpresaId`, `NombreUsuario`, `Estatus`), `Area` (`Id`, `Nombre`, `UsuarioResponsableId`) vía `sys.columns`/`sys.objects`; documentar cualquier drift antes de escribir los 5 SPs.
+- [x] **T2** — `openspec/changes/metricas-desempeno/migration.sql`: seed `Pagina` idempotente (`IF NOT EXISTS ... Nombre = N'Estadisticas'`) — `Nombre='Estadisticas'` (sin tilde), `NombreVisible='Estadísticas'`, `Tipo='Menu'`, `Direccion='/Estadisticas'`, `PermisosPadreId=NULL`, `Logo='fas fa-chart-pie'`, `OrdenB=10`, `Estatus=1`. **(MD-001)**
+- [x] **T3** — `migration.sql`: seed `RolPaginaAccion` SOLO roles `Administrador` y `Supervisor` — `PuedeLeer=1`, `PuedeCrear=PuedeEditar=PuedeEliminar=PuedeExportar=0` (CROSS JOIN `Rol`×`Pagina` + `NOT EXISTS`, patrón `MisActivos`). **(MD-002)**
+- [x] **T4** — `migration.sql`: SP `ObtenerMetricasResumen @Usuario NVARCHAR(25), @FechaInicio DATETIME, @FechaFin DATETIME` → 1 fila `{Total, Nuevos, EnProgreso, Resueltos, Cerrados, Rechazados, Eficiencia, HorasPromedioResolucion}`. Tenant `@EmpresaId` desde `Usuarios`. `Eficiencia = ROUND(Cerrados*100.0/NULLIF(Total,0),1)`. `HorasPromedioResolucion`: day-walk horas hábiles consumiendo `EmpresaHorarioLaboral` (`DiaSemana` ISO `((DATEPART(WEEKDAY,d)+@@DATEFIRST-1)%7)+1`), fallback Lun–Vie 09:00–17:00 si no hay filas; intervalo `[Ticket.FechaCreacion → último Resolver]`, `decimal(10,1)`. **(MD-005, MD-006, MD-012)**
+- [x] **T5** — `migration.sql`: SP `ObtenerDistribucionEstatus @Usuario, @FechaInicio, @FechaFin` → 5 filas `{EstatusId, Nombre, Color, Cantidad}` (`LEFT JOIN Ticket` creados en rango sobre `TicketEstatusId`, `Cantidad=0` si vacío, `ORDER BY te.Orden`). **(MD-007)**
+- [x] **T6** — `migration.sql`: SP `ObtenerEvolucionDiaria @Usuario, @FechaInicio, @FechaFin` → 1 fila/día `{Fecha, Creados, Resueltos}` (tally CTE de días continuos + `LEFT JOIN` conteos; `Resueltos` = `TicketAsignacion.TipoMovimiento='Resolver'` por día, `ISNULL(...,0)`). **(MD-008)**
+- [x] **T7** — `migration.sql`: SP `ObtenerRankingAreas @Usuario, @FechaInicio, @FechaFin` → `{AreaId, AreaNombre, Total, PromUrgencia, Cerrados, Rechazados}` `ORDER BY Total DESC` (sin TOP N; `PromUrgencia = ROUND(AVG(CAST(Urgencia AS decimal(5,1))),1)`). **(MD-009)**
+- [x] **T8** — `migration.sql`: SP `ObtenerRankingReasignaciones @Usuario, @FechaInicio, @FechaFin, @TopN INT` → `{Tipo, UsuarioId, Nombre, Apellido, NombreUsuario, Cantidad}` (Reciben: `COUNT(*)` destino de `Reasignar`; Quitan: `LAG(UsuarioId) PARTITION BY TicketId`; `UNION ALL` + `ROW_NUMBER() OVER (PARTITION BY Tipo ORDER BY Cantidad DESC) <= @TopN`). **(MD-010)**
+- [x] **T9** — `openspec/changes/metricas-desempeno/rollback.sql` (orden inverso, cada guard `IF EXISTS`): `DROP PROCEDURE` los 5 SPs → `DELETE` `RolPaginaAccion`/`Pagina` 'Estadisticas'.
+
+## G2 — Entidades / DTOs (+ csproj)
+
+- [x] **T10** — `ServiceDeskDESIEntities/Tickets/MetricasResumenDTO.cs`: `{int Total, Nuevos, EnProgreso, Resueltos, Cerrados, Rechazados; decimal Eficiencia, HorasPromedioResolucion}`. **(MD-005, MD-006)**
+- [x] **T11** — `ServiceDeskDESIEntities/Tickets/DistribucionEstatusDTO.cs`: `{int EstatusId, Cantidad; string Nombre, Color}`. **(MD-007)**
+- [x] **T12** — `ServiceDeskDESIEntities/Tickets/EvolucionDiariaDTO.cs`: `{DateTime Fecha; int Creados, Resueltos}`. **(MD-008)**
+- [x] **T13** — `ServiceDeskDESIEntities/Tickets/RankingAreaDTO.cs`: `{long AreaId; string AreaNombre; int Total, Cerrados, Rechazados; decimal PromUrgencia}`. **(MD-009)**
+- [x] **T14** — `ServiceDeskDESIEntities/Tickets/RankingReasignacionDTO.cs`: `{string Tipo; long UsuarioId; string Nombre, Apellido, NombreUsuario; int Cantidad}`. **(MD-010)**
+- [x] **T15** — `ServiceDeskDESIEntities/ServiceDeskDESIEntities.csproj`: registrar `<Compile Include="Tickets\...DTO.cs" />` de los 5 DTOs (alias SQL = nombre de propiedad exacto, case-insensitive). **(todas)**
+
+## G3 — WebApi (DAL + Services + Controllers + config)
+
+- [x] **T16** — `ServiceDeskDESIWebApi/DAL/DbWrapper.Estadisticas.cs` (partial): `GetObject("ObtenerMetricasResumen", [@Usuario,@FechaInicio,@FechaFin], r => LlenarEntidad<MetricasResumenDTO>(r))` + `GetObjects(...)` para las 4 listas (`LlenarEntidad<T>`); `ObtenerRankingReasignaciones` añade `@TopN INT` (espeja `DbWrapper.Dashboard.cs`). **(MD-005..MD-010)**
+- [x] **T17** — `ServiceDeskDESIWebApi/Services/EstadisticasService.cs`: 5 métodos que validan `usuario` no vacío (`ArgumentException`) y delegan en `_dbWrapper`, `ModelResponse<T>` + Serilog; `ObtenerRankingReasignaciones` lee `if (!int.TryParse(ConfigurationManager.AppSettings["EstadisticasTopAgentes"], out int topN)) topN = 5;`. **(MD-010, MD-012)**
+- [x] **T18** — `ServiceDeskDESIWebApi/Controllers/EstadisticasController.cs`: `[Authorize] [RoutePrefix("api/Estadisticas")]`, 5 endpoints `[HttpGet, Route(...)] [Permiso("Estadisticas","Leer")]` (`Resumen`, `DistribucionEstatus`, `EvolucionDiaria`, `RankingAreas`, `RankingReasignaciones`), cada uno `_service.Obtener...(User.Identity.Name, fechaInicio, fechaFin)`. **(MD-003, MD-012, MD-013)**
+- [x] **T19** — `ServiceDeskDESIWebApi/ServiceDeskDESIWebApi.csproj`: registrar `<Compile Include>` de `DAL\DbWrapper.Estadisticas.cs`, `Services\EstadisticasService.cs`, `Controllers\EstadisticasController.cs`. **(todas)**
+- [x] **T20** — `ServiceDeskDESIWebApi/Web.config`: añadir `<add key="EstadisticasTopAgentes" value="5" />` en `<appSettings>`. **(MD-010)**
+
+## G4 — MVC DAL/Services
+
+- [x] **T21** — `ServiceDeskDESIMVC/DAL/HttpClientConnection.Estadisticas.cs` (partial): `RequestAsync<MetricasResumenDTO>` y `RequestAsync<List<...>>` ×4 → `api/Estadisticas/{Ruta}?fechaInicio=...&fechaFin=...` (formato ISO), `HttpMethod.Get`, token. **(MD-005..MD-010)**
+- [x] **T22** — `ServiceDeskDESIMVC/Services/EstadisticasService.cs`: 5 wrappers MVC→`HttpClientConnection` (`ObtenerResumen`, `ObtenerDistribucionEstatus`, `ObtenerEvolucionDiaria`, `ObtenerRankingAreas`, `ObtenerRankingReasignaciones`). **(MD-005..MD-010)**
+
+## G5 — MVC Controller/Vista/JS
+
+- [x] **T23** — `ServiceDeskDESIMVC/Controllers/EstadisticasController.cs` (hereda `BaseController`): `Index()` `[Permiso("Estadisticas","Leer")]` — gate de acceso Opción A (`TokenCookie` null→`Home/Autentication`; `esAdmin || esSupervisor || esJefeArea` (`Area.UsuarioResponsableId==UserID`); si no → `Home/AccesoDenegado`); `ViewBag.FechaInicio = new DateTime(DateTime.Now.Year,1,1)`, `ViewBag.FechaFin = DateTime.Today`; 5 acciones AJAX `[Permiso("Estadisticas","Leer")]` → `JsonConvert.SerializeObject(await _estadisticasService.Obtener...)`. **(MD-003, MD-004)**
+- [x] **T24** — `ServiceDeskDESIMVC/Views/Estadisticas/Index.cshtml` (**UTF-8 CON BOM**): 2 `<input type="date">` (defaults `ViewBag`, `max=hoy`, validación JS `inicio<=fin` con `Swal`); 8 tarjetas (Total, Nuevos, En Progreso, Resueltos, Cerrados, Rechazados, Eficiencia `%`, Tiempo promedio `h`, valor 0 si ausente); pie `<canvas id="estatusChart">` (labels/colors DB-driven, `ΣCantidad==0`→"Sin datos"); línea `<canvas id="evolucionChart">` (2 datasets); tablas ranking áreas + 2 de reasignaciones (`filter(Tipo==='Reciben'|'Quitan')`); spinner `spinner-border` + "Cargando datos…" por sección; estados vacíos "Aún no hay tickets registrados…"/"No hay reasignaciones registradas."; JS `cargarEstadisticas(inicio,fin)` dispara 5 `$.get` en paralelo, `window.miChart?.destroy()`, instancia Chart.js solo si `typeof Chart !== 'undefined'`. **(MD-004, MD-005, MD-007, MD-008, MD-009, MD-010, MD-011)**
+- [x] **T25** — `ServiceDeskDESIMVC/Views/Shared/_Layout.cshtml`: descomentar solo Chart.js `<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>` (dejar FullCalendar comentado). **(MD-007, MD-008)**
+- [x] **T26** — `ServiceDeskDESIMVC/ServiceDeskDESIMVC.csproj`: registrar `<Compile Include>` de `DAL\HttpClientConnection.Estadisticas.cs`, `Services\EstadisticasService.cs`, `Controllers\EstadisticasController.cs`. ⚠️ sin esto no compila. **(todas)**
+
+## G6 — Verificación
+
+- [x] **T27** — Compilar `ServiceDeskDESI.sln` con MSBuild VS2022 Debug → **0 errores** en los 3 proyectos (confirma los `<Compile Include>` manuales de G2/G3/G5): `"C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" ServiceDeskDESI.sln /t:Build /p:Configuration=Debug`. **(success criteria)**
+- [x] **T28** — Revisión estática contra MD-001..MD-013 (42 escenarios): página sembrada (llave sin tilde, etiqueta con tilde, `Tipo='Menu'`, `PermisosPadreId=NULL`, logo, `OrdenB`); `RolPaginaAccion` solo Admin+Supervisor `PuedeLeer=1` resto 0; gate `[Permiso]` + `esAdmin||esSupervisor||esJefeArea` → `AccesoDenegado`; 2 inputs fecha (defaults/max/validación); tarjetas "0" en vacíos y Eficiencia `Cerrados/Total*100`; horas hábiles con `EmpresaHorarioLaboral` (1 decimal, fallback Lun–Vie 09–17); pie/línea/rankings con spinner y "Sin datos"; reasignaciones solo `Reasignar` + TOP N desde `EstadisticasTopAgentes`; ranking áreas completo `Total DESC` urgencia 1 decimal; ningún SP acepta `EmpresaId` del cliente; `Index.cshtml` UTF-8 CON BOM. **(todas)**

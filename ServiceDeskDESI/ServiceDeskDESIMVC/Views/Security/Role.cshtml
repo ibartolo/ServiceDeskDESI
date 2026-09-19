@@ -1,0 +1,85 @@
+﻿﻿@model ServiceDeskDESIEntities.Seguridad.Rol
+@{
+    ViewBag.Title = "Role";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+<link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
+
+<div class="form-section">
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @ViewBag.ErrorMessage
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <h3 class="section-title"><i class="fas fa-user-tag me-2"></i>Catálogo de Roles</h3>
+
+    <form id="frmRol" name="frmRol" method="post">
+        @Html.HiddenFor(x => x.Id)
+        @Html.HiddenFor(x => x.CreadoPor)
+        @Html.HiddenFor(x => x.FechaCreacion)
+        @Html.HiddenFor(x => x.ModificadoPor)
+        @Html.HiddenFor(x => x.FechaModificacion)
+        @Html.HiddenFor(x => x.Estatus)
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre del rol" })
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label>Descripción</label>
+                    @Html.TextBoxFor(x => x.Descripcion, new { @class = "form-control", placeholder = "Descripción del rol" })
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3 form-check">
+                    @Html.CheckBoxFor(x => x.PuedeAtenderTickets, new { @class = "form-check-input", id = "PuedeAtenderTickets" })
+                    <label class="form-check-label" for="PuedeAtenderTickets">
+                        <i class="fas fa-headset me-1"></i> ¿Puede atender tickets?
+                    </label>
+                    <small class="text-muted d-block">Los usuarios con este rol podrán ser asignados como responsables de tickets</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarRol()" />
+                    }
+                    <a href="/Security/Role" class="btn btn-warning">Cancelar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 table-responsive">
+                <div class="mb-3">
+                    <table id="tblRol"></table>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Pasar permisos a JavaScript para controlar los botones en el DataTable
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
+</script>
+<script src="@Url.Content("~/Scripts/Security/Role.js")"></script>

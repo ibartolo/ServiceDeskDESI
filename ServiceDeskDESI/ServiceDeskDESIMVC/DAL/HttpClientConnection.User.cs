@@ -12,56 +12,24 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerUsuarios(long empresaId)
+        public async Task<ModelResponse<List<UsuarioDTO>>> ObtenerUsuarios()
         {
-            var result = await RequestAsync<object>($"api/Autentication/User/Lista/{empresaId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
+            return await RequestAsync<List<UsuarioDTO>>($"api/Autentication/User/List", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> ObtenerUsuarioPorId(long id, long empresaId)
+        public async Task<ModelResponse<UsuarioDTO>> ObtenerUsuarioPorId(long id)
         {
-            var result = await RequestAsync<object>($"api/Autentication/User/{id}/{empresaId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
+            return await RequestAsync<UsuarioDTO>($"api/Autentication/User/{id}", HttpMethod.Get, null, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarOActualizarUsuario(Usuario usuario)
+        public async Task<ModelResponse<Usuario>> GuardarOActualizarUsuario(Usuario usuario)
         {
-            var result = await RequestAsync<object>($"api/Autentication/User", HttpMethod.Post, usuario,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
+            return await RequestAsync<Usuario>($"api/Autentication/User", HttpMethod.Post, usuario, token.Token.access_token);
         }
 
-        public async Task<ModelResponse> GuardarUsuarioEmpresa(Usuario usuario)
+        public async Task<ModelResponse<Usuario>> GuardarUsuarioEmpresa(Usuario usuario)
         {
-            var result = await RequestAsync<object>($"api/Autentication/User/Empresa", HttpMethod.Post, usuario,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }));
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
+            return await RequestAsync<Usuario>($"api/Autentication/User/Empresa", HttpMethod.Post, usuario);
         }
 
         public async Task<ModelResponse> EliminarUsuario(Usuario usuario)
@@ -77,22 +45,9 @@ namespace ServiceDeskDESIMVC.DAL
             return modelResponse;
         }
 
-        public async Task<ModelResponse> ActualizarContrasena(Usuario usuario)
-        {
-            var result = await RequestAsync<object>($"api/Autentication/actualizar-contrasena", HttpMethod.Post, usuario,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-
-            return modelResponse;
-        }
-
         public async Task<ModelResponse> ObtenerSucursales()
         {
-            var result = await RequestAsync<object>($"api/Catalogs/obtener-sucursales", HttpMethod.Get, null,
+            var result = await RequestAsync<object>($"api/Sucursales/List", HttpMethod.Get, null,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;

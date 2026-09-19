@@ -1,0 +1,51 @@
+<div class="modal fade" id="modalMantenimientoActivo" tabindex="-1" aria-labelledby="modalMantenimientoActivoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalMantenimientoActivoLabel"><i class="fas fa-tools me-2"></i>Mantenimientos del activo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="activoIdMantenimiento" />
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label>Fecha</label>
+                            <input type="datetime" id="mantenimientoFecha" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" readonly disabled />
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label>Comentario</label>
+                            <textarea id="mantenimientoComentario" class="form-control" rows="2" maxlength="500" placeholder="Describa el mantenimiento realizado"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-end">
+                        <button type="button" id="btnGuardarMantenimiento" class="btn btn-primary" onclick="GuardarMantenimiento()">Guardar mantenimiento</button>
+                    </div>
+                </div>
+                <hr />
+                <h6>Historial de mantenimientos</h6>
+                <div class="table-responsive">
+                    <table id="tblMantenimientos" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Comentario</th>
+                                <th>Registrado por</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/Catalogs/_MantenimientoActivo.js")"></script>

@@ -10,5 +10,6 @@ namespace ServiceDeskDESIEntities.Seguridad
     {
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
+        public bool PuedeAtenderTickets { get; set; }
     }
 }

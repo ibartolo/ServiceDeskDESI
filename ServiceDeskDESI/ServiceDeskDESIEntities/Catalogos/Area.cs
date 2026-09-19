@@ -11,5 +11,6 @@ namespace ServiceDeskDESIEntities.Catalogos
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
         public string Correo { get; set; }
+        public long? UsuarioResponsableId { get; set; }
     }
 }

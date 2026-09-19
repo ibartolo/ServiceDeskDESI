@@ -1,0 +1,106 @@
+﻿@using ServiceDeskDESIEntities.Catalogos
+@{
+    var areas = ViewBag.Areas as List<Area>;
+}
+
+<div class="modal fade" id="modalCapturarTicket" tabindex="-1" aria-labelledby="modalCapturarTicketLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCapturarTicketLabel"><i class="fas fa-ticket-alt me-2"></i>Nuevo Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmCapturaTicket" name="frmCapturaTicket" method="post">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label>Folio:</label>
+                                <input type="text" id="Folio" name="Folio" class="form-control" placeholder="Se generará al guardar" readonly disabled />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label>Área:</label>
+                                <select id="ddlArea" name="AreaId" class="form-control">
+                                    <option value="">Seleccione un área</option>
+                                    @if (areas != null)
+                                    {
+                                        foreach (var a in areas)
+                                        {
+                                            <option value="@a.Id">@a.Nombre</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label>Categoría:</label>
+                                <select id="ddlCategoria" name="CategoriaId" class="form-control">
+                                    <option value="">Seleccione una categoría</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label>Subcategoría:</label>
+                                <select id="ddlSubcategoria" name="SubcategoriaId" class="form-control">
+                                    <option value="">Seleccione una subcategoría</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label>Urgencia:</label>
+                                <select id="ddlUrgencia" name="Urgencia" class="form-control">
+                                    <option value="">Seleccione un nivel</option>
+                                    <option value="1">Baja</option>
+                                    <option value="2">Media</option>
+                                    <option value="3">Alta</option>
+                                    <option value="4">Crítica</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label>Título:</label>
+                                <input type="text" id="Titulo" name="Titulo" class="form-control" maxlength="250" placeholder="Título del ticket" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label>Descripción:</label>
+                                <textarea id="Descripcion" name="Descripcion" class="form-control" rows="5" placeholder="Descripción detallada del problema"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label>Evidencias:</label>
+                                <input type="file" id="inputEvidenciasCaptura" multiple accept=".pdf,.jpg,.jpeg,.png" class="form-control" />
+                                <small class="text-muted">Máximo 3 archivos (PDF, JPG o PNG), 3 MB cada uno.</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="GuardarTicket()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/Ticket/_CapturarTicket.js")"></script>

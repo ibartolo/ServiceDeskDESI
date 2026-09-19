@@ -2,7 +2,7 @@
   "processing": "Procesando...",
   "lengthMenu": "Mostrar _MENU_ registros",
   "zeroRecords": "No se encontraron resultados",
-  "emptyTable": "Ningún dato disponible en esta tabla",
+  "emptyTable": "NingÃºn dato disponible en esta tabla",
   "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
   "infoFiltered": "(filtrado de un total de _MAX_ registros)",
   "search": "Buscar:",
@@ -10,7 +10,7 @@
   "loadingRecords": "Cargando...",
   "paginate": {
     "first": "Primero",
-    "last": "Último",
+    "last": "Ãšltimo",
     "next": "Siguiente",
     "previous": "Anterior"
   },
@@ -21,7 +21,7 @@
   "buttons": {
     "copy": "Copiar",
     "colvis": "Visibilidad",
-    "collection": "Colección",
+    "collection": "ColecciÃ³n",
     "colvisRestore": "Restaurar visibilidad",
     "copyKeys": "Presione ctrl o u2318 + C para copiar los datos de la tabla al portapapeles del sistema. <br \/> <br \/> Para cancelar, haga clic en este mensaje o presione escape.",
     "copySuccess": {
@@ -53,42 +53,42 @@
   },
   "decimal": ",",
   "searchBuilder": {
-    "add": "Añadir condición",
+    "add": "AÃ±adir condiciÃ³n",
     "button": {
-      "0": "Constructor de búsqueda",
-      "_": "Constructor de búsqueda (%d)"
+      "0": "Constructor de bÃºsqueda",
+      "_": "Constructor de bÃºsqueda (%d)"
     },
     "clearAll": "Borrar todo",
-    "condition": "Condición",
+    "condition": "CondiciÃ³n",
     "conditions": {
       "date": {
-        "after": "Despues",
+        "after": "DespuÃ©s",
         "before": "Antes",
         "between": "Entre",
-        "empty": "Vacío",
+        "empty": "VacÃ­o",
         "equals": "Igual a",
         "notBetween": "No entre",
-        "notEmpty": "No Vacio",
+        "notEmpty": "No VacÃ­o",
         "not": "Diferente de"
       },
       "number": {
         "between": "Entre",
-        "empty": "Vacio",
+        "empty": "VacÃ­o",
         "equals": "Igual a",
         "gt": "Mayor a",
         "gte": "Mayor o igual a",
         "lt": "Menor que",
         "lte": "Menor o igual que",
         "notBetween": "No entre",
-        "notEmpty": "No vacío",
+        "notEmpty": "No vacÃ­o",
         "not": "Diferente de"
       },
       "string": {
         "contains": "Contiene",
-        "empty": "Vacío",
+        "empty": "VacÃ­o",
         "endsWith": "Termina en",
         "equals": "Igual a",
-        "notEmpty": "No Vacio",
+        "notEmpty": "No VacÃ­o",
         "startsWith": "Empieza con",
         "not": "Diferente de",
         "notContains": "No Contiene",
@@ -98,9 +98,9 @@
       "array": {
         "not": "Diferente de",
         "equals": "Igual",
-        "empty": "Vacío",
+        "empty": "VacÃ­o",
         "contains": "Contiene",
-        "notEmpty": "No Vacío",
+        "notEmpty": "No VacÃ­o",
         "without": "Sin"
       }
     },
@@ -109,23 +109,23 @@
     "leftTitle": "Criterios anulados",
     "logicAnd": "Y",
     "logicOr": "O",
-    "rightTitle": "Criterios de sangría",
+    "rightTitle": "Criterios de sangrÃ­a",
     "title": {
-      "0": "Constructor de búsqueda",
-      "_": "Constructor de búsqueda (%d)"
+      "0": "Constructor de bÃºsqueda",
+      "_": "Constructor de bÃºsqueda (%d)"
     },
     "value": "Valor"
   },
   "searchPanes": {
     "clearMessage": "Borrar todo",
     "collapse": {
-      "0": "Paneles de búsqueda",
-      "_": "Paneles de búsqueda (%d)"
+      "0": "Paneles de bÃºsqueda",
+      "_": "Paneles de bÃºsqueda (%d)"
     },
     "count": "{total}",
     "countFiltered": "{shown} ({total})",
-    "emptyPanes": "Sin paneles de búsqueda",
-    "loadMessage": "Cargando paneles de búsqueda",
+    "emptyPanes": "Sin paneles de bÃºsqueda",
+    "loadMessage": "Cargando paneles de bÃºsqueda",
     "title": "Filtros Activos - %d",
     "showMessage": "Mostrar Todo",
     "collapseMessage": "Colapsar Todo"
@@ -147,7 +147,7 @@
   "thousands": ".",
   "datetime": {
     "previous": "Anterior",
-    "next": "Proximo",
+    "next": "PrÃ³ximo",
     "hours": "Horas",
     "minutes": "Minutos",
     "seconds": "Segundos",
@@ -174,10 +174,10 @@
       "Dom",
       "Lun",
       "Mar",
-      "Mie",
+      "MiÃ©",
       "Jue",
       "Vie",
-      "Sab"
+      "SÃ¡b"
     ]
   },
   "editor": {
@@ -197,16 +197,16 @@
       "title": "Eliminar Registro",
       "submit": "Eliminar",
       "confirm": {
-        "_": "¿Está seguro que desea eliminar %d filas?",
-        "1": "¿Está seguro que desea eliminar 1 fila?"
+        "_": "Â¿EstÃ¡ seguro que desea eliminar %d filas?",
+        "1": "Â¿EstÃ¡ seguro que desea eliminar 1 fila?"
       }
     },
     "error": {
-      "system": "Ha ocurrido un error en el sistema (<a target=\"\\\" rel=\"\\ nofollow\" href=\"\\\">Más información&lt;\\\/a&gt;).<\/a>"
+      "system": "Ha ocurrido un error en el sistema (<a target=\"\\\" rel=\"\\ nofollow\" href=\"\\\">MÃ¡s informaciÃ³n&lt;\\\/a&gt;).<\/a>"
     },
     "multi": {
-      "title": "Múltiples Valores",
-      "info": "Los elementos seleccionados contienen diferentes valores para este registro. Para editar y establecer todos los elementos de este registro con el mismo valor, hacer click o tap aquí, de lo contrario conservarán sus valores individuales.",
+      "title": "MÃºltiples Valores",
+      "info": "Los elementos seleccionados contienen diferentes valores para este registro. Para editar y establecer todos los elementos de este registro con el mismo valor, hacer click o tap aquÃ­, de lo contrario conservarÃ¡n sus valores individuales.",
       "restore": "Deshacer Cambios",
       "noMulti": "Este registro puede ser editado individualmente, pero no como parte de un grupo."
     }
@@ -216,19 +216,19 @@
     "creationModal": {
       "button": "Crear",
       "name": "Nombre:",
-      "order": "Clasificación",
-      "paging": "Paginación",
-      "search": "Busqueda",
+      "order": "ClasificaciÃ³n",
+      "paging": "PaginaciÃ³n",
+      "search": "BÃºsqueda",
       "select": "Seleccionar",
       "columns": {
-        "search": "Búsqueda de Columna",
+        "search": "BÃºsqueda de Columna",
         "visible": "Visibilidad de Columna"
       },
       "title": "Crear Nuevo Estado",
       "toggleLabel": "Incluir:"
     },
-    "emptyError": "El nombre no puede estar vacio",
-    "removeConfirm": "¿Seguro que quiere eliminar este %s?",
+    "emptyError": "El nombre no puede estar vacÃ­o",
+    "removeConfirm": "Â¿Seguro que quiere eliminar este %s?",
     "removeError": "Error al eliminar el registro",
     "removeJoiner": "y",
     "removeSubmit": "Eliminar",

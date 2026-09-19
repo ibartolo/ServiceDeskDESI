@@ -1,0 +1,207 @@
+-- ============================================================
+-- Rollback: tickets-estatus-espera
+-- Revierte la migración a su estado previo (tickets-ciclo-vida).
+-- Ejecutar solo si no hay tickets en los estatus 6 o 7.
+-- Fecha: 2026-09-11
+-- ============================================================
+
+-- 1. Restaurar ObtenerIndicadoresDashboard (Activos = 1,2)
+IF OBJECT_ID(N'dbo.ObtenerIndicadoresDashboard', N'P') IS NOT NULL DROP PROCEDURE dbo.ObtenerIndicadoresDashboard;
+GO
+CREATE PROCEDURE [dbo].[ObtenerIndicadoresDashboard]
+(
+    @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @EmpresaId BIGINT;
+    DECLARE @UsuarioId BIGINT;
+    SELECT @EmpresaId = EmpresaId, @UsuarioId = Id FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1;
+    IF @EmpresaId IS NULL
+    BEGIN
+        SELECT 0 AS ActivosSemana, 0 AS ResueltosSemana, 0 AS Trabajando, 0 AS CerradosSemana;
+        RETURN;
+    END
+    DECLARE @InicioSemana DATE = DATEADD(day, -((DATEPART(weekday, GETDATE()) + @@DATEFIRST - 2) % 7), CAST(GETDATE() AS date));
+    DECLARE @ActivosSemana INT = (
+        SELECT COUNT(*) FROM Ticket
+        WHERE EmpresaId = @EmpresaId AND Estatus = 1 AND TicketEstatusId IN (1, 2) AND FechaCreacion >= @InicioSemana
+    );
+    DECLARE @ResueltosSemana INT = (
+        SELECT COUNT(DISTINCT TicketId) FROM TicketAsignacion
+        WHERE EmpresaId = @EmpresaId AND Estatus = 1 AND TipoMovimiento = 'Resolver' AND FechaCreacion >= @InicioSemana
+    );
+    DECLARE @Trabajando INT = (
+        SELECT COUNT(*) FROM TicketAsignacion ta
+        INNER JOIN Ticket t ON t.Id = ta.TicketId AND t.Estatus = 1 AND t.EmpresaId = @EmpresaId
+        WHERE ta.UsuarioId = @UsuarioId AND ta.EsActiva = 1 AND ta.Estatus = 1 AND t.TicketEstatusId = 2
+    );
+    DECLARE @CerradosSemana INT = (
+        SELECT COUNT(DISTINCT TicketId) FROM TicketAsignacion
+        WHERE EmpresaId = @EmpresaId AND Estatus = 1 AND TipoMovimiento = 'Cerrar' AND FechaCreacion >= @InicioSemana
+    );
+    SELECT @ActivosSemana AS ActivosSemana, @ResueltosSemana AS ResueltosSemana,
+           @Trabajando AS Trabajando, @CerradosSemana AS CerradosSemana;
+END
+GO
+
+-- 2. Restaurar TransicionarTicket (sin pausas ni @FechaEstimada)
+IF OBJECT_ID(N'[dbo].[TransicionarTicket]', N'P') IS NOT NULL DROP PROCEDURE [dbo].[TransicionarTicket];
+GO
+CREATE PROCEDURE [dbo].[TransicionarTicket]
+(
+    @TicketId        BIGINT,
+    @TipoMovimiento  NVARCHAR(20),
+    @Comentario      NVARCHAR(300) = NULL,
+    @NuevoUsuarioId  BIGINT = NULL,
+    @Usuario         NVARCHAR(25)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @UsuarioId BIGINT, @EmpresaId BIGINT, @EstatusActual INT, @EsAgente BIT = 0,
+            @Resultado INT, @AgenteFinal BIGINT, @EsActiva BIT = 1, @AsignacionId BIGINT;
+    SELECT @UsuarioId = Id, @EmpresaId = EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1;
+    IF @UsuarioId IS NULL BEGIN SELECT 0; RETURN; END
+    SELECT @EstatusActual = TicketEstatusId FROM Ticket WHERE Id = @TicketId AND Estatus = 1 AND EmpresaId = @EmpresaId;
+    IF @EstatusActual IS NULL BEGIN SELECT 0; RETURN; END
+    IF EXISTS(SELECT 1 FROM UsuarioRol ur INNER JOIN Rol r ON ur.RolId = r.Id
+              WHERE ur.UsuarioId = @UsuarioId AND r.PuedeAtenderTickets = 1 AND ur.Estatus = 1 AND r.Estatus = 1)
+        SET @EsAgente = 1;
+    IF @TipoMovimiento = 'Tomar' AND NOT (
+           @EsAgente = 1 AND @EstatusActual = 1
+           AND NOT EXISTS(SELECT 1 FROM TicketAsignacion WHERE TicketId = @TicketId AND EsActiva = 1 AND Estatus = 1)
+           AND EXISTS(SELECT 1 FROM Usuarios WHERE Id = @UsuarioId AND AreaId = (SELECT AreaId FROM Ticket WHERE Id = @TicketId))
+       ) BEGIN SELECT 0; RETURN; END
+    IF @TipoMovimiento = 'Resolver' AND NOT (
+           @EsAgente = 1 AND @EstatusActual = 2
+           AND EXISTS(SELECT 1 FROM TicketAsignacion WHERE TicketId = @TicketId AND EsActiva = 1 AND Estatus = 1 AND UsuarioId = @UsuarioId)
+           AND @Comentario IS NOT NULL AND LEN(LTRIM(RTRIM(@Comentario))) BETWEEN 1 AND 300
+       ) BEGIN SELECT 0; RETURN; END
+    IF @TipoMovimiento = 'Retomar' AND NOT (
+           @EsAgente = 1 AND @EstatusActual = 4
+           AND EXISTS(SELECT 1 FROM Usuarios WHERE Id = @UsuarioId AND AreaId = (SELECT AreaId FROM Ticket WHERE Id = @TicketId))
+       ) BEGIN SELECT 0; RETURN; END
+    IF @TipoMovimiento IN ('Cerrar','Rechazar') AND NOT (
+           (SELECT CreadoPor FROM Ticket WHERE Id = @TicketId) = @Usuario AND @EstatusActual = 3
+           AND @Comentario IS NOT NULL AND LEN(LTRIM(RTRIM(@Comentario))) BETWEEN 1 AND 300
+       ) BEGIN SELECT 0; RETURN; END
+    IF @TipoMovimiento = 'Reasignar' AND NOT (
+           @NuevoUsuarioId IS NOT NULL AND @EstatusActual IN (2, 4)
+           AND @Comentario IS NOT NULL AND LEN(LTRIM(RTRIM(@Comentario))) BETWEEN 1 AND 300
+           AND EXISTS(SELECT 1 FROM Area WHERE Id = (SELECT AreaId FROM Ticket WHERE Id = @TicketId) AND UsuarioResponsableId = @UsuarioId)
+           AND EXISTS(SELECT 1 FROM Usuarios u INNER JOIN UsuarioRol ur ON u.Id = ur.UsuarioId INNER JOIN Rol r ON ur.RolId = r.Id
+                      WHERE u.Id = @NuevoUsuarioId AND u.EmpresaId = @EmpresaId AND u.Estatus = 1
+                        AND ur.Estatus = 1 AND r.Estatus = 1 AND r.PuedeAtenderTickets = 1
+                        AND u.AreaId = (SELECT AreaId FROM Ticket WHERE Id = @TicketId))
+       ) BEGIN SELECT 0; RETURN; END
+    SET @Resultado = CASE @TipoMovimiento
+        WHEN 'Tomar' THEN 2 WHEN 'Resolver' THEN 3 WHEN 'Retomar' THEN 2
+        WHEN 'Cerrar' THEN 5 WHEN 'Rechazar' THEN 4 WHEN 'Reasignar' THEN 2 END;
+    SET @AgenteFinal = CASE WHEN @TipoMovimiento = 'Reasignar' THEN @NuevoUsuarioId ELSE @UsuarioId END;
+    SET @EsActiva = CASE WHEN @TipoMovimiento IN ('Cerrar','Rechazar') THEN 0 ELSE 1 END;
+    BEGIN TRY
+        BEGIN TRAN;
+        UPDATE TicketAsignacion SET EsActiva = 0, ModificadoPor = @Usuario, FechaModificacion = GETDATE()
+            WHERE TicketId = @TicketId AND EsActiva = 1 AND Estatus = 1;
+        INSERT INTO TicketAsignacion (TicketId, UsuarioId, Comentario, EsActiva, TipoMovimiento, TicketEstatusId, CreadoPor, FechaCreacion, Estatus, EmpresaId)
+            VALUES (@TicketId, @AgenteFinal, @Comentario, @EsActiva, @TipoMovimiento, @Resultado, @Usuario, GETDATE(), 1, @EmpresaId);
+        SET @AsignacionId = SCOPE_IDENTITY();
+        UPDATE Ticket SET TicketEstatusId = @Resultado, ModificadoPor = @Usuario, FechaModificacion = GETDATE() WHERE Id = @TicketId;
+        COMMIT TRAN;
+        SELECT @AsignacionId;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+        SELECT 0;
+    END CATCH
+END
+GO
+
+-- 3. Restaurar ObtenerTickets / ObtenerTicketsPorArea / ObtenerTicketAsignaciones
+--    (sin ta.FechaEstimada). Ver openspec/changes/tickets-ciclo-vida/migration.sql
+--    secciones 6, 7 y 8 para los cuerpos previos. Se recrean aquí sin la columna.
+IF OBJECT_ID(N'[dbo].[ObtenerTickets]', N'P') IS NOT NULL DROP PROCEDURE [dbo].[ObtenerTickets];
+GO
+CREATE PROCEDURE [dbo].[ObtenerTickets] (@Usuario NVARCHAR(25)) AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @EmpresaId BIGINT, @UsuarioId BIGINT, @AreaId BIGINT, @EsAgente BIT = 0;
+    SELECT @EmpresaId = EmpresaId, @UsuarioId = Id, @AreaId = AreaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1;
+    IF EXISTS(SELECT 1 FROM UsuarioRol ur INNER JOIN Rol r ON ur.RolId = r.Id WHERE ur.UsuarioId = @UsuarioId AND r.PuedeAtenderTickets = 1 AND ur.Estatus = 1 AND r.Estatus = 1) SET @EsAgente = 1;
+    SELECT t.*, a.Nombre AS AreaNombre, c.Nombre AS CategoriaNombre, sc.Nombre AS SubcategoriaNombre,
+           u.Nombre AS UsuarioCreadorNombre, u.Apellido AS UsuarioCreadorApellido,
+           u.Id AS CreadoPorId,
+           te.Nombre AS EstatusNombre, te.Color AS EstatusColor,
+           ta.UsuarioId AS AgenteId, ag.Nombre AS AgenteNombre, ag.Apellido AS AgenteApellido, ag.NombreUsuario AS AgenteNombreUsuario
+    FROM Ticket t
+    INNER JOIN Area a ON t.AreaId = a.Id
+    INNER JOIN Categoria c ON t.CategoriaId = c.Id
+    LEFT JOIN Categoria sc ON t.SubcategoriaId = sc.Id
+    INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+    INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
+    LEFT JOIN TicketAsignacion ta ON ta.TicketId = t.Id AND ta.EsActiva = 1 AND ta.Estatus = 1
+    LEFT JOIN Usuarios ag ON ta.UsuarioId = ag.Id
+    WHERE t.Estatus = 1 AND t.EmpresaId = @EmpresaId
+      AND ((@EsAgente = 0 AND t.CreadoPor = @Usuario) OR (@EsAgente = 1 AND (t.CreadoPor = @Usuario OR t.AreaId = @AreaId)))
+    ORDER BY t.FechaCreacion DESC;
+END
+GO
+
+IF OBJECT_ID(N'[dbo].[ObtenerTicketsPorArea]', N'P') IS NOT NULL DROP PROCEDURE [dbo].[ObtenerTicketsPorArea];
+GO
+CREATE PROCEDURE [dbo].[ObtenerTicketsPorArea]
+(
+    @AreaId BIGINT, @Usuario NVARCHAR(25)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT t.*, a.Nombre AS AreaNombre, c.Nombre AS CategoriaNombre, sc.Nombre AS SubcategoriaNombre,
+           u.Nombre AS UsuarioCreadorNombre, u.Apellido AS UsuarioCreadorApellido,
+           u.Id AS CreadoPorId,
+           te.Nombre AS EstatusNombre, te.Color AS EstatusColor,
+           ta.UsuarioId AS AgenteId, ag.Nombre AS AgenteNombre, ag.Apellido AS AgenteApellido, ag.NombreUsuario AS AgenteNombreUsuario
+    FROM Ticket t
+    INNER JOIN Area a ON t.AreaId = a.Id
+    INNER JOIN Categoria c ON t.CategoriaId = c.Id
+    LEFT JOIN Categoria sc ON t.SubcategoriaId = sc.Id
+    INNER JOIN Usuarios u ON t.CreadoPor = u.NombreUsuario
+    INNER JOIN TicketEstatus te ON t.TicketEstatusId = te.Id
+    LEFT JOIN TicketAsignacion ta ON ta.TicketId = t.Id AND ta.EsActiva = 1 AND ta.Estatus = 1
+    LEFT JOIN Usuarios ag ON ta.UsuarioId = ag.Id
+    WHERE t.AreaId = @AreaId AND t.Estatus = 1 AND t.EmpresaId = (SELECT EmpresaId FROM Usuarios WHERE NombreUsuario = @Usuario AND Estatus = 1)
+    ORDER BY t.FechaCreacion DESC;
+END
+GO
+
+IF OBJECT_ID(N'[dbo].[ObtenerTicketAsignaciones]', N'P') IS NOT NULL DROP PROCEDURE [dbo].[ObtenerTicketAsignaciones];
+GO
+CREATE PROCEDURE [dbo].[ObtenerTicketAsignaciones] (@TicketId BIGINT) AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT ta.Id, ta.TicketId, ta.UsuarioId, ta.Comentario, ta.EsActiva, ta.CreadoPor, ta.FechaCreacion,
+           ta.ModificadoPor, ta.FechaModificacion, ta.Estatus, ta.EmpresaId,
+           ta.TipoMovimiento, ta.TicketEstatusId,
+           u.Nombre AS AgenteNombre, u.Apellido AS AgenteApellido, u.NombreUsuario AS AgenteNombreUsuario,
+           te.Nombre AS EstatusNombre, te.Color AS EstatusColor
+    FROM TicketAsignacion ta
+    INNER JOIN Usuarios u ON ta.UsuarioId = u.Id
+    LEFT JOIN TicketEstatus te ON ta.TicketEstatusId = te.Id
+    WHERE ta.TicketId = @TicketId AND ta.Estatus = 1
+    ORDER BY ta.FechaCreacion DESC;
+END
+GO
+
+-- 4. Quitar columna FechaEstimada
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[TicketAsignacion]') AND name = 'FechaEstimada')
+    ALTER TABLE [dbo].[TicketAsignacion] DROP COLUMN [FechaEstimada];
+GO
+
+-- 5. Eliminar estatus 6 y 7 (solo si no hay tickets usándolos)
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Ticket] WHERE [TicketEstatusId] IN (6, 7))
+BEGIN
+    DELETE FROM [dbo].[TicketEstatus] WHERE [Id] IN (6, 7);
+END
+GO

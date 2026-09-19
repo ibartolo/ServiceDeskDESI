@@ -2,7 +2,9 @@
 @{
     ViewBag.Title = "Company";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as PermisosViewModel;
 }
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
 <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css" rel="stylesheet" />
@@ -17,7 +19,7 @@
             </button>
         </div>
     }
-    <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Area Compania</h3>
+    <h3 class="section-title"><i class="fas fa-building me-2"></i>Catálogo de Compañías (Razón Social)</h3>
     <form enctype="multipart/form-data" id="frmCompania" name="frmCompania" method="post">
         @Html.HiddenFor(x => x.Id)
         @Html.HiddenFor(x => x.CreadoPor)
@@ -30,17 +32,13 @@
             <div class="col-md-4">
                 <div class="mb-3">
                     <label>Nombre</label>
-                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Compania" })
-
-
+                    @Html.TextBoxFor(x => x.Nombre, new { @class = "form-control", placeholder = "Nombre Compañía" })
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
-                    <label>Acronimo</label>
-                    @Html.TextBoxFor(x => x.Acronimo, new { @class = "form-control", placeholder = "Nombre Acronimo" })
-
-
+                    <label>Acrónimo</label>
+                    @Html.TextBoxFor(x => x.Acronimo, new { @class = "form-control", placeholder = "Acrónimo" })
                 </div>
             </div>
             <div class="col-md-4">
@@ -51,15 +49,20 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-4">
-                <label>Direccion</label>
-                @Html.TextBoxFor(x => x.Direccion, new { @class = "form-control", placeholder = "Direccion" })
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <label>Dirección</label>
+                    @Html.TextBoxFor(x => x.Direccion, new { @class = "form-control", placeholder = "Dirección" })
+                </div>
             </div>
         </div>
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarCompania()" />
+                    @if (permisos != null && ((Model.Id == 0 && permisos.PuedeCrear) || (Model.Id > 0 && permisos.PuedeEditar)))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarCompania()" />
+                    }
                     <a href="/Catalogs/Company" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -75,220 +78,7 @@
 </div>
 
 <script>
-    $(function () {
-        $("#frmCompania").validate({
-            rules: {
-                "Nombre": {
-                    required: true,
-                    maxlength: 250
-                },
-                "Acronimo": {
-                    required: true,
-                    maxlength: 250
-                },
-                "RFC": {
-                    required: true,
-                    maxlength: 250
-                },
-                "Direccion": {
-                    required: true,
-                    maxlength: 250
-                }
-            },
-                messages: {
-                    "Nombre": {
-                        required: "El Nombre es requerido",
-                        maxlength: "El Nombre no puede superar los 250 caracteristicas "
-                    },
-                    "Acronimo": {
-                        required: "El Acronimo es requerido",
-                        maxlength: "El Acronimo no puede superar los 250 caracteristicas "
-                    },
-                    "RFC": {
-                        required: "El RFC es requerido",
-                        maxlength: "El RFC no puede superar los 250 caracteristicas "
-                    },
-                    "Direccion": {
-                        required: "El Direccion es requerido",
-                        maxlength: "El Direccion no puede superar los 250 caracteristicas "
-                    }
-                },
-
-                errorElement: "span",
-                errorClass: "text-danger",
-                highligth: function (element) {
-                    $(element).addClass("is-invalid").removeClass("is-valid");
-                },
-                unhighlight: function (element) {
-                $(element).removeClass("is-invalid").addClass("is-valid");
-                },
-                errorPlacement: function (error, element) {
-                    error.insertAfter(element);
-                }            
-        });
-    });
-
-
-    $(document).ready(function () {
-        var tabla = new DataTable('#tblCompania', {
-            columns: [
-                { data: 'Id', title: 'ID', visible: false },
-                { data: 'Nombre', title: 'Nombre' },
-                { data: 'Acronimo', title: 'Acronimo' },
-                { data: 'Direccion', title: 'Direccion' },
-                {
-                    data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarCompania(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarCompania(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
-                    }
-                    
-                },
-                { data: 'Estatus', title: 'Estatus', visible: false }
-            ]
-        });
-        ConsultarTodasCompanias();
-    });
-    function GuardarActualizarCompania() {
-        if ($("#frmCompania").valid()) {
-            Swal.fire({
-                title: 'Guardando...',
-                text: 'Por favor espere',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            var compania = {
-                Id: $("#Id").val() || 0,
-                Nombre: $("#Nombre").val(),
-                Acronimo: $("#Acronimo").val(),
-                RFC: $("#RFC").val(),
-                Direccion: $("#Direccion").val(),
-                CreadoPor: $("#CreadoPor").val(),
-                FechaCreacion: new Date().toISOString(),
-                ModificadoPor: $("#ModificadoPor").val() || null,
-                FechaModificacion: null,
-                Estatus: true
-            };
-
-            PostMVC('/Catalogs/GuardarOActualizarCompanias', compania, function (response) {
-
-                Swal.close();
-
-                if (response.IsSuccess) {
-                    Swal.fire({
-                        title: '¡Éxito!',
-                        text: response.Message,
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        background: 'white',
-                        iconColor: '#4e73df'
-                    }).then(() => {
-                        window.location.href = '/Catalogs/Company';
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: response.Message,
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar',
-                        background: 'white',
-                        confirmButtonColor: '#4e73df'
-                    });
-                }
-            });
-
-        }
-        
-    }
-
-    function ConsultarTodasCompanias() {
-        GetMVC("/Catalogs/ConsultarTodasLasCompanias", function (r) {
-            var result = typeof r == 'string' ? JSON.parse(r) : r;
-
-            if (result.IsSuccess) {
-                MapingPropertiesDataTable("tblCompania", result.Response);
-            } else {
-                Swal.fire({
-                    title: 'Error',
-                    text: result.Message,
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-            }
-        });
-    }
-
-    function EditarCompania(id) {
-        event.preventDefault();
-        event.stopPropagation();
-        window.location.href = '/Catalogs/Company/' + id;
-    }
-
-    function EliminarCompania(event, id) {
-        event.preventDefault();
-        event.stopPropagation();
-        Swal.fire({
-            title: '¿Está seguro?',
-            text: 'Esta acción eliminará lógicamente el registro',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#e74a3b',
-            cancelButtonColor: '#858796'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'Eliminando...',
-                    text: 'Por favor espere',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                var compania = {
-                    Id: id,
-                    ModificadoPor: $("#ModificadoPor").val() || "system",
-                    FechaModificacion: new Date().toISOString()
-                };
-                PostMVC('/Catalogs/EliminarCompanias', compania, function (response) {
-                    Swal.close();
-
-                    if (response.IsSuccess) {
-                        Swal.fire({
-                            title: '¡Eliminado!',
-                            text: response.Message,
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false,
-                            background: 'white',
-                            iconColor: '#4e73df'
-                        }).then(() => {
-                            ConsultarTodasCompanias();
-                                });
-                        } else {
-                            Swal.fire({
-                                title: 'Error',
-                                text: response.Message,
-                                icon: 'error',
-                                confirmButtonText: 'Aceptar',
-                                background: 'white',
-                                confirmButtonColor: '#4e73df'
-                            });
-                        }
-                    });
-                }
-            });
-
-        return false;
-    }
-    
-
+    // Pasar permisos a JavaScript para controlar los botones en el DataTable
+    var permisosGlobal = @Html.Raw(JsonConvert.SerializeObject(permisos));
 </script>
+<script src="@Url.Content("~/Scripts/Catalogs/Company.js")"></script>

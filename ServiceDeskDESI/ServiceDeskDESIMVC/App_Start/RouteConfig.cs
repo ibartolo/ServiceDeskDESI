@@ -14,6 +14,12 @@ namespace ServiceDeskDESIMVC
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
+                name: "VerAsignacion",
+                url: "Home/VerAsignacion/{token}",
+                defaults: new { controller = "Home", action = "VerAsignacion", token = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }

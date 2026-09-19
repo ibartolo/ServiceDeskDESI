@@ -10,7 +10,7 @@ namespace ServiceDeskDESIEntities.Catalogos
 {
     public class UsuarioPagina : BaseObject
     {
-        public Usuario Usuarios { get; set; }
-        public Pagina  Pagina { get; set; } 
+        public long? UsuarioId { get; set; }
+        public long? PaginaId { get; set; }
     }
 }

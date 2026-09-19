@@ -1,0 +1,54 @@
+﻿<div class="modal fade" id="modalAsignarActivo" tabindex="-1" aria-labelledby="modalAsignarActivoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAsignarActivoLabel"><i class="fas fa-laptop me-2"></i>Activos de <span id="personaNombreActivo"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="personaIdActivo" />
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label>Asignar activo</label>
+                            <select id="ddlActivoDisponible" class="form-control">
+                                <option value="">Seleccione un activo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label>Fecha inicial</label>
+                            <input type="date" id="fechaInicioActivo" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly disabled />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3 d-flex align-items-end">
+                            <button type="button" id="btnAsignarActivo" class="btn btn-primary" onclick="AsignarActivo()">Asignar</button>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <h6>Activos asignados</h6>
+                <div class="table-responsive">
+                    <table id="tblActivosPersona" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Activo</th>
+                                <th>Serial</th>
+                                <th>Fecha inicial</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/Catalogs/_AsignarActivoPersona.js")"></script>

@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Area";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var permisos = ViewBag.Permisos as ServiceDeskDESIEntities.Seguridad.PermisosViewModel;
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
@@ -48,9 +49,33 @@
             </div>
         </div>
         <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Responsable del área:</label>
+                    <select id="ddlUsuarioResponsable" class="form-control">
+                        <option value="">-- Seleccione un responsable --</option>
+                        @if (ViewBag.UsuariosQuePuedenAtender != null)
+                        {
+                            foreach (var usuario in (List<ServiceDeskDESIEntities.Autenticacion.UsuarioDTO>)ViewBag.UsuariosQuePuedenAtender)
+                            {
+                                <option value="@usuario.Id" @(Model.UsuarioResponsableId == usuario.Id ? "selected" : "")>@usuario.Nombre @usuario.Apellido (@usuario.NombreUsuario)</option>
+                            }
+                        }
+                    </select>
+                    @Html.HiddenFor(x => x.UsuarioResponsableId)
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">
-                    <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarArea()" />
+                    @if (permisos != null && (
+                        (Model.Id == 0 && permisos.PuedeCrear) ||
+                        (Model.Id > 0 && permisos.PuedeEditar)
+                    ))
+                    {
+                        <input type="button" value="Guardar" class="btn btn-success" onclick="GuardarActualizarArea()" />
+                    }
                     <a href="/Catalogs/WorkArea" class="btn btn-warning">Cancelar</a>
                 </div>
             </div>
@@ -65,211 +90,9 @@
         </div>
     </form>
 </div>
+
 <script>
-    $(function () {
-        $("#frmArea").validate({
-            rules: {
-                "Nombre": {
-                    required: true,
-                    maxlength: 250
-                },
-                "Descripcion": {
-                    required: true,
-                    maxlength: 500
-                },
-                "Correo": {
-                    required: true,
-                    email: true,
-                    maxlength: 100
-                }
-            },
-            messages: {
-                "Nombre": {
-                    required: "El campo 'Nombre' es requerido.",
-                    maxlength: "El nombre no puede superar los 250 caracteres."
-                },
-                "Descripcion": {
-                    required: "El campo 'Descripción' es requerido.",
-                    maxlength: "La descripción no puede superar los 500 caracteres."
-                },
-                "Correo": {
-                    required: "El campo 'Correo' es requerido.",
-                    email: "Ingrese un correo electrónico válido.",
-                    maxlength: "El correo no puede superar los 100 caracteres."
-                }
-            },
-            errorElement: "span",
-            errorClass: "text-danger",
-            highlight: function (element) {
-                $(element).addClass("is-invalid").removeClass("is-valid");
-            },
-            unhighlight: function (element) {
-                $(element).removeClass("is-invalid").addClass("is-valid");
-            },
-            errorPlacement: function (error, element) {
-                error.insertAfter(element);
-            }
-        });
-    });
-
-    $(document).ready(function () {
-        var tabla = new DataTable('#tblArea', {
-            columns: [
-                { data: 'Id', title: 'ID', visible: false },
-                { data: 'Nombre', title: 'Nombre' },
-                { data: 'Descripcion', title: 'Descripción' },
-                { data: 'Correo', title: 'Correo' },
-                {
-                    data: 'Id', title: 'Acciones', render: function (data) {
-                        return '<div class="d-flex gap-3">' +
-                            '<button class="btn btn-sm btn-outline-primary" onclick="EditarArea(' + data + ')"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-sm btn-outline-danger" onclick="EliminarArea(event, ' + data + ')"><i class="fas fa-trash-alt"></i></button>' +
-                            '</div>';
-                    }
-                },
-                { data: 'Estatus', title: 'Estatus', visible: false }
-            ]
-        });
-        ConsultarTodasAreas();
-    });
-
-    function GuardarActualizarArea() {
-        if ($("#frmArea").valid()) {
-            Swal.fire({
-                title: 'Guardando...',
-                text: 'Por favor espere',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            var area = {
-                Id: $("#Id").val() || 0,
-                Nombre: $("#Nombre").val(),
-                Descripcion: $("#Descripcion").val(),
-                Correo: $("#Correo").val(),
-                CreadoPor: $("#CreadoPor").val(),
-                FechaCreacion: new Date().toISOString(),
-                ModificadoPor: $("#ModificadoPor").val() || null,
-                FechaModificacion: null,
-                Estatus: true
-            };
-
-            PostMVC('/Catalogs/GuardarOActualizarArea', area, function (response) {
-                Swal.close();
-
-                if (response.IsSuccess) {
-                    Swal.fire({
-                        title: '¡Éxito!',
-                        text: response.Message,
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        background: 'white',
-                        iconColor: '#4e73df'
-                    }).then(() => {
-                        window.location.href = '/Catalogs/WorkArea';
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: response.Message,
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar',
-                        background: 'white',
-                        confirmButtonColor: '#4e73df'
-                    });
-                }
-            });
-        }
-    }
-
-    function ConsultarTodasAreas() {
-        GetMVC("/Catalogs/ConsutlarTodasAreas", function (r) {
-            var result = typeof r === 'string' ? JSON.parse(r) : r;
-
-            if (result.IsSuccess) {
-                MapingPropertiesDataTable("tblArea", result.Response);
-            } else {
-                Swal.fire({
-                    title: 'Error',
-                    text: result.Message,
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                    background: 'white',
-                    confirmButtonColor: '#4e73df'
-                });
-            }
-        });
-    }
-
-    function EditarArea(id) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        window.location.href = '/Catalogs/WorkArea/' + id;
-    }
-
-    function EliminarArea(event, id) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        Swal.fire({
-            title: '¿Está seguro?',
-            text: 'Esta acción eliminará lógicamente el registro',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#e74a3b',
-            cancelButtonColor: '#858796'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'Eliminando...',
-                    text: 'Por favor espere',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                var area = {
-                    Id: id,
-                    ModificadoPor: $("#ModificadoPor").val() || "system",
-                    FechaModificacion: new Date().toISOString()
-                };
-
-                PostMVC('/Catalogs/EliminarArea', area, function (response) {
-                    Swal.close();
-
-                    if (response.IsSuccess) {
-                        Swal.fire({
-                            title: '¡Eliminado!',
-                            text: response.Message,
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false,
-                            background: 'white',
-                            iconColor: '#4e73df'
-                        }).then(() => {
-                            ConsultarTodasAreas();
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error',
-                            text: response.Message,
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                            background: 'white',
-                            confirmButtonColor: '#4e73df'
-                        });
-                    }
-                });
-            }
-        });
-
-        return false;
-    }
+    // Pasar permisos a JavaScript para controlar los botones en el DataTable
+    var permisosGlobal = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(permisos));
 </script>
+<script src="@Url.Content("~/Scripts/Catalogs/WorkArea.js")"></script>

@@ -1,0 +1,213 @@
+﻿@{
+    ViewBag.Title = "Estadísticas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var fechaInicio = ViewBag.FechaInicio != null
+        ? ((DateTime)ViewBag.FechaInicio).ToString("yyyy-MM-dd")
+        : new DateTime(DateTime.Now.Year, 1, 1).ToString("yyyy-MM-dd");
+    var fechaFin = ViewBag.FechaFin != null
+        ? ((DateTime)ViewBag.FechaFin).ToString("yyyy-MM-dd")
+        : DateTime.Today.ToString("yyyy-MM-dd");
+    var hoy = DateTime.Today.ToString("yyyy-MM-dd");
+}
+
+<h2 class="page-title"><i class="fas fa-chart-pie me-2"></i>Estadísticas</h2>
+
+<!-- ========================================= -->
+<!-- FILTROS GLOBALES DE FECHA -->
+<!-- ========================================= -->
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-filter me-2"></i>Filtros</h3>
+    <div class="row align-items-end">
+        <div class="col-md-3 mb-3">
+            <label class="form-label" for="fechaInicio">Fecha de inicio</label>
+            <input type="date" id="fechaInicio" class="form-control" value="@fechaInicio" max="@hoy" />
+        </div>
+        <div class="col-md-3 mb-3">
+            <label class="form-label" for="fechaFin">Fecha de fin</label>
+            <input type="date" id="fechaFin" class="form-control" value="@fechaFin" max="@hoy" />
+        </div>
+        <div class="col-md-3 mb-3">
+            <button type="button" id="btnAplicar" class="btn btn-primary w-100"><i class="fas fa-filter me-2"></i>Aplicar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- RESUMEN (TARJETAS KPI) -->
+<!-- ========================================= -->
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-tachometer-alt me-2"></i>Resumen</h3>
+
+    <div id="spinnerResumen" class="text-center py-3" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted mb-0">Cargando datos…</p>
+    </div>
+
+    <div id="resumenContenido" class="row">
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card primary">
+                <div class="stat-number" id="kpiTotal">0</div>
+                <div class="stat-title">Total</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card info">
+                <div class="stat-number" id="kpiNuevos">0</div>
+                <div class="stat-title">Nuevos</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card info">
+                <div class="stat-number" id="kpiEnProgreso">0</div>
+                <div class="stat-title">En Progreso</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card success">
+                <div class="stat-number" id="kpiResueltos">0</div>
+                <div class="stat-title">Resueltos</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card success">
+                <div class="stat-number" id="kpiCerrados">0</div>
+                <div class="stat-title">Cerrados</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card danger">
+                <div class="stat-number" id="kpiRechazados">0</div>
+                <div class="stat-title">Rechazados</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card warning">
+                <div class="stat-number" id="kpiEficiencia">0%</div>
+                <div class="stat-title">Eficiencia</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card warning">
+                <div class="stat-number" id="kpiTiempoPromedio">0 h</div>
+                <div class="stat-title">Tiempo promedio</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- DISTRIBUCIÓN POR ESTATUS (PIE) -->
+<!-- ========================================= -->
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-chart-pie me-2"></i>Distribución por estatus</h3>
+
+    <div id="spinnerEstatus" class="text-center py-3" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted mb-0">Cargando datos…</p>
+    </div>
+
+    <div id="estatusChartWrapper" style="position:relative; height:320px; display:none;">
+        <canvas id="estatusChart"></canvas>
+    </div>
+    <div id="estatusVacio" class="text-center text-muted py-4" style="display:none;">Sin datos</div>
+</div>
+
+<!-- ========================================= -->
+<!-- EVOLUCIÓN DIARIA (LÍNEA) -->
+<!-- ========================================= -->
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-chart-line me-2"></i>Evolución diaria</h3>
+
+    <div id="spinnerEvolucion" class="text-center py-3" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted mb-0">Cargando datos…</p>
+    </div>
+
+    <div id="evolucionChartWrapper" style="position:relative; height:320px; display:none;">
+        <canvas id="evolucionChart"></canvas>
+    </div>
+    <div id="evolucionVacio" class="text-center text-muted py-4" style="display:none;">Sin datos</div>
+</div>
+
+<!-- ========================================= -->
+<!-- RANKING DE ÁREAS -->
+<!-- ========================================= -->
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-building me-2"></i>Ranking de Áreas</h3>
+
+    <div id="spinnerAreas" class="text-center py-3" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted mb-0">Cargando datos…</p>
+    </div>
+
+    <div id="rankingAreasTabla" style="display:none;">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Área</th>
+                        <th class="text-center">Total tickets</th>
+                        <th class="text-center">Prom. urgencia</th>
+                        <th class="text-center">Cerrados</th>
+                        <th class="text-center">Rechazados</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingAreasBody"></tbody>
+            </table>
+        </div>
+    </div>
+    <div id="rankingAreasVacio" class="text-center text-muted py-4" style="display:none;">Aún no hay tickets registrados…</div>
+</div>
+
+<!-- ========================================= -->
+<!-- RANKING DE REASIGNACIONES -->
+<!-- ========================================= -->
+<div class="form-section">
+    <h3 class="section-title"><i class="fas fa-exchange-alt me-2"></i>Ranking de Reasignaciones</h3>
+
+    <div id="spinnerReasignaciones" class="text-center py-3" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted mb-0">Cargando datos…</p>
+    </div>
+
+    <div id="reasignacionesContenido" style="display:none;">
+        <div id="bloqueReciben" class="mb-4">
+            <h5 class="text-muted">Agentes que más reciben</h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Agente</th>
+                            <th>Usuario</th>
+                            <th class="text-center">Reasignaciones recibidas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaRecibenBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div id="bloqueQuitan">
+            <h5 class="text-muted">A quienes más les quitan</h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Agente</th>
+                            <th>Usuario</th>
+                            <th class="text-center">Reasignaciones quitadas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaQuitanBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="reasignacionesVacio" class="text-center text-muted py-4" style="display:none;">No hay reasignaciones registradas.</div>
+</div>
+
+<script>
+    var fechaInicioGlobal = '@fechaInicio';
+    var fechaFinGlobal = '@fechaFin';
+</script>
+<script src="@Url.Content("~/Scripts/Estadisticas/Index.js")"></script>

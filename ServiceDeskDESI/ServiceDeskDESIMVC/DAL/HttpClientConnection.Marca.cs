@@ -12,48 +12,33 @@ namespace ServiceDeskDESIMVC.DAL
 {
     public partial class HttpClientConnection
     {
-        public async Task<ModelResponse> ObtenerTodosLasMarcas(long empresaId)
+        public async Task<ModelResponse<List<Marca>>> ObtenerTodosLasMarcas()
         {
-            var result = await RequestAsync($"api/Marca/List/{empresaId}", HttpMethod.Get, null,
-                new Func<string, string>((responseString) =>
-                {
-                    return responseString;
-                }), token.Token.access_token);
-            var modelresponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelresponse;
+            return await RequestAsync<List<Marca>>($"api/Marca/List", HttpMethod.Get, null, token.Token.access_token);
         }
-        public async Task<ModelResponse> GuardarOActualizarMarca(Marca m,long empresaId)
-        {
-            MappingColumSecurity(m);
-            var result = await RequestAsync<object>($"api/Marca/Guardar/{empresaId}", HttpMethod.Post, m,
-               new Func<string, string>((responseString) =>
-               {
-                   return responseString;
-               }), token.Token.access_token);
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelResponse;
-        }
-        public async Task<ModelResponse> ObtenerMarcaPorId(long id,long empresaId)
-        {
-            var result = await RequestAsync<object>($"api/Marca/{id}/{empresaId}", HttpMethod.Get, null,
-            new Func<string, string>((responseString) =>
-            {
-                return responseString;
-            }));
-            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
 
-            return modelResponse;
-        }
-        public async Task<ModelResponse> EliminarMarcas(Marca m,long empresaId)
+        public async Task<ModelResponse<Marca>> ObtenerMarcaPorId(long id)
         {
-            MappingColumSecurity(m);
-            var result = await RequestAsync<object>($"api/Marca/Eliminar/{empresaId}", HttpMethod.Delete, m,
+            return await RequestAsync<Marca>($"api/Marca/{id}", HttpMethod.Get, null, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse<Marca>> GuardarOActualizarMarca(Marca marca)
+        {
+            MappingColumSecurity(marca);
+            return await RequestAsync<Marca>($"api/Marca/Guardar", HttpMethod.Post, marca, token.Token.access_token);
+        }
+
+        public async Task<ModelResponse> EliminarMarca(Marca marca)
+        {
+            MappingColumSecurity(marca);
+            var result = await RequestAsync<object>($"api/Marca/Eliminar", HttpMethod.Delete, marca,
                 new Func<string, string>((responseString) =>
                 {
                     return responseString;
                 }), token.Token.access_token);
-            var modelreponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
-            return modelreponse;
+
+            var modelResponse = JsonConvert.DeserializeObject<ModelResponse>(result.ToString());
+            return modelResponse;
         }
     }
 }
