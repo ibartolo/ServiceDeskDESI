@@ -22,5 +22,12 @@ namespace ServiceDeskDESIEntities.Autenticacion
         public long? AreaId { get; set; }
         public long? EmpresaId { get; set; }
         public long? PersonaId { get; set; }
+
+        // Campos de apoyo (NO son columnas de la tabla): se usan para el correo de alta de usuario.
+        // El front (pantalla Usuarios) los envía; los nombres también se resuelven server-side en el WebApi.
+        public long? RolId { get; set; }
+        public string SucursalNombre { get; set; }
+        public string AreaNombre { get; set; }
+        public string RolNombre { get; set; }
     }
 }

@@ -842,6 +842,8 @@ namespace ServiceDeskDESIWebApi.Services
                 templateHtml = templateHtml.Replace("{{Usuario}}", usuario);
                 templateHtml = templateHtml.Replace("{{ContrasenaTemporal}}", contrasenaTemporal);
                 templateHtml = templateHtml.Replace("{{UrlLogin}}", urlLogin);
+                templateHtml = templateHtml.Replace("{{UrlTerminos}}", $"{baseUri}Home/Terminos");
+                templateHtml = templateHtml.Replace("{{UrlPrivacidad}}", $"{baseUri}Home/Privacidad");
 
                 Log.Debug("Plantilla procesada, enviando correo a: {Email}", empresa.CorreoContacto);
 
