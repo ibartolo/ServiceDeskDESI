@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,11 +23,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("AreaService.ObtenerAreas para usuario {Usuario}", usuario);
+                Log.Information("AreaService.ObtenerAreas ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerAreas(usuario);
                 Log.Information("AreaService.ObtenerAreas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("AreaService.ObtenerAreas SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -46,12 +49,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("AreaService.ObtenerAreaPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("AreaService.ObtenerAreaPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerAreaPorId(id, usuario);
                 Log.Information("AreaService.ObtenerAreaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("AreaService.ObtenerAreaPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -71,6 +76,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("AreaService.GuardarOActualizarArea para usuario {Usuario}", usuario);
+                Log.Information("AreaService.GuardarOActualizarArea ENTRADA: {Json}", LogSanitizer.ToJson(new { area, usuario }));
 
                 if (string.IsNullOrWhiteSpace(area.Nombre)) { throw new ArgumentException("El nombre del área es requerido."); }
                 if (area.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
@@ -81,6 +87,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarArea(area);
                 Log.Information("AreaService.GuardarOActualizarArea RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("AreaService.GuardarOActualizarArea SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -100,6 +107,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("AreaService.EliminarArea para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("AreaService.EliminarArea ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID del área es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -107,6 +115,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarArea(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("AreaService.EliminarArea RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("AreaService.EliminarArea SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

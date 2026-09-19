@@ -416,3 +416,13 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# ============================================================
+# Archivos subidos en runtime (NO versionar):
+#  - Evidencias de tickets (WebApi): Evidencias/{empresaId}/{ticketId}/{guid}.ext
+#  - Fotos de perfil y logos de empresa (MVC): Uploads/Perfiles/... y Uploads/Logos/...
+# Nota: los logs (App_Data/logs) ya se ignoran con la regla [Ll]ogs/ de arriba.
+# ============================================================
+[Ee]videncias/
+[Uu]ploads/
+

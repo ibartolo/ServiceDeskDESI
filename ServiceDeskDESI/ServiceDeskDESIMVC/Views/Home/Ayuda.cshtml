@@ -108,7 +108,7 @@
     </div>
 
     <div class="ayuda-buscador">
-        <input type="text" id="buscadorAyuda" placeholder="Buscar: ticket, activo, tipo de activo, asignar, correo, contraseña, permiso, marca, modelo, horario, estadísticas, empresa, logo..." autocomplete="off">
+        <input type="text" id="buscadorAyuda" placeholder="Buscar: ticket, pausar, materiales, terceros, activo, tipo de activo, asignar, correo, contraseña, permiso, marca, modelo, horario, estadísticas, empresa, logo..." autocomplete="off">
         <div class="ayuda-resultado-msg" id="resultadoMsg"></div>
     </div>
 
@@ -169,7 +169,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <section class="seccion-card" id="tickets" data-tags="ticket solicitud reportar problema soporte folio capturar nuevo atender resolver cerrar rechazar estatus ciclo">
+    <section class="seccion-card" id="tickets" data-tags="ticket solicitud reportar problema soporte folio capturar nuevo atender resolver cerrar rechazar estatus ciclo pausar pausado reanudar reanudado materiales refacciones insumo terceros proveedor externo espera compra mantenimiento">
         <h3><i class="fas fa-ticket-alt me-2"></i>Tickets (solicitudes de soporte)</h3>
         <p>Un <strong>ticket</strong> es una solicitud de ayuda: "no me abre el sistema", "necesito una licencia", "mi equipo no enciende"... Todo empieza capturando un ticket.</p>
 
@@ -212,17 +212,46 @@
         <ul>
             <li><strong>Nuevo:</strong> acabas de crearlo y espera atención.</li>
             <li><strong>En Progreso:</strong> un agente lo tomó y está trabajando en él.</li>
-            <li><strong>Resuelto:</strong> el agente indica qué hizo, con un comentario.</li>
+            <li><strong>Pendiente de Materiales:</strong> el agente no puede continuar porque falta una compra, refacción o un mantenimiento de un tercero que aún no se ejecuta (por ejemplo, una memoria RAM que tarda en llegar). El ticket <u>sigue abierto</u>; no está resuelto ni rechazado.</li>
+            <li><strong>En Espera de Terceros:</strong> el avance depende de un proveedor externo (por ejemplo, el soporte del hosting) y el tiempo de espera <u>no depende de tu empresa</u>. El ticket <u>sigue abierto</u>.</li>
+            <li><strong>Resuelto:</strong> el agente indica qué hizo con un comentario y puede <strong>adjuntar un anexo</strong> (evidencia) en el mismo paso.</li>
             <li><strong>Cerrado:</strong> tú (solicitante) confirmas que quedó resuelto.</li>
             <li><strong>Rechazado:</strong> si no quedó resuelto, lo devuelves explicando por qué; el agente puede retomarlo.</li>
         </ul>
+
+        <h4>Pausar y reanudar un ticket (espera por materiales o terceros)</h4>
+        <p>Cuando el avance de un ticket <strong>no depende del agente</strong> (falta un insumo, o se espera a un proveedor externo), el agente <strong>pausa</strong> el ticket en lugar de dejarlo "En Progreso".</p>
+        <div class="flujo">
+            <div class="f-paso estado">En Progreso</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">Pausar (motivo + detalle)</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">Pendiente de Materiales / En Espera de Terceros</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">Reanudar</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">En Progreso</div>
+        </div>
+        <ul>
+            <li>Al pausar, el agente elige el <strong>motivo</strong>:
+                <ul>
+                    <li><strong>Pendiente de Materiales:</strong> falta un insumo o refacción (compra/almacén) o un mantenimiento de un tercero.</li>
+                    <li><strong>En Espera de Terceros:</strong> se espera la respuesta de un proveedor externo (el tiempo no lo controla la empresa).</li>
+                </ul>
+            </li>
+            <li>El <strong>detalle</strong> es obligatorio (qué se espera) y, si se conoce, se puede indicar una <strong>fecha estimada</strong> de respuesta.</li>
+            <li>Cuando llega el material o responde el tercero, el agente ejecuta <strong>Reanudar</strong> y el ticket vuelve a <strong>En Progreso</strong>.</li>
+            <li>Mientras está pausado, el ticket <strong>sigue abierto</strong>, aparece en el listado con su fecha estimada y <strong>no</strong> cuenta como resuelto ni cerrado.</li>
+            <li>Un ticket pausado <strong>no</strong> se puede resolver, rechazar, cerrar ni reasignar hasta que se reanude.</li>
+        </ul>
+        <div class="tip"><strong>Tip:</strong> usa "Pendiente de Materiales" cuando dependas de algo que tu empresa debe comprar o preparar, y "En Espera de Terceros" cuando el tiempo lo controle un proveedor externo. Así queda claro por qué el ticket no avanza.</div>
 
         <h4>¿Qué puedes hacer según tu rol?</h4>
         <table class="tabla-campos">
             <thead><tr><th>Rol</th><th>Puede hacer</th></tr></thead>
             <tbody>
                 <tr><td><strong>Solicitante</strong></td><td>Crear tickets, ver los propios, cerrar o rechazar sus tickets resueltos.</td></tr>
-                <tr><td><strong>Agente</strong></td><td>Ver tickets de su área, tomarlos, resolverlos y retomarlos.</td></tr>
+                <tr><td><strong>Agente</strong></td><td>Ver <strong>todos</strong> los tickets de la empresa (sin importar el área), tomarlos, resolverlos (con anexo opcional en el mismo paso), retomarlos y <strong>pausarlos / reanudarlos</strong> (Pendiente de Materiales / En Espera de Terceros).</td></tr>
                 <tr><td><strong>Responsable de área</strong></td><td>Ver tickets de su área y reasignarlos a otro agente.</td></tr>
             </tbody>
         </table>
@@ -337,6 +366,8 @@
         <ul>
             <li><strong>Personas:</strong> el directorio de tu personal (nombre, correo, teléfono, puesto, sucursal).</li>
             <li><strong>Usuarios:</strong> las cuentas que permiten entrar al sistema. Cada usuario tiene un rol.</li>
+            <li><strong>Nombre de usuario:</strong> es único en todo el sistema. Al capturarlo, el sistema avisa si ya existe para que elijas otro.</li>
+            <li><strong>RFC:</strong> es opcional al capturar un usuario.</li>
             <li><strong>Vincular:</strong> una persona puede vincularse a su cuenta de usuario (relación 1 a 1). Al vincular, los datos de la persona se sincronizan con la cuenta y quedan protegidos para evitar errores.</li>
         </ul>
         <p>Administra usuarios en <a class="enlace-app" href="/User/Users">Usuarios</a> y personas en <a class="enlace-app" href="/Catalogs/Persona">Personas</a>.</p>
@@ -534,6 +565,9 @@
         <div class="faq-q">¿Puedo editar un ticket que ya capturé?</div>
         <p class="faq-a">No. Los tickets se guardan tal cual para mantener un historial confiable. Si necesitas corregir algo, captura un ticket nuevo o pide apoyo al agente.</p>
 
+        <div class="faq-q">¿Por qué mi ticket dice "Pendiente de Materiales" o "En Espera de Terceros"?</div>
+        <p class="faq-a">Porque el avance no depende del agente: en <strong>Pendiente de Materiales</strong> falta una compra, refacción o un mantenimiento de un tercero; en <strong>En Espera de Terceros</strong> se espera la respuesta de un proveedor externo (por ejemplo, el soporte del hosting). El ticket <strong>sigue abierto</strong>; el agente lo reanudará cuando llegue el material o responda el tercero, y volverá a "En Progreso".</p>
+
         <div class="faq-q">Recibí un correo para confirmar un activo que no conozco.</div>
         <p class="faq-a">No confirmes nada que no reconozcas. Avísale a tu administrador para que revise la asignación.</p>
     </section>
@@ -552,6 +586,8 @@
                 <tr><td>Permiso</td><td>Autorización para ver una sección o ejecutar una acción (crear, editar, eliminar).</td></tr>
                 <tr><td>Solicitante</td><td>Persona que reporta o solicita apoyo.</td></tr>
                 <tr><td>Agente</td><td>Persona que atiende los tickets.</td></tr>
+                <tr><td>Pendiente de Materiales</td><td>Estatus de un ticket en pausa porque falta un insumo/refacción o un mantenimiento de un tercero.</td></tr>
+                <tr><td>En Espera de Terceros</td><td>Estatus de un ticket en pausa porque el avance depende de un proveedor externo; el tiempo no lo controla la empresa.</td></tr>
                 <tr><td>Responsable de área</td><td>Persona encargada de un área; ve y reasigna sus tickets.</td></tr>
                 <tr><td>Licencia / Período de prueba</td><td>Vigencia de uso del sistema para la empresa.</td></tr>
             </tbody>
@@ -565,72 +601,4 @@
 
 <a class="volver-arriba" href="#" id="btnArriba" title="Volver arriba"><i class="fas fa-arrow-up"></i></a>
 
-<script>
-    $(document).ready(function () {
-        var $cards = $('.seccion-card');
-        var $msg = $('#resultadoMsg');
-
-        function normalizar(texto) {
-            // minúsculas + sin acentos para comparar mejor
-            return texto.toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9\s]/g, ' ');
-        }
-
-        function filtrar() {
-            var q = normalizar($('#buscadorAyuda').val());
-            if (!q) {
-                $cards.show();
-                $msg.text('');
-                return;
-            }
-            var palabras = q.split(/\s+/).filter(function (w) { return w.length > 0; });
-            var visibles = 0;
-            $cards.each(function () {
-                var texto = normalizar($(this).attr('data-tags') + ' ' + $(this).text());
-                var ok = palabras.every(function (p) { return texto.indexOf(p) !== -1; });
-                $(this).toggle(ok);
-                if (ok) { visibles++; }
-            });
-
-            if (visibles === 0) {
-                $msg.html('No encontré secciones con "<strong>' + $('#buscadorAyuda').val() +
-                    '</strong>". Prueba con: ticket, activo, tipo de activo, marca, modelo, asignar, correo, contraseña, permiso, rol, catálogo, estadísticas, horario, empresa, logo.');
-            } else {
-                $msg.text(visibles + ' sección(es) encontrada(s).');
-            }
-        }
-
-        $('#buscadorAyuda').on('input', filtrar);
-
-        // Índice rápido: desplazarse a la sección elegida
-        $('.chip[data-ir]').on('click', function (e) {
-            e.preventDefault();
-            var destino = $(this).attr('data-ir');
-            $('html, body').animate({ scrollTop: $(destino).offset().top - 90 }, 400);
-            $(destino).css('box-shadow', '0 0 0 3px #4e73df');
-            setTimeout(function () { $(destino).css('box-shadow', ''); }, 2500);
-        });
-
-        // Volver arriba
-        $('#btnArriba').on('click', function (e) {
-            e.preventDefault();
-            $('html, body').animate({ scrollTop: 0 }, 300);
-        });
-
-        // Soporte: enlaces internos tipo #seccion que puedan venir de otra vista
-        if (window.location.hash) {
-            try {
-                var $dest = $(window.location.hash);
-                if ($dest.length) {
-                    setTimeout(function () {
-                        $('html, body').animate({ scrollTop: $dest.offset().top - 90 }, 400);
-                        $dest.css('box-shadow', '0 0 0 3px #4e73df');
-                        setTimeout(function () { $dest.css('box-shadow', ''); }, 2500);
-                    }, 300);
-                }
-            } catch (err) { }
-        }
-    });
-</script>
+<script src="@Url.Content("~/Scripts/Home/Ayuda.js")"></script>

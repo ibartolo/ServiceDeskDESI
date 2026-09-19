@@ -315,6 +315,28 @@ namespace ServiceDeskDESIWebApi.DAL
             return modelResponse;
         }
 
+        /// <summary>
+        /// Traduce el código de rechazo devuelto por el SP TransicionarTicket a un mensaje claro.
+        /// (>0 = éxito; 0 = error inesperado; negativos = motivo de rechazo)
+        /// </summary>
+        private static string MensajeRechazoTransicion(long codigo)
+        {
+            switch (codigo)
+            {
+                case -1: return "El usuario no existe o está inactivo.";
+                case -2: return "El ticket no existe o no pertenece a tu empresa.";
+                case -3: return "No tienes permisos para atender tickets (no eres agente).";
+                case -4: return "El ticket no está en un estatus que permita esta acción.";
+                case -5: return "El ticket ya está asignado a otro agente.";
+                case -6: return "Solo el agente asignado al ticket puede realizar esta acción.";
+                case -7: return "El comentario es obligatorio (entre 1 y 300 caracteres).";
+                case -8: return "Solo el responsable del área del ticket puede reasignarlo.";
+                case -9: return "El usuario destino no es un agente válido del área del ticket.";
+                case -10: return "Solo el solicitante (creador) del ticket puede realizar esta acción.";
+                default: return "No se pudo completar la acción sobre el ticket.";
+            }
+        }
+
         public ModelResponse TomarTicket(long ticketId, string usuario, string comentario)
         {
             var modelResponse = new ModelResponse();
@@ -334,7 +356,7 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (resultadoLong <= 0)
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo tomar el ticket. Verifique que sea un agente, que el ticket sea de su área y que esté disponible.";
+                    modelResponse.Message = "No se pudo tomar el ticket. " + MensajeRechazoTransicion(resultadoLong);
                     return modelResponse;
                 }
 
@@ -372,7 +394,7 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (resultadoLong <= 0)
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo reasignar el ticket. Solo el responsable del área puede reasignar.";
+                    modelResponse.Message = "No se pudo reasignar el ticket. " + MensajeRechazoTransicion(resultadoLong);
                     return modelResponse;
                 }
 
@@ -409,7 +431,7 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (resultadoLong <= 0)
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo resolver el ticket. Verifique que sea el agente asignado y que el ticket esté en progreso.";
+                    modelResponse.Message = "No se pudo resolver el ticket. " + MensajeRechazoTransicion(resultadoLong);
                     return modelResponse;
                 }
 
@@ -446,7 +468,7 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (resultadoLong <= 0)
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo rechazar el ticket. Verifique que sea el solicitante y que el ticket esté resuelto.";
+                    modelResponse.Message = "No se pudo rechazar el ticket. " + MensajeRechazoTransicion(resultadoLong);
                     return modelResponse;
                 }
 
@@ -483,7 +505,7 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (resultadoLong <= 0)
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo cerrar el ticket. Verifique que sea el solicitante y que el ticket esté resuelto.";
+                    modelResponse.Message = "No se pudo cerrar el ticket. " + MensajeRechazoTransicion(resultadoLong);
                     return modelResponse;
                 }
 
@@ -519,7 +541,7 @@ namespace ServiceDeskDESIWebApi.DAL
                 if (resultadoLong <= 0)
                 {
                     modelResponse.IsSuccess = false;
-                    modelResponse.Message = "No se pudo retomar el ticket. Verifique que sea un agente y que el ticket esté rechazado.";
+                    modelResponse.Message = "No se pudo retomar el ticket. " + MensajeRechazoTransicion(resultadoLong);
                     return modelResponse;
                 }
 
@@ -532,6 +554,81 @@ namespace ServiceDeskDESIWebApi.DAL
                 Log.Error(ex, "Error al retomar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
                 modelResponse.IsSuccess = false;
                 modelResponse.Message = "Ocurrió un error al retomar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse PausarTicket(long ticketId, string usuario, string comentario, DateTime? fechaEstimada, string tipoMovimiento)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@TipoMovimiento", tipoMovimiento),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+                    new SqlParameter("@FechaEstimada", (object)fechaEstimada ?? DBNull.Value),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo pausar el ticket. " + MensajeRechazoTransicion(resultadoLong);
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket pausado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al pausar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al pausar el ticket.";
+            }
+
+            return modelResponse;
+        }
+
+        public ModelResponse ReanudarTicket(long ticketId, string usuario, string comentario)
+        {
+            var modelResponse = new ModelResponse();
+
+            try
+            {
+                var resultado = ExecuteScalar("TransicionarTicket", CommandType.StoredProcedure, new SqlParameter[]
+                {
+                    new SqlParameter("@TicketId", ticketId),
+                    new SqlParameter("@TipoMovimiento", "Reanudar"),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+                    new SqlParameter("@Usuario", usuario)
+                });
+
+                var resultadoLong = Convert.ToInt64(resultado);
+
+                if (resultadoLong <= 0)
+                {
+                    modelResponse.IsSuccess = false;
+                    modelResponse.Message = "No se pudo reanudar el ticket. " + MensajeRechazoTransicion(resultadoLong);
+                    return modelResponse;
+                }
+
+                modelResponse.IsSuccess = true;
+                modelResponse.Response = resultadoLong;
+                modelResponse.Message = "Ticket reanudado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al reanudar ticket {TicketId} para usuario {Usuario}", ticketId, usuario);
+                modelResponse.IsSuccess = false;
+                modelResponse.Message = "Ocurrió un error al reanudar el ticket.";
             }
 
             return modelResponse;

@@ -2,6 +2,7 @@ using Serilog;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -21,12 +22,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("MantenimientoService.ObtenerMantenimientosPorActivo para ActivoId {ActivoId} usuario {Usuario}", activoId, usuario);
+                Log.Information("MantenimientoService.ObtenerMantenimientosPorActivo ENTRADA: {Json}", LogSanitizer.ToJson(new { activoId, usuario }));
 
                 if (activoId <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerMantenimientosPorActivo(activoId, usuario);
                 Log.Information("MantenimientoService.ObtenerMantenimientosPorActivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("MantenimientoService.ObtenerMantenimientosPorActivo SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -46,6 +49,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("MantenimientoService.GuardarMantenimiento para usuario {Usuario}", usuario);
+                Log.Information("MantenimientoService.GuardarMantenimiento ENTRADA: {Json}", LogSanitizer.ToJson(new { mantenimiento, usuario }));
 
                 if (mantenimiento.ActivoId <= 0) { throw new ArgumentException("El ID del activo es requerido."); }
                 if (string.IsNullOrWhiteSpace(mantenimiento.Comentario)) { throw new ArgumentException("El comentario es requerido."); }
@@ -55,6 +59,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarMantenimiento(mantenimiento, usuario);
                 Log.Information("MantenimientoService.GuardarMantenimiento RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("MantenimientoService.GuardarMantenimiento SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

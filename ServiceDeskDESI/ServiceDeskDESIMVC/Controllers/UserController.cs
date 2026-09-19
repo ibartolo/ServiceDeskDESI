@@ -269,6 +269,12 @@ namespace ServiceDeskDESIMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        public async Task<string> ExisteNombreUsuario(string nombreUsuario)
+        {
+            var response = await _autenticacionService.ExisteNombreUsuario(nombreUsuario);
+            return JsonConvert.SerializeObject(response);
+        }
+
         [Permiso("Usuarios")]
         public async Task<string> GuardarOActualizarUsuarioAdmin(Usuario usuario)
         {

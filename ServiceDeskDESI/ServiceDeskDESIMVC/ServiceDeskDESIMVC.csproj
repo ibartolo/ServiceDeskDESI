@@ -144,6 +144,35 @@
     <Content Include="Scripts\Comun\Comun.js" />
     <Content Include="Scripts\Comun\RecoverPass.js" />
     <Content Include="Scripts\Comun\TempAutentication.js" />
+    <Content Include="Scripts\Catalogs\Active.js" />
+    <Content Include="Scripts\Catalogs\Branch.js" />
+    <Content Include="Scripts\Catalogs\CategoriaResponsable.js" />
+    <Content Include="Scripts\Catalogs\Category.js" />
+    <Content Include="Scripts\Catalogs\Company.js" />
+    <Content Include="Scripts\Catalogs\Mark.js" />
+    <Content Include="Scripts\Catalogs\Model.js" />
+    <Content Include="Scripts\Catalogs\Persona.js" />
+    <Content Include="Scripts\Catalogs\Puesto.js" />
+    <Content Include="Scripts\Catalogs\TypeActive.js" />
+    <Content Include="Scripts\Catalogs\WorkArea.js" />
+    <Content Include="Scripts\Catalogs\_AsignarActivoPersona.js" />
+    <Content Include="Scripts\Catalogs\_MantenimientoActivo.js" />
+    <Content Include="Scripts\ConfiguracionEmpresa\Index.js" />
+    <Content Include="Scripts\Estadisticas\Index.js" />
+    <Content Include="Scripts\Home\Ayuda.js" />
+    <Content Include="Scripts\Home\Configuration.js" />
+    <Content Include="Scripts\Home\MisActivos.js" />
+    <Content Include="Scripts\Home\NewCompany.js" />
+    <Content Include="Scripts\Home\VerAsignacion.js" />
+    <Content Include="Scripts\Security\Permisos.js" />
+    <Content Include="Scripts\Security\Role.js" />
+    <Content Include="Scripts\Shared\_Layout.js" />
+    <Content Include="Scripts\Ticket\Index.js" />
+    <Content Include="Scripts\Ticket\_CapturarTicket.js" />
+    <Content Include="Scripts\Ticket\_DetalleTicket.js" />
+    <Content Include="Scripts\Ticket\_ReasignarTicket.js" />
+    <Content Include="Scripts\User\MyProfile.js" />
+    <Content Include="Scripts\User\Users.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -240,6 +269,7 @@
     <Content Include="Views\Ticket\_CapturarTicket.cshtml" />
     <Content Include="Views\Ticket\_ReasignarTicket.cshtml" />
     <Content Include="Views\Ticket\_DetalleTicket.cshtml" />
+    <Content Include="Views\Ticket\_PausarTicket.cshtml" />
     <Content Include="Views\Catalogs\TypeActive.cshtml" />
     <Content Include="Views\Catalogs\Model.cshtml" />
     <Content Include="Views\Catalogs\Mark.cshtml" />

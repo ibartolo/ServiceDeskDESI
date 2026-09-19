@@ -3,6 +3,7 @@ using ServiceDeskDESIEntities.Autenticacion;
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,11 +24,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PermisosService.ObtenerPermisosPorUsuario para usuario {Usuario}", usuario);
+                Log.Information("PermisosService.ObtenerPermisosPorUsuario ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerPermisosPorUsuario(usuario);
                 Log.Information("PermisosService.ObtenerPermisosPorUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PermisosService.ObtenerPermisosPorUsuario SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -47,6 +50,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PermisosService.ValidarPermisoUsuario para usuario {Usuario}, página {NombrePagina}, acción {Accion}", usuario, nombrePagina, accion);
+                Log.Information("PermisosService.ValidarPermisoUsuario ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario, nombrePagina, accion }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
                 if (string.IsNullOrWhiteSpace(nombrePagina)) { throw new ArgumentException("El nombre de la página es requerido."); }
@@ -70,6 +74,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.ValidarPermisoUsuario(usuarioObj.Id, pagina.Id, accion);
                 Log.Information("PermisosService.ValidarPermisoUsuario RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PermisosService.ValidarPermisoUsuario SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -91,9 +96,11 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PermisosService.ObtenerPaginas");
+                Log.Information("PermisosService.ObtenerPaginas ENTRADA: {Json}", LogSanitizer.ToJson(new { }));
 
                 var result = _dbWrapper.ObtenerPaginas();
                 Log.Information("PermisosService.ObtenerPaginas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PermisosService.ObtenerPaginas SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (Exception ex)
@@ -108,12 +115,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PermisosService.ObtenerPermisosPorRol para RolId {RolId} usuario {Usuario}", rolId, usuario);
+                Log.Information("PermisosService.ObtenerPermisosPorRol ENTRADA: {Json}", LogSanitizer.ToJson(new { rolId, usuario }));
 
                 if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerPermisosPorRol(rolId, usuario);
                 Log.Information("PermisosService.ObtenerPermisosPorRol RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PermisosService.ObtenerPermisosPorRol SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -134,6 +143,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PermisosService.GuardarPermisosRol para RolId {RolId}, PaginaId {PaginaId}, usuario {Usuario}", rolId, paginaId, usuario);
+                Log.Information("PermisosService.GuardarPermisosRol ENTRADA: {Json}", LogSanitizer.ToJson(new { rolId, paginaId, puedeLeer, puedeCrear, puedeEditar, puedeEliminar, puedeExportar, modificadoPor, usuario }));
 
                 if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
                 if (paginaId <= 0) { throw new ArgumentException("El ID de la página es requerido."); }
@@ -166,6 +176,7 @@ namespace ServiceDeskDESIWebApi.Services
                 var result = _dbWrapper.GuardarPermisosRol(rolId, paginaId, puedeLeer, puedeCrear, puedeEditar,
                     puedeEliminar, puedeExportar, modificadoPor, usuario);
                 Log.Information("PermisosService.GuardarPermisosRol RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PermisosService.GuardarPermisosRol SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -187,6 +198,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PermisosService.GuardarPermisosRolMasivo para RolId {RolId} usuario {Usuario}", rolId, usuario);
+                Log.Information("PermisosService.GuardarPermisosRolMasivo ENTRADA: {Json}", LogSanitizer.ToJson(new { rolId, permisos, usuario }));
 
                 // Validaciones
                 if (rolId <= 0) { throw new ArgumentException("El ID del rol es requerido."); }
@@ -208,6 +220,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarPermisosRolMasivo(rolId, permisos, usuario);
                 Log.Information("PermisosService.GuardarPermisosRolMasivo RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PermisosService.GuardarPermisosRolMasivo SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -227,9 +240,11 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("PermisosService.ObtenerConteoPaginasPorRol");
+                Log.Information("PermisosService.ObtenerConteoPaginasPorRol ENTRADA: {Json}", LogSanitizer.ToJson(new { }));
 
                 var result = _dbWrapper.ObtenerConteoPaginasPorRol();
                 Log.Information("PermisosService.ObtenerConteoPaginasPorRol RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("PermisosService.ObtenerConteoPaginasPorRol SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (Exception ex)

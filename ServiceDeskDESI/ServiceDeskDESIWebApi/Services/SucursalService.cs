@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -21,11 +22,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("SucursalService.ObtenerSucursales para usuario {Usuario}", usuario);
+                Log.Information("SucursalService.ObtenerSucursales ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerSucursales(usuario);
                 Log.Information("SucursalService.ObtenerSucursales RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("SucursalService.ObtenerSucursales SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -49,12 +52,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("SucursalService.ObtenerSucursalPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("SucursalService.ObtenerSucursalPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la sucursal es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerSucursalPorId(id, usuario);
                 Log.Information("SucursalService.ObtenerSucursalPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("SucursalService.ObtenerSucursalPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -78,6 +83,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("SucursalService.GuardarOActualizarSucursal para usuario {Usuario}", usuario);
+                Log.Information("SucursalService.GuardarOActualizarSucursal ENTRADA: {Json}", LogSanitizer.ToJson(new { sucursal, usuario }));
 
                 if (string.IsNullOrWhiteSpace(sucursal.Nombre)) { throw new ArgumentException("El nombre de la sucursal es requerido."); }
                 if (sucursal.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
@@ -91,6 +97,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarSucursal(sucursal, usuario);
                 Log.Information("SucursalService.GuardarOActualizarSucursal RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("SucursalService.GuardarOActualizarSucursal SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -114,6 +121,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("SucursalService.EliminarSucursal para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("SucursalService.EliminarSucursal ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la sucursal es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -121,6 +129,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarSucursal(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("SucursalService.EliminarSucursal RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("SucursalService.EliminarSucursal SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

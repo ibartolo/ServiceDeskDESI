@@ -2,6 +2,7 @@
 using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.DAL;
+using ServiceDeskDESIWebApi.Helpers;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -23,11 +24,13 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("MarcaService.ObtenerMarcas para usuario {Usuario}", usuario);
+                Log.Information("MarcaService.ObtenerMarcas ENTRADA: {Json}", LogSanitizer.ToJson(new { usuario }));
 
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerMarcas(usuario);
                 Log.Information("MarcaService.ObtenerMarcas RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("MarcaService.ObtenerMarcas SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -47,12 +50,14 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("MarcaService.ObtenerMarcaPorId para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("MarcaService.ObtenerMarcaPorId ENTRADA: {Json}", LogSanitizer.ToJson(new { id, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la marca es requerido."); }
                 if (string.IsNullOrWhiteSpace(usuario)) { throw new ArgumentException("El nombre de usuario es requerido."); }
 
                 var result = _dbWrapper.ObtenerMarcaPorId(id, usuario);
                 Log.Information("MarcaService.ObtenerMarcaPorId RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("MarcaService.ObtenerMarcaPorId SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -72,6 +77,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("MarcaService.GuardarOActualizarMarca para usuario {Usuario}", usuario);
+                Log.Information("MarcaService.GuardarOActualizarMarca ENTRADA: {Json}", LogSanitizer.ToJson(new { marca, usuario }));
 
                 if (string.IsNullOrWhiteSpace(marca.Nombre)) { throw new ArgumentException("El nombre de la marca es requerido."); }
                 if (marca.Nombre.Length > 250) { throw new ArgumentException("El nombre no puede exceder los 250 caracteres."); }
@@ -81,6 +87,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.GuardarOActualizarMarca(marca);
                 Log.Information("MarcaService.GuardarOActualizarMarca RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("MarcaService.GuardarOActualizarMarca SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)
@@ -100,6 +107,7 @@ namespace ServiceDeskDESIWebApi.Services
             try
             {
                 Log.Information("MarcaService.EliminarMarca para Id {Id} usuario {Usuario}", id, usuario);
+                Log.Information("MarcaService.EliminarMarca ENTRADA: {Json}", LogSanitizer.ToJson(new { id, modificadoPor, fechaModificacion, usuario }));
 
                 if (id <= 0) { throw new ArgumentException("El ID de la marca es requerido."); }
                 if (string.IsNullOrWhiteSpace(modificadoPor)) { throw new ArgumentException("El usuario modificador es requerido."); }
@@ -107,6 +115,7 @@ namespace ServiceDeskDESIWebApi.Services
 
                 var result = _dbWrapper.EliminarMarca(id, modificadoPor, fechaModificacion, usuario);
                 Log.Information("MarcaService.EliminarMarca RESULTADO: IsSuccess={IsSuccess}, Message={Message}", result?.IsSuccess, result?.Message);
+                Log.Information("MarcaService.EliminarMarca SALIDA: {Json}", LogSanitizer.ToJson(result));
                 return result;
             }
             catch (ArgumentException ex)

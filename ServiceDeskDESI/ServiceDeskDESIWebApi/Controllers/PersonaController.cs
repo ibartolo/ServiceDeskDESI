@@ -1,6 +1,7 @@
 ﻿using ServiceDeskDESIEntities.Catalogos;
 using ServiceDeskDESIEntities.Seguridad;
 using ServiceDeskDESIWebApi.Filters;
+using ServiceDeskDESIWebApi.Models;
 using ServiceDeskDESIWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -99,17 +100,6 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = _personaService.DesvincularPersonaUsuario(request.PersonaId, usuario);
             return result;
         }
-    }
-
-    public class VincularUsuarioRequest
-    {
-        public long PersonaId { get; set; }
-        public long UsuarioId { get; set; }
-    }
-
-    public class DesvincularUsuarioRequest
-    {
-        public long PersonaId { get; set; }
     }
 }
     

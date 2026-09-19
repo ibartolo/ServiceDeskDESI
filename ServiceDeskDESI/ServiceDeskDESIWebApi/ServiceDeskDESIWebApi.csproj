@@ -270,6 +270,7 @@
     </Compile>
     <Compile Include="Helpers\Cryptography.cs" />
     <Compile Include="Helpers\EmailHelper.cs" />
+    <Compile Include="Helpers\LogSanitizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ActivoServices.cs" />
     <Compile Include="Services\AreaService.cs" />
@@ -298,6 +299,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAL\DbWrapper.Rol.cs" />
+    <Compile Include="Models\TomarTicketRequest.cs" />
+    <Compile Include="Models\ReasignarTicketRequest.cs" />
+    <Compile Include="Models\TransicionTicketRequest.cs" />
+    <Compile Include="Models\PausarTicketRequest.cs" />
+    <Compile Include="Models\AsignarActivoRequest.cs" />
+    <Compile Include="Models\DesvincularActivoRequest.cs" />
+    <Compile Include="Models\ConfirmarRecepcionRequest.cs" />
+    <Compile Include="Models\VincularUsuarioRequest.cs" />
+    <Compile Include="Models\DesvincularUsuarioRequest.cs" />
+    <Compile Include="Models\AsignarRolRequest.cs" />
+    <Compile Include="Models\EliminarRolUsuarioRequest.cs" />
     <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

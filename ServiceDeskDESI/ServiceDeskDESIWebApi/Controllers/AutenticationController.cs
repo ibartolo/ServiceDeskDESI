@@ -49,6 +49,18 @@ namespace ServiceDeskDESIWebApi.Controllers
         }
 
         /// <summary>
+        /// Indica si ya existe un usuario con ese NombreUsuario (búsqueda GLOBAL)
+        /// </summary>
+        /// <param name="nombreUsuario">Nombre de usuario a validar</param>
+        /// <returns>true si el nombre de usuario ya existe</returns>
+        [HttpGet, Route("User/Existe/{nombreUsuario}")]
+        public ModelResponse<bool> ExisteNombreUsuario(string nombreUsuario)
+        {
+            var result = _autenticacionService.ExisteNombreUsuario(nombreUsuario);
+            return result;
+        }
+
+        /// <summary>
         /// Guarda o actualiza un usuario
         /// </summary>
         /// <param name="u">Objeto usuario con los datos</param>
@@ -168,11 +180,5 @@ namespace ServiceDeskDESIWebApi.Controllers
             var result = _autenticacionService.GuardarOActualizarUsuarioAdmin(usuario, usuarioAdmin);
             return result;
         }
-    }
-
-    public class RestablecerContraseniaRequest
-    {
-        public string Token { get; set; }
-        public string NuevaContrasena { get; set; }
     }
 }
