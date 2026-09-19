@@ -257,6 +257,7 @@
     <Content Include="Views\Home\Autentication.cshtml" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Shared\_LayoutPublic.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Catalogs\WorkArea.cshtml" />
     <Content Include="Views\Compania\AltaEdicion.cshtml" />
@@ -287,6 +288,8 @@
     <Content Include="Views\Security\Permisos.cshtml" />
     <Content Include="Views\Home\Configuration.cshtml" />
     <Content Include="Views\Home\Ayuda.cshtml" />
+    <Content Include="Views\Home\Terminos.cshtml" />
+    <Content Include="Views\Home\Privacidad.cshtml" />
     <Content Include="Views\Catalogs\CategoriaResponsable.cshtml" />
     <Content Include="Views\Catalogs\Puesto.cshtml" />
     <Content Include="Views\Catalogs\Persona.cshtml" />
