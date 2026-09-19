@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - HelpDesk DESI</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root { --desi-blue: #4e73df; --desi-dark: #1c2a4a; --desi-gray: #858796; }
+        * { box-sizing: border-box; }
+        body { background: #f4f6fb; color: #2b2f38; font-family: "Segoe UI", Arial, sans-serif; margin: 0; }
+
+        .doc-header { background: var(--desi-blue); color: #fff; padding: 14px 0; }
+        .doc-header a { color: #fff; text-decoration: none; font-weight: 600; font-size: 1.05rem; }
+        .doc-header .sub { display: block; font-size: .8rem; font-weight: 400; opacity: .9; }
+
+        .doc-wrap { max-width: 920px; margin: 0 auto; padding: 22px 16px 40px; }
+
+        .doc-card {
+            background: #fff; border: 1px solid #e3e6f0; border-radius: 10px;
+            padding: 30px 34px; box-shadow: 0 1px 3px rgba(0,0,0,.04);
+        }
+        .doc-card h1 { font-size: 1.55rem; color: var(--desi-blue); margin: 0 0 .25rem; }
+        .doc-card .doc-meta { color: var(--desi-gray); font-size: .85rem; margin-bottom: 1.2rem; }
+        .doc-card h2 {
+            font-size: 1.1rem; color: var(--desi-dark); margin: 1.7rem 0 .6rem;
+            border-left: 4px solid var(--desi-blue); padding-left: 10px;
+        }
+        .doc-card h3 { font-size: 1rem; color: var(--desi-dark); margin: 1.1rem 0 .4rem; }
+        .doc-card p, .doc-card li { font-size: .95rem; line-height: 1.6; }
+        .doc-card ul { margin: .4rem 0 .8rem 1.1rem; }
+        .doc-card .nota {
+            background: #eef2fd; border-left: 4px solid var(--desi-blue);
+            padding: 10px 14px; border-radius: 4px; margin: 1rem 0; font-size: .92rem;
+        }
+        .doc-card strong { color: var(--desi-dark); }
+
+        .doc-footer { text-align: center; color: var(--desi-gray); font-size: .85rem; padding: 18px 12px 34px; }
+        .doc-footer a { color: var(--desi-blue); text-decoration: none; }
+        .doc-footer a:hover { text-decoration: underline; }
+        .doc-footer .brand { margin-top: 6px; font-size: .8rem; }
+
+        @@media (max-width: 576px) { .doc-card { padding: 20px 18px; } }
+    </style>
+</head>
+<body>
+    <header class="doc-header">
+        <div class="doc-wrap" style="padding-top:0;padding-bottom:0;">
+            <a href="/">
+                <i class="fas fa-headset me-2"></i>HelpDesk DESI
+                <span class="sub">Desarrollo de Software Inteligente (DESI)</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="doc-wrap">
+        @RenderBody()
+    </main>
+
+    <footer class="doc-footer">
+        <div>
+            <a href="/Home/Terminos">Términos y Condiciones</a> &middot;
+            <a href="/Home/Privacidad">Aviso de Privacidad</a> &middot;
+            <a href="/Home/Autentication">Iniciar sesión</a>
+        </div>
+        <div class="brand">&copy; @DateTime.Now.Year Desarrollo de Software Inteligente (DESI) &middot; Todos los derechos reservados.</div>
+    </footer>
+</body>
+</html>
