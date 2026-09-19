@@ -235,6 +235,24 @@ namespace ServiceDeskDESIMVC.Controllers
         }
 
         /// <summary>
+        /// Términos y Condiciones. Acción PÚBLICA (sin sesión): está en la allowlist del
+        /// AuthenticationFilter y usa el layout público (_LayoutPublic).
+        /// </summary>
+        public ActionResult Terminos()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Aviso de Privacidad. Acción PÚBLICA (sin sesión): está en la allowlist del
+        /// AuthenticationFilter y usa el layout público (_LayoutPublic).
+        /// </summary>
+        public ActionResult Privacidad()
+        {
+            return View();
+        }
+
+        /// <summary>
         /// Guarda la preferencia de tema (light/dark) en una cookie propia del usuario
         /// (no es la cookie de sesión). Expira en 1 año y se renueva cada vez que cambia el tema.
         /// Antes de guardar elimina cualquier cookie de tema previa del usuario para evitar

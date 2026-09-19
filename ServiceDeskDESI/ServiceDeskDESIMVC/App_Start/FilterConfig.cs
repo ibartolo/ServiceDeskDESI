@@ -34,7 +34,9 @@ namespace ServiceDeskDESIMVC.App_Start
                 "Home.ValidarRecetearContrasenia",
                 "Home.NewCompany",
                 "Home.GuardarNuevaEmpresa",
-                "Home.AccesoDenegado"
+                "Home.AccesoDenegado",
+                "Home.Terminos",
+                "Home.Privacidad"
             };
 
         public void OnAuthorization(AuthorizationContext filterContext)
